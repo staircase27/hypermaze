@@ -1,0 +1,7 @@
+# Ignore compiled code
+*.[oa]
+# Ignore backup files
+*~
+*.layout
+# Ignore the dll on windows
+*.dll
