@@ -12,12 +12,13 @@ ostream& operator<<(ostream& o,Dirn d){
   return o<<"<Dirn "<<(int)d<<": "<<to_vector(d)<<">";
 }
 class String{
-  const Maze& maze;
-  Vector start;
-  Vector end;
-  list<Dirn> route;
-  
+  public://should really be private but i need this info too often :P
+    const Maze& maze;
+    Vector start;
+    Vector end;
+    list<Dirn> route;
   public:
+  
     String(const Maze& m):maze(m),start(Vector(0,2,0)),end(Vector(m.size.X,2,0)),route(m.size.X,LEFT){};
     
     friend class StringSlice;
@@ -37,6 +38,7 @@ ostream& operator<<(ostream& o,String s){
 
 
 class StringSlice{
+  public:
   String& s;
   list<Dirn>::iterator start;
   list<Dirn>::iterator end;

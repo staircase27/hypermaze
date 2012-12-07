@@ -40,6 +40,28 @@ private:
         bool KeyIsDown[KEY_KEY_CODES_COUNT];
 };
 
+class MyNodeGen:public NodeGen{
+  ISceneManager* smgr;
+  ITexture* wall;
+  ITexture* string;
+  public:
+    MyNodeGen(ISceneManager* smgr,ITexture* wall,ITexture* string):smgr(smgr),wall(wall),string(string){};
+    virtual IMeshSceneNode* makeUnitCube(bool isWall,bool isNode,bool isActive){
+      IMeshSceneNode* node = smgr->addCubeSceneNode(1);
+      if(isWall)
+        node->setMaterialTexture( 0, wall);
+      else
+        if(isActive)
+          node->setMaterialTexture( 0, wall);
+        else
+          node->setMaterialTexture( 0, string);
+        
+      node->setMaterialFlag(video::EMF_LIGHTING, true);
+      return node;
+    }
+};
+
+
 int main(){
 
   MyEventReceiver e;
@@ -67,8 +89,14 @@ int main(){
                 
                 
   Maze m=generate(Vector(5,5,5));
+  String s(m);
+  StringSlice ss(s);
   
-  MazeDisplay md(m,smgr,driver->getTexture("irrlicht/wall.png"));
+  
+  MyNodeGen* ng=new MyNodeGen(smgr,driver->getTexture("irrlicht/wall.png"),driver->getTexture("irrlicht/wall.png"));
+  cout<<"display"<<endl;
+  MazeDisplay md(m,ng);
+  StringDisplay(ss,ng);
 
   int delay=0;
 	while(device->run())
