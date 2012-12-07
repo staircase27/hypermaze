@@ -42,7 +42,7 @@ class MazeDisplay{
   static const double wall=5;
   static const double gap=20;
   
-  std::map<Dirn,pair<int,pair<Dirn,bool> > > limits;
+  std::map<Dirn,pair<pair<int,int>,pair<Dirn,bool> > > limits;
   std::map<Dirn,vector<vector<VisibleCounter*>*>*> nodes;
   Maze& m;
   public:
@@ -50,22 +50,28 @@ class MazeDisplay{
       nodes.clear();
       limits.clear();
       
-      limits[UP].first=0;
+      limits[UP].first.first=0;
+      limits[UP].first.second=0;
       limits[UP].second.first=UP;
       limits[UP].second.second=true;
-      limits[LEFT].first=0;
+      limits[LEFT].first.first=0;
+      limits[LEFT].first.second=0;
       limits[LEFT].second.first=LEFT;
       limits[LEFT].second.second=true;
-      limits[FORWARD].first=0;
+      limits[FORWARD].first.first=0;
+      limits[FORWARD].first.second=0;
       limits[FORWARD].second.first=FORWARD;
       limits[FORWARD].second.second=true;
-      limits[DOWN].first=2*(m.size.Y-1);
+      limits[DOWN].first.first=2*(m.size.Y-1);
+      limits[DOWN].first.second=2*(m.size.Y-1);
       limits[DOWN].second.first=UP;
       limits[DOWN].second.second=false;
-      limits[RIGHT].first=2*(m.size.X-1);
+      limits[RIGHT].first.first=2*(m.size.X-1);
+      limits[RIGHT].first.second=2*(m.size.X-1);
       limits[RIGHT].second.first=LEFT;
       limits[RIGHT].second.second=false;
-      limits[BACK].first=2*(m.size.Z-1);
+      limits[BACK].first.first=2*(m.size.Z-1);
+      limits[BACK].first.second=2*(m.size.Z-1);
       limits[BACK].second.first=FORWARD;
       limits[BACK].second.second=false;
       
@@ -73,8 +79,7 @@ class MazeDisplay{
       nodes[LEFT]=new vector<vector<VisibleCounter*>*>(2*m.size.X-1,(vector<VisibleCounter*>*)NULL);
       nodes[FORWARD]=new vector<vector<VisibleCounter*>*>(2*m.size.Z-1,(vector<VisibleCounter*>*)NULL);
       
-      prettyPrint(cout,m);
-      
+      vector3df position=vector3df(0,0,0)-((wall+gap)*vector3df(m.size.X,m.size.Y,m.size.Z)-gap*vector3df(1,1,1))/2;
       
       int z=0;
       
@@ -86,7 +91,7 @@ class MazeDisplay{
 	          node->setMaterialFlag(video::EMF_LIGHTING, true);
 
             node->setScale(vector3df(wall,wall,wall));
-            node->setPosition(vector3df(x,y,z)*(wall+gap)+vector3df(wall/2,wall/2,wall/2));
+            node->setPosition(position+vector3df(x,y,z)*(wall+gap)+vector3df(wall/2,wall/2,wall/2));
             
             VisibleCounter* vc=new VisibleCounter(node);
             if((*nodes[UP])[2*y]==0)
@@ -105,7 +110,7 @@ class MazeDisplay{
 	            node->setMaterialFlag(video::EMF_LIGHTING, true);
 
               node->setScale(vector3df(wall,gap,wall));
-              node->setPosition(vector3df(x,y,z)*(wall+gap)+vector3df(wall/2,wall+gap/2,wall/2));
+              node->setPosition(position+vector3df(x,y,z)*(wall+gap)+vector3df(wall/2,wall+gap/2,wall/2));
               
               VisibleCounter* vc=new VisibleCounter(node);
               if((*nodes[UP])[2*y+1]==0)
@@ -125,7 +130,7 @@ class MazeDisplay{
 	            node->setMaterialFlag(video::EMF_LIGHTING, true);
 
               node->setScale(vector3df(gap,wall,wall));
-              node->setPosition(vector3df(x,y,z)*(wall+gap)+vector3df(wall+gap/2,wall/2,wall/2));
+              node->setPosition(position+vector3df(x,y,z)*(wall+gap)+vector3df(wall+gap/2,wall/2,wall/2));
               
               VisibleCounter* vc=new VisibleCounter(node);
               if((*nodes[UP])[2*y]==0)
@@ -145,7 +150,7 @@ class MazeDisplay{
 	            node->setMaterialTexture( 0, tex );
 
               node->setScale(vector3df(wall,wall,gap));
-              node->setPosition(vector3df(x,y,z)*(wall+gap)+vector3df(wall/2,wall/2,wall+gap/2));
+              node->setPosition(position+vector3df(x,y,z)*(wall+gap)+vector3df(wall/2,wall/2,wall+gap/2));
               
               VisibleCounter* vc=new VisibleCounter(node);
               if((*nodes[UP])[2*y]==0)
@@ -166,25 +171,29 @@ class MazeDisplay{
     }
     
     void hideSide(Dirn side,bool out){
-      cout<<"hide side "<<side<<" "<<out<<endl<<flush;
-      pair<int,pair<Dirn,bool> >& data=limits[side];
-      cout<<data.first<<endl;
+      pair<pair<int,int>,pair<Dirn,bool> >& data=limits[side];
       if(!out){
-        vector<VisibleCounter*>* ns=(*nodes[data.second.first])[data.first];
+        if(limits[opposite(side)].first.first==data.first.first)
+          return;
+        vector<VisibleCounter*>* ns=(*nodes[data.second.first])[data.first.first];
         if(!(ns==0))
           for(vector<VisibleCounter*>::iterator it=ns->begin();it!=ns->end();++it)
             (*it)->setVisible(false);
-      }
+      }else if(data.first.first==data.first.second)
+          return;
       if(out==data.second.second)
-        data.first--;
+        data.first.first--;
       else
-        data.first++;
+        data.first.first++;
       if(out){
-        vector<VisibleCounter*>* ns=(*nodes[data.second.first])[data.first];
+        vector<VisibleCounter*>* ns=(*nodes[data.second.first])[data.first.first];
         if(!(ns==0))
           for(vector<VisibleCounter*>::iterator it=ns->begin();it!=ns->end();++it)
             (*it)->setVisible(true);
       }
     }
 };
+
+
+
 

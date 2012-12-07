@@ -2,6 +2,7 @@
 #include "gui.hh"
 #include "mazegen.hh"
 #include "vector.hh"
+#include "iMyCamera.hh"
 
 using namespace irr;
 using namespace core;
@@ -55,7 +56,8 @@ int main(){
 	IVideoDriver* driver = device->getVideoDriver();
 	ISceneManager* smgr = device->getSceneManager();
 	
-	smgr->addCameraSceneNodeFPS();
+	addCameraSceneNodeMy(smgr,device->getCursorControl(),0,vector3df(0,0,0),
+	    vector3df(0,0,-300),-500.,-100.,3.,100.);
 	
   ILightSceneNode* light1 =
                 smgr->addLightSceneNode(0, core::vector3df(-100,100,-100),
@@ -73,22 +75,57 @@ int main(){
 	{
 	  --delay;
 	  
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_M)){
+    if(delay<0&&e.IsKeyDown(irr::KEY_PERIOD)){
       md.hideSide(RIGHT,true);
       delay=100;
     }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_N)){
+    if(delay<0&&e.IsKeyDown(irr::KEY_COMMA)){
       md.hideSide(RIGHT,false);
       delay=100;
     }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_B)){
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_M)){
       md.hideSide(LEFT,false);
       delay=100;
     }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_V)){
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_N)){
       md.hideSide(LEFT,true);
       delay=100;
     }
+
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_L)){
+      md.hideSide(FORWARD,true);
+      delay=100;
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_K)){
+      md.hideSide(FORWARD,false);
+      delay=100;
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_J)){
+      md.hideSide(BACK,false);
+      delay=100;
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_H)){
+      md.hideSide(BACK,true);
+      delay=100;
+    }
+
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_O)){
+      md.hideSide(UP,true);
+      delay=100;
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_I)){
+      md.hideSide(UP,false);
+      delay=100;
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_U)){
+      md.hideSide(DOWN,false);
+      delay=100;
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_Y)){
+      md.hideSide(DOWN,true);
+      delay=100;
+    }
+
 	
 		driver->beginScene(true, true, SColor(255,100,101,140));
 
