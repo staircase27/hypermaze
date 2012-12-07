@@ -44,21 +44,30 @@ class MyNodeGen:public NodeGen{
   ISceneManager* smgr;
   ITexture* wall;
   ITexture* string;
+  ITexture* activeString;
   public:
-    MyNodeGen(ISceneManager* smgr,ITexture* wall,ITexture* string):smgr(smgr),wall(wall),string(string){};
-    virtual IMeshSceneNode* makeUnitCube(bool isWall,bool isNode,bool isActive){
+    MyNodeGen(ISceneManager* smgr,ITexture* wall,ITexture* string,ITexture* activeString):smgr(smgr),wall(wall),string(string){};
+    virtual IMeshSceneNode* makeUnitWall(bool isNode){
       IMeshSceneNode* node = smgr->addCubeSceneNode(1);
-      if(isWall)
-        node->setMaterialTexture( 0, wall);
-      else
-        if(isActive)
-          node->setMaterialTexture( 0, wall);
-        else
-          node->setMaterialTexture( 0, string);
-        
+      node->setMaterialTexture( 0, wall);
       node->setMaterialFlag(video::EMF_LIGHTING, true);
       return node;
     }
+
+    virtual IMeshSceneNode* makeUnitString(bool isNode){
+      IMeshSceneNode* node = smgr->addCubeSceneNode(1);
+      node->setMaterialTexture( 0, string);
+      node->setMaterialFlag(video::EMF_LIGHTING, true);
+      return node;
+    }
+
+    virtual void makeStringActive(IMeshSceneNode* node,bool active){
+      if(active)
+        node->setMaterialTexture(0,activeString);
+      else
+        node->setMaterialTexture(0,string);
+    }
+
 };
 
 
@@ -93,10 +102,10 @@ int main(){
   StringSlice ss(s);
   
   
-  MyNodeGen* ng=new MyNodeGen(smgr,driver->getTexture("irrlicht/wall.png"),driver->getTexture("irrlicht/wall.png"));
+  MyNodeGen* ng=new MyNodeGen(smgr,driver->getTexture("irrlicht/wall.png"),driver->getTexture("irrlicht/wall.png"),driver->getTexture("irrlicht/activeString.png"));
   cout<<"display"<<endl;
   MazeDisplay md(m,ng);
-  StringDisplay(ss,ng);
+  StringDisplay sd(ss,ng);
 
   int delay=0;
 	while(device->run())
@@ -153,7 +162,68 @@ int main(){
       md.hideSide(DOWN,true);
       delay=100;
     }
+    
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_V)){
+      if(ss.slide(true,true)){
+        sd.updateActive();
+        delay=100;
+        }
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_C)){
+      if(ss.slide(true,false)){
+        sd.updateActive();
+        delay=100;
+        }
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_X)){
+      if(ss.slide(false,true)){
+        sd.updateActive();
+        delay=100;
+        }
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_Z)){
+      if(ss.slide(false,false)){
+        sd.updateActive();
+        delay=100;
+        }
+    }
 
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_W)){
+      if(ss.tryMove(UP)){
+        sd.update();
+        delay=100;
+      }
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_S)){
+      if(ss.tryMove(DOWN)){
+        sd.update();
+        delay=100;
+      }
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_A)){
+      if(ss.tryMove(RIGHT)){
+        sd.update();
+        delay=100;
+      }
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_D)){
+      if(ss.tryMove(LEFT)){
+        sd.update();
+        delay=100;
+      }
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_Q)){
+      if(ss.tryMove(FORWARD)){
+        sd.update();
+        delay=100;
+      }
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_E)){
+      if(ss.tryMove(BACK)){
+        sd.update();
+        delay=100;
+      }
+    }
 	
 		driver->beginScene(true, true, SColor(255,100,101,140));
 

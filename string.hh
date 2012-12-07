@@ -56,17 +56,22 @@ class StringSlice{
           endPoint+=to_vector(*end);
           ++end;
         }else{
-          if(end==start)
-            return false;
           --end;
+          if(end==start){
+            ++end;
+            return false;
+          }
           endPoint-=to_vector(*end);
         }
       else
         if(towardsEnd){
-          if(end==start)
-            return false;
           startPoint+=to_vector(*start);
           ++start;
+          if(end==start){
+            --start;
+            startPoint-=to_vector(*start);
+            return false;
+          }
         }else{
           if(start==s.route.begin())
             return false;
@@ -81,7 +86,7 @@ class StringSlice{
       Vector point=startPoint;
       list<Dirn>::iterator it=start;
       while(it!=end){
-        if(*it!=d){
+        if(*it!=d && *it !=opposite(d)){
           Vector wall=point+to_shift_vector(*it)+to_shift_vector(d);
           Dirn wallDirn=perpendicular(*it,d);
           cout<<"check point"<<point<<" "<<*it<<" wall is "<<wall<<"-"<<wallDirn;
