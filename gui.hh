@@ -166,17 +166,17 @@ class MazeDisplay{
       init(ng);
     }
     
-    void hideSide(Dirn side,bool out){
+    bool hideSide(Dirn side,bool out){
       pair<pair<int,int>,pair<Dirn,bool> >& data=limits[side];
       if(!out){
         if(limits[opposite(side)].first.first==data.first.first)
-          return;
+          return false;
         vector<VisibleCounter*>* ns=(*nodes[data.second.first])[data.first.first];
         if(!(ns==0))
           for(vector<VisibleCounter*>::iterator it=ns->begin();it!=ns->end();++it)
             (*it)->setVisible(false);
       }else if(data.first.first==data.first.second)
-          return;
+          return false;
       if(out==data.second.second)
         data.first.first--;
       else
@@ -187,11 +187,11 @@ class MazeDisplay{
           for(vector<VisibleCounter*>::iterator it=ns->begin();it!=ns->end();++it)
             (*it)->setVisible(true);
       }
+      return true;
     }
 };
 
 vector3df con(Vector v){
-  cout<<"conv"<<v<<endl;
   return vector3df(v.X,v.Y,v.Z);
 }
 
@@ -277,7 +277,6 @@ class StringDisplay{
       while(sit!=s.s.route.end()){
         if((!active) && (sit==s.start))
           active=true;
-        cout<<active<<endl;
         ng->makeStringActive(*nit,active);
         if(active&& (sit==s.end))
           active=false;

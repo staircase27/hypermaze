@@ -2,6 +2,9 @@
 #define DIRNS_HH_INC
 
 #include "vector.hh"
+#include <set>
+using namespace std;
+
 
 enum Dirn{
 	UP=0,
@@ -11,6 +14,8 @@ enum Dirn{
 	RIGHT,
 	BACK
 };
+
+static Dirn allDirns[6]={UP,LEFT,FORWARD,DOWN,RIGHT,BACK};
 
 static const int ALLDIRNSMASK = (1<<6)-1;
 

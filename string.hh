@@ -85,6 +85,8 @@ class StringSlice{
       cout<<"can move in "<<d<<endl;
       Vector point=startPoint;
       list<Dirn>::iterator it=start;
+      if((d==LEFT||d==opposite(LEFT))&&(start==s.route.begin()||end==s.route.end()))
+        return false;
       while(it!=end){
         if(*it!=d && *it !=opposite(d)){
           Vector wall=point+to_shift_vector(*it)+to_shift_vector(d);

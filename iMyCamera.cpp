@@ -144,26 +144,6 @@ void CSceneNodeAnimatorCameraMy::animateNode(scene::ISceneNode *node, u32 timeMs
     const core::vector3df target = camera->getTarget();
 
     core::vector3df pos = camera->getPosition();
-    core::vector3df tvectX = pos - target;
-    tvectX = tvectX.crossProduct(upVector);
-    tvectX.normalize();
-
-    const scene::SViewFrustum* const va = camera->getViewFrustum();
-    core::vector3df tvectY = (va->getFarLeftDown() - va->getFarRightDown());
-    tvectY = tvectY.crossProduct(upVector.Y > 0 ? pos - target : target - pos);
-    tvectY.normalize();
-
-    if (Translating)
-    {
-        Target += tvectX * (TranslateStart.X - MousePos.X)*TranslateSpeed*SpeedFactor*Zoom +
-                     tvectY * (TranslateStart.Y - MousePos.Y)*TranslateSpeed*SpeedFactor*Zoom;
-        Translating = false;
-    }
-    if (isMouseKeyDown(2))
-    {
-        TranslateStart = MousePos;
-        Translating = true;
-    }
 
     // Rotation ------------------------------------
 
@@ -177,7 +157,7 @@ void CSceneNodeAnimatorCameraMy::animateNode(scene::ISceneNode *node, u32 timeMs
           RotY=-90;
         Rotating=false;
     }
-    if (isMouseKeyDown(0))
+    if (isMouseKeyDown(2))
     {
         RotateStart = MousePos;
         Rotating = true;
