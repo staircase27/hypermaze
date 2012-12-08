@@ -5,3 +5,4 @@
 *.layout
 # Ignore the dll on windows
 *.dll
+.obj
