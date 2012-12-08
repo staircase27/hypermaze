@@ -16,9 +16,9 @@ class String{
     Vector end;
     list<Dirn> route;
   public:
-    const Maze& maze;
+    Maze& maze;
   
-    String(const Maze& m):maze(m),start(Vector(0,2,0)),end(Vector(m.size.X,2,0)),route(m.size.X,LEFT){};
+    String(Maze& m):maze(m),start(Vector(0,2,0)),end(Vector(m.size.X,2,0)),route(m.size.X,LEFT){};
     
     const Vector& getStart() const{
       return start;
@@ -29,6 +29,14 @@ class String{
     
     const list<Dirn>& getRoute() const{
       return route;
+    }
+    
+    String& operator=(const String& o){
+      end=o.end;
+      start=o.start;
+      route=o.route;
+      maze=o.maze;
+      return *this;
     }
     
     friend class StringSlice;
@@ -160,6 +168,16 @@ class StringSlice{
       }
     }
     friend ostream& operator <<(ostream& o,StringSlice s);
+
+    StringSlice& operator=(const StringSlice& o){
+      s=o.s;
+      end=o.end;
+      start=o.start;
+      endPoint=o.endPoint;
+      startPoint=o.startPoint;
+      return *this;
+    }
+
 };
 
 ostream& operator<<(ostream& o,StringSlice s){

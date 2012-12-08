@@ -113,7 +113,7 @@ istream& operator>>(istream& o,Maze& m){
 }
 
 
-void prettyPrint(ostream& o,Maze m,int w=207){
+void prettyPrint(ostream& o,Maze m,int w=150){
   w/=(m.size.X*4+2);
   o<<m.size.X<<" "<<m.size.Y<<" "<<m.size.Z<<" :"<<w<<endl;
   for(int Z=0;Z<m.size.Z;Z+=w){

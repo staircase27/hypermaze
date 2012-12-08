@@ -3,17 +3,18 @@ run: run-irrtest
 
 CPP=g++
 CPPOPTS=-ggdb
-CPPLIB=
+CPPLIBS=
+
+IRRLIBS=-lIrrlicht -I/usr/include/irrlicht/
 
 test: test.o
 test.o: test.cc dirns.hh maze.hh vector.hh string.hh mazegen.hh
 run-test: test
 	./test
 
-CPPLIBS=-lIrrlicht -I/usr/include/irrlicht/
-
+irrtest: CPPLIBS+= $(IRRLIBS)
 irrtest: irrtest.o iMyCamera.o
-irrtest.o: irrtest.cc dirns.hh maze.hh vector.hh string.hh mazegen.hh gui.hh iMyCamera.hh
+irrtest.o: irrtest.cc dirns.hh maze.hh vector.hh string.hh mazegen.hh irrdisp.hh iMyCamera.hh
 iMyCamera.o: iMyCamera.cpp iMyCamera.hh
 run-irrtest: irrtest
 	./irrtest
@@ -21,10 +22,10 @@ run-irrtest: irrtest
 clean:
 	rm -f *.o
 	rm -f test
+	rm -f irrtest
 
 %: %.o
 	$(CPP) $(CPPOPTS) $(CPPLIBS) -o $@ $^
-	
 %.o: %.cc
 	$(CPP) $(CPPOPTS) $(CPPLIBS) -c $<
 %.o: %.cpp

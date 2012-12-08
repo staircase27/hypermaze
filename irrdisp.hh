@@ -33,8 +33,8 @@ class NodeGen{
 
 class VisibleCounter{
   int visible;
-  irr::IMeshSceneNode* node;
   public:
+  irr::IMeshSceneNode* node;
     VisibleCounter(irr::IMeshSceneNode* node):node(node),visible(0){};
     bool setVisible(bool isVisible){
       if(isVisible)
@@ -56,17 +56,11 @@ class MazeDisplay{
   map<Dirn,pair<pair<int,int>,pair<Dirn,bool> > > limits;
   map<Dirn,vector<vector<VisibleCounter*>*>*> nodes;
   set<Dirn> dirns;
-  Maze& m;
-  
-  irr::vector3df center;
   public:
     static const double wall=5;
     static const double gap=20;
   
-    void init(NodeGen* ng){
-      nodes.clear();
-      limits.clear();
-      
+    void init(Maze& m,NodeGen* ng,irr::vector3df center=irr::vector3df(0,0,0)){
       for(set<Dirn>::iterator d=dirns.begin();d!=dirns.end();++d){
         limits[*d].first.first=limits[*d].first.second=0;
         limits[*d].second.first=*d;
@@ -75,13 +69,9 @@ class MazeDisplay{
         limits[opposite(*d)].second.first=*d;
         limits[opposite(*d)].second.second=false;
         
+        nodes[*d]=new vector<vector<VisibleCounter*>*>(
+            2*m.size.dotProduct(to_vector(*d))-1,(vector<VisibleCounter*>*)NULL);
       }
-      nodes[UP]=new vector<vector<VisibleCounter*>*>(
-          2*m.size.dotProduct(to_vector(UP))-1,(vector<VisibleCounter*>*)NULL);
-      nodes[LEFT]=new vector<vector<VisibleCounter*>*>(
-          2*m.size.dotProduct(to_vector(LEFT))-1,(vector<VisibleCounter*>*)NULL);
-      nodes[FORWARD]=new vector<vector<VisibleCounter*>*>(
-          2*m.size.dotProduct(to_vector(FORWARD))-1,(vector<VisibleCounter*>*)NULL);
 
       irr::vector3df position=center-((wall+gap)*con(m.size)-gap*irr::vector3df(1,1,1))/2;
       
@@ -118,14 +108,37 @@ class MazeDisplay{
               }
           }
     }
-    MazeDisplay(Maze& m,NodeGen* ng,irr::vector3df center=irr::vector3df(0,0,0)):m(m),center(center){
+    
+    void clear(){
+      for(vector<vector<VisibleCounter*>*>::iterator layer=nodes[UP]->begin();layer!=nodes[UP]->end();++layer){
+        if(*layer==0)
+          continue;
+        for(vector<VisibleCounter*>::iterator node=(*layer)->begin();node!=(*layer)->end();++node){
+          (*node)->node->remove();
+          delete *node;
+        }
+      }
+      for(set<Dirn>::iterator d=dirns.begin();d!=dirns.end();++d){
+        for(vector<vector<VisibleCounter*>*>::iterator layer=nodes[*d]->begin();layer!=nodes[*d]->end();++layer){
+          if(*layer!=0)
+            delete *layer;
+        }
+        delete nodes[*d];
+      }
+      nodes.clear();
+      limits.clear();
+    }
+
+    MazeDisplay(Maze& m,NodeGen* ng,irr::vector3df center=irr::vector3df(0,0,0)){
       dirns.insert(UP);
       dirns.insert(LEFT);
       dirns.insert(FORWARD);
-      init(ng);
+      init(m,ng,center);
     }
     
     bool hideSide(Dirn side,bool out){
+      if(limits.empty())
+        return false;
       pair<pair<int,int>,pair<Dirn,bool> >& data=limits[side];
       if(!out){
         if(limits[opposite(side)].first.first==data.first.first)
@@ -176,7 +189,6 @@ class StringDisplay{
           (*nit)->setVisible(true);
         if((!active) && (sit==s.getStart()))
           active=true;
-        cout<<active<<endl;
         ng->makeStringActive(*nit,active);
         if(active&& (sit==s.getEnd()))
           active=false;
@@ -245,5 +257,10 @@ class StringDisplay{
     StringDisplay(StringSlice& s,NodeGen* ng,irr::vector3df center=irr::vector3df(0,0,0)):s(s),center(center),ng(ng),activeNodes(0){
       update();
     };
+    void setString(StringSlice _s){
+      s=_s;
+      update();
+    }
+    
 
 };
