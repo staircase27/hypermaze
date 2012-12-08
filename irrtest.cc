@@ -1,6 +1,6 @@
 #define IRRLICHT
 #include "irrlicht.h"
-#include "gui.hh"
+#include "irrdisp.hh"
 #include "mazegen.hh"
 #include "vector.hh"
 #include "iMyCamera.hh"
