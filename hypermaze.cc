@@ -312,6 +312,25 @@ int main(){
       }
       delay=4;
     }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_2)){
+      OpenGui og;
+      if(og.open(device,m)){
+        md.clear();
+        md.init(m,ng);
+        s=String(m);
+        ss=StringSlice(s);
+        sd.setString(ss);
+        irr::f32 r=irr::vector3df(m.size.X,m.size.Y,m.size.Z).getLength()/2;
+        for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
+          slicer->first->setPosition(-con(to_vector(slicer->second))*r*(md.wall+md.gap));
+      }
+      delay=4;
+    }
+    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_3)){
+      SaveGui sg;
+      sg.save(device,m);
+      delay=4;
+    }
 	
 		driver->beginScene(true, true, irr::SColor(255,100,101,140));
 
