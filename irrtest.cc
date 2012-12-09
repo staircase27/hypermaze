@@ -5,6 +5,7 @@
 #include "vector.hh"
 #include "iMyCamera.hh"
 #include "dirns.hh"
+#include "gui.hh"
 
 namespace irr{
   using namespace core;
@@ -104,6 +105,8 @@ int main(){
 	if (!device)
 		return 1;
 		
+  device->getGUIEnvironment()->getSkin()->setFont(device->getGUIEnvironment()->getFont("irrlicht/myfont.xml"));
+
 	
 	device->setWindowCaption(L"Hyper Maze! - Irrlicht");
 	irr::IVideoDriver* driver = device->getVideoDriver();
@@ -119,7 +122,7 @@ int main(){
 
   
                 
-  Maze m=generate(Vector(5,5,5));
+  Maze m(Vector(5,5,5));
   String s(m);
   StringSlice ss(s);
   
@@ -296,27 +299,17 @@ int main(){
       }
     }
     if(delay<0&&e.IsKeyDown(irr::KEY_KEY_1)){
-      m=generate(Vector(5,5,5));
-      md.clear();
-      md.init(m,ng);
-      s=String(m);
-      ss=StringSlice(s);
-      sd.setString(ss);
-      irr::f32 r=irr::vector3df(m.size.X,m.size.Y,m.size.Z).getLength()/2;
-      for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
-        slicer->first->setPosition(-con(to_vector(slicer->second))*r*(md.wall+md.gap));
-      delay=4;
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_2)){
-      m=generate(Vector(10,10,10));
-      md.clear();
-      md.init(m,ng);
-      s=String(m);
-      ss=StringSlice(s);
-      sd.setString(ss);
-      irr::f32 r=irr::vector3df(m.size.X,m.size.Y,m.size.Z).getLength()/2;
-      for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
-        slicer->first->setPosition(-con(to_vector(slicer->second))*r*(md.wall+md.gap));
+      GenerateGui gg;
+      if(gg.generate(device,m)){
+        md.clear();
+        md.init(m,ng);
+        s=String(m);
+        ss=StringSlice(s);
+        sd.setString(ss);
+        irr::f32 r=irr::vector3df(m.size.X,m.size.Y,m.size.Z).getLength()/2;
+        for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
+          slicer->first->setPosition(-con(to_vector(slicer->second))*r*(md.wall+md.gap));
+      }
       delay=4;
     }
 	

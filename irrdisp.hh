@@ -6,6 +6,9 @@
 #include <list>
 #include "dirns.hh"
 
+#ifndef IRRDISP_HH_INC
+#define IRRDISP_HH_INC
+
 namespace irr{
   using namespace core;
   using namespace scene;
@@ -264,3 +267,5 @@ class StringDisplay{
     
 
 };
+
+#endif

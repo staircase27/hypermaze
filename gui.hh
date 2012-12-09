@@ -1,0 +1,119 @@
+#include "irrlicht.h"
+#include "irrdisp.hh"
+#include "maze.hh"
+#include "string.hh"
+
+namespace irr{
+  using namespace core;
+  using namespace scene;
+  using namespace io;
+  using namespace video;
+  using namespace gui;
+};
+
+class BaseGui : irr::IEventReceiver{
+  protected:
+    irr::IrrlichtDevice* device;
+    irr::IEventReceiver* oldReceiver;
+  
+    BaseGui():device(0){};
+      
+    bool OnEvent(const irr::SEvent &event){
+      if(oldReceiver && event.EventType == irr::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
+        oldReceiver->OnEvent(event);
+      return OnEventImpl(event);
+    };
+    virtual bool OnEventImpl(const irr::SEvent &event)=0;
+  
+    void apply(irr::IrrlichtDevice* _device){
+      if(device)
+        unapply();
+      device=_device;
+      oldReceiver=device->getEventReceiver();
+      device->setEventReceiver(this);
+    }
+    void unapply(){
+      if(device)
+        device->setEventReceiver(oldReceiver);
+      device=0;
+    };
+};
+
+
+class GenerateGui: BaseGui{
+
+  bool okClicked;
+
+  protected:
+    virtual bool OnEventImpl(const irr::SEvent &event){
+      if(event.EventType == irr::EET_GUI_EVENT && (event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED ||
+          event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER)){
+        okClicked=true;
+        return true;
+      }
+      return false;
+    };
+
+
+  public:
+    bool generate(irr::IrrlichtDevice* _device,Maze& m){
+      apply(_device);
+      okClicked=false;
+      
+      irr::IVideoDriver* driver = device->getVideoDriver();
+      irr::ISceneManager* smgr = device->getSceneManager();
+      irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+      
+      irr::rect<irr::s32> rect=driver->getViewPort();
+      irr::position2d<irr::s32> center=rect.getCenter();
+      irr::dimension2d<irr::s32> size=rect.getSize();
+      size.Width=min(400,size.Width-10);
+      
+      irr::gui::IGUISpinBox* xSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32-10-32,
+          center.X+size.Width/2,center.Y-5-32-10));
+      xSize->setDecimalPlaces(0);
+      xSize->setRange(3,100);
+      xSize->setValue(m.size.X);
+      irr::gui::IGUISpinBox* ySize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,
+          center.X+size.Width/2,center.Y-5));
+      ySize->setDecimalPlaces(0);
+      ySize->setRange(3,100);
+      ySize->setValue(m.size.Y);
+      irr::gui::IGUISpinBox* zSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y+5,
+          center.X+size.Width/2,center.Y+5+32));
+      zSize->setDecimalPlaces(0);
+      zSize->setRange(3,100);
+      zSize->setValue(m.size.Z);
+      
+      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5+32+10,center.X+size.Width/2,center.Y+5+32+10+32),0,-1,L"Generate");
+      
+      guienv->setFocus(xSize);
+      
+      while(true)
+      {
+        if(!device->run())
+          break;
+        
+        driver->beginScene(true, true, irr::SColor(255,113,113,133));
+
+        smgr->drawAll();
+        
+        guienv->drawAll();
+
+        driver->endScene();
+
+        
+        device->setWindowCaption(L"Generate New Hyper Maze");
+        
+        if(okClicked){
+          m=::generate(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
+          break;
+        }
+      }
+
+      
+      guienv->clear();
+      unapply();
+      return okClicked;
+    }
+};
