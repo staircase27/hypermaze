@@ -1,5 +1,5 @@
-all: irrtest
-run: run-irrtest
+all: hypermaze
+run: run-hypermaze
 
 CPP=g++
 CPPOPTS=-ggdb
@@ -12,12 +12,12 @@ test.o: test.cc dirns.hh maze.hh vector.hh string.hh mazegen.hh
 run-test: test
 	./test
 
-irrtest: CPPLIBS+= $(IRRLIBS)
-irrtest: irrtest.o iMyCamera.o
-irrtest.o: irrtest.cc dirns.hh maze.hh vector.hh string.hh mazegen.hh irrdisp.hh iMyCamera.hh gui.hh
+hypermaze: CPPLIBS+= $(IRRLIBS)
+hypermaze: hypermaze.o iMyCamera.o
+hypermaze.o: hypermaze.cc dirns.hh maze.hh vector.hh string.hh mazegen.hh irrdisp.hh iMyCamera.hh gui.hh
 iMyCamera.o: iMyCamera.cpp iMyCamera.hh
-run-irrtest: irrtest
-	./irrtest
+run-hypermaze: hypermaze
+	./hypermaze
 
 clean:
 	rm -f *.o
