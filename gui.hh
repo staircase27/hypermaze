@@ -43,13 +43,34 @@ class BaseGui : irr::IEventReceiver{
 class GenerateGui: BaseGui{
 
   bool okClicked;
+  bool cancelClicked;
+  
+  enum
+  {
+    GUI_ID_OK_BUTTON=201,
+    GUI_ID_CANCEL_BUTTON
+  };
 
   protected:
     virtual bool OnEventImpl(const irr::SEvent &event){
-      if(event.EventType == irr::EET_GUI_EVENT && (event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED ||
-          event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER)){
-        okClicked=true;
-        return true;
+      if(event.EventType == irr::EET_GUI_EVENT){
+         if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
+           if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
+             okClicked=true;
+             return true;
+           }else{
+             cancelClicked=true;
+             return true;
+           }
+         }
+         if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+           cancelClicked=true;
+           return true;
+         }
+         if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
+           okClicked=true;
+           return true;
+         }
       }
       return false;
     };
@@ -58,7 +79,7 @@ class GenerateGui: BaseGui{
   public:
     bool generate(irr::IrrlichtDevice* _device,Maze& m){
       apply(_device);
-      okClicked=false;
+      okClicked=cancelClicked=false;
       
       irr::IVideoDriver* driver = device->getVideoDriver();
       irr::ISceneManager* smgr = device->getSceneManager();
@@ -85,7 +106,8 @@ class GenerateGui: BaseGui{
       zSize->setRange(3,100);
       zSize->setValue(m.size.Z);
       
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5+32+10,center.X+size.Width/2,center.Y+5+32+10+32),0,-1,L"Generate");
+      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5+32+10,center.X+size.Width/2-100,center.Y+5+32+10+32),0,GUI_ID_CANCEL_BUTTON,L"Cancel");
+      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5+32+10,center.X+size.Width/2,center.Y+5+32+10+32),0,GUI_ID_OK_BUTTON,L"Generate");
       
       guienv->setFocus(xSize);
       
@@ -105,6 +127,8 @@ class GenerateGui: BaseGui{
         
         device->setWindowCaption(L"Generate New Hyper Maze");
         
+        if(cancelClicked)
+          break;
         if(okClicked){
           m=::generate(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
           break;
@@ -117,3 +141,5 @@ class GenerateGui: BaseGui{
       return okClicked;
     }
 };
+
+

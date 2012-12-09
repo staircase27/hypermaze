@@ -25,7 +25,7 @@ clean:
 	rm -f irrtest
 
 %: %.o
-	$(CPP) $(CPPOPTS) $(CPPLIBS) -o $@ $^
+	$(CPP) $(CPPOPTS) -o $@ $^ $(CPPLIBS) 
 %.o: %.cc
 	$(CPP) $(CPPOPTS) $(CPPLIBS) -c $<
 %.o: %.cpp
