@@ -3,6 +3,9 @@
 #include "maze.hh"
 #include "string.hh"
 #include <fstream>
+
+#ifndef GUI_HH_INC
+#define GUI_HH_INC
 using namespace std;
 
 namespace irr{
@@ -56,23 +59,23 @@ class GenerateGui: BaseGui{
   protected:
     virtual bool OnEventImpl(const irr::SEvent &event){
       if(event.EventType == irr::EET_GUI_EVENT){
-         if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
-           if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
-             okClicked=true;
-             return true;
-           }else{
-             cancelClicked=true;
-             return true;
-           }
-         }
-         if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-           cancelClicked=true;
-           return true;
-         }
-         if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-           okClicked=true;
-           return true;
-         }
+        if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
+          if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
+            okClicked=true;
+            return true;
+          }else{
+            cancelClicked=true;
+            return true;
+          }
+        }
+      }
+      if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+        cancelClicked=true;
+        return true;
+      }
+      if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
+        okClicked=true;
+        return true;
       }
       return false;
     };
@@ -111,7 +114,7 @@ class GenerateGui: BaseGui{
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5+32+10,center.X+size.Width/2-100,center.Y+5+32+10+32),0,GUI_ID_CANCEL_BUTTON,L"Cancel");
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5+32+10,center.X+size.Width/2,center.Y+5+32+10+32),0,GUI_ID_OK_BUTTON,L"Generate");
       
-      guienv->setFocus(xSize);
+      guienv->setFocus(xSize->getEditBox());
       
       device->setWindowCaption(L"Generate New Hyper Maze");
         
@@ -158,23 +161,23 @@ class SaveGui: BaseGui{
   protected:
     virtual bool OnEventImpl(const irr::SEvent &event){
       if(event.EventType == irr::EET_GUI_EVENT){
-         if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
-           if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
-             okClicked=true;
-             return true;
-           }else{
-             cancelClicked=true;
-             return true;
-           }
-         }
-         if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-           cancelClicked=true;
-           return true;
-         }
-         if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-           okClicked=true;
-           return true;
-         }
+        if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
+          if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
+            okClicked=true;
+            return true;
+          }else{
+            cancelClicked=true;
+            return true;
+          }
+        }
+      }
+      if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+        cancelClicked=true;
+        return true;
+      }
+      if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
+        okClicked=true;
+        return true;
       }
       return false;
     };
@@ -248,23 +251,23 @@ class OpenGui: BaseGui{
   protected:
     virtual bool OnEventImpl(const irr::SEvent &event){
       if(event.EventType == irr::EET_GUI_EVENT){
-         if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
-           if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
-             okClicked=true;
-             return true;
-           }else{
-             cancelClicked=true;
-             return true;
-           }
-         }
-         if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-           cancelClicked=true;
-           return true;
-         }
-         if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-           okClicked=true;
-           return true;
-         }
+        if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
+          if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
+            okClicked=true;
+            return true;
+          }else{
+            cancelClicked=true;
+            return true;
+          }
+        }
+      }
+      if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+        cancelClicked=true;
+        return true;
+      }
+      if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
+        okClicked=true;
+        return true;
       }
       return false;
     };
@@ -323,4 +326,4 @@ class OpenGui: BaseGui{
     }
 };
 
-
+#endif

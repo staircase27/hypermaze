@@ -7,6 +7,7 @@
 #include "dirns.hh"
 #include "gui.hh"
 #include "keymap.hh"
+#include "keymapgui.hh"
 
 namespace irr{
   using namespace core;
@@ -35,8 +36,11 @@ class MyEventReceiver : public irr::IEventReceiver{
     {
       // Remember whether each key is down or up
       if (event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown){
-        KeyMap::Action a=map.getAction(event.KeyInput.Key);
-        cout<<a<<endl;
+        KeyMap::Action a;
+        if(event.KeyInput.Char==0)
+          a=map.getAction(event.KeyInput.Key);
+        else
+          a=map.getAction(event.KeyInput.Char);
         if(a!=KeyMap::A_NONE){
           actionTriggered[a]=true;
           return true;
@@ -114,21 +118,22 @@ int main(){
 
   MyEventReceiver e;
   
-  e.map.addMapping(irr::KEY_KEY_1,KeyMap::A_GENERATE);
-  e.map.addMapping(irr::KEY_KEY_2,KeyMap::A_LOAD);
-  e.map.addMapping(irr::KEY_KEY_3,KeyMap::A_SAVE);
+  e.map.addMapping('1',KeyMap::A_GENERATE);
+  e.map.addMapping('2',KeyMap::A_LOAD);
+  e.map.addMapping('3',KeyMap::A_SAVE);
+  e.map.addMapping('4',KeyMap::A_CONF);
   
-  e.map.addMapping(irr::KEY_KEY_Q,KeyMap::A_MOVE_FORWARD);
-  e.map.addMapping(irr::KEY_KEY_E,KeyMap::A_MOVE_BACK);
-  e.map.addMapping(irr::KEY_KEY_A,KeyMap::A_MOVE_LEFT);
-  e.map.addMapping(irr::KEY_KEY_D,KeyMap::A_MOVE_RIGHT);
-  e.map.addMapping(irr::KEY_KEY_W,KeyMap::A_MOVE_UP);
-  e.map.addMapping(irr::KEY_KEY_S,KeyMap::A_MOVE_DOWN);
+  e.map.addMapping('q',KeyMap::A_MOVE_FORWARD);
+  e.map.addMapping('e',KeyMap::A_MOVE_BACK);
+  e.map.addMapping('a',KeyMap::A_MOVE_LEFT);
+  e.map.addMapping('d',KeyMap::A_MOVE_RIGHT);
+  e.map.addMapping('w',KeyMap::A_MOVE_UP);
+  e.map.addMapping('s',KeyMap::A_MOVE_DOWN);
   
-  e.map.addMapping(irr::KEY_KEY_Z,KeyMap::A_SLIDE_START_START);
-  e.map.addMapping(irr::KEY_KEY_X,KeyMap::A_SLIDE_START_END);
-  e.map.addMapping(irr::KEY_KEY_C,KeyMap::A_SLIDE_END_START);
-  e.map.addMapping(irr::KEY_KEY_V,KeyMap::A_SLIDE_END_END);
+  e.map.addMapping('z',KeyMap::A_SLIDE_START_START);
+  e.map.addMapping('x',KeyMap::A_SLIDE_START_END);
+  e.map.addMapping('c',KeyMap::A_SLIDE_END_START);
+  e.map.addMapping('v',KeyMap::A_SLIDE_END_END);
   
 	irr::IrrlichtDevice *device =
 		irr::createDevice( irr::video::EDT_OPENGL, irr::dimension2d<irr::u32>(640, 480), 16,
@@ -272,6 +277,11 @@ int main(){
       SaveGui sg;
       sg.save(device,m);
       actionTime[KeyMap::A_SAVE]=now+1*DELAY;
+    }
+    if(e.isTriggered(KeyMap::A_CONF)&&actionTime[KeyMap::A_CONF]<now){
+      KeyMapGui kmg;
+      kmg.edit(device,m);
+      actionTime[KeyMap::A_CONF]=now+1*DELAY;
     }
 	
 		driver->beginScene(true, true, irr::SColor(255,100,101,140));

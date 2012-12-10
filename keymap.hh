@@ -10,6 +10,33 @@ namespace irr{
   using namespace video;
 };
 
+struct KeySpec{
+  const wchar_t chr;
+  const irr::EKEY_CODE key;
+
+  const bool shift:1;
+  const bool control:1;
+  KeySpec():chr(0),key(irr::KEY_KEY_CODES_COUNT),shift(false),control(false){};
+  KeySpec(wchar_t chr,bool shift=false,bool control=false):chr(chr),shift(shift),control(control),key(irr::KEY_KEY_CODES_COUNT){};
+  KeySpec(irr::EKEY_CODE key,bool shift=false,bool control=false):key(key),shift(shift),control(control),chr(0){};
+  
+  bool operator<(const KeySpec& o) const{
+    if(chr<o.chr)
+      return true;
+    if(key<o.key)
+      return true;
+    if(!(shift)&&o.shift)
+      return true;
+    if((!control)&&o.control)
+      return true;
+    return false;
+  }
+  bool operator ==(const KeySpec& o) const{
+    return chr==o.chr&&key==o.key&&shift==o.shift&&control==o.control;
+  }
+};
+
+
 class KeyMap{
   
   public:
@@ -33,25 +60,41 @@ class KeyMap{
     static const pair<Action,pair<Dirn,bool> > sliceActions[12];
     static const pair<Action,pair<bool,bool> > slideActions[4];
     static const pair<Action,Dirn> moveActions[6];
+    static const pair<Action,string> actionNames[A_COUNT-1];
   private:
-    map<int,Action> keyMap;
+    map<KeySpec,Action> keyMap;
+    map<Action,KeySpec> revMap;
   public:
-    Action addMapping(irr::EKEY_CODE code,Action a){
-      Action old=keyMap[code];
-      keyMap[code]=a;
+    pair<KeySpec,Action> addMapping(KeySpec key,Action a){
+      pair<KeySpec,Action> old(revMap[a],keyMap[key]);
+      keyMap[key]=a;
+      revMap.insert(pair<Action,KeySpec>(a,key));
       return old;
     }
-    Action getAction(irr::EKEY_CODE code){
-      return keyMap[code];
+    Action getAction(KeySpec key){
+      return keyMap[key];
     }
-    Action removeMapping(irr::EKEY_CODE code){
-      Action old=keyMap[code];
-      keyMap.erase(code);
+    KeySpec getKeySpec(Action a){
+      return revMap[a];
+    }
+    Action removeMapping(KeySpec key){
+      Action old=keyMap[key];
+      keyMap.erase(key);
+      revMap.erase(old);
       return old;
     }
-//    const map<irr:EKEY_CODE,Action> getKeyMap(){
-//      return keyMap;
-//    }
+    KeySpec removeMapping(Action a){
+      KeySpec old(revMap[a]);
+      revMap.erase(a);
+      keyMap.erase(old);
+      return old;
+    }
+    const map<KeySpec,Action> getKeyMap(){
+      return keyMap;
+    }
+    const map<Action,KeySpec> getRevMap(){
+      return revMap;
+    }
 };
 
 const pair<KeyMap::Action,pair<Dirn,bool> > KeyMap::sliceActions[12]={
@@ -81,5 +124,33 @@ const pair<KeyMap::Action,Dirn> KeyMap::moveActions[6]={
       pair<KeyMap::Action,Dirn>(KeyMap::A_MOVE_RIGHT,RIGHT),
       pair<KeyMap::Action,Dirn>(KeyMap::A_MOVE_FORWARD,FORWARD),
       pair<KeyMap::Action,Dirn>(KeyMap::A_MOVE_BACK,BACK)};
+
+const pair<KeyMap::Action,string> KeyMap::actionNames[A_COUNT-1]={
+      pair<KeyMap::Action,string>(KeyMap::A_GENERATE,"A_GENERATE"),
+      pair<KeyMap::Action,string>(KeyMap::A_LOAD,"A_LOAD"),
+      pair<KeyMap::Action,string>(KeyMap::A_SAVE,"A_SAVE"),
+      pair<KeyMap::Action,string>(KeyMap::A_CONF,"A_CONF"),
+      pair<KeyMap::Action,string>(KeyMap::A_MOVE_UP,"A_MOVE_UP"),
+      pair<KeyMap::Action,string>(KeyMap::A_MOVE_DOWN,"A_MOVE_DOWN"),
+      pair<KeyMap::Action,string>(KeyMap::A_MOVE_LEFT,"A_MOVE_LEFT"),
+      pair<KeyMap::Action,string>(KeyMap::A_MOVE_RIGHT,"A_MOVE_RIGHT"),
+      pair<KeyMap::Action,string>(KeyMap::A_MOVE_FORWARD,"A_MOVE_FORWARD"),
+      pair<KeyMap::Action,string>(KeyMap::A_MOVE_BACK,"A_MOVE_BACK"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLIDE_START_START,"A_SLIDE_START_START"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLIDE_START_END,"A_SLIDE_START_END"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLIDE_END_START,"A_SLIDE_END_START"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLIDE_END_END,"A_SLIDE_END_END"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_UP_IN,"A_SLICE_UP_IN"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_UP_OUT,"A_SLICE_UP_OUT"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_DOWN_IN,"A_SLICE_DOWN_IN"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_DOWN_OUT,"A_SLICE_DOWN_OUT"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_LEFT_IN,"A_SLICE_LEFT_IN"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_LEFT_OUT,"A_SLICE_LEFT_OUT"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_RIGHT_IN,"A_SLICE_RIGHT_IN"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_RIGHT_OUT,"A_SLICE_RIGHT_OUT"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_FORWARD_IN,"A_SLICE_FORWARD_IN"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_FORWARD_OUT,"A_SLICE_FORWARD_OUT"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_BACK_IN,"A_SLICE_BACK_IN"),
+      pair<KeyMap::Action,string>(KeyMap::A_SLICE_BACK_OUT,"A_SLICE_BACK_OUT")};
 
 #endif
