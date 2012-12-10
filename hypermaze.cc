@@ -6,6 +6,7 @@
 #include "iMyCamera.hh"
 #include "dirns.hh"
 #include "gui.hh"
+#include "keymap.hh"
 
 namespace irr{
   using namespace core;
@@ -14,51 +15,66 @@ namespace irr{
   using namespace video;
 };
 
-class MyEventReceiver : public irr::IEventReceiver
-{
 
-private:
-        // We use this array to store the current state of each key
-        bool KeyIsDown[irr::KEY_KEY_CODES_COUNT];
-public:
-        bool MouseDown;
-        irr::position2d<irr::s32> MousePos;
+class MyEventReceiver : public irr::IEventReceiver{
+
+
+  private:
+    // We use this array to store the current state of each key
+    bool actionTriggered[KeyMap::A_COUNT];
+
+  public:
+    
+    KeyMap map;
+  
+    bool MouseDown;
+    irr::position2d<irr::s32> MousePos;
+    
     // This is the one method that we have to implement
     virtual bool OnEvent(const irr::SEvent& event)
     {
-        // Remember whether each key is down or up
-        if (event.EventType == irr::EET_KEY_INPUT_EVENT)
-                KeyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
+      // Remember whether each key is down or up
+      if (event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown){
+        KeyMap::Action a=map.getAction(event.KeyInput.Key);
+        cout<<a<<endl;
+        if(a!=KeyMap::A_NONE){
+          actionTriggered[a]=true;
+          return true;
+        }
+      }
 
-    if (event.EventType != irr::EET_MOUSE_INPUT_EVENT)
+      if (event.EventType != irr::EET_MOUSE_INPUT_EVENT)
         return false;
 
-    switch(event.MouseInput.Event)
-    {
-    case irr::EMIE_LMOUSE_PRESSED_DOWN:
-        MouseDown = true;
-        break;
-    case irr::EMIE_LMOUSE_LEFT_UP:
-        MouseDown = false;
-        break;
-    case irr::EMIE_MOUSE_MOVED:
-        MousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
-        break;
+      switch(event.MouseInput.Event){
+        case irr::EMIE_LMOUSE_PRESSED_DOWN:
+          MouseDown = true;
+          break;
+        case irr::EMIE_LMOUSE_LEFT_UP:
+          MouseDown = false;
+          break;
+        case irr::EMIE_MOUSE_MOVED:
+          MousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
+          break;
+      }
+      return false;
     }
-                return false;
-        }
 
-        // This is used to check whether a key is being held down
-        virtual bool IsKeyDown(irr::EKEY_CODE keyCode) const
-        {
-                return KeyIsDown[keyCode];
-        }
-        
-        MyEventReceiver():MouseDown(false),MousePos(0,0)
-        {
-                for (irr::u32 i=0; i<irr::KEY_KEY_CODES_COUNT; ++i)
-                        KeyIsDown[i] = false;
-        }
+    // This is used to check whether a key is being held down
+    virtual bool isTriggered(KeyMap::Action a)
+    {
+      if(actionTriggered[a]){
+        actionTriggered[a]=false;
+        return true;
+       }
+       return false;
+    }
+    
+    MyEventReceiver():MouseDown(false),MousePos(0,0)
+    {
+      for (irr::u32 i=0; i<KeyMap::A_COUNT; ++i)
+        actionTriggered[i] = false;
+    }
 
 };
 
@@ -97,6 +113,22 @@ class MyNodeGen:public NodeGen{
 int main(){
 
   MyEventReceiver e;
+  
+  e.map.addMapping(irr::KEY_KEY_1,KeyMap::A_GENERATE);
+  e.map.addMapping(irr::KEY_KEY_2,KeyMap::A_LOAD);
+  e.map.addMapping(irr::KEY_KEY_3,KeyMap::A_SAVE);
+  
+  e.map.addMapping(irr::KEY_KEY_Q,KeyMap::A_MOVE_FORWARD);
+  e.map.addMapping(irr::KEY_KEY_E,KeyMap::A_MOVE_BACK);
+  e.map.addMapping(irr::KEY_KEY_A,KeyMap::A_MOVE_LEFT);
+  e.map.addMapping(irr::KEY_KEY_D,KeyMap::A_MOVE_RIGHT);
+  e.map.addMapping(irr::KEY_KEY_W,KeyMap::A_MOVE_UP);
+  e.map.addMapping(irr::KEY_KEY_S,KeyMap::A_MOVE_DOWN);
+  
+  e.map.addMapping(irr::KEY_KEY_Z,KeyMap::A_SLIDE_START_START);
+  e.map.addMapping(irr::KEY_KEY_X,KeyMap::A_SLIDE_START_END);
+  e.map.addMapping(irr::KEY_KEY_C,KeyMap::A_SLIDE_END_START);
+  e.map.addMapping(irr::KEY_KEY_V,KeyMap::A_SLIDE_END_END);
   
 	irr::IrrlichtDevice *device =
 		irr::createDevice( irr::video::EDT_OPENGL, irr::dimension2d<irr::u32>(640, 480), 16,
@@ -152,15 +184,14 @@ int main(){
   int sliced=0;
   irr::vector3df sliceStart;
   
-  irr::u32 then = device->getTimer()->getTime();
-
-  double delay=-1;
-	while(device->run())
+  irr::u32 actionTime[KeyMap::A_COUNT];
+  for (irr::u32 i=0; i<KeyMap::A_COUNT; ++i)
+    actionTime[i] = 0;
+  const irr::u32 DELAY=500;
+  
+  while(device->run())
 	{
     const irr::u32 now = device->getTimer()->getTime();
-    if(delay>=0)
-      delay-=double(now-then)/500.0;
-    then = now;
 	  
 	  if(slice==0&&e.MouseDown){
 	    irr::triangle3df tmp;
@@ -185,120 +216,31 @@ int main(){
 	    if(!e.MouseDown)
 	      slice=0;
 	  }
-	    
-    if(delay<0&&e.IsKeyDown(irr::KEY_PERIOD)){
-      md.hideSide(RIGHT,true);
-      delay=1;
+	  
+    for(const pair<KeyMap::Action,pair<Dirn,bool> >* it=KeyMap::sliceActions;it!=KeyMap::sliceActions+12;++it){
+      if(e.isTriggered(it->first)&&actionTime[it->first]<now){
+        md.hideSide(it->second.first,it->second.second);
+        actionTime[it->first]=now+1*DELAY;
+      }
     }
-    if(delay<0&&e.IsKeyDown(irr::KEY_COMMA)){
-      md.hideSide(RIGHT,false);
-      delay=1;
+    for(const pair<KeyMap::Action,pair<bool,bool> >* it=KeyMap::slideActions;it!=KeyMap::slideActions+4;++it){
+      if(e.isTriggered(it->first)&&actionTime[it->first]<now){
+        if(ss.slide(it->second.first,it->second.second)){
+          sd.updateActive();
+          actionTime[it->first]=now+1*DELAY;
+        }
+      }
     }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_M)){
-      md.hideSide(LEFT,false);
-      delay=1;
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_N)){
-      md.hideSide(LEFT,true);
-      delay=1;
+    for(const pair<KeyMap::Action,Dirn>* it=KeyMap::moveActions;it!=KeyMap::moveActions+6;++it){
+      if(e.isTriggered(it->first)&&actionTime[it->first]<now){
+        if(ss.tryMove(it->second)){
+          sd.update();
+          actionTime[it->first]=now+1*DELAY;
+        }
+      }
     }
 
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_L)){
-      md.hideSide(FORWARD,true);
-      delay=1;
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_K)){
-      md.hideSide(FORWARD,false);
-      delay=1;
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_J)){
-      md.hideSide(BACK,false);
-      delay=1;
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_H)){
-      md.hideSide(BACK,true);
-      delay=1;
-    }
-
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_O)){
-      md.hideSide(UP,true);
-      delay=1;
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_I)){
-      md.hideSide(UP,false);
-      delay=1;
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_U)){
-      md.hideSide(DOWN,false);
-      delay=1;
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_Y)){
-      md.hideSide(DOWN,true);
-      delay=1;
-    }
-    
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_V)){
-      if(ss.slide(true,true)){
-        sd.updateActive();
-        delay=1;
-        }
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_C)){
-      if(ss.slide(true,false)){
-        sd.updateActive();
-        delay=1;
-        }
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_X)){
-      if(ss.slide(false,true)){
-        sd.updateActive();
-        delay=1;
-        }
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_Z)){
-      if(ss.slide(false,false)){
-        sd.updateActive();
-        delay=1;
-        }
-    }
-
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_W)){
-      if(ss.tryMove(UP)){
-        sd.update();
-        delay=1;
-      }
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_S)){
-      if(ss.tryMove(DOWN)){
-        sd.update();
-        delay=1;
-      }
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_A)){
-      if(ss.tryMove(RIGHT)){
-        sd.update();
-        delay=1;
-      }
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_D)){
-      if(ss.tryMove(LEFT)){
-        sd.update();
-        delay=1;
-      }
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_Q)){
-      if(ss.tryMove(FORWARD)){
-        sd.update();
-        delay=1;
-      }
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_E)){
-      if(ss.tryMove(BACK)){
-        sd.update();
-        delay=1;
-      }
-    }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_1)){
+    if(e.isTriggered(KeyMap::A_GENERATE)&&actionTime[KeyMap::A_GENERATE]<now){
       GenerateGui gg;
       if(gg.generate(device,m)){
         md.clear();
@@ -310,9 +252,9 @@ int main(){
         for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
           slicer->first->setPosition(-con(to_vector(slicer->second))*r*(md.wall+md.gap));
       }
-      delay=4;
+      actionTime[KeyMap::A_GENERATE]=now+1*DELAY;
     }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_2)){
+    if(e.isTriggered(KeyMap::A_LOAD)&&actionTime[KeyMap::A_LOAD]<now){
       OpenGui og;
       if(og.open(device,m)){
         md.clear();
@@ -324,12 +266,12 @@ int main(){
         for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
           slicer->first->setPosition(-con(to_vector(slicer->second))*r*(md.wall+md.gap));
       }
-      delay=4;
+      actionTime[KeyMap::A_GENERATE]=now+1*DELAY;
     }
-    if(delay<0&&e.IsKeyDown(irr::KEY_KEY_3)){
+    if(e.isTriggered(KeyMap::A_SAVE)&&actionTime[KeyMap::A_SAVE]<now){
       SaveGui sg;
       sg.save(device,m);
-      delay=4;
+      actionTime[KeyMap::A_SAVE]=now+1*DELAY;
     }
 	
 		driver->beginScene(true, true, irr::SColor(255,100,101,140));
