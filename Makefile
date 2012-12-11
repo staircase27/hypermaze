@@ -1,6 +1,13 @@
 all: hypermaze
 run: run-hypermaze
 
+hypermaze.zip: dist
+	zip hypermaze.zip dist/* 
+dist: dist/hypermaze dist/irrlicht dist/hypermaze.keymap.conf
+
+dist/%:%
+	cp -r $^ $@
+
 CPP=g++
 CPPOPTS=-ggdb
 CPPLIBS=
@@ -23,6 +30,7 @@ clean:
 	rm -f *.o
 	rm -f test
 	rm -f irrtest
+	rm -rf dist/*
 
 %: %.o
 	$(CPP) $(CPPOPTS) -o $@ $^ $(CPPLIBS) 

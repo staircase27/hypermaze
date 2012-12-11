@@ -211,6 +211,12 @@ void CSceneNodeAnimatorCameraMy::animateNode(scene::ISceneNode *node, u32 timeMs
     scene::ISceneManager * smgr = camera->getSceneManager();
     if (smgr && smgr->getActiveCamera() != camera)
         return;
+    if(smgr){
+      core::dimension2d<u32> dim=smgr->getVideoDriver()->getScreenSize();
+      if(dim.Height!=0&&dim.Width!=0)
+        camera->setAspectRatio(dim.Width*1.0/dim.Height);
+    }
+      
 
     if (OldCamera != camera)
     {

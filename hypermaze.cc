@@ -129,9 +129,13 @@ int main(){
 
 	if (!device)
 		return 1;
-		
+	
+	device->setResizable(true);
+	
   device->getGUIEnvironment()->getSkin()->setFont(device->getGUIEnvironment()->getFont("irrlicht/myfont.xml"));
-
+  irr::SColor c=device->getGUIEnvironment()->getSkin()->getColor(irr::EGDC_3D_HIGH_LIGHT);
+  c.setAlpha(170);
+  device->getGUIEnvironment()->getSkin()->setColor(irr::EGDC_3D_HIGH_LIGHT,c);
 	
 	device->setWindowCaption(L"Hyper Maze! - Irrlicht");
 	irr::IVideoDriver* driver = device->getVideoDriver();
@@ -158,14 +162,12 @@ int main(){
 
   map<irr::ISceneNode*,Dirn> slicers;
   
-  irr::f32 r=irr::vector3df(m.size.X,m.size.Y,m.size.Z).getLength()/2;
-  
   for(Dirn* d=allDirns;d!=allDirns+6;++d){
-    irr::IMeshSceneNode* node = smgr->addSphereSceneNode(r*(md.wall+md.gap)/15);
+    irr::IMeshSceneNode* node = smgr->addSphereSceneNode((md.wall+md.gap)/2);
     node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
     node->setMaterialTexture( 0, driver->getTexture("irrlicht/handle.png"));
     node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
-    node->setPosition(-con(to_vector(*d))*r*(md.wall+md.gap));
+    node->setPosition(-con(to_vector(*d))*(abs(to_vector(*d).dotProduct(m.size))/2+2)*(md.wall+md.gap));
     irr::ITriangleSelector* selector = smgr->createTriangleSelector(node->getMesh(),node);
     node->setTriangleSelector(selector);
     selector->drop(); // We're done with this selector, so drop it now.
@@ -241,9 +243,8 @@ int main(){
         s=String(m);
         ss=StringSlice(s);
         sd.setString(ss);
-        irr::f32 r=irr::vector3df(m.size.X,m.size.Y,m.size.Z).getLength()/2;
         for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
-          slicer->first->setPosition(-con(to_vector(slicer->second))*r*(md.wall+md.gap));
+          slicer->first->setPosition(-con(to_vector(slicer->second))*(abs(to_vector(slicer->second).dotProduct(m.size))/2+2)*(md.wall+md.gap));
       }
       actionTime[KeyMap::A_GENERATE]=now+1*DELAY;
     }
@@ -255,9 +256,8 @@ int main(){
         s=String(m);
         ss=StringSlice(s);
         sd.setString(ss);
-        irr::f32 r=irr::vector3df(m.size.X,m.size.Y,m.size.Z).getLength()/2;
         for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
-          slicer->first->setPosition(-con(to_vector(slicer->second))*r*(md.wall+md.gap));
+          slicer->first->setPosition(-con(to_vector(slicer->second))*(abs(to_vector(slicer->second).dotProduct(m.size))/2+2)*(md.wall+md.gap));
       }
       actionTime[KeyMap::A_GENERATE]=now+1*DELAY;
     }
