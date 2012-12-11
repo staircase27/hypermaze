@@ -1,4 +1,6 @@
 #include "irrlicht.h"
+#include <iostream>
+#include <sstream>
 
 #ifndef KEYMAP_HH_INC
 #define KEYMAP_HH_INC
@@ -10,12 +12,14 @@ namespace irr{
   using namespace video;
 };
 
-struct KeySpec{
-  const wchar_t chr;
-  const irr::EKEY_CODE key;
+using namespace std;
 
-  const bool shift:1;
-  const bool control:1;
+struct KeySpec{
+  wchar_t chr;
+  irr::EKEY_CODE key;
+
+  bool shift:1;
+  bool control:1;
   KeySpec():chr(0),key(irr::KEY_KEY_CODES_COUNT),shift(false),control(false){};
   KeySpec(wchar_t chr,bool shift=false,bool control=false):chr(chr),shift(shift),control(control),key(irr::KEY_KEY_CODES_COUNT){};
   KeySpec(irr::EKEY_CODE key,bool shift=false,bool control=false):key(key),shift(shift),control(control),chr(0){};
@@ -60,15 +64,17 @@ class KeyMap{
     static const pair<Action,pair<Dirn,bool> > sliceActions[12];
     static const pair<Action,pair<bool,bool> > slideActions[4];
     static const pair<Action,Dirn> moveActions[6];
-    static const pair<Action,string> actionNames[A_COUNT-1];
+    static const pair<Action,wstring> actionNames[A_COUNT-1];
   private:
     map<KeySpec,Action> keyMap;
     map<Action,KeySpec> revMap;
   public:
     pair<KeySpec,Action> addMapping(KeySpec key,Action a){
       pair<KeySpec,Action> old(revMap[a],keyMap[key]);
+      keyMap.erase(old.first);
+      revMap.erase(old.second);
       keyMap[key]=a;
-      revMap.insert(pair<Action,KeySpec>(a,key));
+      revMap[a]=key;
       return old;
     }
     Action getAction(KeySpec key){
@@ -95,6 +101,9 @@ class KeyMap{
     const map<Action,KeySpec> getRevMap(){
       return revMap;
     }
+    
+    friend ostream& operator<<(ostream& os,const KeyMap& km);
+    friend istream& operator>>(istream& os,const KeyMap& km);
 };
 
 const pair<KeyMap::Action,pair<Dirn,bool> > KeyMap::sliceActions[12]={
@@ -125,32 +134,54 @@ const pair<KeyMap::Action,Dirn> KeyMap::moveActions[6]={
       pair<KeyMap::Action,Dirn>(KeyMap::A_MOVE_FORWARD,FORWARD),
       pair<KeyMap::Action,Dirn>(KeyMap::A_MOVE_BACK,BACK)};
 
-const pair<KeyMap::Action,string> KeyMap::actionNames[A_COUNT-1]={
-      pair<KeyMap::Action,string>(KeyMap::A_GENERATE,"A_GENERATE"),
-      pair<KeyMap::Action,string>(KeyMap::A_LOAD,"A_LOAD"),
-      pair<KeyMap::Action,string>(KeyMap::A_SAVE,"A_SAVE"),
-      pair<KeyMap::Action,string>(KeyMap::A_CONF,"A_CONF"),
-      pair<KeyMap::Action,string>(KeyMap::A_MOVE_UP,"A_MOVE_UP"),
-      pair<KeyMap::Action,string>(KeyMap::A_MOVE_DOWN,"A_MOVE_DOWN"),
-      pair<KeyMap::Action,string>(KeyMap::A_MOVE_LEFT,"A_MOVE_LEFT"),
-      pair<KeyMap::Action,string>(KeyMap::A_MOVE_RIGHT,"A_MOVE_RIGHT"),
-      pair<KeyMap::Action,string>(KeyMap::A_MOVE_FORWARD,"A_MOVE_FORWARD"),
-      pair<KeyMap::Action,string>(KeyMap::A_MOVE_BACK,"A_MOVE_BACK"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLIDE_START_START,"A_SLIDE_START_START"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLIDE_START_END,"A_SLIDE_START_END"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLIDE_END_START,"A_SLIDE_END_START"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLIDE_END_END,"A_SLIDE_END_END"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_UP_IN,"A_SLICE_UP_IN"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_UP_OUT,"A_SLICE_UP_OUT"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_DOWN_IN,"A_SLICE_DOWN_IN"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_DOWN_OUT,"A_SLICE_DOWN_OUT"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_LEFT_IN,"A_SLICE_LEFT_IN"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_LEFT_OUT,"A_SLICE_LEFT_OUT"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_RIGHT_IN,"A_SLICE_RIGHT_IN"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_RIGHT_OUT,"A_SLICE_RIGHT_OUT"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_FORWARD_IN,"A_SLICE_FORWARD_IN"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_FORWARD_OUT,"A_SLICE_FORWARD_OUT"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_BACK_IN,"A_SLICE_BACK_IN"),
-      pair<KeyMap::Action,string>(KeyMap::A_SLICE_BACK_OUT,"A_SLICE_BACK_OUT")};
+const pair<KeyMap::Action,wstring> KeyMap::actionNames[A_COUNT-1]={
+      pair<KeyMap::Action,wstring>(KeyMap::A_GENERATE,L"A_GENERATE"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_LOAD,L"A_LOAD"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SAVE,L"A_SAVE"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_CONF,L"A_CONF"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_MOVE_UP,L"A_MOVE_UP"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_MOVE_DOWN,L"A_MOVE_DOWN"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_MOVE_LEFT,L"A_MOVE_LEFT"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_MOVE_RIGHT,L"A_MOVE_RIGHT"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_MOVE_FORWARD,L"A_MOVE_FORWARD"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_MOVE_BACK,L"A_MOVE_BACK"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_START_START,L"A_SLIDE_START_START"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_START_END,L"A_SLIDE_START_END"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_END_START,L"A_SLIDE_END_START"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_END_END,L"A_SLIDE_END_END"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_UP_IN,L"A_SLICE_UP_IN"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_UP_OUT,L"A_SLICE_UP_OUT"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_DOWN_IN,L"A_SLICE_DOWN_IN"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_DOWN_OUT,L"A_SLICE_DOWN_OUT"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_LEFT_IN,L"A_SLICE_LEFT_IN"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_LEFT_OUT,L"A_SLICE_LEFT_OUT"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_RIGHT_IN,L"A_SLICE_RIGHT_IN"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_RIGHT_OUT,L"A_SLICE_RIGHT_OUT"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_FORWARD_IN,L"A_SLICE_FORWARD_IN"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_FORWARD_OUT,L"A_SLICE_FORWARD_OUT"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_BACK_IN,L"A_SLICE_BACK_IN"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_BACK_OUT,L"A_SLICE_BACK_OUT")};
+      
+      
+    
+ostream& operator<<(ostream& os,const KeyMap& km){
+  for(map<KeySpec,KeyMap::Action>::const_iterator it=km.keyMap.begin();it!=km.keyMap.end();++it){
+    os<<it->first.chr<<" "<<it->first.key<<" "<<it->first.shift<<" "<<it->first.shift<<" "<<it->second;
+  }
+  return os;
+}
+wistream& operator>>(wistream& is,KeyMap& km){
+  wstring line;
+  getline(is,line);
+  while(!line.empty()){
+    wstringstream ss(line);
+    KeySpec ks;
+    KeyMap::Action a;
+    ss>>ks.chr>>(int)ks.key>>ks.shift>>ks.shift>>a;
+    km.addMapping(ks,a);
+    getline(is,line);
+  }
+  return is;
+}
 
 #endif

@@ -8,6 +8,7 @@
 #include "gui.hh"
 #include "keymap.hh"
 #include "keymapgui.hh"
+#include <fstream>
 
 namespace irr{
   using namespace core;
@@ -134,6 +135,9 @@ int main(){
   e.map.addMapping('x',KeyMap::A_SLIDE_START_END);
   e.map.addMapping('c',KeyMap::A_SLIDE_END_START);
   e.map.addMapping('v',KeyMap::A_SLIDE_END_END);
+  
+  ofstream ofs("hypermaze.conf");
+  ofs<<e.map;
   
 	irr::IrrlichtDevice *device =
 		irr::createDevice( irr::video::EDT_OPENGL, irr::dimension2d<irr::u32>(640, 480), 16,
@@ -280,7 +284,7 @@ int main(){
     }
     if(e.isTriggered(KeyMap::A_CONF)&&actionTime[KeyMap::A_CONF]<now){
       KeyMapGui kmg;
-      kmg.edit(device,m);
+      kmg.edit(device,e.map);
       actionTime[KeyMap::A_CONF]=now+1*DELAY;
     }
 	

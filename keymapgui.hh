@@ -13,13 +13,41 @@ namespace irr{
   using namespace gui;
 };
 
+wstring toString(KeySpec ks){
+  wstringstream ss;
+  if(ks.chr==0)
+    if(ks.key==irr::KEY_KEY_CODES_COUNT || ks.key==0)
+      return L"None";
+    else{
+      if(ks.control)
+        ss<<"Ctrl+";
+      if(ks.shift)
+        ss<<"Shift+";
+      ss<<"{key "<<ks.key<<"}";
+      return ss.str();
+    }
+  else{
+    if(ks.control)
+      ss<<"Ctrl+";
+    if(ks.shift)
+      ss<<"Shift+";
+    ss<<ks.chr;
+    return ss.str();
+  }
+}
+
+      
+
 class KeyMapGui: BaseGui{
+
+  KeyMap* km;
 
   bool okClicked;
   bool cancelClicked;
   
-  irr::IGUIEditBox *statusField; 
-  irr::IGUITable *table; 
+  irr::IGUITable *table;
+  int editing;
+  
   enum
   {
     GUI_ID_OK_BUTTON=201,
@@ -38,6 +66,13 @@ class KeyMapGui: BaseGui{
             return true;
           }
         }
+        if(event.GUIEvent.EventType==irr::EGET_TABLE_SELECTED_AGAIN){
+          if(editing>=0)
+            table->setCellText(editing,1,toString(km->getKeySpec(KeyMap::actionNames[editing].first)).c_str());
+          editing=table->getSelected();
+          table->setCellText(editing,1,L"Press New Key");
+          return true;
+        }
       }
       if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
         cancelClicked=true;
@@ -49,18 +84,28 @@ class KeyMapGui: BaseGui{
       }
       if(event.EventType == irr::EET_KEY_INPUT_EVENT&&event.KeyInput.PressedDown){
         cout<<event.KeyInput.Char<<L" or "<<event.KeyInput.Key<<" ("<<event.KeyInput.Shift<<","<<event.KeyInput.Control<<")";
-        wstringstream ss;
-        ss<<(int)event.KeyInput.Char<<L" or "<<event.KeyInput.Key<<" ("<<event.KeyInput.Shift<<","<<event.KeyInput.Control<<")";
-        statusField->setText(ss.str().c_str());
+        if(editing>=0){
+          KeySpec ks(event.KeyInput.Char,event.KeyInput.Shift,event.KeyInput.Control);
+          if(event.KeyInput.Char==0)
+            ks=KeySpec(event.KeyInput.Key,event.KeyInput.Shift,event.KeyInput.Control);
+          KeyMap::Action old=km->addMapping(ks,KeyMap::actionNames[editing].first).second;
+          table->setCellText(old-1,1,toString(km->getKeySpec(old)).c_str());
+          table->setCellText(editing,1,toString(km->getKeySpec(KeyMap::actionNames[editing].first)).c_str());
+         
+          editing=-1;
+          return true;
+        }
       }
       return false;
     };
 
 
   public:
-    bool edit(irr::IrrlichtDevice* _device,Maze& m){
-      apply(_device);
+    bool edit(irr::IrrlichtDevice* _device,KeyMap& km){
+      this->km=&km;
+      editing=-1;
       okClicked=cancelClicked=false;
+      apply(_device);
       
       irr::IVideoDriver* driver = device->getVideoDriver();
       irr::ISceneManager* smgr = device->getSceneManager();
@@ -69,16 +114,26 @@ class KeyMapGui: BaseGui{
       irr::rect<irr::s32> rect=driver->getViewPort();
       irr::position2d<irr::s32> center=rect.getCenter();
       irr::dimension2d<irr::s32> size=rect.getSize();
-      size.Width=min(400,size.Width-10);
+      size.Width=min(600,size.Width-10);
+      size.Height=min(600,size.Height-10);
       
-      table = guienv->addTable(irr::rect<irr::s32>(center.X-size.Width/2,10,center.X+size.Width/2,center.Y-5-32-10),0,-1,true);
+      table = guienv->addTable(irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),0,-1,true);
+      table->addColumn(L"Action",0);
+      table->addColumn(L"Key",1);
+      table->setColumnWidth(0,size.Width/2-10);
+      table->setColumnWidth(1,size.Width/2-10);
+      table->setColumnOrdering(0,irr::EGCO_NONE);
+      table->setColumnOrdering(1,irr::EGCO_NONE);
+      for(int i=0;i<KeyMap::A_COUNT-1;++i){
+        table->addRow(i);
+        table->setCellText(i,0,KeyMap::actionNames[i].second.c_str());
+        table->setCellText(i,1,toString(km.getKeySpec(KeyMap::actionNames[i].first)).c_str());
+      }
       
-      statusField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,center.X+size.Width/2,center.Y-5));
+      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+size.Height/2-32,center.X+size.Width/2-100,center.Y+size.Height/2),0,GUI_ID_CANCEL_BUTTON,L"Cancel");
+      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),0,GUI_ID_OK_BUTTON,L"Open");
       
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5,center.X+size.Width/2-100,center.Y+5+32),0,GUI_ID_CANCEL_BUTTON,L"Cancel");
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5,center.X+size.Width/2,center.Y+5+32),0,GUI_ID_OK_BUTTON,L"Open");
-      
-      guienv->setFocus(statusField);
+      guienv->setFocus(table);
         
       device->setWindowCaption(L"Open Hyper Maze");
       
