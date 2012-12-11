@@ -18,8 +18,8 @@ struct KeySpec{
   wchar_t chr;
   irr::EKEY_CODE key;
 
-  bool shift:1;
-  bool control:1;
+  bool shift;
+  bool control;
   KeySpec():chr(0),key(irr::KEY_KEY_CODES_COUNT),shift(false),control(false){};
   KeySpec(wchar_t chr,bool shift=false,bool control=false):chr(chr),shift(shift),control(control),key(irr::KEY_KEY_CODES_COUNT){};
   KeySpec(irr::EKEY_CODE key,bool shift=false,bool control=false):key(key),shift(shift),control(control),chr(0){};
@@ -41,13 +41,13 @@ struct KeySpec{
 };
 
 
+
+
 class KeyMap{
   
   public:
     enum Action{
       A_NONE=0,
-      A_GENERATE,
-      A_LOAD, A_SAVE,A_CONF,
       A_MOVE_UP,A_MOVE_DOWN,
       A_MOVE_LEFT,A_MOVE_RIGHT,
       A_MOVE_FORWARD,A_MOVE_BACK,
@@ -59,6 +59,8 @@ class KeyMap{
       A_SLICE_RIGHT_IN,A_SLICE_RIGHT_OUT,
       A_SLICE_FORWARD_IN,A_SLICE_FORWARD_OUT,
       A_SLICE_BACK_IN,A_SLICE_BACK_OUT,
+      A_GENERATE,A_LOAD,
+      A_SAVE,A_CONF,
       A_COUNT};
       
     static const pair<Action,pair<Dirn,bool> > sliceActions[12];
@@ -102,8 +104,8 @@ class KeyMap{
       return revMap;
     }
     
-    friend ostream& operator<<(ostream& os,const KeyMap& km);
-    friend istream& operator>>(istream& os,const KeyMap& km);
+    friend wostream& operator<<(wostream& os,const KeyMap& km);
+    friend wistream& operator>>(wistream& os,const KeyMap& km);
 };
 
 const pair<KeyMap::Action,pair<Dirn,bool> > KeyMap::sliceActions[12]={
@@ -164,9 +166,9 @@ const pair<KeyMap::Action,wstring> KeyMap::actionNames[A_COUNT-1]={
       
       
     
-ostream& operator<<(ostream& os,const KeyMap& km){
+wostream& operator<<(wostream& os,const KeyMap& km){
   for(map<KeySpec,KeyMap::Action>::const_iterator it=km.keyMap.begin();it!=km.keyMap.end();++it){
-    os<<it->first.chr<<" "<<it->first.key<<" "<<it->first.shift<<" "<<it->first.shift<<" "<<it->second;
+    os<<it->first.chr<<" "<<it->first.key<<" "<<it->first.shift<<" "<<it->first.shift<<" "<<it->second<<endl;
   }
   return os;
 }
@@ -177,7 +179,11 @@ wistream& operator>>(wistream& is,KeyMap& km){
     wstringstream ss(line);
     KeySpec ks;
     KeyMap::Action a;
-    ss>>ks.chr>>(int)ks.key>>ks.shift>>ks.shift>>a;
+    int i;
+    ss>>ks.chr>>i>>ks.shift>>ks.shift;
+    ks.key=(irr::EKEY_CODE)i;
+    ss>>i;
+    a=(KeyMap::Action)i;
     km.addMapping(ks,a);
     getline(is,line);
   }

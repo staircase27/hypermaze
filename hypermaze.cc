@@ -118,26 +118,10 @@ class MyNodeGen:public NodeGen{
 int main(){
 
   MyEventReceiver e;
-  
-  e.map.addMapping('1',KeyMap::A_GENERATE);
-  e.map.addMapping('2',KeyMap::A_LOAD);
-  e.map.addMapping('3',KeyMap::A_SAVE);
-  e.map.addMapping('4',KeyMap::A_CONF);
-  
-  e.map.addMapping('q',KeyMap::A_MOVE_FORWARD);
-  e.map.addMapping('e',KeyMap::A_MOVE_BACK);
-  e.map.addMapping('a',KeyMap::A_MOVE_LEFT);
-  e.map.addMapping('d',KeyMap::A_MOVE_RIGHT);
-  e.map.addMapping('w',KeyMap::A_MOVE_UP);
-  e.map.addMapping('s',KeyMap::A_MOVE_DOWN);
-  
-  e.map.addMapping('z',KeyMap::A_SLIDE_START_START);
-  e.map.addMapping('x',KeyMap::A_SLIDE_START_END);
-  e.map.addMapping('c',KeyMap::A_SLIDE_END_START);
-  e.map.addMapping('v',KeyMap::A_SLIDE_END_END);
-  
-  ofstream ofs("hypermaze.conf");
-  ofs<<e.map;
+  e.map.addMapping(irr::KEY_F1,KeyMap::A_CONF);
+  wifstream ifs("hypermaze.keymap.conf");
+  ifs>>e.map;
+  ifs.close();
   
 	irr::IrrlichtDevice *device =
 		irr::createDevice( irr::video::EDT_OPENGL, irr::dimension2d<irr::u32>(640, 480), 16,
