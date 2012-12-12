@@ -19,7 +19,7 @@ namespace irr{
 using namespace std;
 
 irr::vector3df con(Vector v){
-  return irr::vector3df(v.X,v.Y,v.Z);
+  return irr::vector3df(-v.X,v.Y,v.Z);
 }
 
 irr::vector3df remSgn(irr::vector3df v){
@@ -76,7 +76,7 @@ class MazeDisplay{
             2*m.size.dotProduct(to_vector(*d))-1,(vector<VisibleCounter*>*)NULL);
       }
 
-      irr::vector3df position=center-((wall+gap)*con(m.size)-gap*irr::vector3df(1,1,1))/2;
+      irr::vector3df position=center-(wall+gap)*con(m.size-Vector(1,1,1))/2;
       
       for(int x=0;x<m.size.X;++x)
         for(int y=0;y<m.size.Y;++y)
@@ -85,7 +85,7 @@ class MazeDisplay{
 	          irr::IMeshSceneNode* node = ng->makeUnitWall(true);
 
             node->setScale(irr::vector3df(wall,wall,wall));
-            node->setPosition(position+con(pos)*(wall+gap)+irr::vector3df(1,1,1)*wall/2);
+            node->setPosition(position+con(pos)*(wall+gap));
             
             VisibleCounter* vc=new VisibleCounter(node);
             for(set<Dirn>::iterator dir=dirns.begin();dir!=dirns.end();++dir){
@@ -100,7 +100,7 @@ class MazeDisplay{
 
                 node->setScale(wall*irr::vector3df(1,1,1)+(gap-wall)*remSgn(con(to_vector(*d))));
 
-                node->setPosition(position+irr::vector3df(x,y,z)*(wall+gap)+con(to_vector(*d))*(wall+gap)/2+irr::vector3df(1,1,1)*wall/2);
+                node->setPosition(position+con(pos)*(wall+gap)+con(to_vector(*d))*(wall+gap)/2);
                 
                 VisibleCounter* vc=new VisibleCounter(node);
                 for(set<Dirn>::iterator dir=dirns.begin();dir!=dirns.end();++dir){
@@ -175,7 +175,7 @@ class StringDisplay{
   public:
     
     void update(){
-      irr::vector3df position=center-(MazeDisplay::wall+MazeDisplay::gap)*irr::vector3df(s.getString().maze.size.X,s.getString().maze.size.Y,s.getString().maze.size.Z)/2;
+      irr::vector3df position=center-(MazeDisplay::wall+MazeDisplay::gap)*con(s.getString().maze.size)/2;
     
     
       bool active=false;
@@ -187,7 +187,7 @@ class StringDisplay{
         if(nit==nodes.end())
           nit=nodes.insert(nit,ng->makeUnitString(true));
         (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1));
-        (*nit)->setPosition(position+irr::vector3df(posn.X,posn.Y,posn.Z)*(MazeDisplay::wall+MazeDisplay::gap));
+        (*nit)->setPosition(position+con(posn)*(MazeDisplay::wall+MazeDisplay::gap));
         if(i>=activeNodes)
           (*nit)->setVisible(true);
         if((!active) && (sit==s.getStart()))
@@ -202,7 +202,7 @@ class StringDisplay{
         if(nit==nodes.end())
           nit=nodes.insert(nit,ng->makeUnitString(false));
         (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(*sit))));
-        (*nit)->setPosition(position+irr::vector3df(posn.X,posn.Y,posn.Z)*(MazeDisplay::wall+MazeDisplay::gap)+(MazeDisplay::gap+MazeDisplay::wall)*con(to_vector(*sit))/2  );
+        (*nit)->setPosition(position+con(posn)*(MazeDisplay::wall+MazeDisplay::gap)+(MazeDisplay::gap+MazeDisplay::wall)*con(to_vector(*sit))/2);
         if(i>=activeNodes)
           (*nit)->setVisible(true);
 
@@ -218,7 +218,7 @@ class StringDisplay{
       if(nit==nodes.end())
         nit=nodes.insert(nit,ng->makeUnitString(true));
       (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1));
-      (*nit)->setPosition(position+irr::vector3df(posn.X,posn.Y,posn.Z)*(MazeDisplay::wall+MazeDisplay::gap));
+      (*nit)->setPosition(position+con(posn)*(MazeDisplay::wall+MazeDisplay::gap));
       if(i>=activeNodes)
         (*nit)->setVisible(true);
 
