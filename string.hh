@@ -117,6 +117,10 @@ class StringSlice{
       if((d==LEFT||d==opposite(LEFT))&&(start==s.route.begin()||end==s.route.end()))
         return false;
       while(it!=end){
+        if(d==UP && point.Y>=s.maze.size.Y-1)
+          return false;
+        if(d==DOWN && point.Y<=1)
+          return false;
         if(*it!=d && *it !=opposite(d)){
           Vector wall=point+to_shift_vector(*it)+to_shift_vector(d);
           Dirn wallDirn=perpendicular(*it,d);

@@ -108,6 +108,8 @@ using namespace std;
         bool Moving;
         bool Translating;
         bool Fine;
+        core::dimension2d<u32> lastdim;
+        
     };
 
     
@@ -211,11 +213,6 @@ void CSceneNodeAnimatorCameraMy::animateNode(scene::ISceneNode *node, u32 timeMs
     scene::ISceneManager * smgr = camera->getSceneManager();
     if (smgr && smgr->getActiveCamera() != camera)
         return;
-    if(smgr){
-      core::dimension2d<u32> dim=smgr->getVideoDriver()->getScreenSize();
-      if(dim.Height!=0&&dim.Width!=0)
-        camera->setAspectRatio(dim.Width*1.0/dim.Height);
-    }
       
 
     if (OldCamera != camera)
@@ -228,10 +225,23 @@ void CSceneNodeAnimatorCameraMy::animateNode(scene::ISceneNode *node, u32 timeMs
         RotY=atan2(Y,offset.getLength())*core::RADTODEG;
         RotX=atan2(offset.Z,offset.X)*core::RADTODEG;
         OldCamera = camera;
+        if(smgr)
+          lastdim=smgr->getVideoDriver()->getScreenSize();
     }
     else
     {
         Target += camera->getTarget() - LastCameraTarget;
+        if(smgr){
+          core::dimension2d<u32> dim=smgr->getVideoDriver()->getScreenSize();
+          if(dim!=lastdim){
+            cout<<"screen changed"<<endl;
+            if(dim.Height!=0&&dim.Width!=0){
+              camera->setFOV(2.*atan(tan(camera->getFOV()/2.0)*dim.Height/lastdim.Height));
+              camera->setAspectRatio(dim.Width*1.0/dim.Height);
+              lastdim=dim;
+            }
+          }
+        }
     }
 
     float SpeedFactor=Fine?0.1:1;
