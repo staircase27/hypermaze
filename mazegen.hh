@@ -6,33 +6,117 @@
 
 using namespace std;
 
+#define DEBUG
+
 #ifndef MAZEGEN_HH_INC
 #define MAZEGEN_HH_INC
 
-class MazeGenHalf{
-  Maze& m;
-  Vector p;
-  bool down;
-  Vector huntStart;
-  Vector huntEnd;
-  int mask;
-  
-  int* xtrans;
-  int* ytrans;
-  int* ztrans;
-  int* xinvtrans;
-  int* yinvtrans;
-  int* zinvtrans;
-  
+class Walker{
+  protected:
+    Maze& m;
   public:
-    MazeGenHalf(Maze& m,bool down):m(m),p(-1,-1,-1),down(down),
-        huntStart(0,0,0),huntEnd(m.size.X-1,m.size.Y-1,m.size.Z-1),
-        mask(1<<10){
-      if(down){
-        huntStart=huntEnd;
-        huntEnd=Vector(0,0,0);
-        mask=mask<<1;
+    Walker(Maze& m):m(m){};
+    
+    virtual void init(){};
+    
+    virtual Vector getStart(){
+      return Vector(0,0,0);
+    }
+    virtual Vector getEnd(){
+      return Vector(m.size.X-1,m.size.Y-1,m.size.Z-1);
+    }
+    
+    virtual void moveVector(Vector& v,bool forward){
+      v.Z+=forward?-1:1;
+      if(v.Z==m.size.Z){
+        v.Z=0;
+        v.X++;
+        if(v.X==m.size.X){
+          v.X=0;
+          v.Y++;
+        }
+      }else if(v.Z<0){
+        v.Z=m.size.Z-1;
+        v.X--;
+        if(v.X<0){
+          v.X=m.size.X-1;
+          v.Y--;
+        }
       }
+    }
+  template <class MGH>
+  friend Maze generate(Vector size);
+};
+  
+template <class W>
+class Hunter{
+  protected:  
+    Maze& m;
+    int& mask;
+    bool down;
+    Vector& p;
+    Walker* w;
+    Vector huntStart;
+    Vector huntEnd;
+  public:
+    Hunter(Maze& m,Vector& p,bool down,int& mask):m(m),mask(mask),down(down),
+        p(p),w(new W(m)),huntStart(w->getStart()),huntEnd(w->getEnd()){
+      if(down){
+        Vector tmp=huntStart;
+        huntStart=huntEnd;
+        huntEnd=tmp;
+      }
+    }
+    virtual bool hunt(){
+      return doHunt(huntStart,huntEnd,down);
+    }
+    virtual void init(){
+      w->init();
+    };
+  protected:
+    virtual bool doHunt(Vector huntStart,Vector huntEnd,bool down){
+      while(huntStart!=huntEnd&&*m[huntStart]!=0){
+        w->moveVector(huntStart,down);
+      }
+      
+      for(p=huntStart;p!=huntEnd;w->moveVector(p,down)){
+        if(*m[p]==0){
+          set<Dirn> available;
+          for(int i=0;i<6;i++){
+            Dirn d=from_id(i);
+            if(inCube(p+to_vector(d),Vector(0,0,0),m.size)&&((*m[p+to_vector(d)]&mask)!=0))
+              available.insert(d);
+          }
+          if(!available.empty()){
+            set<Dirn>::iterator dirn = available.begin();
+            advance(dirn, rand() % available.size());
+            *m[p]|=to_mask(*dirn)|mask;
+            *m[p+to_vector(*dirn)]|=to_mask(opposite(*dirn));
+            return true;
+          }
+        }
+      }
+      huntStart=huntEnd;
+      p.X=-1;
+      return false;
+    }
+    
+  template <class MGH>
+  friend Maze generate(Vector size);
+};
+
+template <class H,class W>
+class MazeGenHalf{
+  protected:
+    Maze& m;
+    int mask;
+    Vector p;
+
+    Hunter<W>* h;
+  public:
+    MazeGenHalf(Maze& m,bool down):m(m),p(-2,-2,-2),mask(1<<10),h(new H(m,p,down,mask)){
+      if(down)
+        mask=mask<<1;
       if(down){
         for(int x=0;x<m.size.X;++x)
           for(int z=0;z<m.size.Z;++z)
@@ -42,33 +126,110 @@ class MazeGenHalf{
           for(int z=0;z<m.size.Z;++z)
             *m[Vector(x,0,z)]|=mask;
       }
-      
-      
-      xtrans=new int[m.size.X];
-      xinvtrans=new int[m.size.X];
-      for(int i=0;i<(m.size.X+1)/2;++i){
-        if(i%2==0){
-          xtrans[i]=i;
-          xtrans[m.size.X-1-i]=m.size.X-1-i;
-        }else{
-          xtrans[i]=m.size.X-1-i;
-          xtrans[m.size.X-1-i]=i;
-        }
-        xinvtrans[xtrans[i]]=i;
-        xinvtrans[xtrans[m.size.X-1-i]]=m.size.X-1-i;
-      }
-      
-      makeTrans(m.size.X,xtrans,xinvtrans);
-      makeTrans(m.size.Y,ytrans,yinvtrans);
-      makeTrans(m.size.Z,ztrans,zinvtrans);
-
-      huntStart.X=xtrans[huntStart.X];
-      huntStart.Y=ytrans[huntStart.Y];
-      huntStart.Z=ztrans[huntStart.Z];
-      huntEnd.X=xtrans[huntEnd.X];
-      huntEnd.Y=ytrans[huntEnd.Y];
-      huntEnd.Z=ztrans[huntEnd.Z];
     };
+    
+    virtual void init(){
+      h->init();
+    };
+    bool walk(){
+      if(p.X<0)
+        return false;
+      set<Dirn> available;
+      for(int i=0;i<6;i++){
+        Dirn d=from_id(i);
+        if(inCube(p+to_vector(d),Vector(0,0,0),m.size)&&*m[p+to_vector(d)]==0)
+          available.insert(d);
+      }
+      if(available.empty())
+        return false;
+      set<Dirn>::iterator dirn = available.begin();
+      advance(dirn, rand() % available.size());
+      #ifdef DEBUG
+      cout<<"    walk in "<<*dirn<<" to "<<p+to_vector(*dirn)<<endl;
+      #endif
+      *m[p]|=to_mask(*dirn);
+      p=p+to_vector(*dirn);
+      *m[p]|=to_mask(opposite(*dirn))|mask;
+      return true;
+    }
+    
+    virtual bool forceHunt(){
+      return false;
+    }
+    bool doStep(){
+      if(p.X==-2)
+        init();
+      #ifdef DEBUG
+      cout<<"step "<<mask<<endl;
+      #endif
+      if(forceHunt()||!walk()){
+        cout<<"hunting"<<endl;
+        if(!h->hunt()){
+          cout<<"hunting failed"<<endl;
+          return true;
+        }
+      }
+      return false;
+    }
+
+  template <class MGH>
+  friend Maze generate(Vector size);
+};
+
+  
+
+class ReorderWalker:public Walker{
+  protected:
+    virtual void translate(Vector& v){
+      if(v.X%2==0)
+        v.X=v.X/2;
+      else
+        v.X=m.size.X-(v.X+1)/2;
+      if(v.Y%2==0)
+        v.Y=v.Y/2;
+      else
+        v.Y=m.size.Y-(v.Y+1)/2;
+      if(v.Z%2==0)
+        v.Z=v.Z/2;
+      else
+        v.Z=m.size.Z-(v.Z+1)/2;
+    }
+    virtual void invtranslate(Vector& v){
+      if(2*v.X<m.size.X)
+        v.X=2*v.X;
+      else
+        v.X=2*(m.size.X-v.X)-1;
+      if(2*v.Y<m.size.Y)
+        v.Y=2*v.Y;
+      else
+        v.Y=2*(m.size.Y-v.Y)-1;
+      if(2*v.Z<m.size.Z)
+        v.Z=2*v.Z;
+      else
+        v.Z=2*(m.size.Z-v.Z)-1;
+    }
+    virtual Vector getEnd(){
+      Vector end(m.size.X-1,m.size.Y-1,m.size.Z-1);
+      translate(end);
+      return end;
+    }
+    virtual void moveVector(Vector& v,bool down){
+      invtranslate(v);
+      Walker::moveVector(v,down);
+      translate(v);
+    }
+  public:
+    ReorderWalker(Maze& m):Walker(m){}
+};
+ 
+class RandOrderWalker:public ReorderWalker{
+  protected:
+    int* xtrans;
+    int* ytrans;
+    int* ztrans;
+    int* xinvtrans;
+    int* yinvtrans;
+    int* zinvtrans;
     
     virtual void makeTrans(int size,int* &trans,int* &invtrans){
       trans=new int[size];
@@ -91,138 +252,53 @@ class MazeGenHalf{
         invtrans[k]=i;
       }
       cout<<endl;
-      /*    
-      for(int i=0;i<(size+1)/2;++i){
-        if(i%2==0){
-          trans[i]=i;
-          trans[size-1-i]=size-1-i;
-        }else{
-          trans[i]=size-1-i;
-          trans[size-1-i]=i;
-        }
-        invtrans[trans[i]]=i;
-        invtrans[trans[size-1-i]]=size-1-i;
-      }      
-      */
-      /*
-      for(int i=0;i<size;++i){
-        if(i%2==0)
-          trans[i]=i/2;
-        else
-          trans[i]=size-(i+1)/2;
-        invtrans[trans[i]]=i;
-      }
-      */
     }
     
-    
-    bool walk(){
-      if(p.X==-1)
-        return false;
-      set<Dirn> available;
-      for(int i=0;i<6;i++){
-        Dirn d=from_id(i);
-        if(inCube(p+to_vector(d),Vector(0,0,0),m.size)&&*m[p+to_vector(d)]==0)
-          available.insert(d);
-      }
-      if(available.empty())
-        return false;
-      set<Dirn>::iterator dirn = available.begin();
-      advance(dirn, rand() % available.size());
-      #ifdef DEBUG
-      cout<<"    walk in "<<*dirn<<" to "<<p+to_vector(*dirn)<<endl;
-      #endif
-      *m[p]|=to_mask(*dirn);
-      p=p+to_vector(*dirn);
-      *m[p]|=to_mask(opposite(*dirn))|mask;
-      return true;
+    virtual Vector getEnd(){
+      return Vector(xtrans[m.size.X-1],ytrans[m.size.Y-1],ztrans[m.size.Z-1]);
     }
-    
-    bool hunt(){
-      while(huntStart!=huntEnd&&*m[huntStart]!=0){
-        moveVector(huntStart);
-      }
-      p=huntStart;
-      while(p!=huntEnd){
-        if(*m[p]==0){
-          set<Dirn> available;
-          for(int i=0;i<6;i++){
-            Dirn d=from_id(i);
-            if(inCube(p+to_vector(d),Vector(0,0,0),m.size)&&((*m[p+to_vector(d)]&mask)!=0))
-              available.insert(d);
-          }
-          if(!available.empty()){
-            set<Dirn>::iterator dirn = available.begin();
-            advance(dirn, rand() % available.size());
-            *m[p]|=to_mask(*dirn)|mask;
-            *m[p+to_vector(*dirn)]|=to_mask(opposite(*dirn));
-            return true;
-          }
-        }
-        moveVector(p);
-      }
-      huntStart=huntEnd;
-      p.X=-1;
-      return false;
+    virtual Vector getStart(){
+      return Vector(xtrans[0],ytrans[0],ztrans[0]);
     }
-    
-    void moveVector(Vector& v){
-      v.Y=yinvtrans[v.Y];
-      v.Y+=down?-1:1;
-      if(v.Y==m.size.Y){
-        v.Y=0;
-        v.Z=zinvtrans[v.Z];
-        v.Z++;
-        if(v.Z==m.size.Z){
-          v.Z=0;
-          v.X=xinvtrans[v.X];
-          v.X++;
-          v.X=xtrans[v.X];
-        }
-        v.Z=ztrans[v.Z];
-      }else if(v.Y<0){
-        v.Y=m.size.Y-1;
-        v.Z=zinvtrans[v.Z];
-        v.Z--;
-        if(v.Z<0){
-          v.Z=m.size.Z-1;
-          v.X=xinvtrans[v.X];
-          v.X--;
-          v.X=xtrans[v.X];
-        }
-        v.Z=ztrans[v.Z];
-      }
+    virtual void translate(Vector& v){
+      v.X=xtrans[v.X];
+      v.Z=ztrans[v.Z];
       v.Y=ytrans[v.Y];
     }
-    
-    
-    bool doStep(){
-      #ifdef DEBUG
-      cout<<"step "<<down<<endl;
-      #endif
-      if(!walk())
-        if(!hunt())
-          return true;
-      return false;
+    virtual void invtranslate(Vector& v){
+      v.Y=yinvtrans[v.Y];
+      v.Z=zinvtrans[v.Z];
+      v.X=xinvtrans[v.X];
     }
-
-  friend Maze generate(Vector);
+  public:
+    RandOrderWalker(Maze& m):ReorderWalker(m){
+      makeTrans(m.size.X,xtrans,xinvtrans);
+      makeTrans(m.size.Y,ytrans,yinvtrans);
+      makeTrans(m.size.Z,ztrans,zinvtrans);
+    };
 };
 
 
+template <class MGH>
 Maze generate(Vector size){
   #ifdef DEBUG
   cout<<"gen"<<endl;
   #endif
   Maze m(size);
-  MazeGenHalf down(m,true);
-  MazeGenHalf up(m,false);
-  while(!(down.doStep()&up.doStep())){
+  MGH* down=new MGH(m,true);
+  MGH* up=new MGH(m,false);
+  #ifdef DEBUG
+  cout<<true<<" state "<<down->p<<" "<<down->h->huntStart<<" "<<down->h->huntEnd<<endl;
+  cout<<false<<" state "<<up->p<<" "<<up->h->huntStart<<" "<<up->h->huntEnd<<endl;
+  #endif
+  while(!(down->doStep()&up->doStep())){
     #ifdef DEBUG
-    cout<<true<<" state "<<down.p<<" "<<down.huntStart<<" "<<down.huntEnd<<endl;
-    cout<<false<<" state "<<up.p<<" "<<up.huntStart<<" "<<up.huntEnd<<endl;
+    cout<<true<<" state "<<down->p<<" "<<down->h->huntStart<<" "<<down->h->huntEnd<<endl;
+    cout<<false<<" state "<<up->p<<" "<<up->h->huntStart<<" "<<up->h->huntEnd<<endl;
     #endif
   };
+  delete up;
+  delete down;
   return m;
 };
 
