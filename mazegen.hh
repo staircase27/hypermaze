@@ -16,6 +16,14 @@ class MazeGenHalf{
   Vector huntStart;
   Vector huntEnd;
   int mask;
+  
+  int* xtrans;
+  int* ytrans;
+  int* ztrans;
+  int* xinvtrans;
+  int* yinvtrans;
+  int* zinvtrans;
+  
   public:
     MazeGenHalf(Maze& m,bool down):m(m),p(-1,-1,-1),down(down),
         huntStart(0,0,0),huntEnd(m.size.X-1,m.size.Y-1,m.size.Z-1),
@@ -34,7 +42,79 @@ class MazeGenHalf{
           for(int z=0;z<m.size.Z;++z)
             *m[Vector(x,0,z)]|=mask;
       }
+      
+      
+      xtrans=new int[m.size.X];
+      xinvtrans=new int[m.size.X];
+      for(int i=0;i<(m.size.X+1)/2;++i){
+        if(i%2==0){
+          xtrans[i]=i;
+          xtrans[m.size.X-1-i]=m.size.X-1-i;
+        }else{
+          xtrans[i]=m.size.X-1-i;
+          xtrans[m.size.X-1-i]=i;
+        }
+        xinvtrans[xtrans[i]]=i;
+        xinvtrans[xtrans[m.size.X-1-i]]=m.size.X-1-i;
+      }
+      
+      makeTrans(m.size.X,xtrans,xinvtrans);
+      makeTrans(m.size.Y,ytrans,yinvtrans);
+      makeTrans(m.size.Z,ztrans,zinvtrans);
+
+      huntStart.X=xtrans[huntStart.X];
+      huntStart.Y=ytrans[huntStart.Y];
+      huntStart.Z=ztrans[huntStart.Z];
+      huntEnd.X=xtrans[huntEnd.X];
+      huntEnd.Y=ytrans[huntEnd.Y];
+      huntEnd.Z=ztrans[huntEnd.Z];
     };
+    
+    virtual void makeTrans(int size,int* &trans,int* &invtrans){
+      trans=new int[size];
+      invtrans=new int[size];
+    
+      for(int i=0;i<size;++i)
+        invtrans[i]=-1;
+      for(int i=0;i<size;++i){
+        int j=rand()%(size-i);
+        int k=-1;
+        while(j>=0){
+          ++k;
+          --j;
+          while(invtrans[k]!=-1){
+           ++k;
+          }
+        }
+        cout<<i<<"->"<<k<<",";
+        trans[i]=k;
+        invtrans[k]=i;
+      }
+      cout<<endl;
+      /*    
+      for(int i=0;i<(size+1)/2;++i){
+        if(i%2==0){
+          trans[i]=i;
+          trans[size-1-i]=size-1-i;
+        }else{
+          trans[i]=size-1-i;
+          trans[size-1-i]=i;
+        }
+        invtrans[trans[i]]=i;
+        invtrans[trans[size-1-i]]=size-1-i;
+      }      
+      */
+      /*
+      for(int i=0;i<size;++i){
+        if(i%2==0)
+          trans[i]=i/2;
+        else
+          trans[i]=size-(i+1)/2;
+        invtrans[trans[i]]=i;
+      }
+      */
+    }
+    
     
     bool walk(){
       if(p.X==-1)
@@ -59,20 +139,11 @@ class MazeGenHalf{
     }
     
     bool hunt(){
-      #ifdef DEBUG
-      cout<<"    hunt"<<endl;
-      #endif
       while(huntStart!=huntEnd&&*m[huntStart]!=0){
         moveVector(huntStart);
-        #ifdef DEBUG
-        cout<<"    move stat"<<huntStart<<*m[huntStart]<<endl;
-        #endif
       }
       p=huntStart;
       while(p!=huntEnd){
-        #ifdef DEBUG
-        cout<<"    move"<<p<<*m[p]<<endl;
-        #endif
         if(*m[p]==0){
           set<Dirn> available;
           for(int i=0;i<6;i++){
@@ -96,24 +167,34 @@ class MazeGenHalf{
     }
     
     void moveVector(Vector& v){
+      v.Y=yinvtrans[v.Y];
       v.Y+=down?-1:1;
       if(v.Y==m.size.Y){
         v.Y=0;
+        v.Z=zinvtrans[v.Z];
         v.Z++;
         if(v.Z==m.size.Z){
           v.Z=0;
+          v.X=xinvtrans[v.X];
           v.X++;
+          v.X=xtrans[v.X];
         }
+        v.Z=ztrans[v.Z];
       }else if(v.Y<0){
         v.Y=m.size.Y-1;
+        v.Z=zinvtrans[v.Z];
         v.Z--;
         if(v.Z<0){
           v.Z=m.size.Z-1;
+          v.X=xinvtrans[v.X];
           v.X--;
+          v.X=xtrans[v.X];
         }
+        v.Z=ztrans[v.Z];
       }
+      v.Y=ytrans[v.Y];
     }
-        
+    
     
     bool doStep(){
       #ifdef DEBUG
