@@ -47,6 +47,46 @@ class Walker{
   template <class MGH>
   friend Maze generate(Vector size);
 };
+
+class DiagonalWalker:public Walker{
+  public:
+    DiagonalWalker(Maze& m):Walker(m){};
+    
+    virtual void moveVector(Vector& v,bool forward){
+       cout<<forward<<" "<<v.X<<","<<v.Y<<","<<v.Z<<endl;
+      do{
+        if(!forward){
+          v.X-=1;
+          v.Z+=1;
+          if(v.X<0){
+            v.Y-=1;
+            v.X=v.Z;
+            v.Z=0;
+            if(v.Y<0){
+              v.Y+=v.X+1;
+              v.X=0;
+            }
+          }
+        }else{
+          v.X+=1;
+          v.Z-=1;
+          if(v.Z<0){
+            v.Y+=1;
+            v.Z=v.X-2;
+            v.X=0;
+            if(v.Z<0){
+              v.Z=v.Y-2;
+              v.Y=0;
+            }
+          }
+        }
+        cout<<v.X<<","<<v.Y<<","<<v.Z<<endl;
+      }while(!inCube(v,Vector(0,0,0),m.size));
+      cout<<"moved"<<v.X<<","<<v.Y<<","<<v.Z<<endl;
+    }
+  template <class MGH>
+  friend Maze generate(Vector size);
+};
   
 template <class W>
 class Hunter{
@@ -105,14 +145,14 @@ class Hunter{
   friend Maze generate(Vector size);
 };
 
-template <class H,class W>
+template <class H>
 class MazeGenHalf{
   protected:
     Maze& m;
     int mask;
     Vector p;
 
-    Hunter<W>* h;
+    H* h;
   public:
     MazeGenHalf(Maze& m,bool down):m(m),p(-2,-2,-2),mask(1<<10),h(new H(m,p,down,mask)){
       if(down)
@@ -177,8 +217,9 @@ class MazeGenHalf{
 };
 
   
-
+template <class W>
 class ReorderWalker:public Walker{
+  Walker* w;
   protected:
     virtual void translate(Vector& v){
       if(v.X%2==0)
@@ -207,22 +248,27 @@ class ReorderWalker:public Walker{
         v.Z=2*v.Z;
       else
         v.Z=2*(m.size.Z-v.Z)-1;
-    }
+    } 
     virtual Vector getEnd(){
-      Vector end(m.size.X-1,m.size.Y-1,m.size.Z-1);
+      Vector end(w->getEnd());
+      translate(end);
+      return end;
+    }
+    virtual Vector getStart(){
+      Vector end(w->getStart());
       translate(end);
       return end;
     }
     virtual void moveVector(Vector& v,bool down){
       invtranslate(v);
-      Walker::moveVector(v,down);
+      w->moveVector(v,down);
       translate(v);
     }
   public:
-    ReorderWalker(Maze& m):Walker(m){}
+    ReorderWalker(Maze& m):Walker(m),w(new W(m)){}
 };
- 
-class RandOrderWalker:public ReorderWalker{
+template <class W>
+class RandOrderWalker:public ReorderWalker<W>{
   protected:
     int* xtrans;
     int* ytrans;
@@ -254,12 +300,6 @@ class RandOrderWalker:public ReorderWalker{
       cout<<endl;
     }
     
-    virtual Vector getEnd(){
-      return Vector(xtrans[m.size.X-1],ytrans[m.size.Y-1],ztrans[m.size.Z-1]);
-    }
-    virtual Vector getStart(){
-      return Vector(xtrans[0],ytrans[0],ztrans[0]);
-    }
     virtual void translate(Vector& v){
       v.X=xtrans[v.X];
       v.Z=ztrans[v.Z];
@@ -271,7 +311,7 @@ class RandOrderWalker:public ReorderWalker{
       v.X=xinvtrans[v.X];
     }
   public:
-    RandOrderWalker(Maze& m):ReorderWalker(m){
+    RandOrderWalker(Maze& m):ReorderWalker<W>(m){
       makeTrans(m.size.X,xtrans,xinvtrans);
       makeTrans(m.size.Y,ytrans,yinvtrans);
       makeTrans(m.size.Z,ztrans,zinvtrans);

@@ -135,7 +135,7 @@ class GenerateGui: BaseGui{
         if(cancelClicked)
           break;
         if(okClicked){
-          m=::generate<MazeGenHalf<Hunter<RandOrderWalker>,RandOrderWalker> >(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
+          m=::generate<MazeGenHalf<Hunter<RandOrderWalker<DiagonalWalker> > > >(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
           break;
         }
       }
