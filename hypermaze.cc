@@ -7,8 +7,11 @@
 #include "dirns.hh"
 #include "gui.hh"
 #include "keymap.hh"
-#include "keymapgui.hh"
+#include "helpgui.hh"
 #include <fstream>
+#include <map>
+
+using namespace std;
 
 namespace irr{
   using namespace core;
@@ -88,9 +91,10 @@ class MyNodeGen:public NodeGen{
   irr::ITexture* wall;
   irr::ITexture* string;
   irr::ITexture* activeString;
+  irr::ITexture* handle;
   public:
-    MyNodeGen(irr::ISceneManager* smgr,irr::ITexture* wall,irr::ITexture* string,irr::ITexture* activeString):
-        smgr(smgr),wall(wall),string(string),activeString(activeString){};
+    MyNodeGen(irr::ISceneManager* smgr,irr::ITexture* wall,irr::ITexture* string,irr::ITexture* activeString,irr::ITexture* handle):
+        smgr(smgr),wall(wall),string(string),activeString(activeString),handle(handle){};
     virtual irr::IMeshSceneNode* makeUnitWall(bool isNode){
       irr::IMeshSceneNode* node = smgr->addCubeSceneNode(1);
       node->setMaterialTexture( 0, wall);
@@ -111,6 +115,16 @@ class MyNodeGen:public NodeGen{
       else
         node->setMaterialTexture(0,string);
     }
+    virtual irr::IMeshSceneNode* makeUnitHandle(){
+      irr::IMeshSceneNode* node = smgr->addSphereSceneNode(1);
+      node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+      node->setMaterialTexture( 0, handle);
+      node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
+      irr::ITriangleSelector* selector = smgr->createTriangleSelector(node->getMesh(),node);
+      node->setTriangleSelector(selector);
+      selector->drop(); // We're done with this selector, so drop it now.
+      return node;
+    };
 
 };
 
@@ -149,31 +163,10 @@ int main(){
                 irr::video::SColorf(1.0f,1.0f,1.0f,1.0f), 800.0f);
   smgr->setAmbientLight(irr::video::SColorf(0.3,0.3,0.3,1));
 
+  MyNodeGen* ng=new MyNodeGen(smgr,driver->getTexture("irrlicht/wall.png"),driver->getTexture("irrlicht/string.png"),driver->getTexture("irrlicht/activeString.png"),driver->getTexture("irrlicht/handle.png"));
   
-                
-  Maze m(Vector(5,5,5));
-  String s(m);
-  StringSlice ss(s);
+  PuzzleDisplay pd(ng);
   
-  
-  MyNodeGen* ng=new MyNodeGen(smgr,driver->getTexture("irrlicht/wall.png"),driver->getTexture("irrlicht/string.png"),driver->getTexture("irrlicht/activeString.png"));
-  MazeDisplay md(m,ng);
-  StringDisplay sd(ss,ng);
-
-  map<irr::ISceneNode*,Dirn> slicers;
-  
-  for(Dirn* d=allDirns;d!=allDirns+6;++d){
-    irr::IMeshSceneNode* node = smgr->addSphereSceneNode((md.wall+md.gap)/2);
-    node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-    node->setMaterialTexture( 0, driver->getTexture("irrlicht/handle.png"));
-    node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
-    node->setPosition(-con(to_vector(*d))*(abs(to_vector(*d).dotProduct(m.size))/2+2)*(md.wall+md.gap));
-    irr::ITriangleSelector* selector = smgr->createTriangleSelector(node->getMesh(),node);
-    node->setTriangleSelector(selector);
-    selector->drop(); // We're done with this selector, so drop it now.
-    slicers[node]=*d;
-  }
-
   irr::ISceneCollisionManager* collMan = smgr->getSceneCollisionManager();
   irr::ISceneNode* slice=0;
   int sliced=0;
@@ -196,14 +189,14 @@ int main(){
 	  }
 	  if(slice){
 	    irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(e.MousePos);
-	    irr::vector3df dir=con(to_vector(slicers[slice]));
+	    irr::vector3df dir=con(to_vector(pd.getSlicers().find(slice)->second));
 	    irr::vector3df ldir=ray.getVector();
 	    irr::f32 d=(sliceStart-ray.start).dotProduct(dir*ldir.getLengthSQ()-ldir*dir.dotProduct(ldir))/(dir.dotProduct(ldir)*dir.dotProduct(ldir)-dir.getLengthSQ()*ldir.getLengthSQ())/15-sliced;
-	    while(d>1&&md.hideSide(slicers[slice],false)){
+	    while(d>1&&pd.hideSide(pd.getSlicers().find(slice)->second,false)){
 	      d--;
 	      sliced++;
 	    }
-	    while(d<-1&&md.hideSide(slicers[slice],true)){
+	    while(d<-1&&pd.hideSide(pd.getSlicers().find(slice)->second,true)){
 	      d++;
 	      sliced--;
 	    }
@@ -214,22 +207,22 @@ int main(){
 	  
     for(const pair<KeyMap::Action,pair<Dirn,bool> >* it=KeyMap::sliceActions;it!=KeyMap::sliceActions+12;++it){
       if(e.isTriggered(it->first)&&actionTime[it->first]<now){
-        md.hideSide(it->second.first,it->second.second);
+        pd.hideSide(it->second.first,it->second.second);
         actionTime[it->first]=now+1*DELAY;
       }
     }
     for(const pair<KeyMap::Action,pair<bool,bool> >* it=KeyMap::slideActions;it!=KeyMap::slideActions+4;++it){
       if(e.isTriggered(it->first)&&actionTime[it->first]<now){
-        if(ss.slide(it->second.first,it->second.second)){
-          sd.updateActive();
+        if(pd.ss.slide(it->second.first,it->second.second)){
+          pd.stringSelectionUpdated();
           actionTime[it->first]=now+1*DELAY;
         }
       }
     }
     for(const pair<KeyMap::Action,Dirn>* it=KeyMap::moveActions;it!=KeyMap::moveActions+6;++it){
       if(e.isTriggered(it->first)&&actionTime[it->first]<now){
-        if(ss.tryMove(it->second)){
-          sd.update();
+        if(pd.ss.tryMove(it->second)){
+          pd.stringUpdated();
           actionTime[it->first]=now+1*DELAY;
         }
       }
@@ -237,38 +230,26 @@ int main(){
 
     if(e.isTriggered(KeyMap::A_GENERATE)&&actionTime[KeyMap::A_GENERATE]<now){
       GenerateGui gg;
-      if(gg.generate(device,m)){
-        md.clear();
-        md.init(m,ng);
-        s=String(m);
-        ss=StringSlice(s);
-        sd.setString(ss);
-        for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
-          slicer->first->setPosition(-con(to_vector(slicer->second))*(abs(to_vector(slicer->second).dotProduct(m.size))/2+2)*(md.wall+md.gap));
+      if(gg.generate(device,pd.m)){
+        pd.mazeUpdated();
       }
       actionTime[KeyMap::A_GENERATE]=now+1*DELAY;
     }
     if(e.isTriggered(KeyMap::A_LOAD)&&actionTime[KeyMap::A_LOAD]<now){
       OpenGui og;
-      if(og.open(device,m)){
-        md.clear();
-        md.init(m,ng);
-        s=String(m);
-        ss=StringSlice(s);
-        sd.setString(ss);
-        for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
-          slicer->first->setPosition(-con(to_vector(slicer->second))*(abs(to_vector(slicer->second).dotProduct(m.size))/2+2)*(md.wall+md.gap));
+      if(og.open(device,pd.m)){
+        pd.mazeUpdated();
       }
       actionTime[KeyMap::A_GENERATE]=now+1*DELAY;
     }
     if(e.isTriggered(KeyMap::A_SAVE)&&actionTime[KeyMap::A_SAVE]<now){
       SaveGui sg;
-      sg.save(device,m);
+      sg.save(device,pd.m);
       actionTime[KeyMap::A_SAVE]=now+1*DELAY;
     }
     if(e.isTriggered(KeyMap::A_CONF)&&actionTime[KeyMap::A_CONF]<now){
-      KeyMapGui kmg;
-      kmg.edit(device,e.map);
+      HelpGui kmg;
+      kmg.help(device,e.map);
       actionTime[KeyMap::A_CONF]=now+1*DELAY;
     }
 	
