@@ -21,7 +21,7 @@ run-test: test
 
 hypermaze: CPPLIBS+= $(IRRLIBS)
 hypermaze: hypermaze.o iMyCamera.o
-hypermaze.o: hypermaze.cc dirns.hh maze.hh vector.hh string.hh mazegen.hh irrdisp.hh iMyCamera.hh gui.hh keymap.hh keymapgui.hh helpgui.hh
+hypermaze.o: hypermaze.cc dirns.hh maze.hh vector.hh string.hh mazegen.hh irrdisp.hh iMyCamera.hh gui.hh keymap.hh keymapgui.hh helpgui.hh controller.hh
 iMyCamera.o: iMyCamera.cpp iMyCamera.hh
 run-hypermaze: hypermaze
 	./hypermaze

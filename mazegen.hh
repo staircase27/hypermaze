@@ -6,8 +6,6 @@
 
 using namespace std;
 
-#define DEBUG
-
 #ifndef MAZEGEN_HH_INC
 #define MAZEGEN_HH_INC
 
@@ -53,7 +51,6 @@ class DiagonalWalker:public Walker{
     DiagonalWalker(Maze& m):Walker(m){};
     
     virtual void moveVector(Vector& v,bool forward){
-       cout<<forward<<" "<<v.X<<","<<v.Y<<","<<v.Z<<endl;
       do{
         if(!forward){
           v.X-=1;
@@ -80,9 +77,7 @@ class DiagonalWalker:public Walker{
             }
           }
         }
-        cout<<v.X<<","<<v.Y<<","<<v.Z<<endl;
       }while(!inCube(v,Vector(0,0,0),m.size));
-      cout<<"moved"<<v.X<<","<<v.Y<<","<<v.Z<<endl;
     }
   template <class MGH>
   friend Maze generate(Vector size);
@@ -203,9 +198,13 @@ class MazeGenHalf{
       cout<<"step "<<mask<<endl;
       #endif
       if(forceHunt()||!walk()){
+        #ifdef DEBUG
         cout<<"hunting"<<endl;
+        #endif
         if(!h->hunt()){
+          #ifdef DEBUG
           cout<<"hunting failed"<<endl;
+          #endif
           return true;
         }
       }
@@ -293,11 +292,9 @@ class RandOrderWalker:public ReorderWalker<W>{
            ++k;
           }
         }
-        cout<<i<<"->"<<k<<",";
         trans[i]=k;
         invtrans[k]=i;
       }
-      cout<<endl;
     }
     
     virtual void translate(Vector& v){
