@@ -51,8 +51,8 @@ class KeyMap{
       A_MOVE_UP,A_MOVE_DOWN,
       A_MOVE_LEFT,A_MOVE_RIGHT,
       A_MOVE_FORWARD,A_MOVE_BACK,
-      A_SLIDE_START_START,A_SLIDE_START_END,
-      A_SLIDE_END_START,A_SLIDE_END_END,
+      A_SLIDE_START_OUT,A_SLIDE_START_IN,
+      A_SLIDE_END_IN,A_SLIDE_END_OUT,
       A_SLICE_UP_IN,A_SLICE_UP_OUT,
       A_SLICE_DOWN_IN,A_SLICE_DOWN_OUT,
       A_SLICE_LEFT_IN,A_SLICE_LEFT_OUT,
@@ -123,10 +123,10 @@ const pair<KeyMap::Action,pair<Dirn,bool> > KeyMap::sliceActions[12]={
       pair<KeyMap::Action,pair<Dirn,bool> >(KeyMap::A_SLICE_BACK_IN,pair<Dirn,bool>(BACK,false))};
 
 const pair<KeyMap::Action,pair<bool,bool> > KeyMap::slideActions[4]={
-      pair<KeyMap::Action,pair<bool,bool> >(KeyMap::A_SLIDE_END_END,pair<bool,bool>(true,true)),
-      pair<KeyMap::Action,pair<bool,bool> >(KeyMap::A_SLIDE_END_START,pair<bool,bool>(true,false)),
-      pair<KeyMap::Action,pair<bool,bool> >(KeyMap::A_SLIDE_START_END,pair<bool,bool>(false,true)),
-      pair<KeyMap::Action,pair<bool,bool> >(KeyMap::A_SLIDE_START_START,pair<bool,bool>(false,false))};
+      pair<KeyMap::Action,pair<bool,bool> >(KeyMap::A_SLIDE_END_OUT,pair<bool,bool>(true,true)),
+      pair<KeyMap::Action,pair<bool,bool> >(KeyMap::A_SLIDE_END_IN,pair<bool,bool>(true,false)),
+      pair<KeyMap::Action,pair<bool,bool> >(KeyMap::A_SLIDE_START_IN,pair<bool,bool>(false,false)),
+      pair<KeyMap::Action,pair<bool,bool> >(KeyMap::A_SLIDE_START_OUT,pair<bool,bool>(false,true))};
 
 const pair<KeyMap::Action,Dirn> KeyMap::moveActions[6]={
       pair<KeyMap::Action,Dirn>(KeyMap::A_MOVE_UP,UP),
@@ -147,10 +147,10 @@ const pair<KeyMap::Action,wstring> KeyMap::actionNames[A_COUNT-1]={
       pair<KeyMap::Action,wstring>(KeyMap::A_MOVE_RIGHT,L"A_MOVE_RIGHT"),
       pair<KeyMap::Action,wstring>(KeyMap::A_MOVE_FORWARD,L"A_MOVE_FORWARD"),
       pair<KeyMap::Action,wstring>(KeyMap::A_MOVE_BACK,L"A_MOVE_BACK"),
-      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_START_START,L"A_SLIDE_START_START"),
-      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_START_END,L"A_SLIDE_START_END"),
-      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_END_START,L"A_SLIDE_END_START"),
-      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_END_END,L"A_SLIDE_END_END"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_START_OUT,L"A_SLIDE_START_OUT"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_START_IN,L"A_SLIDE_START_IN"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_END_IN,L"A_SLIDE_END_IN"),
+      pair<KeyMap::Action,wstring>(KeyMap::A_SLIDE_END_OUT,L"A_SLIDE_END_OUT"),
       pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_UP_IN,L"A_SLICE_UP_IN"),
       pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_UP_OUT,L"A_SLICE_UP_OUT"),
       pair<KeyMap::Action,wstring>(KeyMap::A_SLICE_DOWN_IN,L"A_SLICE_DOWN_IN"),

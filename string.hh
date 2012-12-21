@@ -11,29 +11,39 @@ class StringSlice;
 ostream& operator<<(ostream& o,Dirn d){
   return o<<"<Dirn "<<(int)d<<": "<<to_vector(d)<<">";
 }
+struct StringElement{
+  Vector pos;
+  Dirn d;
+  bool selected;
+  StringElement(Vector pos,Dirn d,bool selected):pos(pos),d(d),selected(selected){};
+};
 class String{
-    Vector start;
+    list<StringElement> route;
     Vector end;
-    list<Dirn> route;
   public:
     Maze& maze;
   
-    String(Maze& m):maze(m),start(Vector(0,2,0)),end(Vector(m.size.X,2,0)),route(m.size.X,LEFT){};
+    String(Maze& m):maze(m),end(m.size.X,2,0),route(){
+      Vector pos(0,2,0);
+      while(pos!=end){
+        route.push_back(StringElement(pos,LEFT,true));
+        pos+=to_vector(LEFT);
+      }
+    };
     
     const Vector& getStart() const{
-      return start;
+      return route.front().pos;
     }
     const Vector& getEnd() const{
       return end;
     }
     
-    const list<Dirn>& getRoute() const{
+    const list<StringElement>& getRoute() const{
       return route;
     }
     
     String& operator=(const String& o){
       end=o.end;
-      start=o.start;
       route=o.route;
       maze=o.maze;
       return *this;
@@ -41,90 +51,81 @@ class String{
     
     friend class StringSlice;
     friend ostream& operator <<(ostream& o,String s);
+    friend ostream& operator <<(ostream& o,StringSlice s);
 };
 
 ostream& operator<<(ostream& o,String s){
   o<<"<String ";
-  Vector p=s.start;
-  for(list<Dirn>::iterator it=s.route.begin();it!=s.route.end();++it){
-    cout<<p<<"-"<<*it<<"-";
-    p+=to_vector(*it);
-  }
-  return cout<<p<<"="<<s.end<<">";
+  for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it)
+    cout<<it->pos<<"-"<<it->d<<"-";
+  return cout<<s.end<<">";
 }
 
 
 
 class StringSlice{
   String& s;
-  list<Dirn>::iterator start;
-  list<Dirn>::iterator end;
-  Vector startPoint;
-  Vector endPoint;
 
   public:
-    StringSlice(String& s):s(s),start(s.route.begin()),end(s.route.end()),startPoint(s.start),endPoint(s.end){};
+    StringSlice(String& s):s(s){};
   
     const String& getString(){
       return s;
     }
     
-    const list<Dirn>::iterator getStart(){
-      return start;
-    }
-    
-    const list<Dirn>::iterator getEnd(){
-      return end;
-    }
-  
-    bool slide(bool moveEnd,bool towardsEnd){
-      if(moveEnd)
-        if(towardsEnd){
-          if(end==s.route.end())
+    bool slide(bool moveEnd,bool out){
+      if(moveEnd){
+        list<StringElement>::reverse_iterator it;
+        for(it=s.route.rbegin();it!=s.route.rend();++it)
+          if(it->selected)
+            break;
+        if(out){
+          if(it==s.route.rbegin())
             return false;
-          endPoint+=to_vector(*end);
-          ++end;
+          --it;
+          it->selected=true;
         }else{
-          --end;
-          if(end==start){
-            ++end;
+          if(it==s.route.rend())
             return false;
-          }
-          endPoint-=to_vector(*end);
+          it->selected=false;
         }
-      else
-        if(towardsEnd){
-          startPoint+=to_vector(*start);
-          ++start;
-          if(end==start){
-            --start;
-            startPoint-=to_vector(*start);
+      }else{
+        list<StringElement>::iterator it;
+        for(it=s.route.begin();it!=s.route.end();++it)
+          if(it->selected)
+            break;
+        if(out){
+          if(it==s.route.begin())
             return false;
-          }
+          --it;
+          it->selected=true;
         }else{
-          if(start==s.route.begin())
+          if(it==s.route.end())
             return false;
-          --start;
-          startPoint-=to_vector(*start);
+          it->selected=false;
         }
+      }
       return true;
     }
     
     bool canMove(Dirn d){
       cout<<"can move in "<<d<<endl;
-      Vector point=startPoint;
-      list<Dirn>::iterator it=start;
-      if((d==LEFT||d==opposite(LEFT))&&(start==s.route.begin()||end==s.route.end()))
+      bool any=false;
+      if((d==LEFT||d==opposite(LEFT))&&(s.route.front().selected||s.route.back().selected))
         return false;
-      while(it!=end){
-        if(d==UP && point.Y>=s.maze.size.Y-1)
+      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
+        cout<<"selected? "<<it->selected<<endl;
+        if(!it->selected)
+          continue;
+        any=true;
+        if(d==UP && it->pos.Y>=s.maze.size.Y-1)
           return false;
-        if(d==DOWN && point.Y<=1)
+        if(d==DOWN && it->pos.Y<=1)
           return false;
-        if(*it!=d && *it !=opposite(d)){
-          Vector wall=point+to_shift_vector(*it)+to_shift_vector(d);
-          Dirn wallDirn=perpendicular(*it,d);
-          cout<<"check point"<<point<<" "<<*it<<" wall is "<<wall<<"-"<<wallDirn;
+        if(it->d!=d && it->d!=opposite(d)){
+          Vector wall=it->pos+to_shift_vector(it->d)+to_shift_vector(d);
+          Dirn wallDirn=perpendicular(it->d,d);
+          cout<<"check point "<<it->pos<<" "<<it->d<<" wall is "<<wall<<"-"<<wallDirn;
           if(inCube(wall,Vector(0,0,0),s.maze.size)){
             cout<<" and is "<<*s.maze[wall]<<" "<<to_mask(wallDirn)<<endl;
             if(((*s.maze[wall])&to_mask(wallDirn))!=0)
@@ -132,39 +133,45 @@ class StringSlice{
           }else
             cout<<endl;
         }
-        point+=to_vector(*it);
-        ++it;
       }
-      return true;
+      return any;
     }
     
     void doMove(Dirn d){
-      startPoint+=to_vector(d);
-      if(start==s.route.begin()){
-        s.start=startPoint;
-      }else{
-        list<Dirn>::iterator it=start;
-        --it;
-        if(*it==opposite(d))
-          s.route.erase(it);
-        else
-          s.route.insert(start,d);
-      }
-      endPoint+=to_vector(d);
-      if(end==s.route.end()){
-        s.end=endPoint;
-      }else{
-        if(*end==d){
-          end=s.route.erase(end);
-        }else{
-          s.route.insert(end,opposite(d));
-          --end;
+      bool lastselected=false;
+      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
+        if(it->selected){
+          if(!lastselected){
+            if(it!=s.route.begin()){
+              list<StringElement>::iterator nit=it;
+              --nit;
+              if(nit->d==opposite(d))
+                s.route.erase(nit);
+              else
+                s.route.insert(it,StringElement(it->pos,d,false));
+            }
+          }
+          it->pos+=to_vector(d);
+        }else if(lastselected){
+          if(it==s.route.end()){
+            s.end+=to_vector(d);
+          }else{
+            if(it->d==d){
+              it=s.route.erase(it);
+            }else{
+              s.route.insert(it,StringElement(it->pos+to_vector(d),opposite(d),false));
+            }
+          }
         }
+        lastselected=it->selected;
       }
+      if(lastselected)
+        s.end+=to_vector(d);
     }
     
     bool tryMove(Dirn d){
       if(canMove(d)){
+        cout<<"Moving"<<endl;
         doMove(d);
         return true;
       }else{
@@ -175,10 +182,6 @@ class StringSlice{
 
     StringSlice& operator=(const StringSlice& o){
       s=o.s;
-      end=o.end;
-      start=o.start;
-      endPoint=o.endPoint;
-      startPoint=o.startPoint;
       return *this;
     }
 
@@ -186,12 +189,9 @@ class StringSlice{
 
 ostream& operator<<(ostream& o,StringSlice s){
   o<<"<StringSlice ";
-  Vector p=s.startPoint;
-  for(list<Dirn>::iterator it=s.start;it!=s.end;++it){
-    cout<<p<<"-"<<*it<<"-";
-    p+=to_vector(*it);
-  }
-  return cout<<p<<"="<<s.endPoint<<">";
+  for(list<StringElement>::iterator it=s.s.route.begin();it!=s.s.route.end();++it)
+    cout<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";
+  return cout<<s.s.end<<">";
 }
 
 

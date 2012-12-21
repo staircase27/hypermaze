@@ -177,33 +177,29 @@ class StringDisplay{
     
     void update(){
       irr::vector3df position=center-(MazeDisplay::wall+MazeDisplay::gap)*con(s.getString().maze.size)/2;
-    
-    
       bool active=false;
       int i=0;
       list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
-      list<Dirn>::const_iterator sit=s.getString().getRoute().begin();
-      Vector posn=s.getString().getStart();
+      list<StringElement>::const_iterator sit=s.getString().getRoute().begin();
       while(sit!=s.getString().getRoute().end()){
+      
         if(nit==nodes.end())
           nit=nodes.insert(nit,ng->makeUnitString(true));
         (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1));
-        (*nit)->setPosition(position+con(posn)*(MazeDisplay::wall+MazeDisplay::gap));
+        (*nit)->setPosition(position+con(sit->pos)*(MazeDisplay::wall+MazeDisplay::gap));
         if(i>=activeNodes)
           (*nit)->setVisible(true);
-        if((!active) && (sit==s.getStart()))
-          active=true;
-        ng->makeStringActive(*nit,active);
-        if(active&& (sit==s.getEnd()))
-          active=false;
+        
+        ng->makeStringActive(*nit,active||sit->selected);
+        active=sit->selected;
         
         ++nit;
         ++i;
         
         if(nit==nodes.end())
           nit=nodes.insert(nit,ng->makeUnitString(false));
-        (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(*sit))));
-        (*nit)->setPosition(position+con(posn)*(MazeDisplay::wall+MazeDisplay::gap)+(MazeDisplay::gap+MazeDisplay::wall)*con(to_vector(*sit))/2);
+        (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(sit->d))));
+        (*nit)->setPosition(position+con(sit->pos)*(MazeDisplay::wall+MazeDisplay::gap)+(MazeDisplay::gap+MazeDisplay::wall)*con(to_vector(sit->d))/2);
         if(i>=activeNodes)
           (*nit)->setVisible(true);
 
@@ -212,19 +208,16 @@ class StringDisplay{
         ++nit;
         ++i;
         
-        posn=posn+to_vector(*sit);
         ++sit;
         
       }
       if(nit==nodes.end())
         nit=nodes.insert(nit,ng->makeUnitString(true));
       (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1));
-      (*nit)->setPosition(position+con(posn)*(MazeDisplay::wall+MazeDisplay::gap));
+      (*nit)->setPosition(position+con(s.getString().getEnd())*(MazeDisplay::wall+MazeDisplay::gap));
       if(i>=activeNodes)
         (*nit)->setVisible(true);
 
-      if((!active) && (sit==s.getStart()))
-        active=true;
       ng->makeStringActive(*nit,active);
       ++nit;
       ++i;
@@ -240,21 +233,17 @@ class StringDisplay{
     void updateActive(){
       bool active=false;
       list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
-      list<Dirn>::const_iterator sit=s.getString().getRoute().begin();
+      list<StringElement>::const_iterator sit=s.getString().getRoute().begin();
       while(sit!=s.getString().getRoute().end()){
-        if((!active) && (sit==s.getStart()))
-          active=true;
-        ng->makeStringActive(*nit,active);
-        if(active&& (sit==s.getEnd()))
-          active=false;
+        ng->makeStringActive(*nit,active||sit->selected);
+        active=sit->selected;
+
         ++nit;
         ng->makeStringActive(*nit,active);
         ++nit;
         ++sit;
         
       }
-      if((!active) && (sit==s.getStart()))
-        active=true;
       ng->makeStringActive(*nit,active);
     }
     
