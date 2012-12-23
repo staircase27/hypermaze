@@ -32,7 +32,7 @@ class KeyboardController:public Controller{
 
   public:
     KeyMap map;
-  
+
     virtual bool OnEvent(const irr::SEvent& event)
     {
       // Remember whether each key is down or up
@@ -59,7 +59,7 @@ class KeyboardController:public Controller{
        }
        return false;
     }
-    
+
     virtual void run(irr::u32 now){
       for(const pair<KeyMap::Action,pair<Dirn,bool> >* it=KeyMap::sliceActions;it!=KeyMap::sliceActions+12;++it){
         if(isTriggered(it->first)&&actionTime[it->first]<now){
@@ -109,7 +109,7 @@ class KeyboardController:public Controller{
         actionTime[KeyMap::A_CONF]=now+1*DELAY;
       }
     };
-    
+
     KeyboardController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),device(device){
       for (irr::u32 i=0; i<KeyMap::A_COUNT; ++i){
         actionTriggered[i] = false;
@@ -125,20 +125,23 @@ class MouseSlicerController: public Controller{
   int sliced;
   irr::vector3df sliceStart;
   irr::position2d<irr::s32> mousePos;
-    
-  
+
+
   public:
   virtual void run(irr::u32 now){
 	  if(slice){
 	    irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
 	    irr::vector3df dir=con(to_vector(pd.getSlicers().find(slice)->second));
 	    irr::vector3df ldir=ray.getVector();
-	    irr::f32 d=(sliceStart-ray.start).dotProduct(dir*ldir.getLengthSQ()-ldir*dir.dotProduct(ldir))/(dir.dotProduct(ldir)*dir.dotProduct(ldir)-dir.getLengthSQ()*ldir.getLengthSQ())/15-sliced;
+	    irr::f32 d=(sliceStart-ray.start).dotProduct(dir*ldir.getLengthSQ()-ldir*dir.dotProduct(ldir))/(dir.dotProduct(ldir)*dir.dotProduct(ldir)-dir.getLengthSQ()*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap)*2-sliced;
+	    cout<<"slice "<<sliced<<" "<<d<<endl<<flush;
 	    while(d>1&&pd.hideSide(pd.getSlicers().find(slice)->second,false)){
+	      cout<<"slice in"<<endl;
 	      d--;
 	      sliced++;
 	    }
 	    while(d<-1&&pd.hideSide(pd.getSlicers().find(slice)->second,true)){
+	      cout<<"slice out"<<endl;
 	      d++;
 	      sliced--;
 	    }
@@ -158,9 +161,11 @@ class MouseSlicerController: public Controller{
 	          slice=collMan-> getSceneNodeAndCollisionPointFromRay(
 	              collMan->getRayFromScreenCoordinates(mousePos),sliceStart,tmp);
 	          if(pd.getSlicers().find(slice)!=pd.getSlicers().end()){
+	            cout<<"valid slicer"<<endl;
    	          sliced=0;
    	          return true;
    	        }else{
+	            cout<<"invalid slicer"<<endl;
    	          slice=0;
    	          return false;
    	        }
@@ -184,22 +189,102 @@ class MouseSlicerController: public Controller{
     MouseSlicerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),slice(0),mousePos(0,0){};
 };
 
+
+class MouseDraggerController: public Controller{
+  irr::ISceneCollisionManager* collMan;
+  irr::ISceneNode* string;
+  irr::vector3df startPoint;
+  irr::position2d<irr::s32> mousePos;
+
+
+  public:
+  virtual void run(irr::u32 now){
+	  if(string!=0){
+	    irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
+	    irr::vector3df ldir=ray.getVector();
+	    irr::vector3df weight;
+	    while(true){
+        weight=(ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
+        weight.X/=ldir.Y*ldir.Y+ldir.Z*ldir.Z;
+        weight.Y/=ldir.X*ldir.X+ldir.Z*ldir.Z;
+        weight.Z/=ldir.X*ldir.X+ldir.Y*ldir.Y;
+        Dirn dir;
+        irr::f32 largest=0;
+        for(Dirn *d=allDirns;d!=allDirns+6;++d){
+          if(weight.dotProduct(con(to_vector(*d)))>largest){
+            largest=weight.dotProduct(con(to_vector(*d)));
+            dir=*d;
+          }
+        }
+        if(largest<1)
+          break;
+        if(pd.ss.tryMove(dir)){
+          pd.stringUpdated();
+          startPoint+=con(to_vector(dir))*(MazeDisplay::wall+MazeDisplay::gap);
+        }else{
+          break;
+        }
+	    }
+	  }
+	};
+
+    virtual bool OnEvent(const irr::SEvent& event)
+    {
+      if (event.EventType != irr::EET_MOUSE_INPUT_EVENT)
+        return false;
+
+      switch(event.MouseInput.Event){
+        case irr::EMIE_LMOUSE_PRESSED_DOWN:
+          {
+            mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
+	          irr::triangle3df tmp;
+	          string=collMan-> getSceneNodeAndCollisionPointFromRay(
+	              collMan->getRayFromScreenCoordinates(mousePos),startPoint,tmp);
+	          if(pd.getSlicers().find(string)==pd.getSlicers().end()){
+   	          return true;
+   	        }else{
+   	          string=0;
+   	          return false;
+   	        }
+	        }
+        case irr::EMIE_LMOUSE_LEFT_UP:
+          if(string!=0){
+            string=0;
+            return true;
+          }else
+            return false;
+        case irr::EMIE_MOUSE_MOVED:
+          if(string!=0){
+            mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
+            return true;
+          }
+          break;
+      }
+      return false;
+    }
+
+    MouseDraggerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),mousePos(0,0){};
+};
+
+
 class MultiInterfaceController:public Controller{
   public:
     KeyboardController kc;
     MouseSlicerController msc;
-  
-    MultiInterfaceController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),kc(pd,device),msc(pd,device){};
-    
+    MouseDraggerController mdc;
+
+    MultiInterfaceController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),kc(pd,device),msc(pd,device),mdc(pd,device){};
+
     virtual bool OnEvent(const irr::SEvent& event){
-      return kc.OnEvent(event)||msc.OnEvent(event);
+      return kc.OnEvent(event)||msc.OnEvent(event)||mdc.OnEvent(event);
     }
-    
+
     virtual void run(irr::u32 now){
       kc.run(now);
       msc.run(now);
+      mdc.run(now);
     }
-  
+
 };
 
 

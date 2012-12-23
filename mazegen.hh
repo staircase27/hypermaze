@@ -14,16 +14,16 @@ class Walker{
     Maze& m;
   public:
     Walker(Maze& m):m(m){};
-    
+
     virtual void init(){};
-    
+
     virtual Vector getStart(){
       return Vector(0,0,0);
     }
     virtual Vector getEnd(){
       return Vector(m.size.X-1,m.size.Y-1,m.size.Z-1);
     }
-    
+
     virtual void moveVector(Vector& v,bool forward){
       v.Z+=forward?-1:1;
       if(v.Z==m.size.Z){
@@ -49,7 +49,7 @@ class Walker{
 class DiagonalWalker:public Walker{
   public:
     DiagonalWalker(Maze& m):Walker(m){};
-    
+
     virtual void moveVector(Vector& v,bool forward){
       do{
         if(!forward){
@@ -82,10 +82,10 @@ class DiagonalWalker:public Walker{
   template <class MGH>
   friend Maze generate(Vector size);
 };
-  
+
 template <class W>
 class Hunter{
-  protected:  
+  protected:
     Maze& m;
     int& mask;
     bool down;
@@ -109,11 +109,11 @@ class Hunter{
       w->init();
     };
   protected:
-    virtual bool doHunt(Vector huntStart,Vector huntEnd,bool down){
+    virtual bool doHunt(Vector& huntStart,Vector& huntEnd,bool down){
       while(huntStart!=huntEnd&&*m[huntStart]!=0){
         w->moveVector(huntStart,down);
       }
-      
+
       for(p=huntStart;p!=huntEnd;w->moveVector(p,down)){
         if(*m[p]==0){
           set<Dirn> available;
@@ -135,7 +135,7 @@ class Hunter{
       p.X=-1;
       return false;
     }
-    
+
   template <class MGH>
   friend Maze generate(Vector size);
 };
@@ -162,7 +162,7 @@ class MazeGenHalf{
             *m[Vector(x,0,z)]|=mask;
       }
     };
-    
+
     virtual void init(){
       h->init();
     };
@@ -187,10 +187,12 @@ class MazeGenHalf{
       *m[p]|=to_mask(opposite(*dirn))|mask;
       return true;
     }
-    
+
     virtual bool forceHunt(){
       return false;
     }
+    virtual void hunted(){};
+
     bool doStep(){
       if(p.X==-2)
         init();
@@ -207,6 +209,7 @@ class MazeGenHalf{
           #endif
           return true;
         }
+        hunted();
       }
       return false;
     }
@@ -215,7 +218,6 @@ class MazeGenHalf{
   friend Maze generate(Vector size);
 };
 
-  
 template <class W>
 class ReorderWalker:public Walker{
   Walker* w;
@@ -247,7 +249,7 @@ class ReorderWalker:public Walker{
         v.Z=2*v.Z;
       else
         v.Z=2*(m.size.Z-v.Z)-1;
-    } 
+    }
     virtual Vector getEnd(){
       Vector end(w->getEnd());
       translate(end);
@@ -275,11 +277,11 @@ class RandOrderWalker:public ReorderWalker<W>{
     int* xinvtrans;
     int* yinvtrans;
     int* zinvtrans;
-    
+
     virtual void makeTrans(int size,int* &trans,int* &invtrans){
       trans=new int[size];
       invtrans=new int[size];
-    
+
       for(int i=0;i<size;++i)
         invtrans[i]=-1;
       for(int i=0;i<size;++i){
@@ -296,7 +298,7 @@ class RandOrderWalker:public ReorderWalker<W>{
         invtrans[k]=i;
       }
     }
-    
+
     virtual void translate(Vector& v){
       v.X=xtrans[v.X];
       v.Z=ztrans[v.Z];
@@ -315,6 +317,23 @@ class RandOrderWalker:public ReorderWalker<W>{
     };
 };
 
+template <class H>
+class RandLimitMazeGenHalf: public MazeGenHalf<H>{
+  private:
+    int maxstep;
+  public:
+    RandLimitMazeGenHalf(Maze& m,bool down):MazeGenHalf<H>(m,down),maxstep(0){};
+    virtual bool forceHunt(){
+      if((--maxstep)<0){
+        cout<<"force"<<endl;
+        return true;
+      }else
+        return false;
+    }
+    virtual void hunted(){
+      maxstep=rand()%20+1;
+    }
+};
 
 template <class MGH>
 Maze generate(Vector size){

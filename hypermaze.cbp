@@ -8,7 +8,7 @@
 		<Build>
 			<Target title="Release">
 				<Option output="hypermaze" prefix_auto="1" extension_auto="1" />
-				<Option object_output="C:\Users\Simon Armstrong\l-tree\l-tree\.objs" />
+				<Option object_output="C:\Users\Simon Armstrong\hypermaze\hypermaze\.objs" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
@@ -32,7 +32,11 @@
 			<Add directory="C:\Users\Simon Armstrong\irrlicht-1.7.3\lib\Win32-gcc" />
 		</Linker>
 		<Unit filename="Makefile" />
+		<Unit filename="controller.hh" />
 		<Unit filename="dirns.hh" />
+		<Unit filename="gui.hh" />
+		<Unit filename="helpgui.hh" />
+		<Unit filename="hypermaze.cc" />
 		<Unit filename="iMyCamera.cpp" />
 		<Unit filename="iMyCamera.hh" />
 		<Unit filename="irrdisp.hh" />
@@ -43,6 +47,8 @@
 		<Unit filename="irrlicht\wall.png" />
 		<Unit filename="irrtest" />
 		<Unit filename="irrtest.cc" />
+		<Unit filename="keymap.hh" />
+		<Unit filename="keymapgui.hh" />
 		<Unit filename="maze.hh" />
 		<Unit filename="mazegen.hh" />
 		<Unit filename="string.hh" />

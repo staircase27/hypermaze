@@ -20,16 +20,16 @@ class BaseGui : irr::IEventReceiver{
   protected:
     irr::IrrlichtDevice* device;
     irr::IEventReceiver* oldReceiver;
-  
+
     BaseGui():device(0){};
-      
+
     bool OnEvent(const irr::SEvent &event){
       if(oldReceiver && event.EventType == irr::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
         oldReceiver->OnEvent(event);
       return OnEventImpl(event);
     };
     virtual bool OnEventImpl(const irr::SEvent &event)=0;
-  
+
     void apply(irr::IrrlichtDevice* _device){
       if(device)
         unapply();
@@ -49,7 +49,7 @@ class GenerateGui: BaseGui{
 
   bool okClicked;
   bool cancelClicked;
-  
+
   enum
   {
     GUI_ID_OK_BUTTON=201,
@@ -85,16 +85,16 @@ class GenerateGui: BaseGui{
     bool generate(irr::IrrlichtDevice* _device,Maze& m){
       apply(_device);
       okClicked=cancelClicked=false;
-      
+
       irr::IVideoDriver* driver = device->getVideoDriver();
       irr::ISceneManager* smgr = device->getSceneManager();
       irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
-      
+
       irr::rect<irr::s32> rect=driver->getViewPort();
       irr::position2d<irr::s32> center=rect.getCenter();
       irr::dimension2d<irr::s32> size=rect.getSize();
       size.Width=min(400,size.Width-10);
-      
+
       irr::gui::IGUISpinBox* xSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32-10-32,
           center.X+size.Width/2,center.Y-5-32-10));
       xSize->setDecimalPlaces(0);
@@ -110,37 +110,37 @@ class GenerateGui: BaseGui{
       zSize->setDecimalPlaces(0);
       zSize->setRange(3,100);
       zSize->setValue(m.size.Z);
-      
+
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5+32+10,center.X+size.Width/2-100,center.Y+5+32+10+32),0,GUI_ID_CANCEL_BUTTON,L"Cancel");
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5+32+10,center.X+size.Width/2,center.Y+5+32+10+32),0,GUI_ID_OK_BUTTON,L"Generate");
-      
+
       guienv->setFocus(xSize->getEditBox());
-      
+
       device->setWindowCaption(L"Generate New Hyper Maze");
-        
+
       while(true)
       {
         if(!device->run())
           break;
-        
+
         driver->beginScene(true, true, irr::SColor(255,113,113,133));
 
         smgr->drawAll();
-        
+
         guienv->drawAll();
 
         driver->endScene();
 
-        
+
         if(cancelClicked)
           break;
         if(okClicked){
-          m=::generate<MazeGenHalf<Hunter<RandOrderWalker<DiagonalWalker> > > >(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
+          m=::generate<RandLimitMazeGenHalf<Hunter<RandOrderWalker<DiagonalWalker> > > >(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
           break;
         }
       }
 
-      
+
       guienv->clear();
       unapply();
       return okClicked;
@@ -151,7 +151,7 @@ class SaveGui: BaseGui{
 
   bool okClicked;
   bool cancelClicked;
-  
+
   enum
   {
     GUI_ID_OK_BUTTON=201,
@@ -187,39 +187,39 @@ class SaveGui: BaseGui{
     bool save(irr::IrrlichtDevice* _device,Maze& m){
       apply(_device);
       okClicked=cancelClicked=false;
-      
+
       irr::IVideoDriver* driver = device->getVideoDriver();
       irr::ISceneManager* smgr = device->getSceneManager();
       irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
-      
+
       irr::rect<irr::s32> rect=driver->getViewPort();
       irr::position2d<irr::s32> center=rect.getCenter();
       irr::dimension2d<irr::s32> size=rect.getSize();
       size.Width=min(400,size.Width-10);
-      
+
       irr::IGUIEditBox * fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,center.X+size.Width/2,center.Y-5));
-      
+
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5,center.X+size.Width/2-100,center.Y+5+32),0,GUI_ID_CANCEL_BUTTON,L"Cancel");
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5,center.X+size.Width/2,center.Y+5+32),0,GUI_ID_OK_BUTTON,L"Save");
-      
+
       guienv->setFocus(fileField);
-        
+
       device->setWindowCaption(L"Save Hyper Maze");
-      
+
       while(true)
       {
         if(!device->run())
           break;
-        
+
         driver->beginScene(true, true, irr::SColor(255,113,113,133));
 
         smgr->drawAll();
-        
+
         guienv->drawAll();
 
         driver->endScene();
 
-        
+
         if(cancelClicked)
           break;
         if(okClicked){
@@ -241,7 +241,7 @@ class OpenGui: BaseGui{
 
   bool okClicked;
   bool cancelClicked;
-  
+
   enum
   {
     GUI_ID_OK_BUTTON=201,
@@ -277,39 +277,39 @@ class OpenGui: BaseGui{
     bool open(irr::IrrlichtDevice* _device,Maze& m){
       apply(_device);
       okClicked=cancelClicked=false;
-      
+
       irr::IVideoDriver* driver = device->getVideoDriver();
       irr::ISceneManager* smgr = device->getSceneManager();
       irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
-      
+
       irr::rect<irr::s32> rect=driver->getViewPort();
       irr::position2d<irr::s32> center=rect.getCenter();
       irr::dimension2d<irr::s32> size=rect.getSize();
       size.Width=min(400,size.Width-10);
-      
+
       irr::IGUIEditBox * fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,center.X+size.Width/2,center.Y-5));
-      
+
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5,center.X+size.Width/2-100,center.Y+5+32),0,GUI_ID_CANCEL_BUTTON,L"Cancel");
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5,center.X+size.Width/2,center.Y+5+32),0,GUI_ID_OK_BUTTON,L"Open");
-      
+
       guienv->setFocus(fileField);
-        
+
       device->setWindowCaption(L"Open Hyper Maze");
-      
+
       while(true)
       {
         if(!device->run())
           break;
-        
+
         driver->beginScene(true, true, irr::SColor(255,113,113,133));
 
         smgr->drawAll();
-        
+
         guienv->drawAll();
 
         driver->endScene();
 
-        
+
         if(cancelClicked)
           break;
         if(okClicked){

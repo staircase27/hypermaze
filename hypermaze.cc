@@ -21,8 +21,6 @@ namespace irr{
   using namespace video;
 };
 
-
-
 class MyNodeGen:public NodeGen{
   irr::ISceneManager* smgr;
   irr::ITexture* wall;
@@ -43,6 +41,9 @@ class MyNodeGen:public NodeGen{
       irr::IMeshSceneNode* node = smgr->addCubeSceneNode(1);
       node->setMaterialTexture( 0, string);
       node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
+      irr::ITriangleSelector* selector = smgr->createTriangleSelector(node->getMesh(),node);
+      node->setTriangleSelector(selector);
+      selector->drop(); // We're done with this selector, so drop it now.
       return node;
     }
 
@@ -74,33 +75,33 @@ int main(){
 
 	if (!device)
 		return 1;
-	
+
 	device->setResizable(true);
-	
+
 	{
     device->getGUIEnvironment()->getSkin()->setFont(device->getGUIEnvironment()->getFont("irrlicht/myfont.xml"));
     irr::SColor c=device->getGUIEnvironment()->getSkin()->getColor(irr::EGDC_3D_HIGH_LIGHT);
     c.setAlpha(170);
     device->getGUIEnvironment()->getSkin()->setColor(irr::EGDC_3D_HIGH_LIGHT,c);
   }
-	
+
 	device->setWindowCaption(L"Hyper Maze! - Irrlicht");
 	irr::IVideoDriver* driver = device->getVideoDriver();
 	irr::ISceneManager* smgr = device->getSceneManager();
-	
+
 	addCameraSceneNodeMy(smgr,device->getCursorControl(),0,irr::vector3df(0,0,0),
 	    irr::vector3df(0,0,-300),-500.,-100.,3.,100.);
-	
+
   irr::ILightSceneNode* light1 =
                 smgr->addLightSceneNode(0, irr::vector3df(-100,100,-100),
                 irr::video::SColorf(1.0f,1.0f,1.0f,1.0f), 800.0f);
   smgr->setAmbientLight(irr::video::SColorf(0.3,0.3,0.3,1));
 
   MyNodeGen* ng=new MyNodeGen(smgr,driver->getTexture("irrlicht/wall.png"),driver->getTexture("irrlicht/string.png"),driver->getTexture("irrlicht/activeString.png"),driver->getTexture("irrlicht/handle.png"));
-  
+
   PuzzleDisplay pd(ng);
-  
-  
+
+
   MultiInterfaceController *mic=new MultiInterfaceController(pd,device);
   Controller* c=mic;
   device->setEventReceiver(c);
@@ -109,13 +110,13 @@ int main(){
   wifstream ifs("hypermaze.keymap.conf");
   ifs>>mic->kc.map;
   ifs.close();
-  
+
   while(device->run())
 	{
     const irr::u32 now = device->getTimer()->getTime();
-	  
+
 	  c->run(now);
-	  
+
 		driver->beginScene(true, true, irr::SColor(255,100,101,140));
 
 		smgr->drawAll();

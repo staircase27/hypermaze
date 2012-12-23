@@ -968,7 +968,7 @@
 	"matrix4.h"
 	"IVideoDriver.h"
 
-1354991799 c:\users\simon armstrong\hypermaze\hypermaze\irrdisp.hh
+1356301951 c:\users\simon armstrong\hypermaze\hypermaze\irrdisp.hh
 	"irrlicht.h"
 	"maze.hh"
 	"string.hh"
@@ -990,13 +990,13 @@
 	<iostream>
 	"irrlicht.h"
 
-1354991799 c:\users\simon armstrong\hypermaze\hypermaze\string.hh
+1356295964 c:\users\simon armstrong\hypermaze\hypermaze\string.hh
 	"maze.hh"
 	"dirns.hh"
 	<list>
 	<istream>
 
-1354991799 c:\users\simon armstrong\hypermaze\hypermaze\mazegen.hh
+1356297984 c:\users\simon armstrong\hypermaze\hypermaze\mazegen.hh
 	"maze.hh"
 	"dirns.hh"
 	"vector.hh"
@@ -1007,11 +1007,62 @@
 	"ICameraSceneNode.h"
 	"vector2d.h"
 
-1354991799 source:c:\users\simon armstrong\hypermaze\hypermaze\imycamera.cpp
+1356295964 source:c:\users\simon armstrong\hypermaze\hypermaze\imycamera.cpp
 	<iostream>
 	<ISceneManager.h>
 	"iMyCamera.hh"
 	<ICursorControl.h>
 	<ICameraSceneNode.h>
 	<SViewFrustum.h>
+
+1354991799 source:c:\users\simon armstrong\hypermaze\hypermaze\test.cc
+	<iostream>
+	<fstream>
+	"maze.hh"
+	"string.hh"
+	"mazegen.hh"
+	<cstdlib>
+	<ctime>
+
+1356301772 source:c:\users\simon armstrong\hypermaze\hypermaze\hypermaze.cc
+	"irrlicht.h"
+	"irrdisp.hh"
+	"mazegen.hh"
+	"vector.hh"
+	"iMyCamera.hh"
+	"dirns.hh"
+	"gui.hh"
+	"keymap.hh"
+	"helpgui.hh"
+	<fstream>
+	<map>
+	"controller.hh"
+
+1356297824 c:\users\simon armstrong\hypermaze\hypermaze\gui.hh
+	"irrlicht.h"
+	"irrdisp.hh"
+	"maze.hh"
+	"string.hh"
+	<fstream>
+
+1356295964 c:\users\simon armstrong\hypermaze\hypermaze\keymap.hh
+	"irrlicht.h"
+	<iostream>
+	<sstream>
+
+1356295964 c:\users\simon armstrong\hypermaze\hypermaze\helpgui.hh
+	"irrlicht.h"
+	"gui.hh"
+	"keymapgui.hh"
+
+1356295964 c:\users\simon armstrong\hypermaze\hypermaze\keymapgui.hh
+	"gui.hh"
+	"keymap.hh"
+	"irrlicht.h"
+	<sstream>
+
+1356306748 c:\users\simon armstrong\hypermaze\hypermaze\controller.hh
+	"irrlicht.h"
+	"irrdisp.hh"
+	"keymap.hh"
 
