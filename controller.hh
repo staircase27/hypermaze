@@ -134,14 +134,11 @@ class MouseSlicerController: public Controller{
 	    irr::vector3df dir=con(to_vector(pd.getSlicers().find(slice)->second));
 	    irr::vector3df ldir=ray.getVector();
 	    irr::f32 d=(sliceStart-ray.start).dotProduct(dir*ldir.getLengthSQ()-ldir*dir.dotProduct(ldir))/(dir.dotProduct(ldir)*dir.dotProduct(ldir)-dir.getLengthSQ()*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap)*2-sliced;
-	    cout<<"slice "<<sliced<<" "<<d<<endl<<flush;
 	    while(d>1&&pd.hideSide(pd.getSlicers().find(slice)->second,false)){
-	      cout<<"slice in"<<endl;
 	      d--;
 	      sliced++;
 	    }
 	    while(d<-1&&pd.hideSide(pd.getSlicers().find(slice)->second,true)){
-	      cout<<"slice out"<<endl;
 	      d++;
 	      sliced--;
 	    }
@@ -161,11 +158,9 @@ class MouseSlicerController: public Controller{
 	          slice=collMan-> getSceneNodeAndCollisionPointFromRay(
 	              collMan->getRayFromScreenCoordinates(mousePos),sliceStart,tmp);
 	          if(pd.getSlicers().find(slice)!=pd.getSlicers().end()){
-	            cout<<"valid slicer"<<endl;
    	          sliced=0;
    	          return true;
    	        }else{
-	            cout<<"invalid slicer"<<endl;
    	          slice=0;
    	          return false;
    	        }
@@ -173,6 +168,12 @@ class MouseSlicerController: public Controller{
         case irr::EMIE_LMOUSE_LEFT_UP:
           if(slice!=0){
             slice=0;
+            return true;
+          }else
+            return false;
+        case irr::EMIE_LMOUSE_DOUBLE_CLICK:
+          if(slice!=0){
+            while(pd.hideSide(pd.getSlicers().find(slice)->second,true)){};
             return true;
           }else
             return false;
