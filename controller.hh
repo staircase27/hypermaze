@@ -129,21 +129,21 @@ class MouseSlicerController: public Controller{
 
   public:
   virtual void run(irr::u32 now){
-	  if(slice){
-	    irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
-	    irr::vector3df dir=con(to_vector(pd.getSlicers().find(slice)->second));
-	    irr::vector3df ldir=ray.getVector();
-	    irr::f32 d=(sliceStart-ray.start).dotProduct(dir*ldir.getLengthSQ()-ldir*dir.dotProduct(ldir))/(dir.dotProduct(ldir)*dir.dotProduct(ldir)-dir.getLengthSQ()*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap)*2-sliced;
-	    while(d>1&&pd.hideSide(pd.getSlicers().find(slice)->second,false)){
-	      d--;
-	      sliced++;
-	    }
-	    while(d<-1&&pd.hideSide(pd.getSlicers().find(slice)->second,true)){
-	      d++;
-	      sliced--;
-	    }
-	  }
-	};
+    if(slice){
+      irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
+      irr::vector3df dir=con(to_vector(pd.getSlicers().find(slice)->second));
+      irr::vector3df ldir=ray.getVector();
+      irr::f32 d=(sliceStart-ray.start).dotProduct(dir*ldir.getLengthSQ()-ldir*dir.dotProduct(ldir))/(dir.dotProduct(ldir)*dir.dotProduct(ldir)-dir.getLengthSQ()*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap)*2-sliced;
+      while(d>1&&pd.hideSide(pd.getSlicers().find(slice)->second,false)){
+        d--;
+        sliced++;
+      }
+      while(d<-1&&pd.hideSide(pd.getSlicers().find(slice)->second,true)){
+        d++;
+        sliced--;
+      }
+    }
+  };
 
     virtual bool OnEvent(const irr::SEvent& event)
     {
@@ -154,17 +154,17 @@ class MouseSlicerController: public Controller{
         case irr::EMIE_LMOUSE_PRESSED_DOWN:
           {
             mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
-	          irr::triangle3df tmp;
-	          slice=collMan-> getSceneNodeAndCollisionPointFromRay(
-	              collMan->getRayFromScreenCoordinates(mousePos),sliceStart,tmp);
-	          if(pd.getSlicers().find(slice)!=pd.getSlicers().end()){
-   	          sliced=0;
-   	          return true;
-   	        }else{
-   	          slice=0;
-   	          return false;
-   	        }
-	        }
+            irr::triangle3df tmp;
+            slice=collMan-> getSceneNodeAndCollisionPointFromRay(
+                collMan->getRayFromScreenCoordinates(mousePos),sliceStart,tmp);
+            if(pd.getSlicers().find(slice)!=pd.getSlicers().end()){
+              sliced=0;
+              return true;
+            }else{
+              slice=0;
+              return false;
+            }
+          }
         case irr::EMIE_LMOUSE_LEFT_UP:
           if(slice!=0){
             slice=0;
@@ -199,35 +199,43 @@ class MouseDraggerController: public Controller{
 
 
   public:
-  virtual void run(irr::u32 now){
-	  if(string!=0){
-	    irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
-	    irr::vector3df ldir=ray.getVector();
-	    irr::vector3df weight;
-	    while(true){
-        weight=(ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
-        weight.X/=ldir.Y*ldir.Y+ldir.Z*ldir.Z;
-        weight.Y/=ldir.X*ldir.X+ldir.Z*ldir.Z;
-        weight.Z/=ldir.X*ldir.X+ldir.Y*ldir.Y;
-        Dirn dir;
-        irr::f32 largest=0;
-        for(Dirn *d=allDirns;d!=allDirns+6;++d){
-          if(weight.dotProduct(con(to_vector(*d)))>largest){
-            largest=weight.dotProduct(con(to_vector(*d)));
-            dir=*d;
+    virtual void run(irr::u32 now){
+      if(string!=0){
+        irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
+        irr::vector3df ldir=ray.getVector();
+        irr::vector3df weight;
+        while(true){
+          weight=(ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
+          if(ldir.Y*ldir.Y+ldir.Z*ldir.Z>0.1*ldir.getLengthSQ())
+            weight.X/=ldir.Y*ldir.Y+ldir.Z*ldir.Z;
+          else
+            weight.X=0;
+          if(ldir.X*ldir.X+ldir.Y*ldir.Y>0.1*ldir.getLengthSQ())
+            weight.Y/=ldir.X*ldir.X+ldir.Z*ldir.Z;
+          else
+            weight.Y=0;
+          if(ldir.X*ldir.X+ldir.Y*ldir.Y>.1*ldir.getLengthSQ())
+            weight.Z/=ldir.X*ldir.X+ldir.Y*ldir.Y;
+          else
+            weight.Z=0;
+          Dirn dir;
+          irr::f32 largest=0.9999;
+          for(Dirn *d=allDirns;d!=allDirns+6;++d){
+            if(weight.dotProduct(con(to_vector(*d)))>largest&&pd.ss.canMove(*d)){
+              largest=weight.dotProduct(con(to_vector(*d)));
+              dir=*d;
+            }
           }
+          if(largest<1)
+            break;
+          if(pd.ss.tryMove(dir)){
+            pd.stringUpdated();
+            startPoint+=con(to_vector(dir))*(MazeDisplay::wall+MazeDisplay::gap);
+          }else
+            break;
         }
-        if(largest<1)
-          break;
-        if(pd.ss.tryMove(dir)){
-          pd.stringUpdated();
-          startPoint+=con(to_vector(dir))*(MazeDisplay::wall+MazeDisplay::gap);
-        }else{
-          break;
-        }
-	    }
-	  }
-	};
+      }
+    };
 
     virtual bool OnEvent(const irr::SEvent& event)
     {
@@ -238,16 +246,16 @@ class MouseDraggerController: public Controller{
         case irr::EMIE_LMOUSE_PRESSED_DOWN:
           {
             mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
-	          irr::triangle3df tmp;
-	          string=collMan-> getSceneNodeAndCollisionPointFromRay(
-	              collMan->getRayFromScreenCoordinates(mousePos),startPoint,tmp);
-	          if(pd.getSlicers().find(string)==pd.getSlicers().end()){
-   	          return true;
-   	        }else{
-   	          string=0;
-   	          return false;
-   	        }
-	        }
+            irr::triangle3df tmp;
+            string=collMan-> getSceneNodeAndCollisionPointFromRay(
+                collMan->getRayFromScreenCoordinates(mousePos),startPoint,tmp);
+            if(pd.getSlicers().find(string)==pd.getSlicers().end()){
+              return true;
+            }else{
+              string=0;
+              return false;
+            }
+          }
         case irr::EMIE_LMOUSE_LEFT_UP:
           if(string!=0){
             string=0;
