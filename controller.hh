@@ -1,4 +1,3 @@
-#define IRRLICHT
 #include "irrlicht.h"
 #include "string.hh"
 #include "keymap.hh"

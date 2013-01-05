@@ -19,21 +19,21 @@ static Dirn allDirns[6]={UP,LEFT,FORWARD,DOWN,RIGHT,BACK};
 
 static const int ALLDIRNSMASK = (1<<6)-1;
 
-unsigned int to_id(Dirn d){
+inline unsigned int to_id(Dirn d){
 	return static_cast<unsigned int>(d);
 }
-Dirn from_id(unsigned int d){
+inline Dirn from_id(unsigned int d){
 	return static_cast<Dirn>(d);
 }
 
-Dirn opposite(Dirn d){
+inline Dirn opposite(Dirn d){
   return from_id((to_id(d)+3)%6);
 }
-int to_mask(Dirn d){
+inline int to_mask(Dirn d){
 	return 1<<to_id(d);
 }
 
-Vector to_vector(Dirn d){
+inline Vector to_vector(Dirn d){
   switch(d){
     case UP:
       return Vector(0,1,0);
@@ -52,7 +52,7 @@ Vector to_vector(Dirn d){
   }
 }
 
-Vector to_shift_vector(Dirn d){
+inline Vector to_shift_vector(Dirn d){
   switch(d){
     case DOWN:
       return Vector(0,-1,0);
@@ -65,7 +65,7 @@ Vector to_shift_vector(Dirn d){
   }
 }
 
-Dirn perpendicular(Dirn d,Dirn e){
+inline Dirn perpendicular(Dirn d,Dirn e){
   switch(d){
     case UP:
     case DOWN:

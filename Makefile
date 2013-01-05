@@ -15,16 +15,28 @@ CPPLIBS=
 IRRLIBS=-lIrrlicht -isystem/usr/include/irrlicht/
 
 test: test.o
-test.o: test.cc dirns.hh maze.hh vector.hh string.hh mazegen.hh
+test.o: test.cc maze.hh dirns.hh vector.hh string.hh mazegen.hh
 run-test: test
 	./test
 
 hypermaze: CPPLIBS+= -DIRRLICHT $(IRRLIBS)
-hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o
-hypermaze.o: hypermaze.cc dirns.hh maze.hh vector.hh string.hh irrdisp.hh iMyCamera.hh gui.hh keymap.hh controller.hh
-controller.o: controller.cc irrdisp.hh  keymapgui.hh helpgui.hh keymap.hh maze.hh string.hh dirns.hh vector.hh  mazegen.hh 
-irrdisp.o: irrdisp.hh
+hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o maze.o keymap.o
+
+hypermaze.o: hypermaze.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
+ iMyCamera.hh keymap.hh controller.hh
+
+controller.o: controller.cc controller.hh string.hh maze.hh dirns.hh \
+ vector.hh keymap.hh irrdisp.hh gui.hh mazegen.hh helpgui.hh keymapgui.hh
+
+irrdisp.o: irrdisp.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
+ controller.hh keymap.hh
+
+maze.o: maze.cc maze.hh dirns.hh vector.hh
+
+keymap.o: keymap.cc keymap.hh dirns.hh vector.hh
+
 iMyCamera.o: iMyCamera.cpp iMyCamera.hh
+
 run-hypermaze: hypermaze
 	./hypermaze
 

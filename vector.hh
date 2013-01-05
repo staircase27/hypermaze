@@ -37,15 +37,15 @@ using namespace std;
       }
   };
 #endif
-Vector operator*(int i,Vector v){
+inline Vector operator*(int i,Vector v){
   return v*i;
 }
-bool inCube(Vector p,Vector start,Vector end){
+inline bool inCube(Vector p,Vector start,Vector end){
   return !(p.X<start.X||p.Y<start.Y||p.Z<start.Z||
       p.X>=end.X||p.Y>=end.Y||p.Z>=end.Z);
 }
 
-ostream& operator<<(ostream& o,Vector v){
+inline ostream& operator<<(ostream& o,Vector v){
   return o<<"<Vector: "<<v.X<<","<<v.Y<<","<<v.Z<<">";
 }
 

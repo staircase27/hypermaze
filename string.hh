@@ -8,7 +8,7 @@ using namespace std;
 
 class StringSlice;
 
-ostream& operator<<(ostream& o,Dirn d){
+inline ostream& operator<<(ostream& o,Dirn d){
   return o<<"<Dirn "<<(int)d<<": "<<to_vector(d)<<">";
 }
 struct StringElement{
@@ -54,7 +54,7 @@ class StringPointer{
     
     friend class StringSlice;
 };
-ostream& operator<<(ostream& o,const StringElement& e){
+inline ostream& operator<<(ostream& o,const StringElement& e){
   return o<<"<StringElement "<<e.pos<<" "<<e.d<<" "<<e.selected<<">";
 }
 class String{
@@ -117,13 +117,6 @@ class String{
     friend ostream& operator <<(ostream& o,String s);
     friend ostream& operator <<(ostream& o,StringSlice s);
 };
-
-ostream& operator<<(ostream& o,String s){
-  o<<"<String ";
-  for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it)
-    cout<<it->pos<<"-"<<it->d<<"-";
-  return cout<<s.endPos<<">";
-}
 
 class StringSlice{
   String& s;
@@ -256,7 +249,16 @@ class StringSlice{
 
 };
 
-ostream& operator<<(ostream& o,StringSlice s){
+
+inline ostream& operator<<(ostream& o,String s){
+  o<<"<String ";
+  for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it)
+    cout<<it->pos<<"-"<<it->d<<"-";
+  return cout<<s.endPos<<">";
+}
+
+
+inline ostream& operator<<(ostream& o,StringSlice s){
   o<<"<StringSlice ";
   for(list<StringElement>::iterator it=s.s.route.begin();it!=s.s.route.end();++it)
     cout<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";

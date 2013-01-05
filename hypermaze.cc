@@ -1,13 +1,12 @@
-#define IRRLICHT
 #include "irrlicht.h"
 #include "irrdisp.hh"
 #include "vector.hh"
 #include "iMyCamera.hh"
 #include "dirns.hh"
 #include "keymap.hh"
+#include "controller.hh"
 #include <fstream>
 #include <map>
-#include "controller.hh"
 
 using namespace std;
 

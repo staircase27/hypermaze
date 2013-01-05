@@ -18,11 +18,11 @@ namespace irr{
 
 using namespace std;
 
-irr::vector3df con(Vector v){
+inline irr::vector3df con(Vector v){
   return irr::vector3df(-v.X,v.Y,v.Z);
 }
 
-irr::vector3df remSgn(irr::vector3df v){
+inline irr::vector3df remSgn(irr::vector3df v){
   return irr::vector3df(abs(v.X),abs(v.Y),abs(v.Z));
 }
 
