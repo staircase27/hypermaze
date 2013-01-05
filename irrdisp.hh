@@ -255,11 +255,9 @@ class StringDisplay{
     }
     
     pair<StringPointer,bool> getStringPointer(irr::ISceneNode* node){
-      cout<<node<<" "<<endl<<flush;
       if(node==0)
         return pair<StringPointer,bool>(s.getString().end(),false);
       int i=node->getID()-STRING_ID;
-      cout<<i<<endl<<flush;
       if(i<0)
         return pair<StringPointer,bool>(s.getString().end(),false);
       

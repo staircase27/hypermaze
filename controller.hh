@@ -308,14 +308,53 @@ class MouseStringDraggerController: public Controller{
 class MouseStringSelectorController: public Controller{
   irr::ISceneCollisionManager* collMan;
   irr::position2d<irr::s32> mousePos;
+  irr::vector3df startPoint;
   irr::ISceneNode* string;
   pair<StringPointer,bool> sp;
+  bool selected;
   int moved;
   
   public:
   
     virtual void run(irr::u32 now){
-    
+      if(string){
+        irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
+        irr::vector3df ldir=ray.getVector();
+        irr::f32 weight=con(to_vector(LEFT)).dotProduct(
+            (ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap))/
+            (ldir.getLengthSQ()-ldir.dotProduct(con(to_vector(LEFT)))*ldir.dotProduct(con(to_vector(LEFT))))-moved;
+        
+        while(weight>1){
+          if(sp.first!=pd.s.end()){
+            if(moved<0)
+              pd.ss.setSelected(sp.first,selected);
+            ++sp.first;
+            if(moved>=0)
+              if(sp.first!=pd.s.end())
+                pd.ss.setSelected(sp.first,!selected);
+            pd.stringSelectionUpdated();
+            ++moved;
+            --weight;
+          }else{
+            break;
+          }
+        }
+        while(weight<-1){
+          if(sp.first!=pd.s.begin()){
+            if(moved>0)
+              if(sp.first!=pd.s.end())
+                pd.ss.setSelected(sp.first,selected);
+            --sp.first;
+            if(moved<=0)
+              pd.ss.setSelected(sp.first,!selected);
+            pd.stringSelectionUpdated();
+            --moved;
+            ++weight;
+          }else{
+            break;
+          }
+        }
+      }
     }
     
     virtual bool OnEvent(const irr::SEvent& event){
@@ -355,9 +394,8 @@ class MouseStringSelectorController: public Controller{
           {
             mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
             irr::triangle3df tmp;
-            irr::vector3df tmp2;
             irr::ISceneNode* node=collMan-> getSceneNodeAndCollisionPointFromRay(
-                collMan->getRayFromScreenCoordinates(mousePos),tmp2,tmp);
+                collMan->getRayFromScreenCoordinates(mousePos),startPoint,tmp);
             pair<StringPointer,bool> sp=pd.getStringPointer(node);
             if(sp.second||sp.first!=pd.s.end()){
               bool selected=false;
@@ -379,11 +417,25 @@ class MouseStringSelectorController: public Controller{
               }
               pd.stringSelectionUpdated();
               string=node;
+              moved=0;
               this->sp=sp;
+              this->selected=selected;
               return true;
             }
             break;
           }
+        case irr::EMIE_RMOUSE_LEFT_UP:
+          if(string!=0){
+            string=0;
+            return true;
+          }
+          break;
+        case irr::EMIE_MOUSE_MOVED:
+          if(string!=0){
+            mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
+            return true;
+          }
+          break;
       }
       return false;
     }
