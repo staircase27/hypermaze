@@ -17,7 +17,6 @@ struct StringElement{
   bool selected;
   StringElement(Vector pos,Dirn d,bool selected):pos(pos),d(d),selected(selected){};
 };
-
 class StringPointer{
   private:
     list<StringElement>::iterator el;
@@ -55,7 +54,9 @@ class StringPointer{
     
     friend class StringSlice;
 };
-
+ostream& operator<<(ostream& o,const StringElement& e){
+  return o<<"<StringElement "<<e.pos<<" "<<e.d<<" "<<e.selected<<">";
+}
 class String{
     list<StringElement> route;
     Vector endPos;

@@ -191,7 +191,7 @@ class MouseSlicerController: public Controller{
 };
 
 
-class MouseDraggerController: public Controller{
+class MouseStringDraggerController: public Controller{
   irr::ISceneCollisionManager* collMan;
   irr::ISceneNode* string;
   irr::vector3df startPoint;
@@ -301,26 +301,115 @@ class MouseDraggerController: public Controller{
       return false;
     }
 
-    MouseDraggerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),mousePos(0,0){};
+    MouseStringDraggerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),mousePos(0,0){};
 };
 
+
+class MouseStringSelectorController: public Controller{
+  irr::ISceneCollisionManager* collMan;
+  irr::position2d<irr::s32> mousePos;
+  irr::ISceneNode* string;
+  pair<StringPointer,bool> sp;
+  int moved;
+  
+  public:
+  
+    virtual void run(irr::u32 now){
+    
+    }
+    
+    virtual bool OnEvent(const irr::SEvent& event){
+      if (event.EventType != irr::EET_MOUSE_INPUT_EVENT)
+        return false;
+
+      switch(event.MouseInput.Event){
+        case irr::EMIE_LMOUSE_DOUBLE_CLICK:
+        case irr::EMIE_RMOUSE_DOUBLE_CLICK:
+          {
+            mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
+            irr::triangle3df tmp;
+            irr::vector3df tmp2;
+            irr::ISceneNode* node=collMan-> getSceneNodeAndCollisionPointFromRay(
+                collMan->getRayFromScreenCoordinates(mousePos),tmp2,tmp);
+            pair<StringPointer,bool> sp=pd.getStringPointer(node);
+            if(sp.second||sp.first!=pd.s.end()){
+              bool selected=false;
+              if(sp.first!=pd.s.end()){
+                selected=sp.first->selected;
+              }
+              if(sp.second && ! selected){
+                if(sp.first!=pd.s.begin()){
+                  --sp.first;
+                  selected|=sp.first->selected;
+                }
+              }
+              selected=!selected;
+              for(StringPointer p=pd.s.begin();p!=pd.s.end();++p)
+                pd.ss.setSelected(p,selected);
+              pd.stringSelectionUpdated();
+              return true;
+            }
+            break;
+          }
+        case irr::EMIE_RMOUSE_PRESSED_DOWN:
+          {
+            mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
+            irr::triangle3df tmp;
+            irr::vector3df tmp2;
+            irr::ISceneNode* node=collMan-> getSceneNodeAndCollisionPointFromRay(
+                collMan->getRayFromScreenCoordinates(mousePos),tmp2,tmp);
+            pair<StringPointer,bool> sp=pd.getStringPointer(node);
+            if(sp.second||sp.first!=pd.s.end()){
+              bool selected=false;
+              if(sp.first!=pd.s.end()){
+                selected=sp.first->selected;
+              }
+              if(sp.second && ! selected){
+                if(sp.first!=pd.s.begin()){
+                  --sp.first;
+                  selected|=sp.first->selected;
+                  ++sp.first;
+                }
+              }
+              if(sp.first!=pd.s.end())
+                pd.ss.setSelected(sp.first,!selected);
+              if(sp.second && sp.first!=pd.s.begin()){
+                --sp.first;
+                pd.ss.setSelected(sp.first,!selected);
+              }
+              pd.stringSelectionUpdated();
+              string=node;
+              this->sp=sp;
+              return true;
+            }
+            break;
+          }
+      }
+      return false;
+    }
+  
+    MouseStringSelectorController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),sp(pd.s.end(),false){};
+};
+  
 
 class MultiInterfaceController:public Controller{
   public:
     KeyboardController kc;
     MouseSlicerController msc;
-    MouseDraggerController mdc;
+    MouseStringDraggerController mdc;
+    MouseStringSelectorController mssc;
 
-    MultiInterfaceController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),kc(pd,device),msc(pd,device),mdc(pd,device){};
+    MultiInterfaceController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),kc(pd,device),msc(pd,device),mdc(pd,device),mssc(pd,device){};
 
     virtual bool OnEvent(const irr::SEvent& event){
-      return kc.OnEvent(event)||msc.OnEvent(event)||mdc.OnEvent(event);
+      return kc.OnEvent(event)||msc.OnEvent(event)||mdc.OnEvent(event)||mssc.OnEvent(event);
     }
 
     virtual void run(irr::u32 now){
       kc.run(now);
       msc.run(now);
       mdc.run(now);
+      mssc.run(now);
     }
 
 };

@@ -173,6 +173,7 @@ class StringDisplay{
   int activeNodes;
   NodeGen* ng;
   irr::vector3df center;
+  static const int STRING_ID=1536;//(3<<9)
   public:
 
     void update(){
@@ -183,8 +184,10 @@ class StringDisplay{
       StringPointer sit=s.getString().begin();
       while(sit!=s.getString().end()){
 
-        if(nit==nodes.end())
+        if(nit==nodes.end()){
           nit=nodes.insert(nit,ng->makeUnitString(true));
+          (*nit)->setID(STRING_ID+i);
+        }
         (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1));
         (*nit)->setPosition(position+con(sit->pos)*(MazeDisplay::wall+MazeDisplay::gap));
         if(i>=activeNodes)
@@ -196,8 +199,10 @@ class StringDisplay{
         ++nit;
         ++i;
 
-        if(nit==nodes.end())
+        if(nit==nodes.end()){
           nit=nodes.insert(nit,ng->makeUnitString(false));
+          (*nit)->setID(STRING_ID+i);
+        }
         (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(sit->d))));
         (*nit)->setPosition(position+con(sit->pos)*(MazeDisplay::wall+MazeDisplay::gap)+(MazeDisplay::gap+MazeDisplay::wall)*con(to_vector(sit->d))/2);
         if(i>=activeNodes)
@@ -211,8 +216,10 @@ class StringDisplay{
         ++sit;
 
       }
-      if(nit==nodes.end())
+      if(nit==nodes.end()){
         nit=nodes.insert(nit,ng->makeUnitString(true));
+        (*nit)->setID(STRING_ID+i);
+      }
       (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1));
       (*nit)->setPosition(position+con(s.getString().getEnd())*(MazeDisplay::wall+MazeDisplay::gap));
       if(i>=activeNodes)
@@ -248,18 +255,25 @@ class StringDisplay{
     }
     
     pair<StringPointer,bool> getStringPointer(irr::ISceneNode* node){
-      list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
+      cout<<node<<" "<<endl<<flush;
+      if(node==0)
+        return pair<StringPointer,bool>(s.getString().end(),false);
+      int i=node->getID()-STRING_ID;
+      cout<<i<<endl<<flush;
+      if(i<0)
+        return pair<StringPointer,bool>(s.getString().end(),false);
+      
       StringPointer sit=s.getString().begin();
       while(sit!=s.getString().end()){
-        if(*nit==node)
+        if(i==0)
           return pair<StringPointer,bool>(sit,true);
-        ++nit;
-        if(*nit==node)
+        --i;
+        if(i==0)
           return pair<StringPointer,bool>(sit,false);
         ++sit;
-         ++nit;
-       }
-      if(*nit==node)
+        --i;
+      }
+      if(i==0)
         return pair<StringPointer,bool>(sit,true);
       else
         return pair<StringPointer,bool>(sit,false);

@@ -30,6 +30,7 @@ class MyNodeGen:public NodeGen{
   public:
     MyNodeGen(irr::ISceneManager* smgr,irr::ITexture* wall,irr::ITexture* string,irr::ITexture* activeString,irr::ITexture* handle):
         smgr(smgr),wall(wall),string(string),activeString(activeString),handle(handle){};
+    
     virtual irr::IMeshSceneNode* makeUnitWall(bool isNode){
       irr::IMeshSceneNode* node = smgr->addCubeSceneNode(1);
       node->setMaterialTexture( 0, wall);
@@ -53,6 +54,7 @@ class MyNodeGen:public NodeGen{
       else
         node->setMaterialTexture(0,string);
     }
+    
     virtual irr::IMeshSceneNode* makeUnitHandle(){
       irr::IMeshSceneNode* node = smgr->addSphereSceneNode(1);
       node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
