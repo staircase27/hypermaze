@@ -1,13 +1,10 @@
 #define IRRLICHT
 #include "irrlicht.h"
 #include "irrdisp.hh"
-#include "mazegen.hh"
 #include "vector.hh"
 #include "iMyCamera.hh"
 #include "dirns.hh"
-#include "gui.hh"
 #include "keymap.hh"
-#include "helpgui.hh"
 #include <fstream>
 #include <map>
 #include "controller.hh"
@@ -19,6 +16,7 @@ namespace irr{
   using namespace scene;
   using namespace io;
   using namespace video;
+  using namespace gui;
 };
 
 class MyNodeGen:public NodeGen{
@@ -107,6 +105,7 @@ int main(){
   MultiInterfaceController *mic=new MultiInterfaceController(pd,device);
   Controller* c=mic;
   device->setEventReceiver(c);
+  pd.c=c;
 
   mic->kc.map.addMapping(irr::KEY_F1,KeyMap::A_CONF);
   wifstream ifs("hypermaze.keymap.conf");

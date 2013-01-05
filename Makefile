@@ -12,16 +12,18 @@ CPP=g++
 CPPOPTS=-ggdb
 CPPLIBS=
 
-IRRLIBS=-lIrrlicht -I/usr/include/irrlicht/
+IRRLIBS=-lIrrlicht -isystem/usr/include/irrlicht/
 
 test: test.o
 test.o: test.cc dirns.hh maze.hh vector.hh string.hh mazegen.hh
 run-test: test
 	./test
 
-hypermaze: CPPLIBS+= $(IRRLIBS)
-hypermaze: hypermaze.o iMyCamera.o
-hypermaze.o: hypermaze.cc dirns.hh maze.hh vector.hh string.hh mazegen.hh irrdisp.hh iMyCamera.hh gui.hh keymap.hh keymapgui.hh helpgui.hh controller.hh
+hypermaze: CPPLIBS+= -DIRRLICHT $(IRRLIBS)
+hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o
+hypermaze.o: hypermaze.cc dirns.hh maze.hh vector.hh string.hh irrdisp.hh iMyCamera.hh gui.hh keymap.hh controller.hh
+controller.o: controller.cc irrdisp.hh  keymapgui.hh helpgui.hh keymap.hh maze.hh string.hh dirns.hh vector.hh  mazegen.hh 
+irrdisp.o: irrdisp.hh
 iMyCamera.o: iMyCamera.cpp iMyCamera.hh
 run-hypermaze: hypermaze
 	./hypermaze

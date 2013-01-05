@@ -88,7 +88,7 @@ int main(){
 
   srand(time(NULL));
 
-  m=generate(Vector(10,10,10));
+  m=generate<RandLimitMazeGenHalf<Hunter<RandOrderWalker<DiagonalWalker> > > >(Vector(10,10,10));
 
   prettyPrint(cout,m);
   ofstream of("mazetest.hmo");

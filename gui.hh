@@ -2,6 +2,7 @@
 #include "irrdisp.hh"
 #include "maze.hh"
 #include "string.hh"
+#include "mazegen.hh"
 #include <fstream>
 
 #ifndef GUI_HH_INC

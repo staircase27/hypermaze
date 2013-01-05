@@ -62,13 +62,19 @@ class String{
     Vector endPos;
   public:
     Maze& maze;
+    const Dirn stringDir;
+    const Dirn targetDir;
   
-    String(Maze& m):maze(m),endPos(m.size.X,2,0),route(){
-      Vector pos(0,2,0);
-      while(pos!=endPos){
-        route.push_back(StringElement(pos,LEFT,true));
-        pos+=to_vector(LEFT);
+    String(Maze& m):maze(m),endPos(0,0,0),route(),stringDir(LEFT),targetDir(FORWARD){
+      Vector start=m.size.dotProduct(to_shift_vector(stringDir))*to_shift_vector(stringDir)+
+          m.size.dotProduct(to_shift_vector(targetDir))*to_shift_vector(targetDir)+
+          m.size.dotProduct(to_vector(perpendicular(stringDir,targetDir)))/2*to_vector(perpendicular(stringDir,targetDir));
+      Vector pos=start;
+      while(pos.dotProduct(to_vector(stringDir))!=(start+m.size).dotProduct(to_vector(stringDir))){
+        route.push_back(StringElement(pos,stringDir,true));
+        pos+=to_vector(stringDir);
       }
+      endPos=pos;
     };
     
     const Vector& getStart() const{
@@ -87,6 +93,17 @@ class String{
     }
     StringPointer end(){
       return StringPointer(route.end());
+    }
+    
+    bool hasWon(){
+      Vector d=to_vector(targetDir);
+      int t=maze.size.dotProduct(-to_shift_vector(opposite(targetDir)));
+      if(endPos.dotProduct(d)<t)
+        return false;
+      for(list<StringElement>::iterator it=route.begin();it!=route.end();++it)
+        if(endPos.dotProduct(d)<t)
+          return false;
+      return true;
     }
     
     String& operator=(const String& o){
@@ -206,6 +223,10 @@ class StringSlice{
           }else{
             if(it->d==d){
               it=s.route.erase(it);
+              if(it==s.route.end()){
+                lastselected=false;
+                break;
+              }
             }else{
               s.route.insert(it,StringElement(it->pos+to_vector(d),opposite(d),false));
             }

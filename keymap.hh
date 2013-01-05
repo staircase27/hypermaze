@@ -1,6 +1,8 @@
 #include "irrlicht.h"
+#include "dirns.hh"
 #include <iostream>
 #include <sstream>
+#include <map>
 
 #ifndef KEYMAP_HH_INC
 #define KEYMAP_HH_INC
