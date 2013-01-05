@@ -180,8 +180,8 @@ class StringDisplay{
       bool active=false;
       int i=0;
       list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
-      list<StringElement>::const_iterator sit=s.getString().getRoute().begin();
-      while(sit!=s.getString().getRoute().end()){
+      StringPointer sit=s.getString().begin();
+      while(sit!=s.getString().end()){
 
         if(nit==nodes.end())
           nit=nodes.insert(nit,ng->makeUnitString(true));
@@ -233,8 +233,8 @@ class StringDisplay{
     void updateActive(){
       bool active=false;
       list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
-      list<StringElement>::const_iterator sit=s.getString().getRoute().begin();
-      while(sit!=s.getString().getRoute().end()){
+      StringPointer sit=s.getString().begin();
+      while(sit!=s.getString().end()){
         ng->makeStringActive(*nit,active||sit->selected);
         active=sit->selected;
 
@@ -246,7 +246,25 @@ class StringDisplay{
       }
       ng->makeStringActive(*nit,active);
     }
-
+    
+    pair<StringPointer,bool> getStringPointer(irr::ISceneNode* node){
+      list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
+      StringPointer sit=s.getString().begin();
+      while(sit!=s.getString().end()){
+        if(*nit==node)
+          return pair<StringPointer,bool>(sit,true);
+        ++nit;
+        if(*nit==node)
+          return pair<StringPointer,bool>(sit,false);
+        ++sit;
+         ++nit;
+       }
+      if(*nit==node)
+        return pair<StringPointer,bool>(sit,true);
+      else
+        return pair<StringPointer,bool>(sit,false);
+    }
+      
     StringDisplay(StringSlice& s,NodeGen* ng,irr::vector3df center=irr::vector3df(0,0,0)):s(s),center(center),ng(ng),activeNodes(0){
       update();
     };
@@ -280,6 +298,10 @@ class PuzzleDisplay{
 
     const map<irr::ISceneNode*,Dirn>& getSlicers(){
       return slicers;
+    }
+    
+    pair<StringPointer,bool> getStringPointer(irr::ISceneNode* node){
+      return sd.getStringPointer(node);
     }
 
     void stringUpdated(){

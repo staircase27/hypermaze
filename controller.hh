@@ -196,6 +196,8 @@ class MouseDraggerController: public Controller{
   irr::ISceneNode* string;
   irr::vector3df startPoint;
   irr::position2d<irr::s32> mousePos;
+  int dist;
+  Dirn currdir;
 
 
   public:
@@ -203,36 +205,51 @@ class MouseDraggerController: public Controller{
       if(string!=0){
         irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
         irr::vector3df ldir=ray.getVector();
-        irr::vector3df weight;
         while(true){
-          weight=(ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
-          if(ldir.Y*ldir.Y+ldir.Z*ldir.Z>0.1*ldir.getLengthSQ())
-            weight.X/=ldir.Y*ldir.Y+ldir.Z*ldir.Z;
-          else
-            weight.X=0;
-          if(ldir.X*ldir.X+ldir.Y*ldir.Y>0.1*ldir.getLengthSQ())
-            weight.Y/=ldir.X*ldir.X+ldir.Z*ldir.Z;
-          else
-            weight.Y=0;
-          if(ldir.X*ldir.X+ldir.Y*ldir.Y>.1*ldir.getLengthSQ())
-            weight.Z/=ldir.X*ldir.X+ldir.Y*ldir.Y;
-          else
-            weight.Z=0;
-          Dirn dir;
-          irr::f32 largest=0.9999;
-          for(Dirn *d=allDirns;d!=allDirns+6;++d){
-            if(weight.dotProduct(con(to_vector(*d)))>largest&&pd.ss.canMove(*d)){
-              largest=weight.dotProduct(con(to_vector(*d)));
-              dir=*d;
+          if(dist==0){
+            irr::vector3df weight;
+            weight=(ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
+            if(ldir.Y*ldir.Y+ldir.Z*ldir.Z>0.1*ldir.getLengthSQ())
+              weight.X/=ldir.Y*ldir.Y+ldir.Z*ldir.Z;
+            else
+              weight.X=0;
+            if(ldir.X*ldir.X+ldir.Y*ldir.Y>0.1*ldir.getLengthSQ())
+              weight.Y/=ldir.X*ldir.X+ldir.Z*ldir.Z;
+            else
+              weight.Y=0;
+            if(ldir.X*ldir.X+ldir.Y*ldir.Y>.1*ldir.getLengthSQ())
+              weight.Z/=ldir.X*ldir.X+ldir.Y*ldir.Y;
+            else
+              weight.Z=0;
+            Dirn dir;
+            irr::f32 largest=0.9999;
+            for(Dirn *d=allDirns;d!=allDirns+6;++d){
+              if(weight.dotProduct(con(to_vector(*d)))>largest&&pd.ss.canMove(*d)){
+                largest=weight.dotProduct(con(to_vector(*d)));
+                dir=*d;
+              }
             }
+            if(largest<1)
+              break;
+            if(pd.ss.tryMove(dir)){
+              pd.stringUpdated();
+              currdir=dir;
+              dist+=1;
+            }else
+              break;
+          }else{
+            irr::f32 weight=con(to_vector(currdir)).dotProduct(
+                (ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap))/
+                (ldir.getLengthSQ()-ldir.dotProduct(con(to_vector(currdir)))*ldir.dotProduct(con(to_vector(currdir))))-dist;
+            if(weight>=1 && pd.ss.tryMove(currdir)){
+              pd.stringUpdated();
+              dist+=1;
+            }else if(weight<=-1 && pd.ss.tryMove(opposite(currdir))){
+              pd.stringUpdated();
+              dist-=1;
+            }else
+              break;
           }
-          if(largest<1)
-            break;
-          if(pd.ss.tryMove(dir)){
-            pd.stringUpdated();
-            startPoint+=con(to_vector(dir))*(MazeDisplay::wall+MazeDisplay::gap);
-          }else
-            break;
         }
       }
     };
@@ -249,7 +266,19 @@ class MouseDraggerController: public Controller{
             irr::triangle3df tmp;
             string=collMan-> getSceneNodeAndCollisionPointFromRay(
                 collMan->getRayFromScreenCoordinates(mousePos),startPoint,tmp);
-            if(pd.getSlicers().find(string)==pd.getSlicers().end()){
+            pair<StringPointer,bool> sp=pd.getStringPointer(string);
+            bool selected=false;
+            if(sp.first!=pd.s.end()){
+              selected=sp.first->selected;
+            }
+            if(sp.second && ! selected){
+              if(sp.first!=pd.s.begin()){
+                --sp.first;
+                selected|=sp.first->selected;
+              }
+            }
+            if(selected){
+              dist=0;
               return true;
             }else{
               string=0;
