@@ -27,6 +27,8 @@ class BaseGui : irr::IEventReceiver{
     bool OnEvent(const irr::SEvent &event){
       if(oldReceiver && event.EventType == irr::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
         oldReceiver->OnEvent(event);
+      if(oldReceiver && event.EventType == irr::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
+        oldReceiver->OnEvent(event);
       return OnEventImpl(event);
     };
     virtual bool OnEventImpl(const irr::SEvent &event)=0;
