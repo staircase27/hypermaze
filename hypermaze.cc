@@ -89,7 +89,7 @@ int main(){
 	irr::ISceneManager* smgr = device->getSceneManager();
 
 	addCameraSceneNodeMy(smgr,device->getCursorControl(),0,irr::vector3df(0,0,0),
-	    irr::vector3df(0,0,-300),-500.,-100.,3.,100.);
+	    irr::vector3df(0,0,-300),-500.,-100.,-3.,100.);
 
   irr::ILightSceneNode* light1 =
                 smgr->addLightSceneNode(0, irr::vector3df(-100,100,-100),
