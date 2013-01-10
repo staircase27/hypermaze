@@ -101,7 +101,7 @@ class String{
       if(endPos.dotProduct(d)<t)
         return false;
       for(list<StringElement>::iterator it=route.begin();it!=route.end();++it)
-        if(endPos.dotProduct(d)<t)
+        if(it->pos.dotProduct(d)<t)
           return false;
       return true;
     }
