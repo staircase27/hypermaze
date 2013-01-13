@@ -180,6 +180,7 @@ wstring toString(KeySpec ks){
 class KeyMapGui: BaseGui{
 
   KeyMap km;
+  KeyMap* kmp;
 
   bool okClicked;
   bool cancelClicked;
@@ -245,12 +246,16 @@ class KeyMapGui: BaseGui{
   public:
     bool edit(irr::IrrlichtDevice* _device,KeyMap& _km){
       km=_km;
+      kmp=&_km;
+      main(_device);
+      return okClicked;
+    }
+    
+    void createGUI(){
       editing=-1;
       okClicked=cancelClicked=false;
-      apply(_device);
       
       irr::IVideoDriver* driver = device->getVideoDriver();
-      irr::ISceneManager* smgr = device->getSceneManager();
       irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
       
       irr::rect<irr::s32> rect=driver->getViewPort();
@@ -259,7 +264,7 @@ class KeyMapGui: BaseGui{
       size.Width=min(600,size.Width-10);
       size.Height=min(600,size.Height-10);
       
-      table = guienv->addTable(irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),0,-1,true);
+      table = guienv->addTable(irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),el,-1,true);
       table->addColumn(L"Action",0);
       table->addColumn(L"Key",1);
       table->setColumnWidth(0,size.Width/2-10);
@@ -272,40 +277,25 @@ class KeyMapGui: BaseGui{
         table->setCellText(i,1,toString(km.getKeySpec(KeyMap::actionNames[i].first)).c_str());
       }
       
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+size.Height/2-32,center.X+size.Width/2-100,center.Y+size.Height/2),0,GUI_ID_CANCEL_BUTTON,L"Cancel");
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),0,GUI_ID_OK_BUTTON,L"Apply");
+      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+size.Height/2-32,center.X+size.Width/2-100,center.Y+size.Height/2),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
+      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Apply");
       
       guienv->setFocus(table);
         
       device->setWindowCaption(L"Configure Hyper Maze");
       
-      while(true)
-      {
-        if(!device->run())
-          break;
-        
-        driver->beginScene(true, true, irr::SColor(255,113,113,133));
-
-        smgr->drawAll();
-        
-        guienv->drawAll();
-
-        driver->endScene();
-
-        
-        if(cancelClicked)
-          break;
-        if(okClicked){
-          _km=km;
-          wofstream ofs("hypermaze.keymap.conf");
-          ofs<<_km;
-          ofs.close();
-          break;
-        }
+    }
+    bool run(){
+      if(cancelClicked)
+        return false;
+      if(okClicked){
+        *kmp=km;
+        wofstream ofs("hypermaze.keymap.conf");
+        ofs<<km;
+        ofs.close();
+        return false;
       }
-      guienv->clear();
-      unapply();
-      return okClicked;
+      return true;
     }
 };
 

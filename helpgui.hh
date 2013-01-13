@@ -20,6 +20,10 @@ class HelpGui: BaseGui{
 
   bool okClicked,keyMapClicked;
   
+  KeyMap* km;
+  
+  irr::u32 keyblock;
+  
   enum
   {
     GUI_ID_OK_BUTTON=201,
@@ -38,13 +42,15 @@ class HelpGui: BaseGui{
             return true;
           }
         }
+        if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
+          okClicked=true;
+          return true;
+        }
       }
-      if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+      if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE && 
+          (keyblock==0||device->getTimer()->getTime()>keyblock)){
         okClicked=true;
-        return true;
-      }
-      if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-        okClicked=true;
+        keyblock=0;
         return true;
       }
       return false;
@@ -53,11 +59,15 @@ class HelpGui: BaseGui{
 
   public:
     bool help(irr::IrrlichtDevice* _device,KeyMap& km){
+      this->km=&km;
+      main(_device);
+      return okClicked;
+    }
+    
+    void createGUI(){
       okClicked=keyMapClicked=false;
-      apply(_device);
-      
+
       irr::IVideoDriver* driver = device->getVideoDriver();
-      irr::ISceneManager* smgr = device->getSceneManager();
       irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
       
       irr::rect<irr::s32> rect=driver->getViewPort();
@@ -66,47 +76,39 @@ class HelpGui: BaseGui{
       size.Width=min(600,size.Width-10);
       size.Height=min(600,size.Height-10);
       
-      guienv->addStaticText(L"Hyper Maze Puzzle Game by Staircase\n\nBend, Stretch and Move the String through the maze to get it to the far side of the hyper maze.\n Either click and drag on the controls or use the keyboard controls set below.\n\n\nGame written by Staircase in association with Dark Field Games. http://www.darkfieldgames.com/\nThis game is released open source under the ***** licence. Feel free to edit and change as you like. If you make any improvements or new ideas please send them me them and I may include them in the next release (and thank you below)",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true,0,-1,true)->setTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
-      guienv->addButton(irr::rect<irr::s32>(center.X-75,center.Y+size.Height/2-32-32-10,center.X+75,center.Y+size.Height/2-32-10),0,GUI_ID_KEY_MAP_BUTTON,L"Edit Key Map");
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),0,GUI_ID_OK_BUTTON,L"OK");
+      guienv->addStaticText(L"Hyper Maze Puzzle Game by Staircase\n\nBend, Stretch and Move the String through the maze to get it to the far side of the hyper maze.\n Either click and drag on the controls or use the keyboard controls set below.\n\n\nGame written by Staircase in association with Dark Field Games. http://www.darkfieldgames.com/\nThis game is released open source under the ***** licence. Feel free to edit and change as you like. If you make any improvements or new ideas please send them me them and I may include them in the next release (and thank you below)",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true,el,-1,true)->setTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
+      guienv->addButton(irr::rect<irr::s32>(center.X-75,center.Y+size.Height/2-32-32-10,center.X+75,center.Y+size.Height/2-32-10),el,GUI_ID_KEY_MAP_BUTTON,L"Edit Key Map");
+      irr::IGUIButton* ok=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"OK");
       
-//      guienv->setFocus();
+      guienv->setFocus(ok);
         
       device->setWindowCaption(L"Hyper Maze Help");
-      
-      while(true)
-      {
-        if(!device->run())
-          break;
-        
-        driver->beginScene(true, true, irr::SColor(255,113,113,133));
-
-        smgr->drawAll();
-        
-        guienv->drawAll();
-
-        driver->endScene();
-
-        
-        if(okClicked){
-          break;
-        }
-        if(keyMapClicked){
-          guienv->clear();
-          unapply();
-          KeyMapGui kmg;
-          return kmg.edit(_device,km);
-        }
+    }
+    
+    bool run(){
+      if(okClicked){
+        return false;
       }
-      guienv->clear();
-      unapply();
-      return okClicked;
+      if(keyMapClicked){
+        el->setVisible(false);
+        KeyMapGui kmg;
+        kmg.edit(device,*km);
+        el->setVisible(true);
+        keyMapClicked=false;
+        keyblock=device->getTimer()->getTime()+500;
+      }
+      return true;
     }
 };
+
 
 class WinGui: BaseGui{
 
   bool okClicked,generateClicked,loadClicked, saveClicked;
+  
+  PuzzleDisplay* pd;
+  
+  irr::u32 keyblock;
   
   enum
   {
@@ -141,8 +143,10 @@ class WinGui: BaseGui{
           return true;
         }
       }
-      if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+      if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE && 
+          (keyblock==0||device->getTimer()->getTime()>keyblock)){
         okClicked=true;
+        keyblock=0;
         return true;
       }
       return false;
@@ -151,11 +155,16 @@ class WinGui: BaseGui{
 
   public:
     bool won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd){
+      this->pd=&pd;
+      main(_device);
+      return true;
+    }
+    
+    void createGUI(){
       okClicked=generateClicked=loadClicked=saveClicked=false;
-      apply(_device);
+      keyblock=0;
       
       irr::IVideoDriver* driver = device->getVideoDriver();
-      irr::ISceneManager* smgr = device->getSceneManager();
       irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
       
       irr::rect<irr::s32> rect=driver->getViewPort();
@@ -164,61 +173,51 @@ class WinGui: BaseGui{
       size.Width=min(600,size.Width-10);
       size.Height=min(600,size.Height-10);
       
-      guienv->addStaticText(L"Congratulations!!!\n\n\nWhat would you like to do now?",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true,0,-1,true)->setTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32-32-10,center.X+size.Width/2,center.Y+size.Height/2-32-10),0,GUI_ID_SAVE_BUTTON,L"Save Maze");
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),0,GUI_ID_LOAD_BUTTON,L"Load a Maze");
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-300,center.Y+size.Height/2-32,center.X+size.Width/2-130,center.Y+size.Height/2),0,GUI_ID_GENERATE_BUTTON,L"Generate New Maze");
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-500,center.Y+size.Height/2-32,center.X+size.Width/2-310,center.Y+size.Height/2),0,GUI_ID_OK_BUTTON,L"Back to Current Maze");
+      guienv->addStaticText(L"Congratulations!!!\n\n\nWhat would you like to do now?",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true,el,-1,true)->setTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
+      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32-32-10,center.X+size.Width/2,center.Y+size.Height/2-32-10),el,GUI_ID_SAVE_BUTTON,L"Save Maze");
+      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_LOAD_BUTTON,L"Load a Maze");
+      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-300,center.Y+size.Height/2-32,center.X+size.Width/2-130,center.Y+size.Height/2),el,GUI_ID_GENERATE_BUTTON,L"Generate New Maze");
+      irr::IGUIButton* back=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-500,center.Y+size.Height/2-32,center.X+size.Width/2-310,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Back to Current Maze");
       
-//      guienv->setFocus();
+      guienv->setFocus(back);
         
       device->setWindowCaption(L"Hyper Maze Help");
-      
-      while(true)
-      {
-        if(!device->run())
-          break;
-        
-        driver->beginScene(true, true, irr::SColor(255,113,113,133));
-
-        smgr->drawAll();
-        
-        guienv->drawAll();
-
-        driver->endScene();
-
-        
-        if(okClicked){
-          break;
-        }
-        if(saveClicked){
-          guienv->clear();
-          unapply();
-          SaveGui sg;
-          return sg.save(_device,pd.m);
-        }
-        if(loadClicked){
-          guienv->clear();
-          unapply();
-          OpenGui og;
-          if(og.open(_device,pd.m)){
-            pd.mazeUpdated();
-          }
-          return true;
-        }
-        if(generateClicked){
-          guienv->clear();
-          unapply();
-          GenerateGui gg;
-          if(gg.generate(_device,pd.m)){
-            pd.mazeUpdated();
-          }
-          return true;
-        }
+    }
+    bool run(){
+      if(okClicked){
+        return false;
       }
-      guienv->clear();
-      unapply();
-      return okClicked;
+      if(saveClicked){
+        el->setVisible(false);
+        SaveGui sg;
+        sg.save(device,pd->m);
+        el->setVisible(true);
+        saveClicked=false;
+        keyblock=device->getTimer()->getTime()+500;
+      }
+      if(loadClicked){
+        el->setVisible(false);
+        OpenGui og;
+        if(og.open(device,pd->m)){
+          pd->mazeUpdated();
+          return false;
+        }
+        el->setVisible(true);
+        loadClicked=false;
+        keyblock=device->getTimer()->getTime()+500;
+      }
+      if(generateClicked){
+        el->setVisible(false);
+        GenerateGui gg;
+        if(gg.generate(device,pd->m)){
+          pd->mazeUpdated();
+          return false;
+        }
+        el->setVisible(true);
+        generateClicked=false;
+        keyblock=device->getTimer()->getTime()+500;
+      }
+      return true;
     }
 };
 
