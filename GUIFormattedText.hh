@@ -24,13 +24,18 @@ class GUIFormattedText: irr::IGUIElement{
     irr::EGUI_ALIGNMENT defaultTextAlignmentHorizontal;
     irr::EGUI_ALIGNMENT defaultTextAlignmentVertical;
     
+    bool background;
+    bool border;
+    
+    static const int GAP=10;
+    
     void layout();
   
   public:
   
-    GUIFormattedText(const wchar_t* text, bool border, irr::IGUIEnvironment* environment,
+    GUIFormattedText(const wchar_t* text, irr::IGUIEnvironment* environment,
         irr::IGUIElement* parent, irr::s32 id, const irr::rect<irr::s32>& rectangle,
-        bool background = false);
+        bool background = true, bool border = true);
 
     virtual ~GUIFormattedText();
     
@@ -62,6 +67,9 @@ class GUIFormattedText: irr::IGUIElement{
 
     virtual void setAllTextAlignment(irr::EGUI_ALIGNMENT horizontal, irr::EGUI_ALIGNMENT vertical);
 
+		virtual void setDrawBackground(bool draw);
+
+		virtual void setDrawBorder(bool draw);
 
 };
 #endif

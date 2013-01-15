@@ -20,13 +20,13 @@ run-test: test
 	./test
 
 hypermaze: CPPLIBS+= -DIRRLICHT $(IRRLIBS)
-hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o maze.o keymap.o
+hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o maze.o keymap.o GUIFormattedText.o
 
 hypermaze.o: hypermaze.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
  iMyCamera.hh keymap.hh controller.hh
 
 controller.o: controller.cc controller.hh string.hh maze.hh dirns.hh \
- vector.hh keymap.hh irrdisp.hh gui.hh mazegen.hh helpgui.hh keymapgui.hh
+ vector.hh keymap.hh irrdisp.hh gui.hh mazegen.hh helpgui.hh keymapgui.hh GUIFormattedText.hh
 
 irrdisp.o: irrdisp.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
  controller.hh keymap.hh
@@ -36,6 +36,8 @@ maze.o: maze.cc maze.hh dirns.hh vector.hh
 keymap.o: keymap.cc keymap.hh dirns.hh vector.hh
 
 iMyCamera.o: iMyCamera.cpp iMyCamera.hh
+
+GUIFormatedText.o: GUIFormattedText.cc GUIFormatedText.hh
 
 run-hypermaze: hypermaze
 	./hypermaze

@@ -5,6 +5,7 @@
 #include "irrlicht.h"
 #include "gui.hh"
 #include "keymapgui.hh"
+#include "GUIFormattedText.hh"
 
 using namespace std;
 
@@ -76,7 +77,10 @@ class HelpGui: BaseGui{
       size.Width=min(600,size.Width-10);
       size.Height=min(600,size.Height-10);
       
-      guienv->addStaticText(L"Hyper Maze Puzzle Game by Staircase\n\nBend, Stretch and Move the String through the maze to get it to the far side of the hyper maze.\n Either click and drag on the controls or use the keyboard controls set below.\n\n\nGame written by Staircase in association with Dark Field Games. http://www.darkfieldgames.com/\nThis game is released open source under the ***** licence. Feel free to edit and change as you like. If you make any improvements or new ideas please send them me them and I may include them in the next release (and thank you below)",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true,el,-1,true)->setTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
+      GUIFormattedText* text=new GUIFormattedText(L"Hyper Maze Puzzle Game by Staircase",guienv,el,0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true);
+      text->setOverrideFont(0,guienv->getBuiltInFont());
+      text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
+      text->addText(L"\nBend, Stretch and Move the String through the maze to get it to the far side of the hyper maze.\n Either click and drag on the controls or use the keyboard controls set below.\n\n\nGame written by Staircase in association with Dark Field Games. http://www.darkfieldgames.com/\nThis game is released open source under the ***** licence. Feel free to edit and change as you like. If you make any improvements or new ideas please send them me them and I may include them in the next release (and thank you below)");
       guienv->addButton(irr::rect<irr::s32>(center.X-75,center.Y+size.Height/2-32-32-10,center.X+75,center.Y+size.Height/2-32-10),el,GUI_ID_KEY_MAP_BUTTON,L"Edit Key Map");
       irr::IGUIButton* ok=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"OK");
       
@@ -173,7 +177,10 @@ class WinGui: BaseGui{
       size.Width=min(600,size.Width-10);
       size.Height=min(600,size.Height-10);
       
-      guienv->addStaticText(L"Congratulations!!!\n\n\nWhat would you like to do now?",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true,el,-1,true)->setTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
+      GUIFormattedText* text=new GUIFormattedText(L"Congratulations!",guienv,el,0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true);
+      text->setOverrideFont(0,guienv->getBuiltInFont());
+      text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
+      text->addText(L"\nWhat would you like to do now?");
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32-32-10,center.X+size.Width/2,center.Y+size.Height/2-32-10),el,GUI_ID_SAVE_BUTTON,L"Save Maze");
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_LOAD_BUTTON,L"Load a Maze");
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-300,center.Y+size.Height/2-32,center.X+size.Width/2-130,center.Y+size.Height/2),el,GUI_ID_GENERATE_BUTTON,L"Generate New Maze");

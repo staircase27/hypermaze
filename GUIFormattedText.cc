@@ -1,10 +1,14 @@
-#include "GUIFormatedText.hh"
+#include "GUIFormattedText.hh"
+#include <iostream>
+using namespace std;
 
-GUIFormattedText::GUIFormattedText(const wchar_t* text, bool border, irr::IGUIEnvironment* environment,
-        irr::IGUIElement* parent, irr::s32 id, const irr::rect<irr::s32>& rectangle, bool background):
+GUIFormattedText::GUIFormattedText(const wchar_t* text, irr::IGUIEnvironment* environment,
+        irr::IGUIElement* parent, irr::s32 id, const irr::rect<irr::s32>& rectangle,
+        bool background, bool border):
         irr::IGUIElement(EGUIET_FORMATTED_TEXT,environment,parent,id,rectangle),
         paragraphs(),layoutNeeded(true),lastLayoutSkinFont(0),defaultOverrideFont(0),
-        defaultTextAlignmentHorizontal(irr::EGUIA_CENTER),defaultTextAlignmentVertical(irr::EGUIA_CENTER){
+        defaultTextAlignmentHorizontal(irr::EGUIA_CENTER),defaultTextAlignmentVertical(irr::EGUIA_CENTER),
+        background(background),border(border){
   setText(text);
 }
 
@@ -14,19 +18,31 @@ GUIFormattedText::~GUIFormattedText(){
 }
     
 void GUIFormattedText::draw(){
+  irr::IGUISkin* skin = Environment->getSkin();
   if(layoutNeeded)
     layout();
   else{
-   	irr::IGUISkin* skin = Environment->getSkin();
-  	if (skin)
-      if(skin->getFont()!=lastLayoutSkinFont)
-        layout();
+  	if (skin && skin->getFont()!=lastLayoutSkinFont)
+      layout();
   }
+  if (skin){
+    irr::EGUI_DEFAULT_COLOR bgCol = irr::EGDC_WINDOW;
+
+    if (!border && background)
+    {
+      skin->draw2DRectangle(this, skin->getColor(bgCol), AbsoluteRect, &AbsoluteClippingRect);
+    }
+    if (border)
+    {
+      skin->draw3DSunkenPane(this, skin->getColor(bgCol), false, background, AbsoluteRect, &AbsoluteClippingRect);
+    }
+  }
+  
   IGUIElement::draw();
 }
     
 void GUIFormattedText::setText( const wchar_t* text){
-  // delete all childrenparagraphs.size()
+  // delete all children
   while(Children.begin()!=Children.end()){
     (*Children.begin())->remove();
   }
@@ -45,7 +61,12 @@ int GUIFormattedText::addText(const wchar_t* text,int i){
     return -1;
   par->setOverrideFont(defaultOverrideFont);
   par->setTextAlignment(defaultTextAlignmentHorizontal,defaultTextAlignmentVertical);
-  paragraphs.insert_before(paragraphs.begin()+i,par);
+  if(i==0)
+    paragraphs.push_front(par);
+  else if(i==paragraphs.size())
+    paragraphs.push_back(par);
+  else
+    paragraphs.insert_before(paragraphs.begin()+i,par);
   layoutNeeded=true;
   return i;
 }
@@ -132,16 +153,35 @@ void GUIFormattedText::setAllTextAlignment(irr::EGUI_ALIGNMENT horizontal, irr::
     (*it)->setTextAlignment(horizontal,vertical);
 }
 
+void GUIFormattedText::setDrawBackground(bool draw){
+	background = draw;
+}
+
+
+void GUIFormattedText::setDrawBorder(bool draw){
+	border = draw;
+}
+
 void GUIFormattedText::layout(){
-  irr::s32 pos=0;
   irr::list<irr::IGUIStaticText*>::Iterator it = paragraphs.begin();
-  for (; it != paragraphs.end(); ++it){
-    irr::s32 height=(*it)->getTextHeight();
-    irr::rect<irr::s32> rect=irr::rect<irr::s32>(irr::position2di(0,0),RelativeRect.getSize());
-    rect.UpperLeftCorner.Y-=pos;
-    rect.LowerRightCorner.Y=rect.UpperLeftCorner.Y-height;
-    
-    pos+=height+10;
+  irr::s32 totalHeight=0;
+  for (; it != paragraphs.end(); ++it)
+    totalHeight+=(*it)->getTextHeight();
+  irr::rect<irr::s32> rect=irr::rect<irr::s32>(irr::position2di(0,0),RelativeRect.getSize());
+  if (defaultTextAlignmentVertical == irr::EGUIA_CENTER){
+    rect.UpperLeftCorner.Y = rect.getCenter().Y - (totalHeight / 2);
+  }else if (defaultTextAlignmentVertical == irr::EGUIA_LOWERRIGHT){
+    rect.UpperLeftCorner.Y = rect.LowerRightCorner.Y - totalHeight;
   }
+  for (it = paragraphs.begin(); it != paragraphs.end(); ++it){
+    irr::s32 height=(*it)->getTextHeight();
+    rect.LowerRightCorner.Y=rect.UpperLeftCorner.Y+height;
+    (*it)->setRelativePosition(rect);
+    rect.UpperLeftCorner.Y+=height+GAP;
+  }
+  layoutNeeded=false;
+ 	irr::IGUISkin* skin = Environment->getSkin();
+	if (skin)
+    lastLayoutSkinFont=skin->getFont();
 }
 
