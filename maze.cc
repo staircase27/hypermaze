@@ -27,6 +27,7 @@ Maze::Maze(Vector size):maze(new int[size.X*size.Y*size.Z]),size(size){
   }
 };
 
+#ifdef IOSTREAM
 void prettyPrint(ostream& o,Maze m,int w){
   w/=(m.size.X*4+2);
   o<<m.size.X<<" "<<m.size.Y<<" "<<m.size.Z<<" :"<<w<<endl;
@@ -58,5 +59,5 @@ void prettyPrint(ostream& o,Maze m,int w){
     o<<endl;
   }
 }
-
+#endif
 

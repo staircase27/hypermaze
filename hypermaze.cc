@@ -66,7 +66,7 @@ class MyNodeGen:public NodeGen{
 };
 
 
-int main(){
+int main(int argc,char* argv[]){
 
 	irr::IrrlichtDevice *device =
 		irr::createDevice( irr::video::EDT_OPENGL, irr::dimension2d<irr::u32>(640, 480), 16,
@@ -76,6 +76,12 @@ int main(){
 		return 1;
 
 	device->setResizable(true);
+	
+	{
+	  irr::IFileSystem* fs=device->getFileSystem();
+	  cout<<argv[0]<<"->"<<(fs->getFileDir(argv[0])+"/").c_str()<<endl;
+	  fs->addFileArchive(fs->getFileDir(argv[0])+"/",false,false,irr::EFAT_FOLDER);
+	}
 
 	{
     device->getGUIEnvironment()->getSkin()->setFont(device->getGUIEnvironment()->getFont("irrlicht/fonts/Scada16r.xml"));

@@ -81,7 +81,6 @@
     };
     
     bool KeyboardController::onWin(){
-      cout<<"Well Done"<<endl;
       WinGui wg;
       wg.won(device,pd);
     }

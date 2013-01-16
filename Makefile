@@ -14,12 +14,14 @@ CPPLIBS=
 
 IRRLIBS=-lIrrlicht -isystem/usr/include/irrlicht/
 
+test: CPPOPTS+= -DIOSTREAM
 test: test.o
 test.o: test.cc maze.hh dirns.hh vector.hh string.hh mazegen.hh
 run-test: test
 	./test
 
-hypermaze: CPPLIBS+= -DIRRLICHT $(IRRLIBS)
+hypermaze: CPPOPTS+= -DIRRLICHT -DIOSTREAM
+hypermaze: CPPLIBS+= $(IRRLIBS)
 hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o maze.o keymap.o GUIFormattedText.o
 
 hypermaze.o: hypermaze.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \

@@ -325,7 +325,6 @@ class RandLimitMazeGenHalf: public MazeGenHalf<H>{
     RandLimitMazeGenHalf(Maze& m,bool down):MazeGenHalf<H>(m,down),maxstep(0){};
     virtual bool forceHunt(){
       if((--maxstep)<0){
-        cout<<"force"<<endl;
         return true;
       }else
         return false;
