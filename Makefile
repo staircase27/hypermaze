@@ -1,3 +1,4 @@
+
 all: hypermaze
 run: run-hypermaze
 

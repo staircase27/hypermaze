@@ -1,5 +1,4 @@
 #include "GUIFormattedText.hh"
-#include <iostream>
 using namespace std;
 
 GUIFormattedText::GUIFormattedText(const wchar_t* text, irr::IGUIEnvironment* environment,

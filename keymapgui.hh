@@ -264,7 +264,7 @@ class KeyMapGui: BaseGui{
       table->setColumnOrdering(1,irr::EGCO_NONE);
       for(int i=0;i<KeyMap::A_COUNT-1;++i){
         table->addRow(i);
-        table->setCellText(i,0,KeyMap::actionNames[i].second.c_str());
+        table->setCellText(i,0,KeyMap::actionNames[i].second);
         table->setCellText(i,1,toString(km.getKeySpec(KeyMap::actionNames[i].first)).c_str());
       }
       

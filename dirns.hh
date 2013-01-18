@@ -107,4 +107,10 @@ inline Dirn perpendicular(Dirn d,Dirn e){
       return d;
   }
 }
+#ifdef IOSTREAM
+inline ostream& operator<<(ostream& o,Dirn d){
+  return o<<"<Dirn "<<(int)d<<": "<<to_vector(d)<<">";
+}
+#endif
+
 #endif

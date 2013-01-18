@@ -5,7 +5,6 @@
 #include "dirns.hh"
 #include "keymap.hh"
 #include "controller.hh"
-#include <fstream>
 #include <map>
 
 using namespace std;
@@ -79,7 +78,6 @@ int main(int argc,char* argv[]){
 	
 	{
 	  irr::IFileSystem* fs=device->getFileSystem();
-	  cout<<argv[0]<<"->"<<(fs->getFileDir(argv[0])+"/").c_str()<<endl;
 	  fs->addFileArchive(fs->getFileDir(argv[0])+"/",false,false,irr::EFAT_FOLDER);
 	}
 
@@ -115,7 +113,7 @@ int main(int argc,char* argv[]){
   mic->kc.map.addMapping(irr::KEY_F1,KeyMap::A_CONF);
   {
     irr::IReadFile* in=device->getFileSystem()->createAndOpenFile("hypermaze.keymap.conf");
-    parse(in,&mic->kc.map);
+    mic->kc.map.load(in);
     in->drop();
   }
 

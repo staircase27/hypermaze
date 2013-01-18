@@ -2,7 +2,6 @@
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
-#include <iostream>
 #include <ISceneManager.h>
 #include "iMyCamera.hh"
 #include <ICursorControl.h>
@@ -234,7 +233,6 @@ void CSceneNodeAnimatorCameraMy::animateNode(scene::ISceneNode *node, u32 timeMs
         if(smgr){
           core::dimension2d<u32> dim=smgr->getVideoDriver()->getScreenSize();
           if(dim!=lastdim){
-            cout<<"screen changed"<<endl;
             if(dim.Height!=0&&dim.Width!=0){
               camera->setFOV(2.*atan(tan(camera->getFOV()/2.0)*dim.Height/lastdim.Height));
               camera->setAspectRatio(dim.Width*1.0/dim.Height);

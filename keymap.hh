@@ -52,8 +52,7 @@ struct KeySpec{
 
 
 
-class KeyMap:public InputParser{
-  
+class KeyMap:private InputParser{
   public:
     enum Action{
       A_NONE=0,
@@ -75,7 +74,7 @@ class KeyMap:public InputParser{
     static const pair<Action,pair<Dirn,bool> > sliceActions[12];
     static const pair<Action,pair<bool,bool> > slideActions[4];
     static const pair<Action,Dirn> moveActions[6];
-    static const pair<Action,wstring> actionNames[A_COUNT-1];
+    static const pair<Action,wchar_t*> actionNames[A_COUNT-1];
   private:
     map<KeySpec,Action> keyMap;
     map<Action,KeySpec> revMap;
@@ -113,6 +112,7 @@ class KeyMap:public InputParser{
       return revMap;
     }
     
+  protected:
     virtual Used parse(char* data,irr::u32 length,bool eof){
       irr::u32 totalused=0;
       char* start=data;
@@ -159,6 +159,8 @@ class KeyMap:public InputParser{
       }
     }
     
+  public:
+    
     void save(irr::IWriteFile* out){
       irr::stringc str;
       char*tmp=new char[MB_CUR_MAX];
@@ -184,7 +186,9 @@ class KeyMap:public InputParser{
       out->write(str.c_str(),str.size());
     }
     
-    
+    void load(irr::IReadFile* in){
+      ::parse(in,this);
+    }
 };
 
 #endif

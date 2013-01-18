@@ -3,7 +3,6 @@
 #include "maze.hh"
 #include "string.hh"
 #include "mazegen.hh"
-#include <fstream>
 
 #ifndef GUI_HH_INC
 #define GUI_HH_INC
@@ -100,6 +99,7 @@ class BaseGui : irr::IEventReceiver{
       unapply();
       guienv->removeFocus(guienv->getFocus());
       el->remove();
+      el->drop();
     }
 };
 
@@ -273,10 +273,11 @@ class SaveGui: BaseGui{
       if(cancelClicked)
         return false;
       if(okClicked){
-        irr::stringc fname(fileField->getText());
-        ofstream ofs(fname.c_str());
-        ofs<<m;
-        ofs.close();
+        irr::IWriteFile* out=device->getFileSystem()->createAndWriteFile(fileField->getText());
+        if(!out)
+          return true;
+        m->save(out);
+        out->drop();
         return false;
       } 
       return true;
@@ -355,10 +356,11 @@ class OpenGui: BaseGui{
       if(cancelClicked)
         return false;
       if(okClicked){
-        irr::stringc fname(fileField->getText());
-        ifstream ifs(fname.c_str());
-        ifs>>*m;
-        ifs.close();
+        irr::IReadFile* in=device->getFileSystem()->createAndOpenFile(fileField->getText());
+        if(!in)
+          return true;
+        m->load(in);
+        in->drop();
         return false;
       }
       return true;

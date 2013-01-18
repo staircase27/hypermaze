@@ -26,6 +26,7 @@ class SequentialInputParser: public InputParser{
   InputParser* current;
   public:
     SequentialInputParser(InputParser* parsers,irr::u32 count):parsers(parsers),end(parsers+count),current(parsers){};
+  protected:
     virtual Used parse(char* data,irr::u32 length,bool eof){
       Used total(0,true);
       while(current!=end && total.finished){

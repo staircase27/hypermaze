@@ -1,16 +1,15 @@
 #include "maze.hh"
 #include "dirns.hh"
 #include <list>
+#ifdef IOSTREAM
 #include <istream>
+#endif
 #ifndef STRING_HH_INC
 #define STRING_HH_INC
 using namespace std;
 
 class StringSlice;
 
-inline ostream& operator<<(ostream& o,Dirn d){
-  return o<<"<Dirn "<<(int)d<<": "<<to_vector(d)<<">";
-}
 struct StringElement{
   Vector pos;
   Dirn d;
@@ -54,9 +53,12 @@ class StringPointer{
     
     friend class StringSlice;
 };
+
+#ifdef IOSTREAM
 inline ostream& operator<<(ostream& o,const StringElement& e){
   return o<<"<StringElement "<<e.pos<<" "<<e.d<<" "<<e.selected<<">";
 }
+#endif
 class String{
     list<StringElement> route;
     Vector endPos;
@@ -114,8 +116,10 @@ class String{
     }
     
     friend class StringSlice;
+    #ifdef IOSTREAM
     friend ostream& operator <<(ostream& o,String s);
     friend ostream& operator <<(ostream& o,StringSlice s);
+    #endif
 };
 
 class StringSlice{
@@ -168,7 +172,6 @@ class StringSlice{
     }
     
     bool canMove(Dirn d){
-//      cout<<"can move in "<<d<<endl;
       bool any=false;
       if((d==LEFT||d==opposite(LEFT))&&(s.route.front().selected||s.route.back().selected))
         return false;
@@ -183,13 +186,10 @@ class StringSlice{
         if(it->d!=d && it->d!=opposite(d)){
           Vector wall=it->pos+to_shift_vector(it->d)+to_shift_vector(d);
           Dirn wallDirn=perpendicular(it->d,d);
-//          cout<<"check point "<<it->pos<<" "<<it->d<<" wall is "<<wall<<"-"<<wallDirn;
           if(inCube(wall,Vector(0,0,0),s.maze.size)){
-//            cout<<" and is "<<*s.maze[wall]<<" "<<to_mask(wallDirn)<<endl;
             if(((*s.maze[wall])&to_mask(wallDirn))!=0)
               return false;
-          }//else
-//            cout<<endl;
+          }
         }
       }
       return any;
@@ -233,14 +233,15 @@ class StringSlice{
     
     bool tryMove(Dirn d){
       if(canMove(d)){
-        cout<<"Moving"<<endl;
         doMove(d);
         return true;
       }else{
         return false;
       }
     }
+    #ifdef IOSTREAM
     friend ostream& operator <<(ostream& o,StringSlice s);
+    #endif
 
     StringSlice& operator=(const StringSlice& o){
       s=o.s;
@@ -249,7 +250,7 @@ class StringSlice{
 
 };
 
-
+#ifdef IOSTREAM
 inline ostream& operator<<(ostream& o,String s){
   o<<"<String ";
   for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it)
@@ -264,6 +265,6 @@ inline ostream& operator<<(ostream& o,StringSlice s){
     cout<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";
   return cout<<s.s.endPos<<">";
 }
-
+#endif
 
 #endif

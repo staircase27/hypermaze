@@ -1,13 +1,24 @@
 #include "dirns.hh"
 #include "vector.hh"
 
+#ifdef IRRLICHT
+#include "irrio.hh"
+#endif
+#ifdef IOSTREAM
+#include <iostream>
+#endif
+
 #ifndef MAZE_HH_INC
 #define MAZE_HH_INC
 
 class Point;
 class ConstPoint;
+#ifdef IRRLICHT
+class MazeParser;
+#endif
 
-class Maze{
+class Maze
+{
   private:
     int* maze;
   public:
@@ -16,8 +27,18 @@ class Maze{
     Maze(Vector size);
     Point operator [](Vector p);
     ConstPoint operator [](Vector p) const;
+    
+    #ifdef IOSTREAM
     friend ostream& operator<<(ostream&,Maze);
     friend istream& operator>>(istream&,Maze&);
+    #endif
+    
+    #ifdef IRRLICHT
+    friend class MazeParser;
+    void load(irr::IReadFile* in);
+    void save(irr::IWriteFile*);
+    #endif
+    
 };
 
 class Point{
@@ -54,7 +75,7 @@ class ConstPoint{
     }
 };
 
-
+#ifdef IOSTREAM
 inline ostream& operator<<(ostream& o,Maze m){
   o<<m.size.X<<" "<<m.size.Y<<" "<<m.size.Z<<hex<<endl;
   int* p=m.maze;
@@ -84,7 +105,7 @@ inline istream& operator>>(istream& o,Maze& m){
   return o>>dec;
 }
 
-
 void prettyPrint(ostream& o,Maze m,int w=150);
+#endif
 
 #endif
