@@ -113,9 +113,11 @@ int main(int argc,char* argv[]){
   pd.c=c;
 
   mic->kc.map.addMapping(irr::KEY_F1,KeyMap::A_CONF);
-  wifstream ifs("hypermaze.keymap.conf");
-  ifs>>mic->kc.map;
-  ifs.close();
+  {
+    irr::IReadFile* in=device->getFileSystem()->createAndOpenFile("hypermaze.keymap.conf");
+    parse(in,&mic->kc.map);
+    in->drop();
+  }
 
   while(device->run())
 	{

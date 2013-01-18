@@ -1,11 +1,18 @@
 #include "irrlicht.h"
 #include "dirns.hh"
-#include <iostream>
-#include <sstream>
 #include <map>
+#include "irrio.hh"
 
 #ifndef KEYMAP_HH_INC
 #define KEYMAP_HH_INC
+
+inline int mbtowc0( wchar_t * pwc, const char * pmb, size_t max ){
+  if(*pmb==0){
+    *pwc=0;
+    return 1;
+  }else
+    return mbtowc(pwc,pmb,max);
+}
 
 namespace irr{
   using namespace core;
@@ -45,7 +52,7 @@ struct KeySpec{
 
 
 
-class KeyMap{
+class KeyMap:public InputParser{
   
   public:
     enum Action{
@@ -106,32 +113,78 @@ class KeyMap{
       return revMap;
     }
     
-    friend wostream& operator<<(wostream& os,const KeyMap& km);
-    friend wistream& operator>>(wistream& os,const KeyMap& km);
+    virtual Used parse(char* data,irr::u32 length,bool eof){
+      irr::u32 totalused=0;
+      char* start=data;
+      char* end=data+length;
+      const char* tmp;
+      while(true){
+        KeySpec ks;
+        while(irr::isspace(*data)){++data;}
+        if(data>=end) return Used(totalused,false);
+        
+        data+=mbtowc0(&ks.chr,data,end-data);
+        if(data>=end) return Used(totalused,false);
+        
+        while(irr::isspace(*data)){++data;}
+        if(data>=end) return Used(totalused,false);
+        
+        ks.key=(irr::EKEY_CODE)irr::strtol10(data,&tmp);
+        data+=tmp-data;
+        if(data>=end) return Used(totalused,false);
+        
+        while(irr::isspace(*data)){++data;}
+        if(data>=end) return Used(totalused,false);
+        
+        ks.shift=(bool)irr::strtol10(data,&tmp);
+        data+=tmp-data;
+        if(data>=end) return Used(totalused,false);
+        
+        while(irr::isspace(*data)){++data;}
+        if(data>=end) return Used(totalused,false);
+        
+        ks.control=(bool)irr::strtol10(data,&tmp);
+        data+=tmp-data;
+        if(data>=end) return Used(totalused,false);
+        
+        while(irr::isspace(*data)){++data;}
+        if(data>=end) return Used(totalused,false);
+        
+        KeyMap::Action a=(KeyMap::Action)irr::strtol10(data,&tmp);
+        data+=tmp-data;
+        if(data>=end) return Used(totalused,false);
+        
+        this->addMapping(ks,a);
+        totalused=data-start;
+      }
+    }
+    
+    void save(irr::IWriteFile* out){
+      irr::stringc str;
+      char*tmp=new char[MB_CUR_MAX];
+      for(map<KeySpec,KeyMap::Action>::const_iterator it=keyMap.begin();it!=keyMap.end();++it){
+        if(it->second==A_NONE)
+          continue;
+        int len=wctomb(tmp,it->first.chr);
+        str+=irr::stringc(tmp,len);
+        str+=" ";
+        str+=it->first.key;
+        str+=" ";
+        str+=it->first.shift;
+        str+=" ";
+        str+=it->first.control;
+        str+=" ";
+        str+=it->second;
+        str+="\n";
+        if(str.size()>256){
+          out->write(str.c_str(),str.size());
+          str=irr::stringc();
+        }
+      }
+      out->write(str.c_str(),str.size());
+    }
+    
+    
 };
-
-inline wostream& operator<<(wostream& os,const KeyMap& km){
-  for(map<KeySpec,KeyMap::Action>::const_iterator it=km.keyMap.begin();it!=km.keyMap.end();++it){
-    os<<it->first.chr<<" "<<it->first.key<<" "<<it->first.shift<<" "<<it->first.shift<<" "<<it->second<<endl;
-  }
-  return os;
-}
-inline wistream& operator>>(wistream& is,KeyMap& km){
-  wstring line;
-  getline(is,line);
-  while(!line.empty()){
-    wstringstream ss(line);
-    KeySpec ks;
-    KeyMap::Action a;
-    int i;
-    ss>>ks.chr>>i>>ks.shift>>ks.shift;
-    ks.key=(irr::EKEY_CODE)i;
-    ss>>i;
-    a=(KeyMap::Action)i;
-    km.addMapping(ks,a);
-    getline(is,line);
-  }
-  return is;
-}
 
 #endif
