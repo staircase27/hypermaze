@@ -6,6 +6,9 @@
 #include "keymap.hh"
 #include "controller.hh"
 #include <map>
+#ifdef IOSTREAM
+#include <iostream>
+#endif
 
 using namespace std;
 

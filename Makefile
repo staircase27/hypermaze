@@ -42,6 +42,8 @@ iMyCamera.o: iMyCamera.cpp iMyCamera.hh
 
 GUIFormatedText.o: GUIFormattedText.cc GUIFormatedText.hh
 
+irrcurl.o: irrcurl.cc irrcurl.hh
+
 run-hypermaze: hypermaze
 	./hypermaze
 

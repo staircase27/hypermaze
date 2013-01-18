@@ -164,19 +164,19 @@ class GenerateGui: BaseGui{
       xSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32-10-32,
           center.X+size.Width/2,center.Y-5-32-10),true,el);
       xSize->setDecimalPlaces(0);
-      xSize->setRange(3,100);
+      xSize->setRange(3,75);
       xSize->setValue(m->size.X);
       
       ySize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,
           center.X+size.Width/2,center.Y-5),true,el);
       ySize->setDecimalPlaces(0);
-      ySize->setRange(3,100);
+      ySize->setRange(3,75);
       ySize->setValue(m->size.Y);
       
       zSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y+5,
           center.X+size.Width/2,center.Y+5+32),true,el);
       zSize->setDecimalPlaces(0);
-      zSize->setRange(3,100);
+      zSize->setRange(3,75);
       zSize->setValue(m->size.Z);
 
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5+32+10,center.X+size.Width/2-100,center.Y+5+32+10+32),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
