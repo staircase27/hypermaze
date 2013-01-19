@@ -5,6 +5,7 @@
 #include "dirns.hh"
 #include "keymap.hh"
 #include "controller.hh"
+#include "sound.hh"
 #include <map>
 #ifdef IOSTREAM
 #include <iostream>
@@ -67,6 +68,29 @@ class MyNodeGen:public NodeGen{
 
 };
 
+class IrrlichtMusicSource: public MusicSource{
+  int i;
+  public:
+    IrrlichtMusicSource():i(-1){};
+    virtual char* getNextTrack(){
+      if(++i>2)
+        i=0;
+      if(i==0)
+        return "irrlicht/music/01. Imagined Village - John Barleycorn.wav";
+      else
+        return "irrlicht/music/05. Bellowhead - Prickle-eye Bush.wav";
+    };
+    virtual char* getEffectName(SoundManager::SOUND_EFFECT effect){
+      switch(effect){
+        case SoundManager::SE_BLOCK:
+          return "irrlicht/sounds/thud.wav";
+        case SoundManager::SE_WIN:
+          return "irrlicht/sounds/HypermazeSuccessTrumpet2_16PCM.wav";
+        default:
+          return "";
+      }
+    };
+};
 
 int main(int argc,char* argv[]){
 
@@ -106,9 +130,12 @@ int main(int argc,char* argv[]){
   MyNodeGen* ng=new MyNodeGen(smgr,driver->getTexture("irrlicht/wall.png"),driver->getTexture("irrlicht/string.png"),driver->getTexture("irrlicht/activeString.png"),driver->getTexture("irrlicht/handle.png"));
 
   PuzzleDisplay pd(ng);
+  
+  SoundManager* sm=createSoundManager();
+  sm->setMusicSource(new IrrlichtMusicSource());
+  sm->startMusic();
 
-
-  MultiInterfaceController *mic=new MultiInterfaceController(pd,device);
+  MultiInterfaceController *mic=new MultiInterfaceController(pd,device,sm);
   Controller* c=mic;
   device->setEventReceiver(c);
   pd.c=c;
@@ -119,12 +146,14 @@ int main(int argc,char* argv[]){
     mic->kc.map.load(in);
     in->drop();
   }
-
+  
   while(device->run())
 	{
     const irr::u32 now = device->getTimer()->getTime();
 
 	  c->run(now);
+	  
+	  sm->run();
 
 		driver->beginScene(true, true, irr::SColor(255,100,101,140));
 

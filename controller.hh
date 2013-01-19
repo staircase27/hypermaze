@@ -2,6 +2,7 @@
 #include "string.hh"
 #include "keymap.hh"
 #include "irrdisp.hh"
+#include "sound.hh"
 
 #ifndef CONTROLLER_HH_INC
 #define CONTROLLER_HH_INC
@@ -32,6 +33,7 @@ class KeyboardController:public Controller{
   irr::u32 actionTime[KeyMap::A_COUNT];
   static const irr::u32 DELAY=500;
   irr::IrrlichtDevice* device;
+  SoundManager* sm;
 
   public:
     KeyMap map;
@@ -43,7 +45,7 @@ class KeyboardController:public Controller{
     
     virtual bool onWin();
 
-    KeyboardController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),device(device){
+    KeyboardController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),device(device),sm(sm){
       for (irr::u32 i=0; i<KeyMap::A_COUNT; ++i){
         actionTriggered[i] = false;
         actionTime[i] = 0;
@@ -65,7 +67,7 @@ class MouseSlicerController: public Controller{
 
     virtual bool OnEvent(const irr::SEvent& event);
     
-    MouseSlicerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),slice(0),mousePos(0,0){};
+    MouseSlicerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),slice(0),mousePos(0,0){};
 };
 
 
@@ -76,6 +78,7 @@ class MouseStringDraggerController: public Controller{
   irr::position2d<irr::s32> mousePos;
   int dist;
   Dirn currdir;
+  SoundManager* sm;
 
 
   public:
@@ -83,7 +86,7 @@ class MouseStringDraggerController: public Controller{
 
     virtual bool OnEvent(const irr::SEvent& event);
 
-    MouseStringDraggerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),mousePos(0,0){};
+    MouseStringDraggerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),mousePos(0,0),sm(sm){};
 };
 
 
@@ -102,7 +105,7 @@ class MouseStringSelectorController: public Controller{
     
     virtual bool OnEvent(const irr::SEvent& event);
   
-    MouseStringSelectorController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),sp(pd.s.end(),false){};
+    MouseStringSelectorController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),sp(pd.s.end(),false){};
 };
   
 
@@ -113,7 +116,7 @@ class MultiInterfaceController:public Controller{
     MouseStringDraggerController mdc;
     MouseStringSelectorController mssc;
 
-    MultiInterfaceController(PuzzleDisplay& pd,irr::IrrlichtDevice *device):Controller(pd),kc(pd,device),msc(pd,device),mdc(pd,device),mssc(pd,device){};
+    MultiInterfaceController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),kc(pd,device,sm),msc(pd,device,sm),mdc(pd,device,sm),mssc(pd,device,sm){};
 
     virtual bool OnEvent(const irr::SEvent& event){
       return kc.OnEvent(event)||msc.OnEvent(event)||mdc.OnEvent(event)||mssc.OnEvent(event);

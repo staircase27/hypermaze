@@ -1,13 +1,15 @@
-class MusicSource{
-  virtual char* getNextTrack(){return 0;};
-}
+
+#ifndef SOUND_HH_INC
+#define SOUND_HH_INC
+
+class MusicSource;
 
 class SoundManager{
   public:
     enum SOUND_EFFECT{
-      SE_BLOCK;
-      SE_WIN;
-    }
+      SE_BLOCK,
+      SE_WIN
+    };
 
   protected:
     MusicSource* ms;
@@ -35,6 +37,12 @@ class SoundManager{
     virtual bool isValid()=0;
 };
 
+class MusicSource{
+  public:
+    virtual char* getNextTrack(){return 0;};
+    virtual char* getEffectName(SoundManager::SOUND_EFFECT effect){return 0;};
+};
+
 SoundManager* createSoundManager();    
     
-
+#endif

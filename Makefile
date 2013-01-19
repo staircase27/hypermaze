@@ -21,9 +21,9 @@ test.o: test.cc maze.hh dirns.hh vector.hh string.hh mazegen.hh
 run-test: test
 	./test
 
-hypermaze: CPPOPTS+= -DIRRLICHT
-hypermaze: CPPLIBS+= $(IRRLIBS)
-hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o maze.o keymap.o GUIFormattedText.o
+hypermaze: CPPOPTS+= -DIRRLICHT -DOPENAL
+hypermaze: CPPLIBS+= $(IRRLIBS) -lopenal -lalut
+hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o maze.o keymap.o GUIFormattedText.o sound.o
 
 hypermaze.o: hypermaze.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
  iMyCamera.hh keymap.hh controller.hh irrio.hh
@@ -43,6 +43,8 @@ iMyCamera.o: iMyCamera.cpp iMyCamera.hh
 GUIFormatedText.o: GUIFormattedText.cc GUIFormatedText.hh
 
 irrcurl.o: irrcurl.cc irrcurl.hh
+
+sound.o: sound.cc sound.hh
 
 run-hypermaze: hypermaze
 	./hypermaze

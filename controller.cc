@@ -50,7 +50,8 @@
           if(pd.ss.tryMove(it->second)){
             pd.stringUpdated();
             actionTime[it->first]=now+1*DELAY;
-          }
+          }else
+            sm->playEffect(SoundManager::SE_BLOCK);
         }
       }
 
@@ -82,6 +83,7 @@
     
     bool KeyboardController::onWin(){
       WinGui wg;
+      sm->playEffect(SoundManager::SE_WIN);
       wg.won(device,pd);
     }
 
@@ -167,14 +169,22 @@
               weight.Z=0;
             Dirn dir;
             irr::f32 largest=0.9999;
+            irr::f32 reallargest=0.9999;
             for(Dirn *d=allDirns;d!=allDirns+6;++d){
-              if(weight.dotProduct(con(to_vector(*d)))>largest&&pd.ss.canMove(*d)){
-                largest=weight.dotProduct(con(to_vector(*d)));
-                dir=*d;
+              if(weight.dotProduct(con(to_vector(*d)))>largest){
+                if(weight.dotProduct(con(to_vector(*d)))>reallargest)
+                  reallargest=weight.dotProduct(con(to_vector(*d)));
+                if(pd.ss.canMove(*d)){
+                  largest=weight.dotProduct(con(to_vector(*d)));
+                  dir=*d;
+                }
               }
             }
-            if(largest<1)
+            if(largest<1){
+              if(reallargest>=1.5)
+                sm->playEffect(SoundManager::SE_BLOCK);
               break;
+            }
             if(pd.ss.tryMove(dir)){
               pd.stringUpdated();
               currdir=dir;
@@ -191,8 +201,11 @@
             }else if(weight<=-1 && pd.ss.tryMove(opposite(currdir))){
               pd.stringUpdated();
               dist-=1;
-            }else
+            }else{
+              if(weight>=1.1 || weight<=-1.1)
+                sm->playEffect(SoundManager::SE_BLOCK);
               break;
+            }
           }
         }
       }
