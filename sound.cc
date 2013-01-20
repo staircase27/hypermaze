@@ -53,7 +53,12 @@ class OpenALSoundManager: public SoundManager{
       if(!ms)
         return
 	    alDeleteBuffers(1, buffer);
-	    *buffer=alutCreateBufferFromFile(ms->getNextTrack());
+	    char* track=ms->getNextTrack();
+	    if(!track){
+	      playing=false;
+	      return;
+	    }
+	    *buffer=alutCreateBufferFromFile(track);
 	  }
       
     
@@ -78,8 +83,16 @@ class OpenALSoundManager: public SoundManager{
     virtual void playEffect(SOUND_EFFECT effect){
       if(buffer[(int) effect]==0)
         buffer[(int) effect]=alutCreateBufferFromFile(ms->getEffectName(effect));
-      alSourcei(source[0],AL_BUFFER,buffer[(int) effect]);
-      alSourcePlay(source[0]);
+      ALint cur;
+      alGetSourcei(source[0],AL_BUFFER,&cur);
+      if(cur==buffer[(int) effect]){
+        alGetSourcei(source[0],AL_SOURCE_STATE,&cur);
+        if(cur!=AL_PLAYING)
+          alSourcePlay(source[0]);
+      }else{
+        alSourcei(source[0],AL_BUFFER,buffer[(int) effect]);
+        alSourcePlay(source[0]);
+      }
     }
     
     virtual void startMusic(){
