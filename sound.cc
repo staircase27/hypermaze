@@ -53,12 +53,19 @@ class OpenALSoundManager: public SoundManager{
       if(!ms)
         return
 	    alDeleteBuffers(1, buffer);
-	    char* track=ms->getNextTrack();
+	    const char* track=ms->getNextTrack();
 	    if(!track){
 	      playing=false;
 	      return;
 	    }
-	    *buffer=alutCreateBufferFromFile(track);
+	    if(!ml)
+  	    *buffer=alutCreateBufferFromFile(track);
+  	  else{
+  	    int length;
+  	    void* data=ml->loadTrack(track,length);
+  	    *buffer=alutCreateBufferFromFileImage(data,length);
+  	    ml->finished(data,length);
+  	  }
 	  }
       
     
@@ -81,8 +88,20 @@ class OpenALSoundManager: public SoundManager{
     };
     
     virtual void playEffect(SOUND_EFFECT effect){
-      if(buffer[(int) effect]==0)
-        buffer[(int) effect]=alutCreateBufferFromFile(ms->getEffectName(effect));
+      if(buffer[(int) effect]==0){
+	      const char* track=ms->getEffectName(effect);
+	      if(!track){
+	        return;
+	      }
+	      if(!ml)
+    	    buffer[(int) effect]=alutCreateBufferFromFile(track);
+    	  else{
+    	    int length;
+    	    void* data=ml->loadTrack(track,length);
+    	    buffer[(int) effect]=alutCreateBufferFromFileImage(data,length);
+    	    ml->finished(data,length);
+    	  }
+    	}
       ALint cur;
       alGetSourcei(source[0],AL_BUFFER,&cur);
       if(cur==buffer[(int) effect]){
@@ -103,6 +122,9 @@ class OpenALSoundManager: public SoundManager{
       playing=false;
       alSourcePause(source[0]);
     };
+    virtual bool isPlaying(){
+      return playing;
+    }
     
     virtual void run(){
       if(!playing)
@@ -172,6 +194,7 @@ class EmptySoundManager: public SoundManager{
     
     virtual void startMusic(){};
     virtual void stopMusic(){};
+    virtual bool isPlaying(){return false;}
     
     virtual void run(){};
     

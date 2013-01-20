@@ -69,18 +69,43 @@ class MyNodeGen:public NodeGen{
 };
 
 class IrrlichtMusicSource: public MusicSource{
+  irr::IFileSystem* fs;
+  irr::stringc folder;
+  irr::IFileList* files;
   int i;
   public:
-    IrrlichtMusicSource():i(-1){};
-    virtual char* getNextTrack(){
-      if(++i>2)
-        i=0;
-      if(i==0)
-        return "irrlicht/music/01. Imagined Village - John Barleycorn.wav";
-      else
-        return "irrlicht/music/05. Bellowhead - Prickle-eye Bush.wav";
+    IrrlichtMusicSource(irr::IFileSystem* fs):fs(fs),i(-1),folder("irrlicht/music/"){
+      fs->grab();
+      irr::EFileSystemType type=fs->setFileListSystem(irr::FILESYSTEM_VIRTUAL);
+      irr::path cwd=fs->getWorkingDirectory();
+      if(!fs->changeWorkingDirectoryTo(folder)){
+        files=fs->createEmptyFileList(folder,false,false);
+      }else{
+        files=fs->createFileList();
+        bool hasfiles=false;
+        for(int i=0;(!hasfiles)&&i<files->getFileCount();++i)
+          if(!files->isDirectory(i))
+            hasfiles=true;
+        if(!hasfiles){
+          files->drop();
+          files=fs->createEmptyFileList(folder,false,false);
+        }
+      }
+      fs->changeWorkingDirectoryTo(folder);
+      fs->setFileListSystem(type);
     };
-    virtual char* getEffectName(SoundManager::SOUND_EFFECT effect){
+    virtual ~IrrlichtMusicSource(){
+      fs->drop();
+      files->drop();
+    }
+    virtual const char* getNextTrack(){
+      do{
+        if(++i>files->getFileCount())
+          i=0;
+      }while(files->isDirectory(i));
+      return files->getFullFileName(i).c_str();
+    };
+    virtual const char* getEffectName(SoundManager::SOUND_EFFECT effect){
       switch(effect){
         case SoundManager::SE_BLOCK:
           return "irrlicht/sounds/thud.wav";
@@ -90,6 +115,40 @@ class IrrlichtMusicSource: public MusicSource{
           return "";
       }
     };
+};
+
+class IrrlichtMusicLoader: public MusicLoader{
+  irr::IFileSystem* fs;
+  public:
+    virtual void* loadTrack(const char* track,int& length){
+      irr::IReadFile* f=fs->createAndOpenFile(track);
+      int len=f->getSize()+2;
+      int extra=64;
+      length=0;
+      char* data=new char[len];
+      while(int read=f->read(data+length,len-length)){
+        length+=read;
+        if(length=len){
+          char* tmp=new char[len+extra];
+          memcpy(tmp,data,len);
+          delete[] data;
+          data=tmp;
+          len+=extra;
+          extra*=2;
+        }
+      }
+      return data;
+    }
+    virtual void finished(void* data,int length){
+      delete[] (char*)data;
+    }
+    IrrlichtMusicLoader(irr::IFileSystem* fs):fs(fs){
+      fs->grab();
+    };
+    virtual ~IrrlichtMusicLoader(){
+      fs->drop();
+    }
+    
 };
 
 int main(int argc,char* argv[]){
@@ -106,6 +165,7 @@ int main(int argc,char* argv[]){
 	{
 	  irr::IFileSystem* fs=device->getFileSystem();
 	  fs->addFileArchive(fs->getFileDir(argv[0])+"/",false,false,irr::EFAT_FOLDER);
+	  fs->setFileListSystem(irr::FILESYSTEM_VIRTUAL);
 	}
 
 	{
@@ -132,7 +192,8 @@ int main(int argc,char* argv[]){
   PuzzleDisplay pd(ng);
   
   SoundManager* sm=createSoundManager();
-  sm->setMusicSource(new IrrlichtMusicSource());
+  sm->setMusicSource(new IrrlichtMusicSource(device->getFileSystem()));
+  sm->setMusicLoader(new IrrlichtMusicLoader(device->getFileSystem()));
   sm->startMusic();
 
   MultiInterfaceController *mic=new MultiInterfaceController(pd,device,sm);

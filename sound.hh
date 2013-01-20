@@ -4,6 +4,8 @@
 
 class MusicSource;
 
+class MusicLoader;
+
 class SoundManager{
   public:
     enum SOUND_EFFECT{
@@ -13,12 +15,19 @@ class SoundManager{
 
   protected:
     MusicSource* ms;
+    MusicLoader* ml;
   public:
     void setMusicSource(MusicSource* _ms){
       ms=_ms;
     }
     MusicSource* getMusicSource(){
       return ms;
+    }
+    void setMusicLoader(MusicLoader* _ml){
+      ml=_ml;
+    }
+    MusicLoader* getMusicLoader(){
+      return ml;
     }
     
     virtual void setMusicVolume(unsigned int volume)=0;
@@ -31,6 +40,7 @@ class SoundManager{
     
     virtual void startMusic()=0;
     virtual void stopMusic()=0;
+    virtual bool isPlaying()=0;
     
     virtual void run()=0;
     
@@ -39,8 +49,14 @@ class SoundManager{
 
 class MusicSource{
   public:
-    virtual char* getNextTrack(){return 0;};
-    virtual char* getEffectName(SoundManager::SOUND_EFFECT effect){return 0;};
+    virtual const char* getNextTrack(){return 0;};
+    virtual const char* getEffectName(SoundManager::SOUND_EFFECT effect){return 0;};
+};
+
+class MusicLoader{
+  public:
+    virtual void* loadTrack(const char* track,int& length)=0;
+    virtual void finished(void* data,int length)=0;
 };
 
 SoundManager* createSoundManager();    

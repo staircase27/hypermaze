@@ -52,7 +52,7 @@ run-hypermaze: hypermaze
 clean:
 	rm -f *.o
 	rm -f test
-	rm -f irrtest
+	rm -f hypermaze
 	rm -rf dist/*
 
 %: %.o
