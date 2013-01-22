@@ -193,9 +193,17 @@ int main(int argc,char* argv[]){
 	irr::ISceneManager* smgr = device->getSceneManager();
 	
 	{
-  	smgr->addCubeSceneNode(1,0,-1,irr::vector3df(0,-300,0),irr::vector3df(0,0,0),irr::vector3df(5000,0.0001,5000));
-  	irr::IMeshSceneNode* sky=smgr->addSphereSceneNode(-0.5*5000,32,0,-1,irr::vector3df(0,-300,0));
-  	sky->setMaterialTexture( 0, driver->getTexture("irrlicht/SkyDome-Cloud-Medium-MidMorning.png"));
+    irr::IAnimatedMesh* mesh = smgr->getMesh("irrlicht/worldsky.obj");
+    if (!mesh)
+    {
+      device->drop();
+      return 1;
+    }
+    irr::IAnimatedMeshSceneNode* sky = smgr->addAnimatedMeshSceneNode( mesh );
+  	sky->setScale(irr::vector3df(1,1,1)*1000);
+  	sky->setPosition(irr::vector3df(0,-300,0));
+    sky->setMaterialFlag(irr::EMF_LIGHTING, false);
+  	sky->setMaterialTexture( 0, driver->getTexture("irrlicht/worldsky.png"));
   }
 
 	addCameraSceneNodeMy(smgr,device->getCursorControl(),0,irr::vector3df(0,0,0),
