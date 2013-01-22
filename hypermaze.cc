@@ -38,6 +38,16 @@ class MyNodeGen:public NodeGen{
       return node;
     }
 
+    virtual irr::IMeshSceneNode* makeStringEnd(){
+      irr::IMeshSceneNode* node = smgr->addCubeSceneNode(1);
+      node->setMaterialTexture( 0, string);
+      node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
+      irr::IMeshSceneNode* washer = smgr->addSphereSceneNode(2,16,node);
+      washer->setScale(irr::vector3df(0.01,1,1));
+      washer->setPosition(irr::vector3df(-(0.5-0.01),0,0));
+      return node;
+    }
+
     virtual irr::IMeshSceneNode* makeUnitString(bool isNode){
       irr::IMeshSceneNode* node = smgr->addCubeSceneNode(1);
       node->setMaterialTexture( 0, string);
@@ -99,6 +109,8 @@ class IrrlichtMusicSource: public MusicSource{
       files->drop();
     }
     virtual const char* getNextTrack(){
+      if(files->getFileCount()==0)
+        return (char*)NULL;
       do{
         if(++i>files->getFileCount())
           i=0;
@@ -112,7 +124,7 @@ class IrrlichtMusicSource: public MusicSource{
         case SoundManager::SE_WIN:
           return "irrlicht/sounds/HypermazeSuccessTrumpet2_16PCM.wav";
         default:
-          return "";
+          return NULL;
       }
     };
 };
@@ -122,9 +134,11 @@ class IrrlichtMusicLoader: public MusicLoader{
   public:
     virtual void* loadTrack(const char* track,int& length){
       irr::IReadFile* f=fs->createAndOpenFile(track);
+      length=0;
+      if(!f)
+        return (char*)NULL;
       int len=f->getSize()+2;
       int extra=64;
-      length=0;
       char* data=new char[len];
       while(int read=f->read(data+length,len-length)){
         length+=read;
@@ -165,7 +179,6 @@ int main(int argc,char* argv[]){
 	{
 	  irr::IFileSystem* fs=device->getFileSystem();
 	  fs->addFileArchive(fs->getFileDir(argv[0])+"/",false,false,irr::EFAT_FOLDER);
-	  fs->setFileListSystem(irr::FILESYSTEM_VIRTUAL);
 	}
 
 	{
@@ -178,6 +191,12 @@ int main(int argc,char* argv[]){
 	device->setWindowCaption(L"Hyper Maze! - Irrlicht");
 	irr::IVideoDriver* driver = device->getVideoDriver();
 	irr::ISceneManager* smgr = device->getSceneManager();
+	
+	{
+  	smgr->addCubeSceneNode(1,0,-1,irr::vector3df(0,-300,0),irr::vector3df(0,0,0),irr::vector3df(5000,0.0001,5000));
+  	irr::IMeshSceneNode* sky=smgr->addSphereSceneNode(-0.5*5000,32,0,-1,irr::vector3df(0,-300,0));
+  	sky->setMaterialTexture( 0, driver->getTexture("irrlicht/SkyDome-Cloud-Medium-MidMorning.png"));
+  }
 
 	addCameraSceneNodeMy(smgr,device->getCursorControl(),0,irr::vector3df(0,0,0),
 	    irr::vector3df(0,0,-300),-500.,-100.,-3.,100.);

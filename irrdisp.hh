@@ -29,6 +29,7 @@ inline irr::vector3df remSgn(irr::vector3df v){
 class NodeGen{
   public:
     virtual irr::IMeshSceneNode* makeUnitWall(bool isNode)=0;
+    virtual irr::IMeshSceneNode* makeStringEnd()=0;
     virtual irr::IMeshSceneNode* makeUnitString(bool isNode)=0;
     virtual void makeStringActive(irr::IMeshSceneNode* node,bool active)=0;
     virtual irr::IMeshSceneNode* makeUnitHandle()=0;
@@ -81,6 +82,8 @@ class MazeDisplay{
 class StringDisplay{
   StringSlice& s;
   list<irr::IMeshSceneNode*> nodes;
+  irr::IMeshSceneNode* startEnd;
+  irr::IMeshSceneNode* endEnd;
   int activeNodes;
   NodeGen* ng;
   irr::vector3df center;
@@ -92,7 +95,8 @@ class StringDisplay{
     
     pair<StringPointer,bool> getStringPointer(irr::ISceneNode* node);
       
-    StringDisplay(StringSlice& s,NodeGen* ng,irr::vector3df center=irr::vector3df(0,0,0)):s(s),center(center),ng(ng),activeNodes(0){
+    StringDisplay(StringSlice& s,NodeGen* ng,irr::vector3df center=irr::vector3df(0,0,0)):s(s),center(center),ng(ng),activeNodes(0),startEnd(ng->makeStringEnd()),endEnd(ng->makeStringEnd()){
+      endEnd->setRotation(irr::vector3df(0,180,0));
       update();
     };
     void setString(StringSlice _s){

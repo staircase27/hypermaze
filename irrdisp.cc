@@ -101,6 +101,14 @@
       int i=0;
       list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
       StringPointer sit=s.getString().begin();
+      
+      startEnd->setPosition(position+con(s.getString().getStart())*(MazeDisplay::wall+MazeDisplay::gap)
+          -con(to_vector(s.getString().stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
+      startEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s.getString().stringDir))));
+      endEnd->setPosition(position+con(s.getString().getEnd())*(MazeDisplay::wall+MazeDisplay::gap)
+          +con(to_vector(s.getString().stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
+      endEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s.getString().stringDir))));
+      
       while(sit!=s.getString().end()){
 
         if(nit==nodes.end()){

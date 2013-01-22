@@ -66,7 +66,7 @@ class OpenALSoundManager: public SoundManager{
   	    *buffer=alutCreateBufferFromFileImage(data,length);
   	    ml->finished(data,length);
   	  }
-	  }
+    }
       
     
     virtual void setMusicVolume(unsigned int volume){
