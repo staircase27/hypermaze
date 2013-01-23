@@ -30,14 +30,17 @@ class Maze
     
     ~Maze();
     
-    Maze& operator=(Maze& m);
     Maze& operator=(const Maze& m);
+    
+    inline void makeThisACopy(){
+      (*this)=Maze((const Maze)(*this));
+    }
     
     Point operator [](Vector p);
     ConstPoint operator [](Vector p) const;
     
     #ifdef IOSTREAM
-    friend ostream& operator<<(ostream&,Maze);
+    friend ostream& operator<<(ostream&,const Maze&);
     friend istream& operator>>(istream&,Maze&);
     #endif
     
@@ -84,7 +87,7 @@ class ConstPoint{
 };
 
 #ifdef IOSTREAM
-inline ostream& operator<<(ostream& o,Maze m){
+inline ostream& operator<<(ostream& o,const Maze& m){
   o<<m.size.X<<" "<<m.size.Y<<" "<<m.size.Z<<hex<<endl;
   int* p=m.maze;
   for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i){

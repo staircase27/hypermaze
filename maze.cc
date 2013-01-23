@@ -42,7 +42,7 @@ Maze::~Maze(){
     delete[] (maze-1);
 }
 
-Maze& Maze::operator=(Maze& m){
+Maze& Maze::operator=(const Maze& m){
   *(maze-1)-=1;
   if(*(maze-1)<=0)
     delete[] (maze-1);
@@ -50,17 +50,6 @@ Maze& Maze::operator=(Maze& m){
   *(maze-1)+=1;
   size=m.size;
 }
-Maze& Maze::operator=(const Maze& m){
-  *(maze-1)-=1;
-  if(*(maze-1)<=0)
-    delete[] (maze-1);
-  maze=new int[1+m.size.X*m.size.Y*m.size.Z]+1;
-  *(maze-1)=1;
-  memcpy(maze,m.maze,sizeof(int)*m.size.X*m.size.Y*m.size.Z);
-  size=m.size;
-}
-
-
 
 #ifdef IOSTREAM
 void prettyPrint(ostream& o,Maze m,int w){
