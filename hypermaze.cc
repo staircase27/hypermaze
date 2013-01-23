@@ -65,10 +65,15 @@ class MyNodeGen:public NodeGen{
         node->setMaterialTexture(0,string);
     }
     
-    virtual irr::IMeshSceneNode* makeUnitHandle(){
+    virtual irr::IMeshSceneNode* makeUnitHandle(int isForward){
       irr::IMeshSceneNode* node = smgr->addSphereSceneNode(1);
       node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
-      node->setMaterialTexture( 0, handle);
+      if(isForward==0)
+        node->setMaterialTexture( 0, handle);
+      else if(isForward>0)
+        node->setMaterialTexture( 0, string);
+      else
+        node->setMaterialTexture( 0, activeString);
       node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
       irr::ITriangleSelector* selector = smgr->createTriangleSelector(node->getMesh(),node);
       node->setTriangleSelector(selector);

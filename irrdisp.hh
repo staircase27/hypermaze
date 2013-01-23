@@ -32,7 +32,7 @@ class NodeGen{
     virtual irr::IMeshSceneNode* makeStringEnd()=0;
     virtual irr::IMeshSceneNode* makeUnitString(bool isNode)=0;
     virtual void makeStringActive(irr::IMeshSceneNode* node,bool active)=0;
-    virtual irr::IMeshSceneNode* makeUnitHandle()=0;
+    virtual irr::IMeshSceneNode* makeUnitHandle(int isForward)=0;
 };
 
 class VisibleCounter{
@@ -122,7 +122,7 @@ class PuzzleDisplay{
    public:
     PuzzleDisplay(NodeGen* ng):m(Vector(5,5,5)),s(m),ss(s),ng(ng),md(m,ng),sd(ss,ng),won(false){
       for(Dirn* d=allDirns;d!=allDirns+6;++d){
-        irr::IMeshSceneNode* node = ng->makeUnitHandle();
+        irr::IMeshSceneNode* node = ng->makeUnitHandle(to_vector(*d).dotProduct(to_vector(s.targetDir)));
         node->setScale(irr::vector3df(1,1,1)*(md.wall+md.gap)/2);
         node->setPosition(-con(to_vector(*d))*(abs(to_vector(*d).dotProduct(m.size))/2+2)*(md.wall+md.gap));
         slicers[node]=*d;
