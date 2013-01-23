@@ -1,4 +1,5 @@
 #include "maze.hh"
+#include <cstring>
 
 Point Maze::operator [](Vector p){
   return Point(*this,maze+(p.X+size.X*(p.Y+size.Y*p.Z)));
@@ -7,7 +8,8 @@ ConstPoint Maze::operator [](Vector p) const{
   return ConstPoint(*this,maze+(p.X+size.X*(p.Y+size.Y*p.Z)));
 };
 
-Maze::Maze(Vector size):maze(new int[size.X*size.Y*size.Z]),size(size){
+Maze::Maze(Vector size):maze(new int[1+size.X*size.Y*size.Z]+1),size(size){
+  *(maze-1)=1;
   int defmask=ALLDIRNSMASK&~to_mask(UP)&~to_mask(DOWN);
   memset(maze,0,size.X*size.Y*size.Z*sizeof(int));
   for(int x=0;x<size.X;++x){
@@ -26,6 +28,39 @@ Maze::Maze(Vector size):maze(new int[size.X*size.Y*size.Z]),size(size){
     *(*this)[Vector(x,size.Y-1,size.Z-1)]&=~to_mask(FORWARD);
   }
 };
+
+Maze::Maze(Maze& m):maze(m.maze),size(m.size){
+  *(maze-1)+=1;
+};
+Maze::Maze(const Maze& m):maze(new int[1+m.size.X*m.size.Y*m.size.Z]+1),size(m.size){
+  *(maze-1)=1;
+  memcpy(maze,m.maze,sizeof(int)*m.size.X*m.size.Y*m.size.Z);
+}
+Maze::~Maze(){
+  *(maze-1)-=1;
+  if(*(maze-1)<=0)
+    delete[] (maze-1);
+}
+
+Maze& Maze::operator=(Maze& m){
+  *(maze-1)-=1;
+  if(*(maze-1)<=0)
+    delete[] (maze-1);
+  maze=m.maze;
+  *(maze-1)+=1;
+  size=m.size;
+}
+Maze& Maze::operator=(const Maze& m){
+  *(maze-1)-=1;
+  if(*(maze-1)<=0)
+    delete[] (maze-1);
+  maze=new int[1+m.size.X*m.size.Y*m.size.Z]+1;
+  *(maze-1)=1;
+  memcpy(maze,m.maze,sizeof(int)*m.size.X*m.size.Y*m.size.Z);
+  size=m.size;
+}
+
+
 
 #ifdef IOSTREAM
 void prettyPrint(ostream& o,Maze m,int w){
@@ -83,7 +118,7 @@ class MazeParser:public InputParser{
 
         size.Z=strtol(data,&data,10);
         if(data>=end) return Used(0,false);
-        m->size=size;
+        *m=Maze(size);
         pos=0;
       }
       

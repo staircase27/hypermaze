@@ -16,7 +16,7 @@ CPPLIBS=
 IRRLIBS=-lIrrlicht -isystem/usr/include/irrlicht/
 
 test: CPPOPTS+= -DIOSTREAM
-test: test.o
+test: test.o maze.o
 test.o: test.cc maze.hh dirns.hh vector.hh string.hh mazegen.hh
 run-test: test
 	./test

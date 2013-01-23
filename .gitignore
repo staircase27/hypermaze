@@ -6,3 +6,5 @@
 # Ignore the dll on windows
 *.dll
 .obj
+# don't backup the music
+irrlicht/music

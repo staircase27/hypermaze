@@ -24,6 +24,9 @@ using namespace std;
       Vector operator-(Vector o){
         return Vector(X-o.X,Y-o.Y,Z-o.Z);
       }
+      Vector operator-(){
+        return Vector(-X,-Y,-Z);
+      }
       Vector& operator-=(Vector o){
         X-=o.X;Y-=o.Y;Z-=o.Z;
         return *this;

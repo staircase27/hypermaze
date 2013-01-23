@@ -25,6 +25,14 @@ class Maze
     Vector size;
 
     Maze(Vector size);
+    Maze(Maze& m);
+    Maze(const Maze& m);
+    
+    ~Maze();
+    
+    Maze& operator=(Maze& m);
+    Maze& operator=(const Maze& m);
+    
     Point operator [](Vector p);
     ConstPoint operator [](Vector p) const;
     
@@ -95,8 +103,7 @@ inline ostream& operator<<(ostream& o,Maze m){
 
 inline istream& operator>>(istream& o,Maze& m){
   o>>m.size.X>>m.size.Y>>m.size.Z>>hex;
-  delete[] m.maze;
-  m.maze=new int[m.size.X*m.size.Y*m.size.Z];
+  m=Maze(m.size);
   int* p=m.maze;
   for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i){
     o>>*p;
