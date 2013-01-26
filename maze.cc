@@ -43,12 +43,15 @@ Maze::~Maze(){
 }
 
 Maze& Maze::operator=(const Maze& m){
+  if(maze==m.maze)
+    return *this;
   *(maze-1)-=1;
   if(*(maze-1)<=0)
     delete[] (maze-1);
   maze=m.maze;
   *(maze-1)+=1;
   size=m.size;
+  return *this;
 }
 
 #ifdef IOSTREAM
