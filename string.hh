@@ -97,6 +97,10 @@ class String{
       return StringPointer(route.end());
     }
     
+    int length(){
+      return route.size();
+    }
+    
     bool hasWon(){
       Vector d=to_vector(targetDir);
       int t=maze.size.dotProduct(-to_shift_vector(opposite(targetDir)));
