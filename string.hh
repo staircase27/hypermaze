@@ -63,11 +63,11 @@ class String{
     list<StringElement> route;
     Vector endPos;
   public:
-    Maze& maze;
+    Maze maze;
     const Dirn stringDir;
     const Dirn targetDir;
   
-    String(Maze& m):maze(m),endPos(0,0,0),route(),stringDir(LEFT),targetDir(FORWARD){
+    String(Maze m):maze(m),endPos(0,0,0),route(),stringDir(LEFT),targetDir(FORWARD){
       Vector start=m.size.dotProduct(to_shift_vector(stringDir))*to_shift_vector(stringDir)+
           m.size.dotProduct(to_shift_vector(targetDir))*to_shift_vector(targetDir)+
           m.size.dotProduct(to_vector(perpendicular(stringDir,targetDir)))/2*to_vector(perpendicular(stringDir,targetDir));
@@ -123,43 +123,43 @@ class String{
 };
 
 class StringSlice{
-  String& s;
+  String* s;
 
   public:
-    StringSlice(String& s):s(s){};
+    StringSlice(String& s):s(&s){};
   
     String& getString(){
-      return s;
+      return *s;
     }
     
     bool slide(bool moveEnd,bool out){
       if(moveEnd){
         list<StringElement>::reverse_iterator it;
-        for(it=s.route.rbegin();it!=s.route.rend();++it)
+        for(it=s->route.rbegin();it!=s->route.rend();++it)
           if(it->selected)
             break;
         if(out){
-          if(it==s.route.rbegin())
+          if(it==s->route.rbegin())
             return false;
           --it;
           it->selected=true;
         }else{
-          if(it==s.route.rend())
+          if(it==s->route.rend())
             return false;
           it->selected=false;
         }
       }else{
         list<StringElement>::iterator it;
-        for(it=s.route.begin();it!=s.route.end();++it)
+        for(it=s->route.begin();it!=s->route.end();++it)
           if(it->selected)
             break;
         if(out){
-          if(it==s.route.begin())
+          if(it==s->route.begin())
             return false;
           --it;
           it->selected=true;
         }else{
-          if(it==s.route.end())
+          if(it==s->route.end())
             return false;
           it->selected=false;
         }
@@ -173,21 +173,21 @@ class StringSlice{
     
     bool canMove(Dirn d){
       bool any=false;
-      if((d==LEFT||d==opposite(LEFT))&&(s.route.front().selected||s.route.back().selected))
+      if((d==LEFT||d==opposite(LEFT))&&(s->route.front().selected||s->route.back().selected))
         return false;
-      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
+      for(list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it){
         if(!it->selected)
           continue;
         any=true;
-        if(d==UP && it->pos.Y>=s.maze.size.Y-1)
+        if(d==UP && it->pos.Y>=s->maze.size.Y-1)
           return false;
         if(d==DOWN && it->pos.Y<=1)
           return false;
         if(it->d!=d && it->d!=opposite(d)){
           Vector wall=it->pos+to_shift_vector(it->d)+to_shift_vector(d);
           Dirn wallDirn=perpendicular(it->d,d);
-          if(inCube(wall,Vector(0,0,0),s.maze.size)){
-            if(((*s.maze[wall])&to_mask(wallDirn))!=0)
+          if(inCube(wall,Vector(0,0,0),s->maze.size)){
+            if(((*s->maze[wall])&to_mask(wallDirn))!=0)
               return false;
           }
         }
@@ -197,38 +197,38 @@ class StringSlice{
     
     void doMove(Dirn d){
       bool lastselected=false;
-      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
+      for(list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it){
         if(it->selected){
           if(!lastselected){
-            if(it!=s.route.begin()){
+            if(it!=s->route.begin()){
               list<StringElement>::iterator nit=it;
               --nit;
               if(nit->d==opposite(d))
-                s.route.erase(nit);
+                s->route.erase(nit);
               else
-                s.route.insert(it,StringElement(it->pos,d,false));
+                s->route.insert(it,StringElement(it->pos,d,false));
             }
           }
           it->pos+=to_vector(d);
         }else if(lastselected){
-          if(it==s.route.end()){
-            s.endPos+=to_vector(d);
+          if(it==s->route.end()){
+            s->endPos+=to_vector(d);
           }else{
             if(it->d==d){
-              it=s.route.erase(it);
-              if(it==s.route.end()){
+              it=s->route.erase(it);
+              if(it==s->route.end()){
                 lastselected=false;
                 break;
               }
             }else{
-              s.route.insert(it,StringElement(it->pos+to_vector(d),opposite(d),false));
+              s->route.insert(it,StringElement(it->pos+to_vector(d),opposite(d),false));
             }
           }
         }
         lastselected=it->selected;
       }
       if(lastselected)
-        s.endPos+=to_vector(d);
+        s->endPos+=to_vector(d);
     }
     
     bool tryMove(Dirn d){
