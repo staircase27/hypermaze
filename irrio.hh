@@ -20,13 +20,29 @@ class InputParser{
     virtual Used parse(char* data,irr::u32 length,bool eof)=0;
 };
 
-class SequentialInputParser: public InputParser{
-  InputParser* parsers;
-  InputParser* end;
-  InputParser* current;
+template <class T,class PP>
+class Derefer{
   public:
-    SequentialInputParser(InputParser* parsers,irr::u32 count):parsers(parsers),end(parsers+count),current(parsers){};
-  protected:
+    PP data;
+    Derefer<T,PP>& operator++(){
+      data++;
+      return *this;
+    }
+    bool operator!=(const Derefer<T,PP>& o){
+      return *data!=*o.data;
+    }
+    T* operator->(){
+      return *data;
+    }
+    Derefer(PP data):data(data){};
+};
+
+template <class P>
+class SequentialInputParser: public InputParser{
+  P current;
+  public:
+    const P end;
+    SequentialInputParser(P begin,P end):end(end),current(begin){};
     virtual Used parse(char* data,irr::u32 length,bool eof){
       Used total(0,true);
       while(current!=end && total.finished){
