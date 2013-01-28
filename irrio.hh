@@ -18,6 +18,7 @@ struct Used{
 class InputParser{
   public:
     virtual Used parse(char* data,irr::u32 length,bool eof)=0;
+    virtual ~InputParser(){};
 };
 
 template <class T,class PP>
@@ -46,7 +47,7 @@ class SequentialInputParser: public InputParser{
     virtual Used parse(char* data,irr::u32 length,bool eof){
       Used total(0,true);
       while(current!=end && total.finished){
-        Used used=current->parse(data,length,eof);
+        Used used=current->parse(data+total.amount,length-total.amount,eof);
         total.amount+=used.amount;
         if(used.finished)
           ++current;

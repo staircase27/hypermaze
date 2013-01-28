@@ -7,6 +7,7 @@
 #include "controller.hh"
 #include "sound.hh"
 #include <map>
+#include "script.hh"
 #ifdef IOSTREAM
 #include <iostream>
 #endif
@@ -240,6 +241,26 @@ int main(int argc,char* argv[]){
     in->drop();
   }
   
+
+	char* data=""// (not True) or (True and True)
+	    "2 2 "//add a or with 2 elements
+	        "1 "// add a true
+	      "3 2 "//add a and with 2 elements
+	        "1 "//add a true
+	        "4 1 ";//add a true
+	cout<<data<<endl;
+	irr::IReadFile* file=irr::createMemoryReadFile(data,strlen(data),"",false);
+	Condition* condition;
+  InputParser** parsers=new InputParser*[2];
+  parsers[0]=new ConditionParser(parsers+1,&condition);
+  InputParser* parser=new SequentialInputParser<Derefer<InputParser,InputParser**> >(
+      Derefer<InputParser,InputParser**>(parsers),
+      Derefer<InputParser,InputParser**>(parsers+2));
+  ::parse(file,parser);
+  cout<<"parsed"<<endl;
+  cout<<condition->is(0,Script(),pd)<<endl;
+
+
   while(device->run())
 	{
     const irr::u32 now = device->getTimer()->getTime();

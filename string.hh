@@ -265,9 +265,9 @@ inline ostream& operator<<(ostream& o,String s){
 
 inline ostream& operator<<(ostream& o,StringSlice s){
   o<<"<StringSlice ";
-  for(list<StringElement>::iterator it=s.s.route.begin();it!=s.s.route.end();++it)
+  for(list<StringElement>::iterator it=s.s->route.begin();it!=s.s->route.end();++it)
     cout<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";
-  return cout<<s.s.endPos<<">";
+  return cout<<s.s->endPos<<">";
 }
 #endif
 

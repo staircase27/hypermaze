@@ -21,12 +21,12 @@ test.o: test.cc maze.hh dirns.hh vector.hh string.hh mazegen.hh
 run-test: test
 	./test
 
-hypermaze: CPPOPTS+= -DIRRLICHT -DOPENAL
+hypermaze: CPPOPTS+= -DIRRLICHT -DOPENAL -DIOSTREAM
 hypermaze: CPPLIBS+= $(IRRLIBS) -lopenal -lalut
 hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o maze.o keymap.o GUIFormattedText.o sound.o
 
 hypermaze.o: hypermaze.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
- iMyCamera.hh keymap.hh controller.hh irrio.hh
+ iMyCamera.hh keymap.hh controller.hh irrio.hh script.hh
 
 controller.o: controller.cc controller.hh string.hh maze.hh dirns.hh \
  vector.hh keymap.hh irrdisp.hh gui.hh mazegen.hh helpgui.hh keymapgui.hh GUIFormattedText.hh  irrio.hh

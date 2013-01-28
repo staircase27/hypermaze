@@ -5,6 +5,7 @@
 
 class Script;
 
+
 class Condition{
   public:
     virtual bool is(int time,Script s,PuzzleDisplay pd)=0;
@@ -22,6 +23,17 @@ class ConditionParser:public InputParser{
   public:
     virtual Used parse(char* data,irr::u32 length,bool eof);
     ConditionParser(InputParser** dataParser,Condition** newCondition):dataParser(dataParser),newCondition(newCondition){};
+    virtual ~ConditionParser();
+};
+class ConditionListParser:public InputParser{
+  InputParser** dataParser;
+  Condition*** newConditions;
+  int* count;
+  public:
+    virtual Used parse(char* data,irr::u32 length,bool eof);
+    ConditionListParser(InputParser** dataParser,Condition*** newConditions,int* count):
+        dataParser(dataParser),newConditions(newConditions),count(count){};
+    virtual ~ConditionListParser();
 };
 
 class Script{
@@ -69,8 +81,19 @@ class ConditionOr: public Condition{
           return true;
       return false;
     }
-    virtual InputParser* createParser(){return NULL;};
-    virtual void returnParser(InputParser*){};
+    virtual InputParser* createParser(){
+      InputParser** parsers=new InputParser*[2];
+      parsers[0]=new ConditionListParser(parsers+1,&conditions,&count);
+      return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
+        Derefer<InputParser,InputParser**>(parsers),
+        Derefer<InputParser,InputParser**>(parsers+2));
+    };
+    virtual void returnParser(InputParser* parser){
+      SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
+      delete *(p->end.data-2);
+      delete[] (p->end.data-2);
+      delete parser;
+    };
 };
 class ConditionAnd: public Condition{
   Condition** conditions;
@@ -82,8 +105,19 @@ class ConditionAnd: public Condition{
           return false;
       return true;
     }
-    virtual InputParser* createParser(){return NULL;};
-    virtual void returnParser(InputParser*){};
+    virtual InputParser* createParser(){
+      InputParser** parsers=new InputParser*[2];
+      parsers[0]=new ConditionListParser(parsers+1,&conditions,&count);
+      return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
+        Derefer<InputParser,InputParser**>(parsers),
+        Derefer<InputParser,InputParser**>(parsers+2));
+    };
+    virtual void returnParser(InputParser* parser){
+      SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
+      delete *(p->end.data-2);
+      delete[] (p->end.data-2);
+      delete parser;
+    };
 };
 class ConditionNot: public Condition{
   Condition* condition;
@@ -100,9 +134,8 @@ class ConditionNot: public Condition{
     };
     virtual void returnParser(InputParser* parser){
       SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
-      condition->returnParser(*(p->end.data-1));
       delete *(p->end.data-2);
-      delete[] p->end.data;
+      delete[] (p->end.data-2);
       delete parser;
     };
 };
@@ -227,9 +260,9 @@ Used ConditionParser::parse(char* data,irr::u32 length,bool eof){
   int type=strtol(data,&data,10);
   if(data>=end) return Used(0,false);
   switch(type){
+    case 1:
       *newCondition=new ConditionTrue();
       *dataParser=(*newCondition)->createParser();
-    case 1:
       break;
     case 2:
       *newCondition=new ConditionOr();
@@ -264,4 +297,30 @@ Used ConditionParser::parse(char* data,irr::u32 length,bool eof){
       *dataParser=(*newCondition)->createParser();
   }
   return Used(data-start,true);
+}
+ConditionParser::~ConditionParser(){
+  (*newCondition)->returnParser(*dataParser);
+}
+Used ConditionListParser::parse(char* data,irr::u32 length,bool eof){
+  char* start=data;
+  char* end=data+length;
+  if(!eof)
+    end-=1;
+  *count=strtol(data,&data,10);
+  if(data>=end) return Used(0,false);
+  *newConditions=new Condition*[*count];
+  InputParser** parsers=new InputParser*[2*(*count)];
+  for(int i=0;i<*count;++i)
+    parsers[i*2]=new ConditionParser(parsers+i*2+1,(*newConditions)+i);
+  *dataParser=new SequentialInputParser<Derefer<InputParser,InputParser**> >(
+      Derefer<InputParser,InputParser**>(parsers),
+      Derefer<InputParser,InputParser**>(parsers+2*(*count)));
+  return Used(data-start,true);
+}
+ConditionListParser::~ConditionListParser(){
+  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)(*dataParser);
+  for(int i=0;i<*count;++i)
+    delete *(p->end.data-2*(*count)+2*i);
+  delete[] (p->end.data-2*(*count));
+  delete p;
 }
