@@ -148,7 +148,15 @@ class ConditionAfter: public Condition,public InputParser{
       return s.getTime(event)+delay<=time;
     }
     virtual Used parse(char* data,irr::u32 length,bool eof){
-      return Used(0,true);
+      char* start=data;
+      char* end=data+length;
+      if(!eof)
+        end-=1;
+      event=strtol(data,&data,10);
+      if(data>=end) return Used(0,false);
+      delay=strtol(data,&data,10);
+      if(data>=end) return Used(0,false);
+      return Used(data-start,true);
     }
     virtual InputParser* createParser(){return this;};
     virtual void returnParser(InputParser*){};
@@ -160,7 +168,13 @@ class ConditionBefore: public Condition,public InputParser{
       return s.getTime(event)==0;
     }
     virtual Used parse(char* data,irr::u32 length,bool eof){
-      return Used(0,true);
+      char* start=data;
+      char* end=data+length;
+      if(!eof)
+        end-=1;
+      event=strtol(data,&data,10);
+      if(data>=end) return Used(0,false);
+      return Used(data-start,true);
     }
     virtual InputParser* createParser(){return this;};
     virtual void returnParser(InputParser*){};
@@ -207,9 +221,50 @@ class ConditionStringPosition: public Condition{
         return false;
       }
     }
-    virtual InputParser* createParser(){return NULL;};
-    virtual void returnParser(InputParser*){};
+    virtual InputParser* createParser();
+    virtual void returnParser(InputParser* parser){delete parser;};
 };
+class ConditionStringPositionParser: public InputParser{
+  ConditionStringPosition* c;
+  int i;
+  public:
+    ConditionStringPositionParser(ConditionStringPosition* c):c(c),i(-2);
+  
+    Used parse(char* data,irr::u32 length,bool eof){
+      char* start=data;
+      char* end=data+length;
+      if(!eof)
+        end-=1;
+      if(i==-1){
+        c->tiestart=strtol(data,&data,10);
+        if(data>=end) return Used(0,false);
+
+        c->tieend=strtol(data,&data,10);
+        if(data>=end) return Used(0,false);
+
+        c->count=strtol(data,&data,10);
+        if(data>=end) return Used(0,false);
+        c->poss=new Vector[c->count];
+        i=0;
+      }
+      
+      char* tmp;
+      while(i<c->size){
+        c->pos[i].X=strtol(data,&tmp,10);
+        if(tmp>=end) return Used(data-start,false);
+        c->pos[i].Y=strtol(tmp,&tmp,10);
+        if(tmp>=end) return Used(data-start,false);
+        c->pos[i].Z=strtol(tmp,&tmp,10);
+        if(tmp>=end) return Used(data-start,false);
+        ++i;
+        data=tmp;
+      }
+      return Used(data-start,true);
+    }
+}
+InputParser* ConditionStringPosition::createParser(){
+  return new ConditionStringPositionParser(*this);
+}
 class ConditionStringSelection: public Condition{
   bool* sels;
   bool tiestart;
@@ -248,9 +303,46 @@ class ConditionStringSelection: public Condition{
         return false;
       }
     }
-    virtual InputParser* createParser(){return NULL;};
+    virtual InputParser* createParser();
     virtual void returnParser(InputParser*){};
 };
+class ConditionStringSelectionParser: public InputParser{
+  ConditionStringPosition* c;
+  int i;
+  public:
+    ConditionStringSelectionParser(ConditionStringPosition* c):c(c),i(-2);
+  
+    Used parse(char* data,irr::u32 length,bool eof){
+      char* start=data;
+      char* end=data+length;
+      if(!eof)
+        end-=1;
+      if(i==-1){
+        c->tiestart=strtol(data,&data,10);
+        if(data>=end) return Used(0,false);
+
+        c->tieend=strtol(data,&data,10);
+        if(data>=end) return Used(0,false);
+
+        c->count=strtol(data,&data,10);
+        if(data>=end) return Used(0,false);
+        c->poss=new bool[c->count];
+        i=0;
+      }
+      
+      char* tmp;
+      while(i<c->size){
+        c->pos[i]=strtol(data,&tmp,10);
+        if(tmp>=end) return Used(data-start,false);
+        ++i;
+        data=tmp;
+      }
+      return Used(data-start,true);
+    }
+}
+InputParser* ConditionStringSelection::createParser(){
+  return new ConditionStringSelectionParser(*this);
+}
 
 Used ConditionParser::parse(char* data,irr::u32 length,bool eof){
   char* start=data;
