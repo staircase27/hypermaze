@@ -257,7 +257,13 @@ int main(int argc,char* argv[]){
   s.returnParser(parser);
   cout<<"parsed"<<endl;
   cout<<condition->is(0,Script(),pd)<<endl;
-
+  cout<<"output"<<endl;
+  irr::stringc str;
+  condition->output(&str);
+  cout<<str.c_str()<<endl;
+  file->drop();
+  delete condition;
+  
 
   while(device->run())
 	{

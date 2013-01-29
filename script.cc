@@ -111,6 +111,20 @@ void ConditionOr::returnParser(InputParser* parser){
   delete[] (p->end.data-2);
   delete parser;
 };
+void ConditionOr::output(irr::stringc* s,irr::IWriteFile* file){
+  (*s)+="2 ";(*s)+=count;(*s)+="\n";
+  for(int i=0;i<count;++i)
+    conditions[i]->output(s,file);
+  if(file && s->size()>256){
+    file->write(s->c_str(),s->size());
+    *s=irr::stringc();
+  }
+}
+ConditionOr::~ConditionOr(){
+  for(int i=0;i<count;++i)
+    delete conditions[i];
+  delete[] conditions;
+}
 
 bool ConditionAnd::is(int time,Script s,PuzzleDisplay pd){
   for(int i=0;i<count;++i)
@@ -131,6 +145,20 @@ void ConditionAnd::returnParser(InputParser* parser){
   delete[] (p->end.data-2);
   delete parser;
 };
+void ConditionAnd::output(irr::stringc* s,irr::IWriteFile* file){
+  (*s)+="3 ";(*s)+=count;(*s)+="\n";
+  for(int i=0;i<count;++i)
+    conditions[i]->output(s,file);
+  if(file && s->size()>256){
+    file->write(s->c_str(),s->size());
+    *s=irr::stringc();
+  }
+}
+ConditionAnd::~ConditionAnd(){
+  for(int i=0;i<count;++i)
+    delete conditions[i];
+  delete[] conditions;
+}
 
 InputParser* ConditionNot::createParser(){
   InputParser** parsers=new InputParser*[2];
@@ -145,6 +173,14 @@ void ConditionNot::returnParser(InputParser* parser){
   delete[] (p->end.data-2);
   delete parser;
 };
+void ConditionNot::output(irr::stringc* s,irr::IWriteFile* file){
+  (*s)+="4\n";
+  condition->output(s,file);
+  if(file && s->size()>256){
+    file->write(s->c_str(),s->size());
+    *s=irr::stringc();
+  }
+}
 
 bool ConditionAfter::is(int time,Script s,PuzzleDisplay pd){
   return s.getTime(event)+delay<=time;
@@ -160,6 +196,13 @@ Used ConditionAfter::parse(char* data,irr::u32 length,bool eof){
   if(data>=end) return Used(0,false);
   return Used(data-start,true);
 }
+void ConditionAfter::output(irr::stringc* s,irr::IWriteFile* file){
+  (*s)+="5 ";(*s)+=event;(*s)+=" ";(*s)+=delay;(*s)+="\n";
+  if(file && s->size()>256){
+    file->write(s->c_str(),s->size());
+    *s=irr::stringc();
+  }
+}
 
 bool ConditionBefore::is(int time,Script s,PuzzleDisplay pd){
   return s.getTime(event)==0;
@@ -173,21 +216,13 @@ Used ConditionBefore::parse(char* data,irr::u32 length,bool eof){
   if(data>=end) return Used(0,false);
   return Used(data-start,true);
 }
-
-
-InputParser* Script::createParser(Condition** condition){
-  InputParser** parsers=new InputParser*[2];
-  parsers[0]=new ConditionParser(parsers+1,condition);
-  InputParser* parser=new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-      Derefer<InputParser,InputParser**>(parsers),
-      Derefer<InputParser,InputParser**>(parsers+2));
+void ConditionBefore::output(irr::stringc* s,irr::IWriteFile* file){
+  (*s)+="6 ";(*s)+=event;(*s)+="\n";
+  if(file && s->size()>256){
+    file->write(s->c_str(),s->size());
+    *s=irr::stringc();
+  }
 }
-void Script::returnParser(InputParser* parser){
-  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
-  delete *(p->end.data-2);
-  delete[] (p->end.data-2);
-  delete parser;
-};
 
 class ConditionStringPositionParser: public InputParser{
   ConditionStringPosition* c;
@@ -227,8 +262,22 @@ class ConditionStringPositionParser: public InputParser{
       return Used(data-start,true);
     }
 };
-inline InputParser* ConditionStringPosition::createParser(){
+InputParser* ConditionStringPosition::createParser(){
   return new ConditionStringPositionParser(this);
+}
+void ConditionStringPosition::output(irr::stringc* s,irr::IWriteFile* file){
+  (*s)+="7 ";(*s)+=tiestart;(*s)+=" ";(*s)+=tieend;(*s)+=" ";(*s)+=count;(*s)+=" ";
+  for(int i=0;i<count;++i){
+    (*s)+=poss[i].X;(*s)+=" ";(*s)+=poss[i].Y;(*s)+=" ";(*s)+=poss[i].Z;(*s)+=" ";
+  }
+  (*s)+="\n";
+  if(file && s->size()>256){
+    file->write(s->c_str(),s->size());
+    *s=irr::stringc();
+  }
+}
+ConditionStringPosition::~ConditionStringPosition(){
+  delete[] poss;
 }
 
 class ConditionStringSelectionParser: public InputParser{
@@ -265,8 +314,34 @@ class ConditionStringSelectionParser: public InputParser{
       return Used(data-start,true);
     }
 };
-inline InputParser* ConditionStringSelection::createParser(){
+InputParser* ConditionStringSelection::createParser(){
   return new ConditionStringSelectionParser(this);
 }
+void ConditionStringSelection::output(irr::stringc* s,irr::IWriteFile* file){
+  (*s)+="7 ";(*s)+=tiestart;(*s)+=" ";(*s)+=tieend;(*s)+=" ";(*s)+=count;(*s)+=" ";
+  for(int i=0;i<count;++i)
+    (*s)+=sels[i]+=" ";
+  (*s)+="\n";
+  if(file && s->size()>256){
+    file->write(s->c_str(),s->size());
+    *s=irr::stringc();
+  }
+}
+ConditionStringSelection::~ConditionStringSelection(){
+  delete[] sels;
+}
 
+InputParser* Script::createParser(Condition** condition){
+  InputParser** parsers=new InputParser*[2];
+  parsers[0]=new ConditionParser(parsers+1,condition);
+  InputParser* parser=new SequentialInputParser<Derefer<InputParser,InputParser**> >(
+      Derefer<InputParser,InputParser**>(parsers),
+      Derefer<InputParser,InputParser**>(parsers+2));
+}
+void Script::returnParser(InputParser* parser){
+  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
+  delete *(p->end.data-2);
+  delete[] (p->end.data-2);
+  delete parser;
+};
 

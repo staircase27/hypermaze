@@ -10,6 +10,8 @@ class Condition{
     virtual bool is(int time,Script s,PuzzleDisplay pd)=0;
     virtual InputParser* createParser()=0;
     virtual void returnParser(InputParser*)=0;
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0)=0;
+    virtual ~Condition(){};
 };
 
 class Action;
@@ -48,6 +50,7 @@ class ConditionTrue: public Condition, public InputParser{
     virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
     virtual InputParser* createParser(){return this;};
     virtual void returnParser(InputParser*){};
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="1\n";};
 };
 
 class ConditionOr: public Condition{
@@ -57,6 +60,8 @@ class ConditionOr: public Condition{
     virtual bool is(int time,Script s,PuzzleDisplay pd);
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser);
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
+    virtual ~ConditionOr();
 };
 class ConditionAnd: public Condition{
   Condition** conditions;
@@ -65,6 +70,8 @@ class ConditionAnd: public Condition{
     virtual bool is(int time,Script s,PuzzleDisplay pd);
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser);
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
+    virtual ~ConditionAnd();
 };
 class ConditionNot: public Condition{
   Condition* condition;
@@ -74,6 +81,8 @@ class ConditionNot: public Condition{
     }
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser);
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
+    virtual ~ConditionNot(){delete condition;}
 };
 
 class ConditionAfter: public Condition,private InputParser{
@@ -84,6 +93,7 @@ class ConditionAfter: public Condition,private InputParser{
     virtual Used parse(char* data,irr::u32 length,bool eof);
     virtual InputParser* createParser(){return this;};
     virtual void returnParser(InputParser*){};
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
 };
 class ConditionBefore: public Condition,private InputParser{
   int event;
@@ -92,6 +102,7 @@ class ConditionBefore: public Condition,private InputParser{
     virtual Used parse(char* data,irr::u32 length,bool eof);
     inline virtual InputParser* createParser(){return this;};
     inline virtual void returnParser(InputParser*){};
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
 };
 
 class ConditionStringPosition: public Condition{
@@ -138,6 +149,8 @@ class ConditionStringPosition: public Condition{
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser){delete parser;};
     friend class ConditionStringPositionParser;
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
+    virtual ~ConditionStringPosition();
 };
 class ConditionStringSelection: public Condition{
   bool* sels;
@@ -180,5 +193,7 @@ class ConditionStringSelection: public Condition{
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser){delete parser;};
     friend class ConditionStringSelectionParser;
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
+    virtual ~ConditionStringSelection();
 };
 
