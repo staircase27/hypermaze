@@ -23,7 +23,7 @@ run-test: test
 
 hypermaze: CPPOPTS+= -DIRRLICHT -DOPENAL -DIOSTREAM
 hypermaze: CPPLIBS+= $(IRRLIBS) -lopenal -lalut
-hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o maze.o keymap.o GUIFormattedText.o sound.o
+hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o maze.o keymap.o GUIFormattedText.o sound.o script.o
 
 hypermaze.o: hypermaze.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
  iMyCamera.hh keymap.hh controller.hh irrio.hh script.hh
@@ -45,6 +45,8 @@ GUIFormatedText.o: GUIFormattedText.cc GUIFormatedText.hh
 irrcurl.o: irrcurl.cc irrcurl.hh
 
 sound.o: sound.cc sound.hh
+
+script.o: script.cc script.hh
 
 run-hypermaze: hypermaze
 	./hypermaze

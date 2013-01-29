@@ -251,12 +251,10 @@ int main(int argc,char* argv[]){
 	cout<<data<<endl;
 	irr::IReadFile* file=irr::createMemoryReadFile(data,strlen(data),"",false);
 	Condition* condition;
-  InputParser** parsers=new InputParser*[2];
-  parsers[0]=new ConditionParser(parsers+1,&condition);
-  InputParser* parser=new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-      Derefer<InputParser,InputParser**>(parsers),
-      Derefer<InputParser,InputParser**>(parsers+2));
+  Script s;
+  InputParser* parser=s.createParser(&condition);
   ::parse(file,parser);
+  s.returnParser(parser);
   cout<<"parsed"<<endl;
   cout<<condition->is(0,Script(),pd)<<endl;
 
