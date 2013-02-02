@@ -14,6 +14,8 @@ class Walker{
     Maze& m;
   public:
     Walker(Maze& m):m(m){};
+    
+    virtual ~Walker(){};
 
     virtual void init(){};
 
@@ -102,6 +104,10 @@ class Hunter{
         huntEnd=tmp;
       }
     }
+    virtual ~Hunter(){
+      delete w;
+    }
+
     virtual bool hunt(){
       return doHunt(huntStart,huntEnd,down);
     }
@@ -214,6 +220,11 @@ class MazeGenHalf{
       return false;
     }
 
+  public:
+    virtual ~MazeGenHalf(){
+      delete h;
+    }
+
   template <class MGH>
   friend Maze generate(Vector size);
 };
@@ -267,6 +278,9 @@ class ReorderWalker:public Walker{
     }
   public:
     ReorderWalker(Maze& m):Walker(m),w(new W(m)){}
+    virtual ~ReorderWalker(){
+      delete w;
+    }
 };
 template <class W>
 class RandOrderWalker:public ReorderWalker<W>{
@@ -315,6 +329,14 @@ class RandOrderWalker:public ReorderWalker<W>{
       makeTrans(m.size.Y,ytrans,yinvtrans);
       makeTrans(m.size.Z,ztrans,zinvtrans);
     };
+    ~RandOrderWalker(){
+      delete[] xtrans;
+      delete[] xinvtrans;
+      delete[] ytrans;
+      delete[] yinvtrans;
+      delete[] ztrans;
+      delete[] zinvtrans;
+    }
 };
 
 template <class H>

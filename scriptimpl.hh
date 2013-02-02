@@ -1,6 +1,10 @@
+#include "script.hh"
+
+#ifndef SCRIPTIMPL_HH_INC
+#define SCRIPTIMPL_HH_INC
 class ConditionTrue: public Condition, public InputParser{
   public:
-    virtual bool is(int time,Script s,PuzzleDisplay pd){return true;}
+    virtual bool is(int time,Script script,const String& s){return true;}
     virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
     virtual InputParser* createParser(){return this;};
     virtual void returnParser(InputParser*){};
@@ -11,7 +15,7 @@ class ConditionOr: public Condition{
   Condition** conditions;
   int count;
   public:
-    virtual bool is(int time,Script s,PuzzleDisplay pd);
+    virtual bool is(int time,Script script,const String& s);
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser);
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
@@ -21,7 +25,7 @@ class ConditionAnd: public Condition{
   Condition** conditions;
   int count;
   public:
-    virtual bool is(int time,Script s,PuzzleDisplay pd);
+    virtual bool is(int time,Script script,const String& s);
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser);
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
@@ -30,8 +34,8 @@ class ConditionAnd: public Condition{
 class ConditionNot: public Condition{
   Condition* condition;
   public:
-    virtual bool is(int time,Script s,PuzzleDisplay pd){
-      return !condition->is(time,s,pd);
+    virtual bool is(int time,Script script,const String& s){
+      return !condition->is(time,script,s);
     }
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser);
@@ -43,7 +47,7 @@ class ConditionAfter: public Condition,private InputParser{
   int event;
   int delay;
   public:
-    virtual bool is(int time,Script s,PuzzleDisplay pd);
+    virtual bool is(int time,Script script,const String& s);
     virtual Used parse(char* data,irr::u32 length,bool eof);
     virtual InputParser* createParser(){return this;};
     virtual void returnParser(InputParser*){};
@@ -52,7 +56,7 @@ class ConditionAfter: public Condition,private InputParser{
 class ConditionBefore: public Condition,private InputParser{
   int event;
   public:
-    virtual bool is(int time,Script s,PuzzleDisplay pd);
+    virtual bool is(int time,Script script,const String& s);
     virtual Used parse(char* data,irr::u32 length,bool eof);
     inline virtual InputParser* createParser(){return this;};
     inline virtual void returnParser(InputParser*){};
@@ -65,7 +69,7 @@ class ConditionStringPosition: public Condition{
   bool tieend;
   int count;
   
-  inline bool checkPath(String& s,StringPointer sp){
+  inline bool checkPath(const String& s,ConstStringPointer sp){
     Vector* pos=poss;
     for(;pos!=poss+count;++pos,++sp)
       if(sp==s.end())
@@ -76,26 +80,26 @@ class ConditionStringPosition: public Condition{
     return true;
   }
   
-  inline StringPointer spsub(StringPointer sp,int d){
+  inline ConstStringPointer spsub(ConstStringPointer sp,int d){
     for(int i=0;i<d;++i)--sp;
     return sp;
   }
   
   public:
-    virtual bool is(int time,Script s,PuzzleDisplay pd){
-      if(count>pd.s.length()+1)
+    virtual bool is(int time,Script script,const String& s){
+      if(count>s.length()+1)
         return false;
       if(tiestart||tieend){
-        if(tieend && tiestart && count!=(pd.s.length()+1))
+        if(tieend && tiestart && count!=(s.length()+1))
           return false;
         if(tieend && !tiestart)
-          return checkPath(pd.s,spsub(pd.s.end(),count-1));
+          return checkPath(s,spsub(s.end(),count-1));
         else
-          return checkPath(pd.s,pd.s.begin());
+          return checkPath(s,s.begin());
       }else{
-        StringPointer spEnd=spsub(pd.s.end(),count-2);
-        for(StringPointer sp=pd.s.begin();sp!=spEnd;++sp)
-          if(checkPath(pd.s,sp))
+        ConstStringPointer spEnd=spsub(s.end(),count-2);
+        for(ConstStringPointer sp=s.begin();sp!=spEnd;++sp)
+          if(checkPath(s,sp))
             return true;
         return false;
       }
@@ -112,7 +116,7 @@ class ConditionStringSelection: public Condition{
   bool tieend;
   int count;
   
-  inline bool checkPath(String& s,StringPointer sp){
+  inline bool checkPath(const String& s,ConstStringPointer sp){
     bool* sel=sels;
     for(;sel!=sels+count;++sel,++sp)
       if(!(sel && *sel==sp->selected))
@@ -120,26 +124,26 @@ class ConditionStringSelection: public Condition{
     return true;
    }
     
-  inline StringPointer spsub(StringPointer sp,int d){
+  inline ConstStringPointer spsub(ConstStringPointer sp,int d){
     for(int i=0;i<d;++i)--sp;
     return sp;
   }
   
   public:
-    virtual bool is(int time,Script s,PuzzleDisplay pd){
-      if(count>pd.s.length())
+    virtual bool is(int time,Script script,const String& s){
+      if(count>s.length())
         return false;
       if(tiestart||tieend){
-        if(tieend && tiestart && count!=(pd.s.length()))
+        if(tieend && tiestart && count!=(s.length()))
           return false;
         if(tieend && !tiestart)
-          return checkPath(pd.s,spsub(pd.s.end(),count));
+          return checkPath(s,spsub(s.end(),count));
         else
-          return checkPath(pd.s,pd.s.begin());
+          return checkPath(s,s.begin());
       }else{
-        StringPointer spEnd=spsub(pd.s.end(),count-1);
-        for(StringPointer sp=pd.s.begin();sp!=spEnd;++sp)
-          if(checkPath(pd.s,sp))
+        ConstStringPointer spEnd=spsub(s.end(),count-1);
+        for(ConstStringPointer sp=s.begin();sp!=spEnd;++sp)
+          if(checkPath(s,sp))
             return true;
         return false;
       }
@@ -151,3 +155,42 @@ class ConditionStringSelection: public Condition{
     virtual ~ConditionStringSelection();
 };
 
+class ActionMessage{
+  Message m;
+  virtual void doCommon(ScriptResponse& r,String&){
+    if(r.messageCount==0){
+      r.messages=new Message[1];
+    }else{
+      Message* tmp=new Message[r.messageCount+1];
+      memcpy(tmp,r.messages,r.messageCount*sizeof(Message));
+      r.messages=tmp;
+    }
+    r.messages[r.messageCount]=m;
+    ++r.messageCount;
+  };
+};
+class ActionBlockWin{
+  virtual void doWin(ScriptResponseWin& r,String&){
+    r.block=true;
+  };
+};
+class ActionWinMessage{
+  Message m;
+  virtual void doWin(ScriptResponseWin& r,String&){
+    r.winMessage=m;
+  };
+};
+class ActionWinNextLevel{
+  Pair<irr::stringc,irr::stringc> nextLevel;
+  virtual void doWin(ScriptResponseWin& r,String&){
+    r.nextLevel=nextLevel;
+  };
+};
+class SomeAction{
+  virtual void doStart(ScriptResponseStart&,String&)=0;
+  virtual void doWin(ScriptResponseWin&,String&)=0;
+  virtual void doMove(ScriptResponseMove&,String&)=0;
+  virtual void doSelect(ScriptResponseSelect&,String&)=0;
+  virtual void doCommon(ScriptResponse&,String&)=0;
+};
+#endif

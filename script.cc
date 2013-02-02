@@ -93,9 +93,9 @@ ConditionListParser::~ConditionListParser(){
 }
 
 
-bool ConditionOr::is(int time,Script s,PuzzleDisplay pd){
+bool ConditionOr::is(int time,Script script,const String& s){
   for(int i=0;i<count;++i)
-    if(conditions[i]->is(time,s,pd))
+    if(conditions[i]->is(time,script,s))
       return true;
   return false;
 }
@@ -127,9 +127,9 @@ ConditionOr::~ConditionOr(){
   delete[] conditions;
 }
 
-bool ConditionAnd::is(int time,Script s,PuzzleDisplay pd){
+bool ConditionAnd::is(int time,Script script,const String& s){
   for(int i=0;i<count;++i)
-    if(!conditions[i]->is(time,s,pd))
+    if(!conditions[i]->is(time,script,s))
       return false;
   return true;
 }
@@ -183,8 +183,8 @@ void ConditionNot::output(irr::stringc* s,irr::IWriteFile* file){
   }
 }
 
-bool ConditionAfter::is(int time,Script s,PuzzleDisplay pd){
-  return s.getTime(event)+delay<=time;
+bool ConditionAfter::is(int time,Script script,const String& s){
+  return script.getTime(event)+delay<=time;
 }
 Used ConditionAfter::parse(char* data,irr::u32 length,bool eof){
   char* start=data;
@@ -205,8 +205,8 @@ void ConditionAfter::output(irr::stringc* s,irr::IWriteFile* file){
   }
 }
 
-bool ConditionBefore::is(int time,Script s,PuzzleDisplay pd){
-  return s.getTime(event)==0;
+bool ConditionBefore::is(int time,Script script,const String& s){
+  return script.getTime(event)==0;
 }
 Used ConditionBefore::parse(char* data,irr::u32 length,bool eof){
   char* start=data;

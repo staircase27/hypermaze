@@ -14,30 +14,30 @@ using namespace std;
       int X,Y,Z;
       Vector(int x,int y,int z):X(x),Y(y),Z(z){};
       Vector():X(0),Y(0),Z(0){};
-      Vector operator+(Vector o){
+      Vector operator+(const Vector& o) const{
         return Vector(X+o.X,Y+o.Y,Z+o.Z);
       }
-      Vector& operator+=(Vector o){
+      Vector& operator+=(const Vector& o){
         X+=o.X;Y+=o.Y;Z+=o.Z;
         return *this;
       }
-      Vector operator-(Vector o){
+      Vector operator-(const Vector& o) const{
         return Vector(X-o.X,Y-o.Y,Z-o.Z);
       }
-      Vector operator-(){
+      Vector operator-() const{
         return Vector(-X,-Y,-Z);
       }
-      Vector& operator-=(Vector o){
+      Vector& operator-=(const Vector& o){
         X-=o.X;Y-=o.Y;Z-=o.Z;
         return *this;
       }
-      Vector operator*(int i){
+      Vector operator*(int i) const {
         return Vector(X*i,Y*i,Z*i);
       }
-      bool operator !=(Vector o){
+      bool operator !=(const Vector& o)const {
         return X!=o.X||Y!=o.Y||Z!=o.Z;
       }
-      int dotProduct(Vector o){
+      int dotProduct(const Vector& o) const{
         return X*o.X+Y*o.Y+Z*o.Z;
       }
   };

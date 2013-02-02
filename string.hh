@@ -53,6 +53,41 @@ class StringPointer{
     
     friend class StringSlice;
 };
+class ConstStringPointer{
+  private:
+    list<StringElement>::const_iterator el;
+  public:
+    
+    const StringElement& operator *(){
+      return *el;
+    }
+    const StringElement* operator ->(){
+      return &*el;
+    }
+    
+    ConstStringPointer& operator++(){
+      ++el;
+      return *this;
+    }
+    ConstStringPointer& operator--(){
+      --el;
+      return *this;
+    }
+    
+    bool operator!=(const ConstStringPointer& other) const{
+      return el!=other.el;
+    }
+    bool operator==(const ConstStringPointer& other) const{
+      return el==other.el;
+    }
+    
+    ConstStringPointer& operator=(const ConstStringPointer& other){
+      el=other.el;
+      return *this;
+    }
+    
+    ConstStringPointer(list<StringElement>::const_iterator el):el(el){};
+};
 
 #ifdef IOSTREAM
 inline ostream& operator<<(ostream& o,const StringElement& e){
@@ -96,17 +131,23 @@ class String{
     StringPointer end(){
       return StringPointer(route.end());
     }
+    ConstStringPointer begin() const{
+      return ConstStringPointer(route.begin());
+    }
+    ConstStringPointer end() const{
+      return ConstStringPointer(route.end());
+    }
     
-    int length(){
+    int length() const{
       return route.size();
     }
     
-    bool hasWon(){
+    bool hasWon() const{
       Vector d=to_vector(targetDir);
       int t=maze.size.dotProduct(-to_shift_vector(opposite(targetDir)));
       if(endPos.dotProduct(d)<t)
         return false;
-      for(list<StringElement>::iterator it=route.begin();it!=route.end();++it)
+      for(list<StringElement>::const_iterator it=route.begin();it!=route.end();++it)
         if(it->pos.dotProduct(d)<t)
           return false;
       return true;

@@ -30,7 +30,7 @@ class Derefer{
       return *this;
     }
     bool operator!=(const Derefer<T,PP>& o){
-      return *data!=*o.data;
+      return data!=o.data;
     }
     T* operator->(){
       return *data;

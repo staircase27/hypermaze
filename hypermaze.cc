@@ -256,7 +256,7 @@ int main(int argc,char* argv[]){
   ::parse(file,parser);
   s.returnParser(parser);
   cout<<"parsed"<<endl;
-  cout<<condition->is(0,Script(),pd)<<endl;
+  cout<<condition->is(0,Script(),pd.s)<<endl;
   cout<<"output"<<endl;
   irr::stringc str;
   condition->output(&str);

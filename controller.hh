@@ -105,7 +105,7 @@ class MouseStringSelectorController: public Controller{
     
     virtual bool OnEvent(const irr::SEvent& event);
   
-    MouseStringSelectorController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),sp(pd.s.end(),false){};
+    MouseStringSelectorController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),sp(pd.s.end(),false){};
 };
   
 

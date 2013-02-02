@@ -28,7 +28,7 @@ class OpenALSoundManager: public SoundManager{
     ALuint	source[NUM_SOURCES];
     
   public:
-    OpenALSoundManager():valid(true),playing(false){
+    OpenALSoundManager():valid(true),playing(false),buffer({0}){
       if(!alutInit(0, 0)){
         valid=false;
         return;
@@ -130,7 +130,7 @@ class OpenALSoundManager: public SoundManager{
       if(!playing)
         return;
       {
-        ALuint toreplace[NUM_MUSICS];
+        ALuint toreplace[NUM_MUSICS]={0};
         ALint count=0;
         ALint queued=0;
         alGetSourcei(source[1],AL_BUFFERS_QUEUED,&queued);

@@ -75,6 +75,8 @@ class MazeDisplay{
       dirns.insert(FORWARD);
       init(m,ng,center);
     }
+    
+    ~MazeDisplay(){clear();};
 
     bool hideSide(Dirn side,bool out);
 };
