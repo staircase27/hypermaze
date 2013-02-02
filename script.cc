@@ -1,4 +1,5 @@
 #include "script.hh"
+#include "scriptimpl.hh"
 
 class ConditionParser:public InputParser{
   InputParser** dataParser;

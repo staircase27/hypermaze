@@ -46,7 +46,7 @@ irrcurl.o: irrcurl.cc irrcurl.hh
 
 sound.o: sound.cc sound.hh
 
-script.o: script.cc script.hh
+script.o: script.cc script.hh scriptimpl.hh
 
 run-hypermaze: hypermaze
 	./hypermaze
