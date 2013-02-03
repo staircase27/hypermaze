@@ -209,7 +209,9 @@ int main(int argc,char* argv[]){
   	sky->setScale(irr::vector3df(1,1,1)*1000);
   	sky->setPosition(irr::vector3df(0,-300,0));
     sky->setMaterialFlag(irr::EMF_LIGHTING, false);
-  	sky->setMaterialTexture( 0, driver->getTexture("irrlicht/worldsky.png"));
+    
+  	sky->getMaterial(0).setTexture( 0, driver->getTexture("irrlicht/ground.png"));
+  	sky->getMaterial(1).setTexture( 0, driver->getTexture("irrlicht/sky.png"));
   }
 
 	addCameraSceneNodeMy(smgr,device->getCursorControl(),0,irr::vector3df(0,0,0),
