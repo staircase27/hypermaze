@@ -58,6 +58,11 @@ class Action{
   virtual void doWin(ScriptResponseWin&,String&)=0;
   virtual void doMove(ScriptResponseMove&,String&)=0;
   virtual void doSelect(ScriptResponseSelect&,String&)=0;
+  
+  virtual InputParser* createParser()=0;
+  virtual void returnParser(InputParser*)=0;
+  virtual void output(irr::stringc* s,irr::IWriteFile* file=0)=0;
+  virtual ~Action(){};
 };
 class ActionStart: public Action{
   virtual void doStart(ScriptResponseStart&,String&)=0;

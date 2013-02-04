@@ -155,6 +155,36 @@ class ConditionStringSelection: public Condition{
     virtual ~ConditionStringSelection();
 };
 
+class MessageParser: public InputParser{
+  Message* m;
+  int pos;
+  public:
+    MessageParser(Message* m):m(m),pos(-1){};
+    Used parse(char* data,irr::u32 length,bool eof){
+      char* start=data;
+      char* end=data+length;
+      if(!eof)
+        end-=1;
+      if(pos==-1){
+        int len=strtol(data,&data,10);
+        if(data>=end) return Used(0,false);
+        delete[] m->paragraphs;
+        m->paragraphs=new Pair<irr::stringc,irr::stringc>[len];
+        m->count=len;
+        pos=0;
+      }
+      
+      char* tmp;
+      while(pos<m->size.X*m->size.Y*m->size.Z){
+        m->maze[pos]=strtol(data,&tmp,16);
+        if(tmp>=end) return Used(data-start,false);
+        ++pos;
+        data=tmp;
+      }
+      return Used(data-start,true);
+    }
+};
+
 class ActionMessage{
   Message m;
   virtual void doCommon(ScriptResponse& r,String&){
@@ -168,6 +198,11 @@ class ActionMessage{
     r.messages[r.messageCount]=m;
     ++r.messageCount;
   };
+  
+  virtual InputParser* createParser();
+  virtual void returnParser(InputParser*);
+  virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
+  virtual ~ActionMessage();
 };
 class ActionBlockWin{
   virtual void doWin(ScriptResponseWin& r,String&){

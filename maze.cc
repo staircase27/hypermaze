@@ -92,6 +92,7 @@ void prettyPrint(ostream& o,Maze m,int w){
 class MazeParser:public InputParser{
   Maze* m;
   int pos;
+  irr::stringc;
   public:
     MazeParser(Maze* m):m(m),pos(-1){};
     
