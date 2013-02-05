@@ -67,9 +67,9 @@ class GUIFormattedText: irr::IGUIElement{
 
     virtual void setAllTextAlignment(irr::EGUI_ALIGNMENT horizontal, irr::EGUI_ALIGNMENT vertical);
 
-		virtual void setDrawBackground(bool draw);
+    virtual void setDrawBackground(bool draw);
 
-		virtual void setDrawBorder(bool draw);
+    virtual void setDrawBorder(bool draw);
 
 };
 #endif

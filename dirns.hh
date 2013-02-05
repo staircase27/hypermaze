@@ -7,12 +7,12 @@ using namespace std;
 
 
 enum Dirn{
-	UP=0,
-	LEFT,
-	FORWARD,
-	DOWN,
-	RIGHT,
-	BACK
+  UP=0,
+  LEFT,
+  FORWARD,
+  DOWN,
+  RIGHT,
+  BACK
 };
 
 static Dirn allDirns[6]={UP,LEFT,FORWARD,DOWN,RIGHT,BACK};
@@ -20,17 +20,17 @@ static Dirn allDirns[6]={UP,LEFT,FORWARD,DOWN,RIGHT,BACK};
 static const int ALLDIRNSMASK = (1<<6)-1;
 
 inline unsigned int to_id(Dirn d){
-	return static_cast<unsigned int>(d);
+  return static_cast<unsigned int>(d);
 }
 inline Dirn from_id(unsigned int d){
-	return static_cast<Dirn>(d);
+  return static_cast<Dirn>(d);
 }
 
 inline Dirn opposite(Dirn d){
   return from_id((to_id(d)+3)%6);
 }
 inline int to_mask(Dirn d){
-	return 1<<to_id(d);
+  return 1<<to_id(d);
 }
 
 inline Vector to_vector(Dirn d){

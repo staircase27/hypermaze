@@ -8,6 +8,11 @@
 #include "sound.hh"
 #include <map>
 #include "script.hh"
+
+//for testing REMOVE LATER
+#include "scriptimpl.hh"
+
+
 #ifdef IOSTREAM
 #include <iostream>
 #endif
@@ -173,32 +178,31 @@ class IrrlichtMusicLoader: public MusicLoader{
 
 int main(int argc,char* argv[]){
 
-	irr::IrrlichtDevice *device =
-		irr::createDevice( irr::video::EDT_OPENGL, irr::dimension2d<irr::u32>(640, 480), 16,
-			false, false, false);
+  irr::IrrlichtDevice *device = irr::createDevice( irr::video::EDT_OPENGL,
+      irr::dimension2d<irr::u32>(640, 480), 16, false, false, false);
 
-	if (!device)
-		return 1;
+  if (!device)
+    return 1;
 
-	device->setResizable(true);
-	
-	{
-	  irr::IFileSystem* fs=device->getFileSystem();
-	  fs->addFileArchive(fs->getFileDir(argv[0])+"/",false,false,irr::EFAT_FOLDER);
-	}
+  device->setResizable(true);
+  
+  {
+    irr::IFileSystem* fs=device->getFileSystem();
+    fs->addFileArchive(fs->getFileDir(argv[0])+"/",false,false,irr::EFAT_FOLDER);
+  }
 
-	{
+  {
     device->getGUIEnvironment()->getSkin()->setFont(device->getGUIEnvironment()->getFont("irrlicht/fonts/Scada16r.xml"));
     irr::SColor c=device->getGUIEnvironment()->getSkin()->getColor(irr::EGDC_3D_HIGH_LIGHT);
     c.setAlpha(170);
     device->getGUIEnvironment()->getSkin()->setColor(irr::EGDC_3D_HIGH_LIGHT,c);
   }
 
-	device->setWindowCaption(L"Hyper Maze! - Irrlicht");
-	irr::IVideoDriver* driver = device->getVideoDriver();
-	irr::ISceneManager* smgr = device->getSceneManager();
-	
-	{
+  device->setWindowCaption(L"Hyper Maze! - Irrlicht");
+  irr::IVideoDriver* driver = device->getVideoDriver();
+  irr::ISceneManager* smgr = device->getSceneManager();
+  
+  {
     irr::IAnimatedMesh* mesh = smgr->getMesh("irrlicht/worldsky.obj");
     if (!mesh)
     {
@@ -206,16 +210,16 @@ int main(int argc,char* argv[]){
       return 1;
     }
     irr::IAnimatedMeshSceneNode* sky = smgr->addAnimatedMeshSceneNode( mesh );
-  	sky->setScale(irr::vector3df(1,1,1)*1000);
-  	sky->setPosition(irr::vector3df(0,-300,0));
+    sky->setScale(irr::vector3df(1,1,1)*1000);
+    sky->setPosition(irr::vector3df(0,-300,0));
     sky->setMaterialFlag(irr::EMF_LIGHTING, false);
     
-  	sky->getMaterial(0).setTexture( 0, driver->getTexture("irrlicht/ground.png"));
-  	sky->getMaterial(1).setTexture( 0, driver->getTexture("irrlicht/sky.png"));
+    sky->getMaterial(0).setTexture( 0, driver->getTexture("irrlicht/ground.png"));
+    sky->getMaterial(1).setTexture( 0, driver->getTexture("irrlicht/sky.png"));
   }
 
-	addCameraSceneNodeMy(smgr,device->getCursorControl(),0,irr::vector3df(0,0,0),
-	    irr::vector3df(0,0,-300),-500.,-100.,-3.,100.);
+  addCameraSceneNodeMy(smgr,device->getCursorControl(),0,irr::vector3df(0,0,0),
+      irr::vector3df(0,0,-300),-500.,-100.,-3.,100.);
 
   irr::ILightSceneNode* light1 =
                 smgr->addLightSceneNode(0, irr::vector3df(-100,100,-100),
@@ -243,45 +247,79 @@ int main(int argc,char* argv[]){
     in->drop();
   }
   
-
-	char* data=""// (not True) or (True and True)
-	    "2 2 "//add a or with 2 elements
-	        "1 "// add a true
-	      "3 2 "//add a and with 2 elements
-	        "1 "//add a true
-	        "4 1 ";//add a true
-	cout<<data<<endl;
-	irr::IReadFile* file=irr::createMemoryReadFile(data,strlen(data),"",false);
-	Condition* condition;
-  Script s;
-  InputParser* parser=s.createParser(&condition);
-  ::parse(file,parser);
-  s.returnParser(parser);
-  cout<<"parsed"<<endl;
-  cout<<condition->is(0,Script(),pd.s)<<endl;
-  cout<<"output"<<endl;
-  irr::stringc str;
-  condition->output(&str);
-  cout<<str.c_str()<<endl;
-  file->drop();
-  delete condition;
+  {
+    const char* data=""// (not True) or (True and True)
+        "2 2 "//add a or with 2 elements
+            "1 "// add a true
+          "3 2 "//add a and with 2 elements
+            "1 "//add a true
+            "4 1 ";//add a true
+    cout<<data<<endl;
+    irr::IReadFile* file=irr::createMemoryReadFile((void*)data,strlen(data),"",false);//cast is safe as read file
+    Condition* condition;
+    Script s;
+    InputParser* parser=s.createParser(&condition);
+    ::parse(file,parser);
+    s.returnParser(parser);
+    cout<<"parsed"<<endl;
+    cout<<condition->is(0,Script(),pd.s)<<endl;
+    cout<<"output"<<endl;
+    irr::stringc str;
+    condition->output(&str);
+    cout<<str.c_str()<<endl;
+    file->drop();
+    delete condition;
+  }
+  
+  {
+    const char* data= // "1 " //type of the Action;
+        " \n 4 " //4 paragraphs
+        "  \n daas£4;ca \n  \n" // format string
+        "| dsadADy6 aa \n dsAD012 SADu12 !%^)*£\"$&  | " // a paragaph using |
+        " sdpadhyapd ||"// a paragraph with format but no text
+        "\ndsaghoaiugsd !  aSDP123 \\\"£OU\n |   !" //another format and paragraph with no white space after end of paragraph
+        "oad Asadsadaad sadadydpsoadhaphd \n swdad A "// a final format and paragraph (with no whitespace after the previous paragraph
+        "ouagdaodgha doaidga oagh !P$U | SDyd | Doswpdy | owytqoe yp | "; // some spare text to trick the code
+    cout<<data<<endl;
+    irr::IReadFile* file=irr::createMemoryReadFile((void*)data,strlen(data),"",false);
+    ActionMessage am;
+    InputParser* p=am.createParser();
+    ::parse(file,p);
+    am.returnParser(p);
+    cout<<"parsed"<<endl;
+    cout<<am.m.count<<endl;
+    cout<<"format \""<<am.m.paragraphs[0].a.c_str()<<"\""<<endl;
+    cout<<"paragraph \""<<am.m.paragraphs[0].b.c_str()<<"\""<<endl;
+    cout<<"format \""<<am.m.paragraphs[1].a.c_str()<<"\""<<endl;
+    cout<<"paragraph \""<<am.m.paragraphs[1].b.c_str()<<"\""<<endl;
+    cout<<"format \""<<am.m.paragraphs[2].a.c_str()<<"\""<<endl;
+    cout<<"paragraph \""<<am.m.paragraphs[2].b.c_str()<<"\""<<endl;
+    cout<<"format \""<<am.m.paragraphs[3].a.c_str()<<"\""<<endl;
+    cout<<"paragraph \""<<am.m.paragraphs[3].b.c_str()<<"\""<<endl;
+    cout<<"output"<<endl;
+    irr::stringc str;
+    am.output(&str);
+    cout<<str.c_str()<<endl;
+    file->drop();
+  }
+  
   
 
   while(device->run())
-	{
+  {
     const irr::u32 now = device->getTimer()->getTime();
 
-	  c->run(now);
-	  
-	  sm->run();
+    c->run(now);
+    
+    sm->run();
 
-		driver->beginScene(true, true, irr::SColor(255,100,101,140));
+    driver->beginScene(true, true, irr::SColor(255,100,101,140));
 
-		smgr->drawAll();
-		driver->endScene();
-	}
-	device->drop();
+    smgr->drawAll();
+    driver->endScene();
+  }
+  device->drop();
 
-	return 0;
+  return 0;
 }
 

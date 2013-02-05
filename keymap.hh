@@ -74,7 +74,7 @@ class KeyMap:private InputParser{
     static const pair<Action,pair<Dirn,bool> > sliceActions[12];
     static const pair<Action,pair<bool,bool> > slideActions[4];
     static const pair<Action,Dirn> moveActions[6];
-    static const pair<Action,wchar_t*> actionNames[A_COUNT-1];
+    static const pair<Action,const wchar_t*> actionNames[A_COUNT-1];
   private:
     map<KeySpec,Action> keyMap;
     map<Action,KeySpec> revMap;

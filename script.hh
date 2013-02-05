@@ -23,15 +23,18 @@ class Condition{
 };
 
 template <class T1,class T2>
-class Pair{
+struct Pair{
   T1 a;
   T2 b;
   Pair(T1 a,T2 b):a(a),b(b){};
+  Pair():a(),b(){};
 };
 
-class Message{
+struct Message{
   int count;
   Pair<irr::stringc,irr::stringc>* paragraphs;
+  Message():paragraphs(0),count(0){};
+  void output(irr::stringc* s,irr::IWriteFile* file=0);
 };
 
 struct ScriptResponse{

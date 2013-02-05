@@ -21,7 +21,7 @@ void GUIFormattedText::draw(){
   if(layoutNeeded)
     layout();
   else{
-  	if (skin && skin->getFont()!=lastLayoutSkinFont)
+    if (skin && skin->getFont()!=lastLayoutSkinFont)
       layout();
   }
   if (skin){
@@ -153,12 +153,12 @@ void GUIFormattedText::setAllTextAlignment(irr::EGUI_ALIGNMENT horizontal, irr::
 }
 
 void GUIFormattedText::setDrawBackground(bool draw){
-	background = draw;
+  background = draw;
 }
 
 
 void GUIFormattedText::setDrawBorder(bool draw){
-	border = draw;
+  border = draw;
 }
 
 void GUIFormattedText::layout(){
@@ -179,8 +179,8 @@ void GUIFormattedText::layout(){
     rect.UpperLeftCorner.Y+=height+GAP;
   }
   layoutNeeded=false;
- 	irr::IGUISkin* skin = Environment->getSkin();
-	if (skin)
+  irr::IGUISkin* skin = Environment->getSkin();
+  if (skin)
     lastLayoutSkinFont=skin->getFont();
 }
 

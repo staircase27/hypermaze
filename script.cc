@@ -332,6 +332,122 @@ ConditionStringSelection::~ConditionStringSelection(){
   delete[] sels;
 }
 
+void Message::output(irr::stringc* s,irr::IWriteFile* file){
+  *s+=count;
+  *s+="\n";
+  const char* const delims="\"'|^_!\\\3";
+  for(int i=0;i<count;++i){
+    *s+=paragraphs[i].a;
+    *s+=" ";
+    const char* delim=delims;
+    while(paragraphs[i].b.findFirst(*delim)!=-1)
+      ++delim; // if this fails then you have a string with '\3' in it!!!!!!!!
+    *s+=*delim;
+    *s+=paragraphs[i].b;
+    *s+=*delim;
+    *s+="\n";
+    if(file && s->size()>256){
+      file->write(s->c_str(),s->size());
+      *s=irr::stringc();
+    }
+  }
+}
+
+class MessageParser: public InputParser{
+  Message* m;
+  int pos;
+  irr::stringc lines;
+  char delim;
+  public:
+    MessageParser(Message* m):m(m),pos(-1),lines(),delim(0){};
+    Used parse(char* data,irr::u32 length,bool eof){
+      char* start=data;
+      char* end=data+length;
+      if(!eof)
+        end-=1;
+      if(pos==-1){
+        int len=strtol(data,&data,10);
+        if(data>=end) return Used(0,false);
+        if(m->paragraphs)
+          delete[] m->paragraphs;
+        m->paragraphs=new Pair<irr::stringc,irr::stringc>[len];
+        m->count=len;
+        pos=0;
+      }
+      
+      char* tmp;
+      while(pos<2*m->count){
+        if(pos%2==0){
+          while(isspace(*data))
+            if(++data>=end)
+              return Used(data-start,false);
+          tmp=data;
+          while(!isspace(*tmp))
+            if(++tmp>=end)
+              return Used(data-start,false);
+          m->paragraphs[pos/2].a=irr::stringc(data,tmp-data);
+          data=tmp;
+          ++pos;
+        }
+        if(!delim){
+          while(isspace(*data))
+            if(++data>=end)
+              return Used(data-start,false);
+          cout<<"delim is '"<<*data<<"'"<<endl;
+          delim=*data;
+          if(++data>=end)
+            return Used(data-start,false);
+        }
+        tmp=(char*)memchr(data,delim,end-data);
+        if(!tmp){
+          lines.append(data,end-data);
+          return Used(end-start,false);
+        }
+        lines.append(data,tmp-data);
+        m->paragraphs[pos/2].b=lines;
+        lines=irr::stringc();
+        delim=0;
+        ++pos;
+        data=tmp+1;
+      }
+      return Used(data-start,true);
+    }
+};
+
+void ActionMessage::doCommon(ScriptResponse& r,String&){
+  if(r.messageCount==0){
+    r.messages=new Message[1];
+  }else{
+    Message* tmp=new Message[r.messageCount+1];
+    memcpy(tmp,r.messages,r.messageCount*sizeof(Message));
+    r.messages=tmp;
+  }
+  r.messages[r.messageCount]=m;
+  ++r.messageCount;
+};
+InputParser* ActionMessage::createParser(){
+  return new MessageParser(&m);
+}
+void ActionMessage::output(irr::stringc* s,irr::IWriteFile* file){
+  *s+="1 ";
+  m.output(s,file);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 InputParser* Script::createParser(Condition** condition){
   InputParser** parsers=new InputParser*[2];
   parsers[0]=new ConditionParser(parsers+1,condition);

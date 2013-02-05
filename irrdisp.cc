@@ -20,8 +20,8 @@
         for(int y=0;y<m.size.Y;++y)
           for(int z=0;z<m.size.Z;++z){
             Vector pos(x,y,z);
-	          irr::IMeshSceneNode* node = ng->makeUnitWall(true);
-	          node->grab();
+            irr::IMeshSceneNode* node = ng->makeUnitWall(true);
+            node->grab();
 
             node->setScale(irr::vector3df(wall,wall,wall));
             node->setPosition(position+con(pos)*(wall+gap));
@@ -35,8 +35,8 @@
 
             for(set<Dirn>::iterator d=dirns.begin();d!=dirns.end();++d)
               if((*m[Vector(x,y,z)]&to_mask(*d))!=0){
-    	          irr::IMeshSceneNode* node = ng->makeUnitWall(false);
-    	          node->grab();
+                irr::IMeshSceneNode* node = ng->makeUnitWall(false);
+                node->grab();
 
                 node->setScale(wall*irr::vector3df(1,1,1)+(gap-wall)*remSgn(con(to_vector(*d))));
 

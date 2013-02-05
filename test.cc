@@ -30,11 +30,11 @@ void removeWall(Maze m,Vector v,Dirn wall){
 }
 
 int main(){
-	Dirn d=UP;
-	cout<<to_id(d)<<endl;
-	cout<<to_id(opposite(d))<<endl;
-	cout<<to_id(opposite(from_id(5)))<<endl;
-	cout<<to_mask(d)<<endl;
+  Dirn d=UP;
+  cout<<to_id(d)<<endl;
+  cout<<to_id(opposite(d))<<endl;
+  cout<<to_id(opposite(from_id(5)))<<endl;
+  cout<<to_mask(d)<<endl;
   int c=0;
   c|=to_mask(d);
   c|=to_mask(opposite(d));

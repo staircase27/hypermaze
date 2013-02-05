@@ -92,7 +92,6 @@ void prettyPrint(ostream& o,Maze m,int w){
 class MazeParser:public InputParser{
   Maze* m;
   int pos;
-  irr::stringc;
   public:
     MazeParser(Maze* m):m(m),pos(-1){};
     
@@ -130,45 +129,45 @@ void Maze::load(irr::IReadFile* in){
   ::parse(in,&mp);
 }
 irr::stringc tostr16(int number){
-	// store if negative and make positive
-	bool negative = false;
-	if (number < 0)
-	{
-		number *= -1;
-		negative = true;
-	}
+  // store if negative and make positive
+  bool negative = false;
+  if (number < 0)
+  {
+    number *= -1;
+    negative = true;
+  }
 
-	// temporary buffer for 16 numbers
-	irr::c8 tmpbuf[16]={0};
-	irr::u32 idx = 15;
+  // temporary buffer for 16 numbers
+  irr::c8 tmpbuf[16]={0};
+  irr::u32 idx = 15;
 
-	// special case '0'
+  // special case '0'
 
-	if (!number)
-	{
-		tmpbuf[14] = '0';
-		return irr::stringc(&tmpbuf[14]);
-	}
+  if (!number)
+  {
+    tmpbuf[14] = '0';
+    return irr::stringc(&tmpbuf[14]);
+  }
 
-	// add numbers
-	while(number && idx)
-	{
-		--idx;
-		if((number % 16)>9)
-  		tmpbuf[idx] = (irr::c8)('a' - 10 + (number % 16));
+  // add numbers
+  while(number && idx)
+  {
+    --idx;
+    if((number % 16)>9)
+      tmpbuf[idx] = (irr::c8)('a' - 10 + (number % 16));
     else
-  		tmpbuf[idx] = (irr::c8)('0' + (number % 16));
-		number /= 16;
-	}
+      tmpbuf[idx] = (irr::c8)('0' + (number % 16));
+    number /= 16;
+  }
 
-	// add sign
-	if (negative)
-	{
-		--idx;
-		tmpbuf[idx] = '-';
-	}
+  // add sign
+  if (negative)
+  {
+    --idx;
+    tmpbuf[idx] = '-';
+  }
 
-	return irr::stringc(&tmpbuf[idx]);
+  return irr::stringc(&tmpbuf[idx]);
 }
 void Maze::save(irr::IWriteFile* out){
   irr::stringc str;
