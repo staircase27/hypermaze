@@ -163,7 +163,7 @@ class ActionMessage{
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser){delete parser;};
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-    virtual ~ActionMessage(){};
+    virtual ~ActionMessage(){delete[] m.paragraphs;};
 };
 class ActionBlockWin{
   virtual void doWin(ScriptResponseWin& r,String&){

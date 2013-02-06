@@ -403,7 +403,7 @@ class MessageParser: public InputParser{
           lines.append(data,end-data);
           return Used(end-start,false);
         }
-        lines.append(data,tmp-data);
+        lines+=irr::stringc(data,tmp-data);
         m->paragraphs[pos/2].b=lines;
         lines=irr::stringc();
         delim=0;

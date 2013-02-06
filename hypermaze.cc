@@ -318,6 +318,11 @@ int main(int argc,char* argv[]){
     smgr->drawAll();
     driver->endScene();
   }
+  delete ng;
+  delete mic;
+  delete sm->getMusicSource();
+  delete sm->getMusicLoader();
+  delete sm;
   device->drop();
 
   return 0;

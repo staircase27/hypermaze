@@ -51,12 +51,14 @@ class MusicSource{
   public:
     virtual const char* getNextTrack(){return 0;};
     virtual const char* getEffectName(SoundManager::SOUND_EFFECT effect){return 0;};
+    virtual ~MusicSource(){};
 };
 
 class MusicLoader{
   public:
     virtual void* loadTrack(const char* track,int& length)=0;
     virtual void finished(void* data,int length)=0;
+    virtual ~MusicLoader(){};
 };
 
 SoundManager* createSoundManager();    
