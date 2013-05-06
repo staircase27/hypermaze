@@ -45,6 +45,8 @@ class SoundManager{
     virtual void run()=0;
     
     virtual bool isValid()=0;
+    
+    virtual ~SoundManager(){};
 };
 
 class MusicSource{

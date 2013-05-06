@@ -247,8 +247,9 @@ int main(int argc,char* argv[]){
     in->drop();
   }
   
+  //*
   {
-    const char* data=""// (not True) or (True and True)
+    const char* data=""// (True) or (True and True)
         "2 2 "//add a or with 2 elements
             "1 "// add a true
           "3 2 "//add a and with 2 elements
@@ -272,33 +273,44 @@ int main(int argc,char* argv[]){
   }
   
   {
-    const char* data= // "1 " //type of the Action;
+    const char* data= 
+        " 3 " //three actions
+        "1 " //type of the Action;
         " \n 4 " //4 paragraphs
         "  \n daas£4;ca \n  \n" // format string
         "| dsadADy6 aa \n dsAD012 SADu12 !%^)*£\"$&  | " // a paragaph using |
         " sdpadhyapd ||"// a paragraph with format but no text
         "\ndsaghoaiugsd !  aSDP123 \\\"£OU\n |   !" //another format and paragraph with no white space after end of paragraph
         "oad Asadsadaad sadadydpsoadhaphd \n swdad A "// a final format and paragraph (with no whitespace after the previous paragraph
-        "ouagdaodgha doaidga oagh !P$U | SDyd | Doswpdy | owytqoe yp | "; // some spare text to trick the code
-    cout<<data<<endl;
+        "\t\n\t\n 2"//next action
+        "  4" //last action
+        " http://domain.path/asdadad/adsdadad.dasad?=%20%43 'adadadaodiy!\"£'    ";
+    cout<<"input"<<endl<<data<<endl;
     irr::IReadFile* file=irr::createMemoryReadFile((void*)data,strlen(data),"",false);
-    ActionMessage am;
-    InputParser* p=am.createParser();
-    ::parse(file,p);
-    am.returnParser(p);
-    cout<<"parsed"<<endl;
-    cout<<am.m.count<<endl;
-    cout<<"format \""<<am.m.paragraphs[0].a.c_str()<<"\""<<endl;
-    cout<<"paragraph \""<<am.m.paragraphs[0].b.c_str()<<"\""<<endl;
-    cout<<"format \""<<am.m.paragraphs[1].a.c_str()<<"\""<<endl;
-    cout<<"paragraph \""<<am.m.paragraphs[1].b.c_str()<<"\""<<endl;
-    cout<<"format \""<<am.m.paragraphs[2].a.c_str()<<"\""<<endl;
-    cout<<"paragraph \""<<am.m.paragraphs[2].b.c_str()<<"\""<<endl;
-    cout<<"format \""<<am.m.paragraphs[3].a.c_str()<<"\""<<endl;
-    cout<<"paragraph \""<<am.m.paragraphs[3].b.c_str()<<"\""<<endl;
+    Action** as;
+    int count;
+    Script s;
+    InputParser* parser=s.createParser(&as,&count);
+    ::parse(file,parser);
+    Action* a=as[0];
+    s.returnParser(parser);
+    cout<<"parsed "<<count<<endl;
+    ScriptResponseStart srs;
+    a->doStart(srs,pd.s);
+    cout<<srs.messages->count<<endl;
+    cout<<"format \""<<srs.messages->paragraphs[0].a.c_str()<<"\""<<endl;
+    cout<<"paragraph \""<<srs.messages->paragraphs[0].b.c_str()<<"\""<<endl;
+    cout<<"format \""<<srs.messages->paragraphs[1].a.c_str()<<"\""<<endl;
+    cout<<"paragraph \""<<srs.messages->paragraphs[1].b.c_str()<<"\""<<endl;
+    cout<<"format \""<<srs.messages->paragraphs[2].a.c_str()<<"\""<<endl;
+    cout<<"paragraph \""<<srs.messages->paragraphs[2].b.c_str()<<"\""<<endl;
+    cout<<"format \""<<srs.messages->paragraphs[3].a.c_str()<<"\""<<endl;
+    cout<<"paragraph \""<<srs.messages->paragraphs[3].b.c_str()<<"\""<<endl;
     cout<<"output"<<endl;
     irr::stringc str;
-    am.output(&str);
+    as[0]->output(&str);
+    as[1]->output(&str);
+    as[2]->output(&str);
     cout<<str.c_str()<<endl;
     file->drop();
   }

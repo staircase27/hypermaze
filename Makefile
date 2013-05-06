@@ -26,15 +26,15 @@ hypermaze: CPPLIBS+= $(IRRLIBS) -lopenal -lalut
 hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o maze.o keymap.o GUIFormattedText.o sound.o script.o
 
 hypermaze.o: hypermaze.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
- iMyCamera.hh keymap.hh controller.hh irrio.hh script.hh scriptimpl.hh
+ iMyCamera.hh keymap.hh controller.hh irrio.hh script.hh scriptimpl.hh SmartPointer.hh
 
 controller.o: controller.cc controller.hh string.hh maze.hh dirns.hh \
- vector.hh keymap.hh irrdisp.hh gui.hh mazegen.hh helpgui.hh keymapgui.hh GUIFormattedText.hh  irrio.hh
+ vector.hh keymap.hh irrdisp.hh gui.hh mazegen.hh helpgui.hh keymapgui.hh GUIFormattedText.hh  irrio.hh SmartPointer.hh
 
 irrdisp.o: irrdisp.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
- controller.hh keymap.hh irrio.hh
+ controller.hh keymap.hh irrio.hh SmartPointer.hh
 
-maze.o: maze.cc maze.hh dirns.hh vector.hh
+maze.o: maze.cc maze.hh dirns.hh vector.hh SmartPointer.hh
 
 keymap.o: keymap.cc keymap.hh dirns.hh vector.hh irrio.hh
 
@@ -46,7 +46,7 @@ irrcurl.o: irrcurl.cc irrcurl.hh
 
 sound.o: sound.cc sound.hh
 
-script.o: script.cc script.hh scriptimpl.hh
+script.o: script.cc script.hh scriptimpl.hh SmartPointer.hh
 
 run-hypermaze: hypermaze
 	./hypermaze

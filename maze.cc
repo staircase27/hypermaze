@@ -2,16 +2,15 @@
 #include <cstring>
 
 Point Maze::operator [](Vector p){
-  return Point(*this,maze+(p.X+size.X*(p.Y+size.Y*p.Z)));
+  return Point(size,maze+(p.X+size.X*(p.Y+size.Y*p.Z)));
 };
 ConstPoint Maze::operator [](Vector p) const{
-  return ConstPoint(*this,maze+(p.X+size.X*(p.Y+size.Y*p.Z)));
+  return ConstPoint(size,maze+(p.X+size.X*(p.Y+size.Y*p.Z)));
 };
 
-Maze::Maze(Vector size):maze(new int[1+size.X*size.Y*size.Z]+1),size(size){
-  *(maze-1)=1;
+Maze::Maze(Vector size):maze(new int[size.X*size.Y*size.Z]),size(size){
   int defmask=ALLDIRNSMASK&~to_mask(UP)&~to_mask(DOWN);
-  memset(maze,0,size.X*size.Y*size.Z*sizeof(int));
+  memset(&*maze,0,size.X*size.Y*size.Z*sizeof(int));
   for(int x=0;x<size.X;++x){
     int mask=defmask;
     if(x==0)
@@ -30,27 +29,15 @@ Maze::Maze(Vector size):maze(new int[1+size.X*size.Y*size.Z]+1),size(size){
 };
 
 Maze::Maze(Maze& m):maze(m.maze),size(m.size){
-  *(maze-1)+=1;
 };
-Maze::Maze(const Maze& m):maze(new int[1+m.size.X*m.size.Y*m.size.Z]+1),size(m.size){
-  *(maze-1)=1;
-  memcpy(maze,m.maze,sizeof(int)*m.size.X*m.size.Y*m.size.Z);
+Maze::Maze(const Maze& m):maze(new int[m.size.X*m.size.Y*m.size.Z]),size(m.size){
+  memcpy(&*maze,&*m.maze,sizeof(int)*m.size.X*m.size.Y*m.size.Z);
 }
-Maze::~Maze(){
-  *(maze-1)-=1;
-  if(*(maze-1)<=0)
-    delete[] (maze-1);
-}
+Maze::~Maze(){}
 
 Maze& Maze::operator=(const Maze& m){
-  if(maze==m.maze)
-    return *this;
-  *(maze-1)-=1;
-  if(*(maze-1)<=0)
-    delete[] (maze-1);
-  maze=m.maze;
-  *(maze-1)+=1;
   size=m.size;
+  maze=m.maze;
   return *this;
 }
 
@@ -177,10 +164,11 @@ void Maze::save(irr::IWriteFile* out){
   str+=" ";
   str+=size.Z;
   str+="\n";
-  int* p=maze;
-  int* end=maze+size.X*size.Y*size.Z;
+  SPA<int> p=maze;
+  SPA<int> end=maze+size.X*size.Y*size.Z;
   while(p!=end){
-    str+=tostr16(*p++);
+    str+=tostr16(*p);
+    ++p;
     str+=" ";
     if(str.size()>256){
       out->write(str.c_str(),str.size());

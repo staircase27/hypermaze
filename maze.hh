@@ -1,6 +1,8 @@
 #include "dirns.hh"
 #include "vector.hh"
 
+#include "SmartPointer.hh"
+
 #ifdef IRRLICHT
 #include "irrio.hh"
 #endif
@@ -20,7 +22,7 @@ class MazeParser;
 class Maze
 {
   private:
-    int* maze;
+    SPA<int> maze;
   public:
     Vector size;
 
@@ -54,42 +56,41 @@ class Maze
 
 class Point{
   private:
-    Maze& maze;
-    int* point;
+		Vector size;
+    SPA<int> point;
   public:
-    Point(Maze& maze,int* point):maze(maze),point(point){};
-    Point(const Point& p):maze(p.maze),point(p.point){};
+    Point(Vector size,SPA<int> point):size(size),point(point){};
+    Point(const Point& p):size(p.size),point(p.point){};
     Point& operator=(const Point& p){
-      maze=p.maze;
+      size=p.size;
       point=p.point;
       return *this;
     }
-    inline int& operator*(){return *point;}
-    inline const int& operator*()const {return *point;}
+    inline int& operator*()const {return *point;}
     inline Point operator+(Vector d){
-      return Point(maze,point+(d.X+maze.size.X*(d.Y+maze.size.Y*d.Z)));
+      return Point(size,point+(d.X+size.X*(d.Y+size.Y*d.Z)));
     }
     friend class ConstPoint;
 };
 
 class ConstPoint{
   private:
-    const Maze& maze;
-    int* point;
+    Vector size;
+    SPA<int> point;
   public:
-    ConstPoint(const Maze& maze,int* point):maze(maze),point(point){};
-    ConstPoint(const ConstPoint& p):maze(p.maze),point(p.point){};
-    ConstPoint(const Point& p):maze(p.maze),point(p.point){};
-    inline const int& operator*()const {return *point;}
+    ConstPoint(Vector size,SPA<int> point):size(size),point(point){};
+    ConstPoint(const ConstPoint& p):size(p.size),point(p.point){};
+    ConstPoint(const Point& p):size(p.size),point(p.point){};
+    inline const int& operator*() const {return *point;}
     inline ConstPoint operator+(Vector d){
-      return ConstPoint(maze,point+(d.X+maze.size.X*(d.Y+maze.size.Y*d.Z)));
+      return ConstPoint(size,point+(d.X+size.X*(d.Y+size.Y*d.Z)));
     }
 };
 
 #ifdef IOSTREAM
 inline ostream& operator<<(ostream& o,const Maze& m){
   o<<m.size.X<<" "<<m.size.Y<<" "<<m.size.Z<<hex<<endl;
-  int* p=m.maze;
+  const int* p=&*m.maze;
   for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i){
     o<<*p<<" ";
     #ifdef DEBUG
@@ -107,7 +108,7 @@ inline ostream& operator<<(ostream& o,const Maze& m){
 inline istream& operator>>(istream& o,Maze& m){
   o>>m.size.X>>m.size.Y>>m.size.Z>>hex;
   m=Maze(m.size);
-  int* p=m.maze;
+  int* p=&*m.maze;
   for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i){
     o>>*p;
     ++p;

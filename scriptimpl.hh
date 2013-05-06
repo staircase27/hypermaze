@@ -155,7 +155,18 @@ class ConditionStringSelection: public Condition{
     virtual ~ConditionStringSelection();
 };
 
-class ActionMessage{
+
+class ActionNothing:public ActionCommon,private InputParser{
+  public:
+    virtual void doCommon(ScriptResponse&,String&){};
+    virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
+    virtual InputParser* createParser(){return this;};
+    virtual void returnParser(InputParser*){};
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="0\n";};
+    virtual ~ActionNothing(){};
+};
+
+class ActionMessage:public ActionCommon{
   public:
     Message m;
     virtual void doCommon(ScriptResponse& r,String&);
@@ -163,26 +174,69 @@ class ActionMessage{
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser){delete parser;};
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-    virtual ~ActionMessage(){delete[] m.paragraphs;};
+    virtual ~ActionMessage(){};
 };
-class ActionBlockWin{
-  virtual void doWin(ScriptResponseWin& r,String&){
-    r.block=true;
-  };
+class ActionBlockWin:public ActionWin,private InputParser{
+  public:
+    virtual void doWin(ScriptResponseWin& r,String&){
+      r.block=true;
+    };
+    virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
+    virtual InputParser* createParser(){return this;};
+    virtual void returnParser(InputParser*){};
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="2\n";};
+    virtual ~ActionBlockWin(){};
 };
-class ActionWinMessage{
-  Message m;
-  virtual void doWin(ScriptResponseWin& r,String&){
-    r.winMessage=m;
-  };
-  
+class ActionWinMessage:public ActionWin{
+  public:
+    Message m;
+    virtual void doWin(ScriptResponseWin& r,String&){
+      r.winMessage=m;
+    };
+    virtual InputParser* createParser();
+    virtual void returnParser(InputParser* parser){delete parser;};
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
+    virtual ~ActionWinMessage(){};
 };
-class ActionWinNextLevel{
+class ActionWinNextLevel:public ActionWin{
   Pair<irr::stringc,irr::stringc> nextLevel;
-  virtual void doWin(ScriptResponseWin& r,String&){
-    r.nextLevel=nextLevel;
-  };
+  public:
+    virtual void doWin(ScriptResponseWin& r,String&){
+      r.nextLevel=nextLevel;
+    };
+    virtual InputParser* createParser();
+    virtual void returnParser(InputParser* parser){delete parser;};
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
+    virtual ~ActionWinNextLevel(){};
 };
+
+class ActionForceWin:public Action,private InputParser{
+  public:
+		virtual void doStart(ScriptResponseStart&,String&){};
+		virtual void doWin(ScriptResponseWin&,String&){};
+		virtual void doMove(ScriptResponseMove& r,String&){r.forceWin=true;};
+		virtual void doSelect(ScriptResponseSelect& r,String&){r.forceWin=true;};
+		
+    virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
+    virtual InputParser* createParser(){return this;};
+    virtual void returnParser(InputParser*){};
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="5\n";};
+    virtual ~ActionBlockWin(){};
+};
+
+/*
+class ActionSelectString:public ActionCommon{
+  bool fromStart;
+  int length;
+  bool* change;
+  bool* val;
+  
+  public:
+    virtual void doCommon(ScriptResponse& r,String&);
+  
+}
+//*/
+
 class SomeAction{
   virtual void doStart(ScriptResponseStart&,String&)=0;
   virtual void doWin(ScriptResponseWin&,String&)=0;

@@ -1,90 +1,142 @@
 #include "script.hh"
 #include "scriptimpl.hh"
 
-class ConditionParser:public InputParser{
+template <class T>
+class Parser:public InputParser{
   InputParser** dataParser;
-  Condition** newCondition;
+  T** newT;
   public:
-    virtual Used parse(char* data,irr::u32 length,bool eof);
-    ConditionParser(InputParser** dataParser,Condition** newCondition):dataParser(dataParser),newCondition(newCondition){};
-    virtual ~ConditionParser();
+    Used parse(char* data,irr::u32 length,bool eof);
+    Parser(InputParser** dataParser,T** newT):dataParser(dataParser),newT(newT){};
+    virtual ~Parser();
 };
-Used ConditionParser::parse(char* data,irr::u32 length,bool eof){
+template <>
+Used Parser<Condition>::parse(char* data,irr::u32 length,bool eof){
   char* start=data;
   char* end=data+length;
   if(!eof)
     end-=1;
   int type=strtol(data,&data,10);
-  if(data>=end) return Used(0,false);
+  if(!eof){
+	  if(data>=end) return Used(0,false);
+	}else{
+	  if(data>end){
+	    type=0;
+	    data=end;
+	  }
+	}
   switch(type){
     case 1:
-      *newCondition=new ConditionTrue();
-      *dataParser=(*newCondition)->createParser();
+      *newT=new ConditionTrue();
       break;
     case 2:
-      *newCondition=new ConditionOr();
-      *dataParser=(*newCondition)->createParser();
+      *newT=new ConditionOr();
       break;
     case 3:
-      *newCondition=new ConditionAnd();
-      *dataParser=(*newCondition)->createParser();
+      *newT=new ConditionAnd();
       break;
     case 4:
-      *newCondition=new ConditionNot();
-      *dataParser=(*newCondition)->createParser();
+      *newT=new ConditionNot();
       break;
     case 5:
-      *newCondition=new ConditionAfter();
-      *dataParser=(*newCondition)->createParser();
+      *newT=new ConditionAfter();
       break;
     case 6:
-      *newCondition=new ConditionBefore();
-      *dataParser=(*newCondition)->createParser();
+      *newT=new ConditionBefore();
       break;
     case 7:
-      *newCondition=new ConditionStringPosition();
-      *dataParser=(*newCondition)->createParser();
+      *newT=new ConditionStringPosition();
       break;
     case 8:
-      *newCondition=new ConditionStringSelection();
-      *dataParser=(*newCondition)->createParser();
+      *newT=new ConditionStringSelection();
       break;
     default:
-      *newCondition=new ConditionTrue();
-      *dataParser=(*newCondition)->createParser();
+      *newT=new ConditionTrue();
   }
+  *dataParser=(*newT)->createParser();
   return Used(data-start,true);
 }
-ConditionParser::~ConditionParser(){
-  (*newCondition)->returnParser(*dataParser);
+template<>
+Used Parser<Action>::parse(char* data,irr::u32 length,bool eof){
+  char* start=data;
+  char* end=data+length;
+  if(!eof)
+    end-=1;
+  int type=strtol(data,&data,10);
+  if(!eof){
+	  if(data>=end) return Used(0,false);
+	}else{
+	  if(data>end){
+	    type=0;
+	    data=end;
+	  }
+	}
+  switch(type){
+    case 1:
+      *newT=new ActionMessage();
+      break;
+    case 2:
+      *newT=new ActionBlockWin();
+      break;
+    case 3:
+      *newT=new ActionWinMessage();
+      break;
+    case 4:
+      *newT=new ActionWinNextLevel();
+      break;
+    case 5:
+      *newT=new ActionForceWin();
+      break;
+    case 6:
+//      *newT=new ConditionBefore();
+      break;
+    case 7:
+//      *newT=new ConditionStringPosition();
+      break;
+    case 8:
+//      *newT=new ConditionStringSelection();
+      break;
+    default:
+      *newT=new ActionNothing();
+      break;
+  }
+  *dataParser=(*newT)->createParser();
+  return Used(data-start,true);
 }
-class ConditionListParser:public InputParser{
+template <class T>
+Parser<T>::~Parser(){
+  (*newT)->returnParser(*dataParser);
+}
+template <class T>
+class ListParser:public InputParser{
   InputParser** dataParser;
-  Condition*** newConditions;
+  T*** newTs;
   int* count;
   public:
     virtual Used parse(char* data,irr::u32 length,bool eof);
-    ConditionListParser(InputParser** dataParser,Condition*** newConditions,int* count):
-        dataParser(dataParser),newConditions(newConditions),count(count){};
-    virtual ~ConditionListParser();
+    ListParser(InputParser** dataParser,T*** newTs,int* count):
+        dataParser(dataParser),newTs(newTs),count(count){};
+    virtual ~ListParser();
 };
-Used ConditionListParser::parse(char* data,irr::u32 length,bool eof){
+template <class T>
+Used ListParser<T>::parse(char* data,irr::u32 length,bool eof){
   char* start=data;
   char* end=data+length;
   if(!eof)
     end-=1;
   *count=strtol(data,&data,10);
   if(data>=end) return Used(0,false);
-  *newConditions=new Condition*[*count];
+  *newTs=new T*[*count];
   InputParser** parsers=new InputParser*[2*(*count)];
   for(int i=0;i<*count;++i)
-    parsers[i*2]=new ConditionParser(parsers+i*2+1,(*newConditions)+i);
+    parsers[i*2]=new Parser<T>(parsers+i*2+1,(*newTs)+i);
   *dataParser=new SequentialInputParser<Derefer<InputParser,InputParser**> >(
       Derefer<InputParser,InputParser**>(parsers),
       Derefer<InputParser,InputParser**>(parsers+2*(*count)));
   return Used(data-start,true);
 }
-ConditionListParser::~ConditionListParser(){
+template <class T>
+ListParser<T>::~ListParser(){
   SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)(*dataParser);
   for(int i=0;i<*count;++i)
     delete *(p->end.data-2*(*count)+2*i);
@@ -101,7 +153,7 @@ bool ConditionOr::is(int time,Script script,const String& s){
 }
 InputParser* ConditionOr::createParser(){
   InputParser** parsers=new InputParser*[2];
-  parsers[0]=new ConditionListParser(parsers+1,&conditions,&count);
+  parsers[0]=new ListParser<Condition>(parsers+1,&conditions,&count);
   return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
     Derefer<InputParser,InputParser**>(parsers),
     Derefer<InputParser,InputParser**>(parsers+2));
@@ -135,7 +187,7 @@ bool ConditionAnd::is(int time,Script script,const String& s){
 }
 InputParser* ConditionAnd::createParser(){
   InputParser** parsers=new InputParser*[2];
-  parsers[0]=new ConditionListParser(parsers+1,&conditions,&count);
+  parsers[0]=new ListParser<Condition>(parsers+1,&conditions,&count);
   return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
     Derefer<InputParser,InputParser**>(parsers),
     Derefer<InputParser,InputParser**>(parsers+2));
@@ -163,7 +215,7 @@ ConditionAnd::~ConditionAnd(){
 
 InputParser* ConditionNot::createParser(){
   InputParser** parsers=new InputParser*[2];
-  parsers[0]=new ConditionParser(parsers+1,&condition);
+  parsers[0]=new Parser<Condition>(parsers+1,&condition);
   return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
     Derefer<InputParser,InputParser**>(parsers),
     Derefer<InputParser,InputParser**>(parsers+2));
@@ -368,8 +420,6 @@ class MessageParser: public InputParser{
       if(pos==-1){
         int len=strtol(data,&data,10);
         if(data>=end) return Used(0,false);
-        if(m->paragraphs)
-          delete[] m->paragraphs;
         m->paragraphs=new Pair<irr::stringc,irr::stringc>[len];
         m->count=len;
         pos=0;
@@ -393,7 +443,6 @@ class MessageParser: public InputParser{
           while(isspace(*data))
             if(++data>=end)
               return Used(data-start,false);
-          cout<<"delim is '"<<*data<<"'"<<endl;
           delim=*data;
           if(++data>=end)
             return Used(data-start,false);
@@ -432,17 +481,90 @@ void ActionMessage::output(irr::stringc* s,irr::IWriteFile* file){
   *s+="1 ";
   m.output(s,file);
 }
+InputParser* ActionWinMessage::createParser(){
+  return new MessageParser(&m);
+}
+void ActionWinMessage::output(irr::stringc* s,irr::IWriteFile* file){
+  *s+="3 ";
+  m.output(s,file);
+}
 
+class dataDescParser:public InputParser{
+  Pair<irr::stringc,irr::stringc>* d;
+  int pos;
+  irr::stringc lines;
+  char delim;
+  public:
+    dataDescParser	(Pair<irr::stringc,irr::stringc>* d):d(d),pos(0),lines(),delim(0){};
+    Used parse(char* data,irr::u32 length,bool eof){
+      char* start=data;
+      char* end=data+length;
+      if(!eof)
+        end-=1;
+      char* tmp;
+      if(pos<2){
+        if(pos==0){
+          while(isspace(*data))
+            if(++data>=end)
+              return Used(data-start,false);
+          tmp=data;
+          while(!isspace(*tmp))
+            if(++tmp>=end)
+              return Used(data-start,false);
+          d->a=irr::stringc(data,tmp-data);
+          data=tmp;
+          pos=1;
+        }
+        if(!delim){
+          while(isspace(*data))
+            if(++data>=end)
+              return Used(data-start,false);
+          delim=*data;
+          if(++data>=end)
+            return Used(data-start,false);
+        }
+        tmp=(char*)memchr(data,delim,end-data);
+        if(!tmp){
+          lines.append(data,end-data);
+          return Used(end-start,false);
+        }
+        lines+=irr::stringc(data,tmp-data);
+        d->b=lines;
+        lines=irr::stringc();
+        delim=0;
+        pos=2;
+        data=tmp+1;
+      }
+      return Used(data-start,true);
+    }
+};
 
+InputParser* ActionWinNextLevel::createParser(){
+  return new dataDescParser(&nextLevel);
+}
+void ActionWinNextLevel::output(irr::stringc* s,irr::IWriteFile* file){
+  *s+="4 ";
+  const char* const delims="\"'|^_!\\\3";
+  if(nextLevel.a=="")
+    nextLevel.a="-";
+  *s+=nextLevel.a;
+  *s+=" ";
+  const char* delim=delims;
+  while(nextLevel.b.findFirst(*delim)!=-1)
+      ++delim; // if this fails then you have a string with '\3' in it!!!!!!!!
+  *s+=*delim;
+  *s+=nextLevel.b;
+  *s+=*delim;
+  *s+="\n";
+  if(file && s->size()>256){
+    file->write(s->c_str(),s->size());
+    *s=irr::stringc();
+  }
+}
 
-
-
-
-
-
-
-
-
+void ActionSelectString::doCommon(ScriptResponse& r,String& s){
+  changed=false;
+  for(StringPoint p=s
 
 
 
@@ -450,8 +572,15 @@ void ActionMessage::output(irr::stringc* s,irr::IWriteFile* file){
 
 InputParser* Script::createParser(Condition** condition){
   InputParser** parsers=new InputParser*[2];
-  parsers[0]=new ConditionParser(parsers+1,condition);
-  InputParser* parser=new SequentialInputParser<Derefer<InputParser,InputParser**> >(
+  parsers[0]=new Parser<Condition>(parsers+1,condition);
+  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
+      Derefer<InputParser,InputParser**>(parsers),
+      Derefer<InputParser,InputParser**>(parsers+2));
+}
+InputParser* Script::createParser(Action*** action,int* count){
+  InputParser** parsers=new InputParser*[2];
+  parsers[0]=new ListParser<Action>(parsers+1,action,count);
+  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
       Derefer<InputParser,InputParser**>(parsers),
       Derefer<InputParser,InputParser**>(parsers+2));
 }

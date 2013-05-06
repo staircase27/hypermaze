@@ -32,7 +32,7 @@ struct Pair{
 
 struct Message{
   int count;
-  Pair<irr::stringc,irr::stringc>* paragraphs;
+  SPA<Pair<irr::stringc,irr::stringc> > paragraphs;
   Message():paragraphs(0),count(0){};
   void output(irr::stringc* s,irr::IWriteFile* file=0);
 };
@@ -42,68 +42,79 @@ struct ScriptResponse{
   bool stringSelectionChanged;
   int messageCount;
   Message* messages;
+  ScriptResponse():stringChanged(false),stringSelectionChanged(false),messageCount(0),messages(0){};
 };
 struct ScriptResponseStart:public ScriptResponse{};
 struct ScriptResponseWin:public ScriptResponse{
   bool block;
   Message winMessage;
   Pair<irr::stringc,irr::stringc> nextLevel;
+  ScriptResponseWin():block(false),winMessage(),nextLevel("",""){}
 };
 struct ScriptResponseMove:public ScriptResponse{
   bool forceWin;
+  ScriptResponseMove():forceWin(false){};
 };
 struct ScriptResponseSelect:public ScriptResponse{
   bool forceWin;
+  ScriptResponseSelect():forceWin(false){};
 };
 
 class Action{
-  virtual void doStart(ScriptResponseStart&,String&)=0;
-  virtual void doWin(ScriptResponseWin&,String&)=0;
-  virtual void doMove(ScriptResponseMove&,String&)=0;
-  virtual void doSelect(ScriptResponseSelect&,String&)=0;
-  
-  virtual InputParser* createParser()=0;
-  virtual void returnParser(InputParser*)=0;
-  virtual void output(irr::stringc* s,irr::IWriteFile* file=0)=0;
-  virtual ~Action(){};
+  public:
+		virtual void doStart(ScriptResponseStart&,String&)=0;
+		virtual void doWin(ScriptResponseWin&,String&)=0;
+		virtual void doMove(ScriptResponseMove&,String&)=0;
+		virtual void doSelect(ScriptResponseSelect&,String&)=0;
+		
+		virtual InputParser* createParser()=0;
+		virtual void returnParser(InputParser*)=0;
+		virtual void output(irr::stringc* s,irr::IWriteFile* file=0)=0;
+		virtual ~Action(){};
 };
-class ActionStart: public Action{
-  virtual void doStart(ScriptResponseStart&,String&)=0;
-  virtual void doWin(ScriptResponseWin&,String& s){};
-  virtual void doMove(ScriptResponseMove&,String&){};
-  virtual void doSelect(ScriptResponseSelect&,String&){};
+class ActionStart: public virtual Action{
+  public:
+		virtual void doStart(ScriptResponseStart&,String&)=0;
+		virtual void doWin(ScriptResponseWin&,String& s){};
+		virtual void doMove(ScriptResponseMove&,String&){};
+		virtual void doSelect(ScriptResponseSelect&,String&){};
 };
-class ActionWin: public Action{
-  virtual void doStart(ScriptResponseStart&,String&){};
-  virtual void doWin(ScriptResponseWin&,String&)=0;
-  virtual void doMove(ScriptResponseMove&,String&){};
-  virtual void doSelect(ScriptResponseSelect&,String&){};
+class ActionWin: public virtual Action{
+  public:
+		virtual void doStart(ScriptResponseStart&,String&){};
+		virtual void doWin(ScriptResponseWin&,String&)=0;
+		virtual void doMove(ScriptResponseMove&,String&){};
+		virtual void doSelect(ScriptResponseSelect&,String&){};
 };
-class ActionMove: public Action{
-  virtual void doStart(ScriptResponseStart&,String&){};
-  virtual void doWin(ScriptResponseWin&,String&){};
-  virtual void doMove(ScriptResponseMove&,String&)=0;
-  virtual void doSelect(ScriptResponseSelect&,String&){};
+class ActionMove: public virtual Action{
+  public:
+		virtual void doStart(ScriptResponseStart&,String&){};
+		virtual void doWin(ScriptResponseWin&,String&){};
+		virtual void doMove(ScriptResponseMove&,String&)=0;
+		virtual void doSelect(ScriptResponseSelect&,String&){};
 };
-class ActionSelect: public Action{
-  virtual void doStart(ScriptResponseStart&,String&){};
-  virtual void doWin(ScriptResponseWin&,String&)=0;
-  virtual void doMove(ScriptResponseMove&,String&){};
-  virtual void doSelect(ScriptResponseSelect&,String&){};
+class ActionSelect: public virtual Action{
+  public:
+		virtual void doStart(ScriptResponseStart&,String&){};
+		virtual void doWin(ScriptResponseWin&,String&){};
+		virtual void doMove(ScriptResponseMove&,String&){};
+		virtual void doSelect(ScriptResponseSelect&,String&)=0;
 };
-class ActionCommon: public Action{
-  virtual void doCommon(ScriptResponse&,String&)=0;
-  virtual void doStart(ScriptResponseStart& r,String& s){doCommon(r,s);};
-  virtual void doWin(ScriptResponseWin& r,String& s){doCommon(r,s);};
-  virtual void doMove(ScriptResponseMove& r,String& s){doCommon(r,s);};
-  virtual void doSelect(ScriptResponseSelect& r,String& s){doCommon(r,s);};
+class ActionCommon: public virtual Action{
+  public:
+		virtual void doCommon(ScriptResponse&,String&)=0;
+		virtual void doStart(ScriptResponseStart& r,String& s){doCommon(r,s);};
+		virtual void doWin(ScriptResponseWin& r,String& s){doCommon(r,s);};
+		virtual void doMove(ScriptResponseMove& r,String& s){doCommon(r,s);};
+		virtual void doSelect(ScriptResponseSelect& r,String& s){doCommon(r,s);};
 };
 
 class Event{
-  Trigger trigger;
-  Condition* condition;
-  int actionCount;
-  Action* actions;
+  public:
+		Trigger trigger;
+		Condition* condition;
+		int actionCount;
+		Action* actions;
 };
 
 class Script{
@@ -118,6 +129,7 @@ class Script{
     }
     
     InputParser* createParser(Condition** c);
+    InputParser* createParser(Action*** a,int* count);
     void returnParser(InputParser* p);
 };
 #endif

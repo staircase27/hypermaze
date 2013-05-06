@@ -63,7 +63,7 @@ class SequentialInputParser: public InputParser{
 
 inline void parse(irr::IReadFile* in,InputParser* parser){
   irr::u32 len=256;
-  char *buf=new char[len];
+  char *buf=new char[len+1];
   irr::u32 avail=0;
   Used used(0,false);
   while(!used.finished){
@@ -72,13 +72,14 @@ inline void parse(irr::IReadFile* in,InputParser* parser){
       avail-=used.amount;
     }else if(avail==len){
       len*=2;
-      char* tmp=new char[len];
+      char* tmp=new char[len+1];
       memcpy(tmp,buf,avail);
       delete[] buf;
       buf=tmp;
     }
     irr::s32 read=in->read(buf+avail,len-avail);
     avail+=read;
+    buf[avail]='\0';
     used=parser->parse(buf,avail,read==0);
     if(read==0)
       used.finished=true;
