@@ -562,10 +562,11 @@ void ActionWinNextLevel::output(irr::stringc* s,irr::IWriteFile* file){
   }
 }
 
+/*
 void ActionSelectString::doCommon(ScriptResponse& r,String& s){
   changed=false;
   for(StringPoint p=s
-
+//*/
 
 
 

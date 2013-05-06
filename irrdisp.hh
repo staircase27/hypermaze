@@ -82,7 +82,7 @@ class MazeDisplay{
 };
 
 class StringDisplay{
-  StringSlice& s;
+  String& s;
   list<irr::IMeshSceneNode*> nodes;
   irr::IMeshSceneNode* startEnd;
   irr::IMeshSceneNode* endEnd;
@@ -97,11 +97,11 @@ class StringDisplay{
     
     pair<StringPointer,bool> getStringPointer(irr::ISceneNode* node);
       
-    StringDisplay(StringSlice& s,NodeGen* ng,irr::vector3df center=irr::vector3df(0,0,0)):s(s),center(center),ng(ng),activeNodes(0),startEnd(ng->makeStringEnd()),endEnd(ng->makeStringEnd()){
+    StringDisplay(String& s,NodeGen* ng,irr::vector3df center=irr::vector3df(0,0,0)):s(s),center(center),ng(ng),activeNodes(0),startEnd(ng->makeStringEnd()),endEnd(ng->makeStringEnd()){
       endEnd->setRotation(irr::vector3df(0,180,0));
       update();
     };
-    void setString(StringSlice _s){
+    void setString(String _s){
       s=_s;
       update();
     }
@@ -113,7 +113,7 @@ class PuzzleDisplay{
   public:
     Maze m;
     String s;
-    StringSlice ss;
+    StringPlay sp;
     Controller* c;
   private:
     NodeGen* ng;
@@ -122,7 +122,7 @@ class PuzzleDisplay{
     map<irr::ISceneNode*,Dirn> slicers;
     bool won;
    public:
-    PuzzleDisplay(NodeGen* ng):m(Vector(5,5,5)),s(m),ss(s),ng(ng),md(m,ng),sd(ss,ng),won(false){
+    PuzzleDisplay(NodeGen* ng):m(Vector(5,5,5)),s(m),sp(s),ng(ng),md(m,ng),sd(s,ng),won(false){
       for(Dirn* d=allDirns;d!=allDirns+6;++d){
         irr::IMeshSceneNode* node = ng->makeUnitHandle(to_vector(*d).dotProduct(to_vector(s.targetDir)));
         node->setScale(irr::vector3df(1,1,1)*(md.wall+md.gap)/2);

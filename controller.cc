@@ -39,7 +39,7 @@
       }
       for(const pair<KeyMap::Action,pair<bool,bool> >* it=KeyMap::slideActions;it!=KeyMap::slideActions+4;++it){
         if(isTriggered(it->first)&&actionTime[it->first]<now){
-          if(pd.ss.slide(it->second.first,it->second.second)){
+          if(pd.sp.slide(it->second.first,it->second.second)){
             pd.stringSelectionUpdated();
             actionTime[it->first]=now+1*DELAY;
           }
@@ -47,7 +47,7 @@
       }
       for(const pair<KeyMap::Action,Dirn>* it=KeyMap::moveActions;it!=KeyMap::moveActions+6;++it){
         if(isTriggered(it->first)&&actionTime[it->first]<now){
-          if(pd.ss.tryMove(it->second)){
+          if(pd.sp.tryMove(it->second)){
             pd.stringUpdated();
             actionTime[it->first]=now+1*DELAY;
           }else
@@ -174,7 +174,7 @@
               if(weight.dotProduct(con(to_vector(*d)))>largest){
                 if(weight.dotProduct(con(to_vector(*d)))>reallargest)
                   reallargest=weight.dotProduct(con(to_vector(*d)));
-                if(pd.ss.canMove(*d)){
+                if(pd.sp.canMove(*d)){
                   largest=weight.dotProduct(con(to_vector(*d)));
                   dir=*d;
                 }
@@ -185,7 +185,7 @@
                 sm->playEffect(SoundManager::SE_BLOCK);
               break;
             }
-            if(pd.ss.tryMove(dir)){
+            if(pd.sp.tryMove(dir)){
               pd.stringUpdated();
               currdir=dir;
               dist+=1;
@@ -195,10 +195,10 @@
             irr::f32 weight=con(to_vector(currdir)).dotProduct(
                 (ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap))/
                 (ldir.getLengthSQ()-ldir.dotProduct(con(to_vector(currdir)))*ldir.dotProduct(con(to_vector(currdir))))-dist;
-            if(weight>=1 && pd.ss.tryMove(currdir)){
+            if(weight>=1 && pd.sp.tryMove(currdir)){
               pd.stringUpdated();
               dist+=1;
-            }else if(weight<=-1 && pd.ss.tryMove(opposite(currdir))){
+            }else if(weight<=-1 && pd.sp.tryMove(opposite(currdir))){
               pd.stringUpdated();
               dist-=1;
             }else{
@@ -270,11 +270,11 @@
         while(weight>1){
           if(sp.first!=pd.s.end()){
             if(moved<0)
-              pd.ss.setSelected(sp.first,selected);
+              pd.sp.setSelected(sp.first,selected);
             ++sp.first;
             if(moved>=0)
               if(sp.first!=pd.s.end())
-                pd.ss.setSelected(sp.first,!selected);
+                pd.sp.setSelected(sp.first,!selected);
             pd.stringSelectionUpdated();
             ++moved;
             --weight;
@@ -286,10 +286,10 @@
           if(sp.first!=pd.s.begin()){
             if(moved>0)
               if(sp.first!=pd.s.end())
-                pd.ss.setSelected(sp.first,selected);
+                pd.sp.setSelected(sp.first,selected);
             --sp.first;
             if(moved<=0)
-              pd.ss.setSelected(sp.first,!selected);
+              pd.sp.setSelected(sp.first,!selected);
             pd.stringSelectionUpdated();
             --moved;
             ++weight;
@@ -327,7 +327,7 @@
               }
               selected=!selected;
               for(StringPointer p=pd.s.begin();p!=pd.s.end();++p)
-                pd.ss.setSelected(p,selected);
+                pd.sp.setSelected(p,selected);
               pd.stringSelectionUpdated();
               return true;
             }
@@ -353,10 +353,10 @@
                 }
               }
               if(sp.first!=pd.s.end())
-                pd.ss.setSelected(sp.first,!selected);
+                pd.sp.setSelected(sp.first,!selected);
               if(sp.second && sp.first!=pd.s.begin()){
                 --sp.first;
-                pd.ss.setSelected(sp.first,!selected);
+                pd.sp.setSelected(sp.first,!selected);
               }
               pd.stringSelectionUpdated();
               string=node;

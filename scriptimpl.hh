@@ -221,7 +221,7 @@ class ActionForceWin:public Action,private InputParser{
     virtual InputParser* createParser(){return this;};
     virtual void returnParser(InputParser*){};
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="5\n";};
-    virtual ~ActionBlockWin(){};
+    virtual ~ActionForceWin(){};
 };
 
 /*

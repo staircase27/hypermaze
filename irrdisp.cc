@@ -99,20 +99,20 @@
       return true;
     }
     void StringDisplay::update(){
-      irr::vector3df position=center-(MazeDisplay::wall+MazeDisplay::gap)*con(s.getString().maze.size)/2;
+      irr::vector3df position=center-(MazeDisplay::wall+MazeDisplay::gap)*con(s.maze.size)/2;
       bool active=false;
       int i=0;
       list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
-      StringPointer sit=s.getString().begin();
+      StringPointer sit=s.begin();
       
-      startEnd->setPosition(position+con(s.getString().getStart())*(MazeDisplay::wall+MazeDisplay::gap)
-          -con(to_vector(s.getString().stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
-      startEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s.getString().stringDir))));
-      endEnd->setPosition(position+con(s.getString().getEnd())*(MazeDisplay::wall+MazeDisplay::gap)
-          +con(to_vector(s.getString().stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
-      endEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s.getString().stringDir))));
+      startEnd->setPosition(position+con(s.getStart())*(MazeDisplay::wall+MazeDisplay::gap)
+          -con(to_vector(s.stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
+      startEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s.stringDir))));
+      endEnd->setPosition(position+con(s.getEnd())*(MazeDisplay::wall+MazeDisplay::gap)
+          +con(to_vector(s.stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
+      endEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s.stringDir))));
       
-      while(sit!=s.getString().end()){
+      while(sit!=s.end()){
 
         if(nit==nodes.end()){
           nit=nodes.insert(nit,ng->makeUnitString(true));
@@ -151,7 +151,7 @@
         (*nit)->setID(STRING_ID+i);
       }
       (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1));
-      (*nit)->setPosition(position+con(s.getString().getEnd())*(MazeDisplay::wall+MazeDisplay::gap));
+      (*nit)->setPosition(position+con(s.getEnd())*(MazeDisplay::wall+MazeDisplay::gap));
       if(i>=activeNodes)
         (*nit)->setVisible(true);
 
@@ -170,8 +170,8 @@
     void StringDisplay::updateActive(){
       bool active=false;
       list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
-      StringPointer sit=s.getString().begin();
-      while(sit!=s.getString().end()){
+      StringPointer sit=s.begin();
+      while(sit!=s.end()){
         ng->makeStringActive(*nit,active||sit->selected);
         active=sit->selected;
 
@@ -186,13 +186,13 @@
     
     pair<StringPointer,bool> StringDisplay::getStringPointer(irr::ISceneNode* node){
       if(node==0)
-        return pair<StringPointer,bool>(s.getString().end(),false);
+        return pair<StringPointer,bool>(s.end(),false);
       int i=node->getID()-STRING_ID;
       if(i<0)
-        return pair<StringPointer,bool>(s.getString().end(),false);
+        return pair<StringPointer,bool>(s.end(),false);
       
-      StringPointer sit=s.getString().begin();
-      while(sit!=s.getString().end()){
+      StringPointer sit=s.begin();
+      while(sit!=s.end()){
         if(i==0)
           return pair<StringPointer,bool>(sit,true);
         --i;
@@ -230,8 +230,8 @@
         md.clear();
         md.init(m,ng);
         s=String(m);
-        ss=StringSlice(s);
-        sd.setString(ss);
+        sp=StringPlay(s);
+        sd.setString(s);
         for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
           slicer->first->setPosition(-con(to_vector(slicer->second))*(abs(to_vector(slicer->second).dotProduct(m.size))/2+2)*(md.wall+md.gap));
         won=false;

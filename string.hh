@@ -8,7 +8,7 @@
 #define STRING_HH_INC
 using namespace std;
 
-class StringSlice;
+class StringPlay;
 
 struct StringElement{
   Vector pos;
@@ -51,7 +51,7 @@ class StringPointer{
     
     StringPointer(list<StringElement>::iterator el):el(el){};
     
-    friend class StringSlice;
+    friend class StringPlay;
 };
 class ConstStringPointer{
   private:
@@ -160,18 +160,18 @@ class String{
       return *this;
     }
     
-    friend class StringSlice;
+    friend class StringPlay;
     #ifdef IOSTREAM
     friend ostream& operator <<(ostream& o,String s);
-    friend ostream& operator <<(ostream& o,StringSlice s);
+    friend ostream& operator <<(ostream& o,StringPlay s);
     #endif
 };
 
-class StringSlice{
+class StringPlay{
   String* s;
 
   public:
-    StringSlice(String& s):s(&s){};
+    StringPlay(String& s):s(&s){};
   
     String& getString(){
       return *s;
@@ -285,10 +285,10 @@ class StringSlice{
       }
     }
     #ifdef IOSTREAM
-    friend ostream& operator <<(ostream& o,StringSlice s);
+    friend ostream& operator <<(ostream& o,StringPlay s);
     #endif
 
-    StringSlice& operator=(const StringSlice& o){
+    StringPlay& operator=(const StringPlay& o){
       s=o.s;
       return *this;
     }
@@ -304,8 +304,8 @@ inline ostream& operator<<(ostream& o,String s){
 }
 
 
-inline ostream& operator<<(ostream& o,StringSlice s){
-  o<<"<StringSlice ";
+inline ostream& operator<<(ostream& o,StringPlay s){
+  o<<"<StringPlay ";
   for(list<StringElement>::iterator it=s.s->route.begin();it!=s.s->route.end();++it)
     cout<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";
   return cout<<s.s->endPos<<">";

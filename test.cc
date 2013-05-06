@@ -53,7 +53,7 @@ int main(){
     }
   cout<<m;
   String s(m);
-  StringSlice l(s);
+  StringPlay l(s);
   cout<<s<<endl;
   cout<<l.canMove(DOWN)<<endl;
   l.doMove(DOWN);
