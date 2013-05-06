@@ -247,6 +247,7 @@ int main(int argc,char* argv[]){
     in->drop();
   }
   
+  #ifdef IOSTREAM
   //*
   {
     const char* data=""// (True) or (True and True)
@@ -315,7 +316,11 @@ int main(int argc,char* argv[]){
     file->drop();
   }
   
+  {
+  	StringEdit se(ps.s);
+  }
   
+  #endif
 
   while(device->run())
   {

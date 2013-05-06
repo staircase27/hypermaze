@@ -1,3 +1,4 @@
+#include <cctype>
 #include "script.hh"
 #include "scriptimpl.hh"
 

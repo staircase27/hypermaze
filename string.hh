@@ -9,6 +9,7 @@
 using namespace std;
 
 class StringPlay;
+class StringEdit;
 
 struct StringElement{
   Vector pos;
@@ -52,6 +53,7 @@ class StringPointer{
     StringPointer(list<StringElement>::iterator el):el(el){};
     
     friend class StringPlay;
+    friend class StringEdit;
 };
 class ConstStringPointer{
   private:
@@ -161,6 +163,7 @@ class String{
     }
     
     friend class StringPlay;
+    friend class StringEdit;
     #ifdef IOSTREAM
     friend ostream& operator <<(ostream& o,String s);
     friend ostream& operator <<(ostream& o,StringPlay s);
@@ -218,7 +221,7 @@ class StringPlay{
     
     bool canMove(Dirn d){
       bool any=false;
-      if((d==LEFT||d==opposite(LEFT))&&(s->route.front().selected||s->route.back().selected))
+      if((d==s->stringDir||d==opposite(s->stringDir))&&(s->route.front().selected||s->route.back().selected))
         return false;
       for(list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it){
         if(!it->selected)
@@ -293,6 +296,69 @@ class StringPlay{
       return *this;
     }
 
+};
+
+class StringEdit{
+  String* s;
+
+  public:
+    StringEdit(String& s):s(&s){};
+  
+    String& getString(){
+      return *s;
+    }
+
+    void setSelected(StringPointer p,bool selected){
+      p.el->selected=selected;
+    }
+    
+    void setStringSegment(StringPointer sp,StringPointer ep,int count,Dirn* newRoute){
+      list<StringElement>::iterator it=sp.el;
+      Vector pos=it->pos;
+      for(Dirn* d=newRoute;d<newRoute+count;++it,++d){
+        //run out of bits of string to move so add a new one
+        if(it==ep.el){
+          it--;
+          s->route.insert(it,StringElement(pos,*d,it->selected&&ep.el->selected));
+          it++;
+        }else{
+          it->pos=pos;
+          it->d=*d;
+        }
+        pos+=to_vector(*d);
+      }
+      {
+		    //connect up to the right distance across
+		    Dirn d=s->stringDir;
+		    int dist=to_vector(d).dotProduct(ep.el->pos-pos);
+		    if(dist<0){
+		      dist=-dist;
+		      d=opposite(d);
+		    }
+		    for(int i=0;i<dist;++i,++it){
+		      //run out of bits of string to move so add a new one
+		      if(it==ep.el){
+		        it--;
+		        s->route.insert(it,StringElement(pos,d,it->selected&&ep.el->selected));
+		        it++;
+		      }else{
+		        it->pos=pos;
+		        it->d=d;
+		      }
+		      pos+=to_vector(d);
+		    }
+      }
+      //delete any spares
+      while(it!=ep.el)
+	      it=s->route.erase(it);
+      
+      //slide the rest of the string across to line up
+      for(it=ep.el;it!=s->route.end();++it){
+        it->pos=pos;
+        pos+=to_vector(it->d);
+      }
+      s->endPos=pos;
+    }
 };
 
 #ifdef IOSTREAM
