@@ -22,7 +22,7 @@ class StringPointer{
     list<StringElement>::iterator el;
   public:
     
-    const StringElement& operator *(){
+    const StringElement& operator *()const{
       return *el;
     }
     const StringElement* operator ->(){
@@ -94,6 +94,9 @@ class ConstStringPointer{
 #ifdef IOSTREAM
 inline ostream& operator<<(ostream& o,const StringElement& e){
   return o<<"<StringElement "<<e.pos<<" "<<e.d<<" "<<e.selected<<">";
+}
+inline ostream& operator<<(ostream& o,const StringPointer& e){
+  return o<<"<Pointer to "<<*e<<">";
 }
 #endif
 class String{
@@ -313,20 +316,23 @@ class StringEdit{
     }
     
     void setStringSegment(StringPointer sp,StringPointer ep,int count,Dirn* newRoute){
+      cout<<"setting string from "<<sp<<" to "<<ep<<" to new route of length "<<count<<endl;
+      cout<<*s<<endl;
       list<StringElement>::iterator it=sp.el;
       Vector pos=it->pos;
       for(Dirn* d=newRoute;d<newRoute+count;++it,++d){
         //run out of bits of string to move so add a new one
+        cout<<"moving string "<<*it<<" new pos "<<pos<<" new dirn "<<*d<<endl;
         if(it==ep.el){
-          it--;
-          s->route.insert(it,StringElement(pos,*d,it->selected&&ep.el->selected));
-          it++;
+          cout<<"new element needed"<<endl;
+          it=s->route.insert(it,StringElement(pos,*d,it->selected&&ep.el->selected));
         }else{
           it->pos=pos;
           it->d=*d;
         }
         pos+=to_vector(*d);
       }
+      cout<<*s<<endl;
       {
 		    //connect up to the right distance across
 		    Dirn d=s->stringDir;
@@ -335,12 +341,13 @@ class StringEdit{
 		      dist=-dist;
 		      d=opposite(d);
 		    }
+		    cout<<dist<<" elements in "<<d<<" needed to connect"<<endl;
 		    for(int i=0;i<dist;++i,++it){
 		      //run out of bits of string to move so add a new one
+	        cout<<"moving string "<<*it<<" new pos "<<pos<<" new dirn "<<d<<endl;
 		      if(it==ep.el){
-		        it--;
-		        s->route.insert(it,StringElement(pos,d,it->selected&&ep.el->selected));
-		        it++;
+	          cout<<"new element needed"<<endl;
+		        it=s->route.insert(it,StringElement(pos,d,it->selected&&ep.el->selected));
 		      }else{
 		        it->pos=pos;
 		        it->d=d;
@@ -348,12 +355,18 @@ class StringEdit{
 		      pos+=to_vector(d);
 		    }
       }
+      cout<<*s<<endl;
       //delete any spares
-      while(it!=ep.el)
+      while(it!=ep.el){
+        cout<<"deleting spare element "<<*it<<endl;
 	      it=s->route.erase(it);
+	    }
       
+      cout<<*s<<endl;
       //slide the rest of the string across to line up
+      cout<<"moving rest to line up"<<endl;
       for(it=ep.el;it!=s->route.end();++it){
+        cout<<"moving string "<<*it<<" new pos "<<pos<<endl;
         it->pos=pos;
         pos+=to_vector(it->d);
       }

@@ -317,7 +317,14 @@ int main(int argc,char* argv[]){
   }
   
   {
-  	StringEdit se(ps.s);
+  	StringEdit se(pd.s);
+  	StringPointer ps=pd.s.begin();
+  	++ps;
+  	StringPointer pe=ps;
+  	++pe;
+  	++pe;
+  	Dirn d=FORWARD;
+  	se.setStringSegment(ps,pe,1,&d);
   }
   
   #endif
