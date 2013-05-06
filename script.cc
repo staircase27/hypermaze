@@ -2,6 +2,12 @@
 #include "script.hh"
 #include "scriptimpl.hh"
 
+class StringMatcher{
+  //returns if the pattern matches the string and if it has a range marker the start and end of the last range found
+  //pattern takes the form of a list of string specs each of which have a repeat range (min & max repeats) and a spec for the elements in that range.
+  //the spec consists of on allowed ranges for each of the coords and if we care what the selection state is & if so what we want it to be
+}
+
 template <class T>
 class Parser:public InputParser{
   InputParser** dataParser;

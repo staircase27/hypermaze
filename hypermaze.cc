@@ -320,11 +320,28 @@ int main(int argc,char* argv[]){
   	StringEdit se(pd.s);
   	StringPointer ps=pd.s.begin();
   	++ps;
+  	++ps;
+  	++ps;
   	StringPointer pe=ps;
   	++pe;
   	++pe;
   	Dirn d=FORWARD;
   	se.setStringSegment(ps,pe,1,&d);
+  	
+  	ps=pd.s.begin();
+  	++ps;
+  	pe=ps;
+  	++pe;
+  	++pe;
+  	d=BACK;
+  	se.setStringSegment(ps,pe,1,&d);
+  	
+  	++pe;
+  	++pe;
+  	d=LEFT;
+  	se.setStringSegment(ps,pe,1,&d);
+  	
+  	pd.stringUpdated();
   }
   
   #endif
