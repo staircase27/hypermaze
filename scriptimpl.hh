@@ -2,6 +2,68 @@
 
 #ifndef SCRIPTIMPL_HH_INC
 #define SCRIPTIMPL_HH_INC
+
+struct Range{
+  int start;
+  int end;
+  inline bool inRange(int val){
+    return ((start==INT_MAX)||(val>=start))&&((end==INT_MAX)||(val<=end));
+  }
+  Range():start(0),end(-1){};
+};
+
+struct StringElementCondition{
+  // first bit is if we care (1 care, 0 dont). second is the value to match if we do care
+  int selectionCondition;
+
+  int xrange_count;
+  int yrange_count;
+  int zrange_count;
+  Range* xrange;
+  Range* yrange;
+  Range* zrange;
+  template <class T>
+  inline bool matches(T el){
+    if((selectionCondition&1)==0||(((selectionCondition&2)==2)==el->selected)){
+      bool match=false;
+      for(int i=0;i<xrange_count&&!match;++i)
+        if(xrange[i].inRange(el->pos.X))
+          match=true;
+      if(!match)
+        return false;
+      match=false;
+      for(int i=0;i<yrange_count&&!match;++i)
+        if(yrange[i].inRange(el->pos.Y))
+          match=true;
+      if(!match)
+        return false;
+      match=false;
+      for(int i=0;i<zrange_count&&!match;++i)
+        if(zrange[i].inRange(el->pos.Z))
+          match=true;
+      return match;
+    }
+    return false;
+  }
+  StringElementCondition():selectionCondition(0),xrange_count(0),yrange_count(0),zrange_count(0),xrange(0),yrange(0),zrange(0){};
+  
+	void output(irr::stringc* s,irr::IWriteFile* file=0);
+};
+
+class StringConditionParser:public InputParser{
+  int stage;
+  StringElementCondition* c;
+  public:
+    Used parse(char* data,irr::u32 length,bool eof);
+    StringConditionParser(StringElementCondition *c):c(c),stage(0){}
+};
+
+class StringMatcher{
+  //returns if the pattern matches the string and if it has a range marker the start and end of the last range found
+  //pattern takes the form of a list of string specs each of which have a repeat range (min & max repeats) and a spec for the elements in that range.
+};
+
+
 class ConditionTrue: public Condition, public InputParser{
   public:
     virtual bool is(int time,Script script,const String& s){return true;}

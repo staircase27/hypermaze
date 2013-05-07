@@ -1,12 +1,152 @@
 #include <cctype>
+#define USE_CLIM
+#ifdef USE_CLIM
+#include <climits>
+#else
+#define INT_MAX std::numeric_limits<int>::max()
+#endif
 #include "script.hh"
 #include "scriptimpl.hh"
 
-class StringMatcher{
-  //returns if the pattern matches the string and if it has a range marker the start and end of the last range found
-  //pattern takes the form of a list of string specs each of which have a repeat range (min & max repeats) and a spec for the elements in that range.
-  //the spec consists of on allowed ranges for each of the coords and if we care what the selection state is & if so what we want it to be
+void StringElementCondition::output(irr::stringc* s,irr::IWriteFile* file){
+  cout<<selectionCondition<<" "<<(selectionCondition&1)<<" "<<(selectionCondition&1==0)<<endl;
+  if((selectionCondition&1)==0)
+    (*s)+="*";
+  else if((selectionCondition&2)==0)
+    (*s)+="N";
+  else
+    (*s)+="Y";
+  (*s)+="\n";
+  (*s)+=xrange_count;
+  for(int i=0;i<xrange_count;++i){
+    (*s)+=" ";
+    if(xrange[i].start==INT_MAX)
+      (*s)+="*";
+    else
+      (*s)+=xrange[i].start;
+    (*s)+=" ";
+    if(xrange[i].end==INT_MAX)
+      (*s)+="*";
+    else
+      (*s)+=xrange[i].end;
+  }
+  (*s)+="\n";
+  if(file && s->size()>256){
+    file->write(s->c_str(),s->size());
+    *s=irr::stringc();
+  }
+  (*s)+=yrange_count;
+  for(int i=0;i<yrange_count;++i){
+    (*s)+=" ";
+    if(yrange[i].start==INT_MAX)
+      (*s)+="*";
+    else
+      (*s)+=yrange[i].start;
+    (*s)+=" ";
+    if(yrange[i].end==INT_MAX)
+      (*s)+="*";
+    else
+      (*s)+=yrange[i].end;
+  }
+  (*s)+="\n";
+  if(file && s->size()>256){
+    file->write(s->c_str(),s->size());
+    *s=irr::stringc();
+  }
+  (*s)+=zrange_count;
+  for(int i=0;i<zrange_count;++i){
+    (*s)+=" ";
+    if(zrange[i].start==INT_MAX)
+      (*s)+="*";
+    else
+      (*s)+=zrange[i].start;
+    (*s)+=" ";
+    if(zrange[i].end==INT_MAX)
+      (*s)+="*";
+    else
+      (*s)+=zrange[i].end;
+  }
+  (*s)+="\n";
+  if(file && s->size()>256){
+    file->write(s->c_str(),s->size());
+    *s=irr::stringc();
+  }
 }
+
+Used StringConditionParser::parse(char* data,irr::u32 length,bool eof){
+  cout<<"in"<<stage<<endl;
+  char* start=data;
+  char* end=data+length;
+  if(!eof)
+    end-=1;
+  while(stage!=4){
+	  cout<<"main"<<stage<<endl;
+    if(stage==0){
+      while(isspace(*data))
+        if(++data>=end)
+          return Used(data-start,false);
+      if(*data=='*')
+        c->selectionCondition=0;
+      else if(*data=='Y')
+        c->selectionCondition=3;
+      else
+        c->selectionCondition=4;
+      ++stage;
+      ++data;
+    }else{
+      int* count;
+      Range** ranges;
+      if((stage&3)==1){
+        count=&c->xrange_count;
+        ranges=&c->xrange;
+      }else if((stage&3)==2){
+        count=&c->yrange_count;
+        ranges=&c->yrange;
+      }else{//(stage&3)==3
+        count=&c->zrange_count;
+        ranges=&c->zrange;
+      }
+      if((stage&~3)==0){
+        char* tmp=data;
+        *count=strtol(data,&tmp,10);
+        if(tmp>end&&!eof)
+          return Used(data-start,false);
+        (*ranges)=new Range[*count];
+        data=tmp;
+        stage+=4;
+      }
+      for(;(stage&~3)<=4*(*count);stage+=4){
+        cout<<"inloop"<<stage<<" "<<(stage>>2)-1<<endl;
+        while(isspace(*data))
+          if(++data>=end)
+            return Used(data-start,false);
+        char* tmp=data;
+		    if(*data=='*'){
+		      (*ranges)[(stage>>2)-1].start=INT_MAX;
+		      ++tmp;
+		    }else{
+		      (*ranges)[(stage>>2)-1].start=strtol(data,&tmp,10);
+		      if(tmp>end&&!eof)
+		        return Used(data-start,false);
+		    }
+        while(isspace(*tmp))
+          if(++tmp>=end)
+            return Used(data-start,false);
+		    if(*tmp=='*'){
+		      (*ranges)[(stage>>2)-1].end=INT_MAX;
+		      ++tmp;
+		    }else{
+		      (*ranges)[(stage>>2)-1].end=strtol(tmp,&tmp,10);
+		      if(tmp>end&&!eof)
+		        return Used(data-start,false);
+		    }
+		    data=tmp;
+	    }
+	    stage=(stage&3)+1;
+    }
+  }
+}
+
 
 template <class T>
 class Parser:public InputParser{
@@ -25,13 +165,13 @@ Used Parser<Condition>::parse(char* data,irr::u32 length,bool eof){
     end-=1;
   int type=strtol(data,&data,10);
   if(!eof){
-	  if(data>=end) return Used(0,false);
-	}else{
-	  if(data>end){
-	    type=0;
-	    data=end;
-	  }
-	}
+    if(data>=end) return Used(0,false);
+  }else{
+    if(data>end){
+      type=0;
+      data=end;
+    }
+  }
   switch(type){
     case 1:
       *newT=new ConditionTrue();
@@ -71,13 +211,13 @@ Used Parser<Action>::parse(char* data,irr::u32 length,bool eof){
     end-=1;
   int type=strtol(data,&data,10);
   if(!eof){
-	  if(data>=end) return Used(0,false);
-	}else{
-	  if(data>end){
-	    type=0;
-	    data=end;
-	  }
-	}
+    if(data>=end) return Used(0,false);
+  }else{
+    if(data>end){
+      type=0;
+      data=end;
+    }
+  }
   switch(type){
     case 1:
       *newT=new ActionMessage();
@@ -502,7 +642,7 @@ class dataDescParser:public InputParser{
   irr::stringc lines;
   char delim;
   public:
-    dataDescParser	(Pair<irr::stringc,irr::stringc>* d):d(d),pos(0),lines(),delim(0){};
+    dataDescParser  (Pair<irr::stringc,irr::stringc>* d):d(d),pos(0),lines(),delim(0){};
     Used parse(char* data,irr::u32 length,bool eof){
       char* start=data;
       char* end=data+length;

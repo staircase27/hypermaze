@@ -327,7 +327,7 @@ int main(int argc,char* argv[]){
   	++pe;
   	Dirn d=FORWARD;
   	se.setStringSegment(ps,pe,1,&d);
-  	
+
   	ps=pd.s.begin();
   	++ps;
   	pe=ps;
@@ -342,6 +342,29 @@ int main(int argc,char* argv[]){
   	se.setStringSegment(ps,pe,1,&d);
   	
   	pd.stringUpdated();
+  	
+  }
+  
+  {
+    StringElementCondition sec;
+    irr::stringc str;
+    sec.output(&str);
+    cout<<str.c_str()<<endl;
+    const char* data="Y "
+                      "0 "//no x conditions
+                      "1 "//one y condition
+                      "1 1 "//y is exactly 1
+                      "4 "//4 for the last type
+                      "* 0 2 3 5 *";//up to 0 2-3 and >5 (plus a missing one)
+    cout<<"input"<<endl<<data<<endl;
+    irr::IReadFile* file=irr::createMemoryReadFile((void*)data,strlen(data),"",false);
+    StringConditionParser secp(&sec);
+    ::parse(file,&secp);
+    str=irr::stringc();
+    sec.output(&str);
+    cout<<"output"<<endl<<str.c_str()<<endl;
+    
+    
   }
   
   #endif

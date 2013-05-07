@@ -314,14 +314,19 @@ class StringEdit{
     void setSelected(StringPointer p,bool selected){
       p.el->selected=selected;
     }
-    
     void setStringSegment(StringPointer sp,StringPointer ep,int count,Dirn* newRoute){
       list<StringElement>::iterator it=sp.el;
       Vector pos=it->pos;
+      bool endSel=true;
+      if(ep!=s->end())
+        endSel=ep.el->selected;
       for(Dirn* d=newRoute;d<newRoute+count;++it,++d){
         //run out of bits of string to move so add a new one
         if(it==ep.el){
-          it=s->route.insert(it,StringElement(pos,*d,it->selected&&ep.el->selected));
+          --it;
+          bool sel=it->selected&&endSel;
+          ++it;
+          it=s->route.insert(it,StringElement(pos,*d,sel));
         }else{
           it->pos=pos;
           it->d=*d;
@@ -331,14 +336,17 @@ class StringEdit{
       {
 		    //connect up to the right distance across
 		    Dirn d=s->stringDir;
-		    int dist=to_vector(d).dotProduct(ep.el->pos-pos);
+		    int dist=to_vector(d).dotProduct((ep==s->end()?s->endPos:ep.el->pos)-pos);
 		    if(dist<0){
 		      dist=-dist;
 		      d=opposite(d);
 		    }
 		    for(int i=0;i<dist;++i,++it){
 		      if(it==ep.el){
-		        it=s->route.insert(it,StringElement(pos,d,it->selected&&ep.el->selected));
+		        --it;
+		        bool sel=it->selected&&endSel;
+		        ++it;
+		        it=s->route.insert(it,StringElement(pos,d,sel));
 		      }else{
 		        it->pos=pos;
 		        it->d=d;
