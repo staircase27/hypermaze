@@ -374,6 +374,99 @@ int main(int argc,char* argv[]){
     cout<<str.c_str()<<endl;
     file->drop();
   }
+  {
+     irr::stringc str;
+     StringMatcher sm;
+     
+     sm.count=1;
+     sm.pattern=new pair<PatternTag,StringElementCondition>[5];
+          str=irr::stringc();
+     sm.output(&str);
+     cout<<"pattern"<<endl<<str.c_str()<<endl;
+     cout<<sm.match(pd.s)<<endl;
+     
+     sm.pattern[0].first.max=6000;
+     str=irr::stringc();
+     sm.output(&str);
+     cout<<"pattern"<<endl<<str.c_str()<<endl;
+     cout<<sm.match(pd.s)<<endl;
+     
+     sm.pattern[0].first.greedy=false;
+     str=irr::stringc();
+     sm.output(&str);
+     cout<<"pattern"<<endl<<str.c_str()<<endl;
+     cout<<sm.match(pd.s)<<endl;
+     
+     sm.pattern[0].first.min=6000;
+     str=irr::stringc();
+     sm.output(&str);
+     cout<<"pattern"<<endl<<str.c_str()<<endl;
+     cout<<sm.match(pd.s)<<endl;
+     
+     sm.pattern[0].first.min=0;
+     sm.pattern[0].second.selectionCondition=1;
+     str=irr::stringc();
+     sm.output(&str);
+     cout<<"pattern"<<endl<<str.c_str()<<endl;
+     cout<<sm.match(pd.s)<<endl;
+     
+     sm.pattern[1].first.max=6000;
+     sm.count=2;
+     str=irr::stringc();
+     sm.output(&str);
+     cout<<"pattern"<<endl<<str.c_str()<<endl;
+     cout<<sm.match(pd.s)<<endl;
+     
+     sm.pattern[0].first.greedy=true;
+     str=irr::stringc();
+     sm.output(&str);
+     cout<<"pattern"<<endl<<str.c_str()<<endl;
+     cout<<sm.match(pd.s)<<endl;
+     
+     sm.pattern[0].second.selectionCondition=0;
+     sm.pattern[1].first.min=3;
+     sm.pattern[1].first.max=3;
+     str=irr::stringc();
+     sm.output(&str);
+     cout<<"pattern"<<endl<<str.c_str()<<endl;
+     cout<<sm.match(pd.s)<<endl;
+     
+     sm.pattern[0].first.greedy=false;
+     str=irr::stringc();
+     sm.output(&str);
+     cout<<"pattern"<<endl<<str.c_str()<<endl;
+     cout<<sm.match(pd.s)<<endl;
+     
+     sm.groups=new pair<int,int>[2];
+     sm.groups[0].first=0;
+     sm.groups[0].second=1;
+     sm.groups[1].first=1;
+     sm.groups[1].second=0;
+     sm.group_count=2;
+     
+     pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups=new pair<SP<ConstStringPointer>,SP<ConstStringPointer> >[2];
+     str=irr::stringc();
+     sm.output(&str);
+     cout<<"pattern"<<endl<<str.c_str()<<endl;
+     cout<<sm.match(pd.s,groups)<<endl;
+     cout<<*groups[0].first<<" "<<*groups[0].second<<endl;
+     cout<<*groups[1].first<<" "<<*groups[1].second<<endl;
+     delete[] groups;
+
+     groups=new pair<SP<ConstStringPointer>,SP<ConstStringPointer> >[2];
+     sm.pattern[0].second.selectionCondition=3;
+     str=irr::stringc();
+     sm.output(&str);
+     cout<<"pattern"<<endl<<str.c_str()<<endl;
+     cout<<sm.match(pd.s,groups)<<endl;
+     cout<<&*groups[0].first<<" "<<&*groups[0].second<<endl;
+     cout<<&*groups[1].first<<" "<<&*groups[1].second<<endl;
+     delete[] groups;
+     
+     delete[] sm.groups;
+     delete[] sm.pattern;
+  }
+  
   
   #endif
 

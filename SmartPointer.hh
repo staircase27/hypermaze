@@ -7,6 +7,7 @@ class SP{
     T* p;
     int* c;
   public:
+    SP<T>():c(new int(1)),p(0){};
     SP<T>(T* p):c(new int(1)),p(p){ };
     template <class U>
     SP<T>(const SP<U>& op):p(op.p),c(op.c){++*c;}

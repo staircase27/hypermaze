@@ -15,7 +15,7 @@ void StringElementCondition::output(irr::stringc* s,irr::IWriteFile* file){
     (*s)+="N";
   else
     (*s)+="Y";
-  (*s)+="\n";
+  (*s)+=" ";
   (*s)+=xrange_count;
   for(int i=0;i<xrange_count;++i){
     (*s)+=" ";
@@ -29,7 +29,7 @@ void StringElementCondition::output(irr::stringc* s,irr::IWriteFile* file){
     else
       (*s)+=xrange[i].end;
   }
-  (*s)+="\n";
+  (*s)+=" ";
   if(file && s->size()>256){
     file->write(s->c_str(),s->size());
     *s=irr::stringc();
@@ -47,7 +47,7 @@ void StringElementCondition::output(irr::stringc* s,irr::IWriteFile* file){
     else
       (*s)+=yrange[i].end;
   }
-  (*s)+="\n";
+  (*s)+=" ";
   if(file && s->size()>256){
     file->write(s->c_str(),s->size());
     *s=irr::stringc();

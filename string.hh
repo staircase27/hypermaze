@@ -60,10 +60,10 @@ class ConstStringPointer{
     list<StringElement>::const_iterator el;
   public:
     
-    const StringElement& operator *(){
+    const StringElement& operator *()const{
       return *el;
     }
-    const StringElement* operator ->(){
+    const StringElement* operator ->()const{
       return &*el;
     }
     
@@ -96,6 +96,9 @@ inline ostream& operator<<(ostream& o,const StringElement& e){
   return o<<"<StringElement "<<e.pos<<" "<<e.d<<" "<<e.selected<<">";
 }
 inline ostream& operator<<(ostream& o,const StringPointer& e){
+  return o<<"<Pointer to "<<*e<<">";
+}
+inline ostream& operator<<(ostream& o,const ConstStringPointer& e){
   return o<<"<Pointer to "<<*e<<">";
 }
 #endif
