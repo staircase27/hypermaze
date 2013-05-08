@@ -467,8 +467,8 @@ int main(int argc,char* argv[]){
      cout<<&*groups[1].first<<" "<<&*groups[1].second<<endl;
      delete[] groups;
      
-     delete[] sm.groups;
-     delete[] sm.pattern;
+//     delete[] sm.groups;
+//     delete[] sm.pattern;
   }
   
   

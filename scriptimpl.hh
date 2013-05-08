@@ -87,93 +87,18 @@ public:
   public:
   
 	  StringMatcher():count(0),group_count(0),pattern(0),groups(0){};
-	  
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){
-      (*s)+=count;
-      (*s)+="\n";
-      for(int i=0;i<count;++i){
-        (*s)+=pattern[i].first.min;
-        (*s)+=" ";
-        (*s)+=pattern[i].first.max;
-        (*s)+=" ";
-        (*s)+=pattern[i].first.greedy;
-        (*s)+="\n";
-        pattern[i].second.output(s,file);
-      }
-      (*s)+=group_count;
-      for(int i=0;i<group_count;++i){
-        (*s)+=groups[i].first;
-        (*s)+=" ";
-        (*s)+=groups[i].second;
-        (*s)+=" ";
-      }
-    };
-  
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
+    virtual ~StringMatcher(){
+      delete[] pattern;
+      delete[] groups;
+    }
+    virtual InputParser* createParser();
+    virtual void returnParser(InputParser*);
     inline int groupCount(){return group_count;}
-    
-	  bool match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups=0){
-  	  PatternMatch* m=groups==0?0:new PatternMatch[count];
-  	  bool valid=matchStep(s,s.begin(),m,0);
-  	  if(groups!=0){
-  	    for(int i=0;i<group_count;++i){
-  	      groups[i].first=m[this->groups[i].first].start;
-  	      groups[i].second=m[this->groups[i].second].end;
-  	    }
-  	  }
-  	  delete[] m;
-  	  return valid;
-	  }
+	  bool match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups=0);
 	  
 	private:
-	  bool matchStep(const String& s,ConstStringPointer p,PatternMatch* matches,int level){
-	    if(level==count){
-	      cout<<level<<" at end of pattern so are we at the end of te string? "<<(p==s.end())<<endl;
-	      return p==s.end();
-	    }
-	    PatternTag& pt=pattern[level].first;
-	    StringElementCondition& sec=pattern[level].second;
-      if(matches)
-		    matches[level].start=SP<ConstStringPointer>(new ConstStringPointer(p));
-      cout<<level<<" "<<"starting match step from "<<p<<endl;
-      int i=0;
-      while(i<pt.min){
-	      cout<<level<<" "<<"stepping to min "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
-        if(p==s.end()||!sec.matches(p))
-          return false;
-        ++i;++p;
-      }
-      if(pt.greedy){
-        //go to first that doesn't match or max+1 (whichevers first)
-		    while(i<pt.max&&p!=s.end()&&sec.matches(p)){
-		      ++i;++p;
-		      cout<<level<<" "<<"stepping to max "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
-		    }
-		    cout<<level<<" "<<"at max (or first fail) "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
-		  }
-      //while i is still in valid range
-      while(i>=pt.min && i<=pt.max){
-        //see if we can match the next group
-        if(matchStep(s,p,matches,level+1)){
-          cout<<level<<" found a match"<<endl;
-				  if(matches)
-						matches[level].end=SP<ConstStringPointer>(new ConstStringPointer(p));
-          count=count;
-          return true;
-        }
-        if(pt.greedy){
-          cout<<level<<" stepping back "<<i<<" "<<p<<endl;
-          --i;--p;
-        }else{
-			    cout<<level<<" "<<"stepping up "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
-		      if(!sec.matches(p))
-	          return false;
-          ++i;++p;
-        }
-      }
-      cout<<level<<" no match for trailing groups (but we matched over all allowed repeats)"<<endl;
-      //didn't find a match in the valid range
-      return false;
-	  }
+	  bool matchStep(const String& s,ConstStringPointer p,PatternMatch* matches,int level);
 };
 
 
