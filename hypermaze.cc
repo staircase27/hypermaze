@@ -373,6 +373,10 @@ int main(int argc,char* argv[]){
     cout<<"output"<<endl;
     cout<<str.c_str()<<endl;
     file->drop();
+    delete[] sr.messages;
+    for(Action** ap=as;ap!=as+count;++ap)
+	    delete *ap;
+	  delete[] as;
   }
   {
      irr::stringc str;

@@ -47,6 +47,12 @@ struct StringElementCondition{
   }
   StringElementCondition():selectionCondition(0),xrange_count(0),yrange_count(0),zrange_count(0),xrange(0),yrange(0),zrange(0){};
   
+  ~StringElementCondition(){
+    delete[] xrange;
+    delete[] yrange;
+    delete[] zrange;
+  }
+  
 	void output(irr::stringc* s,irr::IWriteFile* file=0);
 };
 
