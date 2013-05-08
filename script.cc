@@ -9,7 +9,6 @@
 #include "scriptimpl.hh"
 
 void StringElementCondition::output(irr::stringc* s,irr::IWriteFile* file){
-  cout<<selectionCondition<<" "<<(selectionCondition&1)<<" "<<(selectionCondition&1==0)<<endl;
   if((selectionCondition&1)==0)
     (*s)+="*";
   else if((selectionCondition&2)==0)
@@ -74,23 +73,21 @@ void StringElementCondition::output(irr::stringc* s,irr::IWriteFile* file){
 }
 
 Used StringConditionParser::parse(char* data,irr::u32 length,bool eof){
-  cout<<"in"<<stage<<endl;
   char* start=data;
   char* end=data+length;
   if(!eof)
     end-=1;
   while(stage!=4){
-	  cout<<"main"<<stage<<endl;
     if(stage==0){
       while(isspace(*data))
         if(++data>=end)
           return Used(data-start,false);
       if(*data=='*')
         c->selectionCondition=0;
-      else if(*data=='Y')
+      else if(*data=='Y'||*data=='y')
         c->selectionCondition=3;
       else
-        c->selectionCondition=4;
+        c->selectionCondition=1;
       ++stage;
       ++data;
     }else{
@@ -109,14 +106,13 @@ Used StringConditionParser::parse(char* data,irr::u32 length,bool eof){
       if((stage&~3)==0){
         char* tmp=data;
         *count=strtol(data,&tmp,10);
-        if(tmp>end&&!eof)
+        if(tmp>=end&&!eof)
           return Used(data-start,false);
         (*ranges)=new Range[*count];
         data=tmp;
         stage+=4;
       }
       for(;(stage&~3)<=4*(*count);stage+=4){
-        cout<<"inloop"<<stage<<" "<<(stage>>2)-1<<endl;
         while(isspace(*data))
           if(++data>=end)
             return Used(data-start,false);
@@ -126,7 +122,7 @@ Used StringConditionParser::parse(char* data,irr::u32 length,bool eof){
 		      ++tmp;
 		    }else{
 		      (*ranges)[(stage>>2)-1].start=strtol(data,&tmp,10);
-		      if(tmp>end&&!eof)
+		      if(tmp>=end&&!eof)
 		        return Used(data-start,false);
 		    }
         while(isspace(*tmp))
@@ -137,7 +133,7 @@ Used StringConditionParser::parse(char* data,irr::u32 length,bool eof){
 		      ++tmp;
 		    }else{
 		      (*ranges)[(stage>>2)-1].end=strtol(tmp,&tmp,10);
-		      if(tmp>end&&!eof)
+		      if(tmp>=end&&!eof)
 		        return Used(data-start,false);
 		    }
 		    data=tmp;
@@ -145,6 +141,7 @@ Used StringConditionParser::parse(char* data,irr::u32 length,bool eof){
 	    stage=(stage&3)+1;
     }
   }
+  return Used(data-start,true);
 }
 
 
@@ -235,14 +232,14 @@ Used Parser<Action>::parse(char* data,irr::u32 length,bool eof){
       *newT=new ActionForceWin();
       break;
     case 6:
-//      *newT=new ConditionBefore();
+      *newT=new ActionSelectStringPattern();
       break;
-    case 7:
+//    case 7:
 //      *newT=new ConditionStringPosition();
-      break;
-    case 8:
-//      *newT=new ConditionStringSelection();
-      break;
+//      break;
+//    case 8:
+//      *newT=new ActionStringSelectionPattern();
+//      break;
     default:
       *newT=new ActionNothing();
       break;
@@ -709,11 +706,34 @@ void ActionWinNextLevel::output(irr::stringc* s,irr::IWriteFile* file){
   }
 }
 
-/*
-void ActionSelectString::doCommon(ScriptResponse& r,String& s){
-  changed=false;
-  for(StringPoint p=s
-//*/
+void ActionSelectStringPattern::doCommon(ScriptResponse& r,String& s){
+  StringEdit se(s);
+  for(StringPointer p=s.begin();p!=s.end();++p){
+    if(!change.matches(p))
+      continue;
+    bool newsel=select.matches(p);
+    if(newsel^p->selected){
+      r.stringSelectionChanged=true;
+      se.setSelected(p,newsel);
+    }
+  }
+}
+
+InputParser* ActionSelectStringPattern::createParser(){
+  InputParser** parsers=new InputParser*[2];
+  parsers[0]=new StringConditionParser(&this->change);
+  parsers[1]=new StringConditionParser(&this->select);
+  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
+    Derefer<InputParser,InputParser**>(parsers),
+    Derefer<InputParser,InputParser**>(parsers+2));
+};
+void ActionSelectStringPattern::returnParser(InputParser* parser){
+  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
+  delete *(p->end.data-2);
+  delete *(p->end.data-1);
+  delete[] (p->end.data-2);
+  delete parser;
+};
 
 
 

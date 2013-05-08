@@ -25,19 +25,19 @@ struct StringElementCondition{
   template <class T>
   inline bool matches(T el){
     if((selectionCondition&1)==0||(((selectionCondition&2)==2)==el->selected)){
-      bool match=false;
+      bool match=xrange_count==0;
       for(int i=0;i<xrange_count&&!match;++i)
         if(xrange[i].inRange(el->pos.X))
           match=true;
       if(!match)
         return false;
-      match=false;
+      match=yrange_count==0;
       for(int i=0;i<yrange_count&&!match;++i)
         if(yrange[i].inRange(el->pos.Y))
           match=true;
       if(!match)
         return false;
-      match=false;
+      match=zrange_count==0;
       for(int i=0;i<zrange_count&&!match;++i)
         if(zrange[i].inRange(el->pos.Z))
           match=true;
@@ -241,6 +241,7 @@ class ActionMessage:public ActionCommon{
 class ActionBlockWin:public ActionWin,private InputParser{
   public:
     virtual void doWin(ScriptResponseWin& r,String&){
+      cout<<"Win Blocked"<<endl;
       r.block=true;
     };
     virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
@@ -286,18 +287,17 @@ class ActionForceWin:public Action,private InputParser{
     virtual ~ActionForceWin(){};
 };
 
-/*
-class ActionSelectString:public ActionCommon{
-  bool fromStart;
-  int length;
-  bool* change;
-  bool* val;
+class ActionSelectStringPattern:public ActionCommon{
+  StringElementCondition change;
+  StringElementCondition select;
   
   public:
     virtual void doCommon(ScriptResponse& r,String&);
-  
-}
-//*/
+    virtual InputParser* createParser();
+    virtual void returnParser(InputParser* p);
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="6 ";change.output(s,file);select.output(s,file);};
+};
+
 
 class SomeAction{
   virtual void doStart(ScriptResponseStart&,String&)=0;

@@ -56,7 +56,7 @@ class SequentialInputParser: public InputParser{
       }
       if(eof && current!=end)
         while(++current!=end)
-          current->parse((char*)0,0,true);
+          current->parse(data+length,0,true);
       return total;
     }
 };
