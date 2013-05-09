@@ -16,6 +16,8 @@ void StringElementCondition::output(irr::stringc* s,irr::IWriteFile* file){
   else
     (*s)+="Y";
   (*s)+=" ";
+  (*s)+=dirnsCondition;
+  (*s)+=" ";
   (*s)+=xrange_count;
   for(int i=0;i<xrange_count;++i){
     (*s)+=" ";
@@ -88,8 +90,15 @@ Used StringConditionParser::parse(char* data,irr::u32 length,bool eof){
         c->selectionCondition=3;
       else
         c->selectionCondition=1;
+      char* tmp=data+1;
+      while(isspace(*tmp))
+        if(++tmp>=end)
+          return Used(data-start,false);
+      c->dirnsCondition=strtol(tmp,&tmp,10);
+      if(++tmp>=end)
+        return Used(data-start,false);
+      data=tmp;
       ++stage;
-      ++data;
     }else{
       int* count;
       Range** ranges;
@@ -144,19 +153,42 @@ Used StringConditionParser::parse(char* data,irr::u32 length,bool eof){
   return Used(data-start,true);
 }
 
+Used PatternTag::parse(char* data,irr::u32 length,bool eof){
+  char* start=data;
+  char* end=data+length;
+  if(!eof)
+    end-=1;
+  
+	min=strtol(data,&data,10);
+	if(data>=end&&!eof)
+		return Used(0,false);  
+	max=strtol(data,&data,10);
+	if(data>=end&&!eof)
+		return Used(0,false);  
+	greedy=(bool)strtol(data,&data,10);
+	if(data>=end&&!eof)
+		return Used(0,false);  
+	return Used(data-start,true);
+}
+
+void PatternTag::output(irr::stringc* s,irr::IWriteFile* file){
+  (*s)+=min;
+  (*s)+=" ";
+  (*s)+=max;
+  (*s)+=" ";
+  (*s)+=greedy;
+  (*s)+="\n";
+}
+
 void StringMatcher::output(irr::stringc* s,irr::IWriteFile* file){
   (*s)+=count;
   (*s)+="\n";
   for(int i=0;i<count;++i){
-    (*s)+=pattern[i].first.min;
-    (*s)+=" ";
-    (*s)+=pattern[i].first.max;
-    (*s)+=" ";
-    (*s)+=pattern[i].first.greedy;
-    (*s)+="\n";
+	  pattern[i].first.output(s,file);
     pattern[i].second.output(s,file);
   }
   (*s)+=group_count;
+  (*s)+=" ";
   for(int i=0;i<group_count;++i){
     (*s)+=groups[i].first;
     (*s)+=" ";
@@ -165,10 +197,93 @@ void StringMatcher::output(irr::stringc* s,irr::IWriteFile* file){
   }
 };
 
-InputParser* StringMatcher::createParser(){}
-void StringMatcher::returnParser(InputParser*){}
+class StringMatcherGroupsParser:public InputParser{
+  StringMatcher* sm;
+  int stage;
+  public:
+		StringMatcherGroupsParser(StringMatcher* sm):sm(sm),stage(-1){};
+		Used parse(char* data,irr::u32 length,bool eof){
+			char* start=data;
+			char* end=data+length;
+			if(!eof)
+				end-=1;
+		  if(stage==-1){
+				sm->group_count=strtol(data,&data,10);
+				if(data>=end&&!eof)
+					return Used(0,false);
+			  delete[] sm->groups;
+			  sm->groups=new pair<int,int>[sm->group_count];
+		    ++stage;
+		  }
+		  while(stage<sm->group_count){
+		    char* tmp;
+				sm->groups[stage].first=strtol(data,&tmp,10);
+				if(tmp>=end&&!eof)
+					return Used(data-start,false);  
+				sm->groups[stage].second=(bool)strtol(tmp,&tmp,10);
+				if(data>=end&&!eof)
+					return Used(data-start,false);  
+		    data=tmp;
+		    ++stage;
+		  }
+		  return Used(data-start,true);
+		}
+};
 
-bool StringMatcher::match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups){
+class StringMatcherParser:public InputParser{
+  InputParser** dataParser;
+  StringMatcher* sm;
+  public:
+    virtual Used parse(char* data,irr::u32 length,bool eof);
+    StringMatcherParser(InputParser** dataParser,  StringMatcher* sm):
+        dataParser(dataParser),sm(sm){};
+    virtual ~StringMatcherParser();
+};
+
+Used StringMatcherParser::parse(char* data,irr::u32 length,bool eof){
+  char* start=data;
+  char* end=data+length;
+  if(!eof)
+    end-=1;
+  sm->count=strtol(data,&data,10);
+  if(data>=end) return Used(0,false);
+  delete[] sm->pattern;
+  sm->pattern=new pair<PatternTag,StringElementCondition>[sm->count];
+  InputParser** parsers=new InputParser*[2*(sm->count)+1];
+  for(int i=0;i<sm->count;++i){
+    parsers[i*2]=&sm->pattern[i].first;
+    parsers[i*2+1]=new StringConditionParser(&sm->pattern[i].second);
+  }
+  parsers[2*sm->count]=new StringMatcherGroupsParser(sm);
+  *dataParser=new SequentialInputParser<Derefer<InputParser,InputParser**> >(
+      Derefer<InputParser,InputParser**>(parsers),
+      Derefer<InputParser,InputParser**>(parsers+(2*(sm->count)+1)));
+  return Used(data-start,true);
+}
+
+StringMatcherParser::~StringMatcherParser(){
+  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)(*dataParser);
+  for(int i=0;i<sm->count;++i)
+    delete *(p->end.data-2*(sm->count)+2*i);
+  delete *(p->end.data-1);
+  delete[] (p->end.data-(2*(sm->count)+1));
+  delete p;
+}
+InputParser* StringMatcher::createParser(){
+  InputParser** parsers=new InputParser*[2];
+  parsers[0]=new StringMatcherParser(parsers+1,this);
+  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
+    Derefer<InputParser,InputParser**>(parsers),
+    Derefer<InputParser,InputParser**>(parsers+2));
+}
+void StringMatcher::returnParser(InputParser* parser){
+  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
+  delete *(p->end.data-2);
+  delete[] (p->end.data-2);
+  delete parser;
+}
+
+bool StringMatcher::match(String& s,pair<SP<StringPointer>,SP<StringPointer> >* groups){
   PatternMatch* m=groups==0?0:new PatternMatch[count];
   bool valid=matchStep(s,s.begin(),m,0);
   if(groups!=0){
@@ -181,7 +296,7 @@ bool StringMatcher::match(const String& s,pair<SP<ConstStringPointer>,SP<ConstSt
   return valid;
 }
 
-bool StringMatcher::matchStep(const String& s,ConstStringPointer p,PatternMatch* matches,int level){
+bool StringMatcher::matchStep(String& s,StringPointer p,PatternMatch* matches,int level){
   if(level==count){
     cout<<level<<" at end of pattern so are we at the end of te string? "<<(p==s.end())<<endl;
     return p==s.end();
@@ -189,7 +304,7 @@ bool StringMatcher::matchStep(const String& s,ConstStringPointer p,PatternMatch*
   PatternTag& pt=pattern[level].first;
   StringElementCondition& sec=pattern[level].second;
   if(matches)
-    matches[level].start=SP<ConstStringPointer>(new ConstStringPointer(p));
+    matches[level].start=SP<StringPointer>(new StringPointer(p));
   cout<<level<<" "<<"starting match step from "<<p<<endl;
   int i=0;
   while(i<pt.min){
@@ -212,7 +327,7 @@ bool StringMatcher::matchStep(const String& s,ConstStringPointer p,PatternMatch*
     if(matchStep(s,p,matches,level+1)){
       cout<<level<<" found a match"<<endl;
 		  if(matches)
-				matches[level].end=SP<ConstStringPointer>(new ConstStringPointer(p));
+				matches[level].end=SP<StringPointer>(new StringPointer(p));
       count=count;
       return true;
     }
@@ -230,10 +345,6 @@ bool StringMatcher::matchStep(const String& s,ConstStringPointer p,PatternMatch*
   //didn't find a match in the valid range
   return false;
 }
-
-
-
-
 
 template <class T>
 class Parser:public InputParser{
@@ -279,10 +390,7 @@ Used Parser<Condition>::parse(char* data,irr::u32 length,bool eof){
       *newT=new ConditionBefore();
       break;
     case 7:
-      *newT=new ConditionStringPosition();
-      break;
-    case 8:
-      *newT=new ConditionStringSelection();
+      *newT=new ConditionStringPattern();
       break;
     default:
       *newT=new ConditionTrue();
@@ -324,12 +432,9 @@ Used Parser<Action>::parse(char* data,irr::u32 length,bool eof){
     case 6:
       *newT=new ActionSelectStringPattern();
       break;
-//    case 7:
-//      *newT=new ConditionStringPosition();
-//      break;
-//    case 8:
-//      *newT=new ActionStringSelectionPattern();
-//      break;
+    case 7:
+      *newT=new ActionSetStringRoute();
+      break;
     default:
       *newT=new ActionNothing();
       break;
@@ -379,7 +484,7 @@ ListParser<T>::~ListParser(){
 }
 
 
-bool ConditionOr::is(int time,Script script,const String& s){
+bool ConditionOr::is(int time,Script script,String& s){
   for(int i=0;i<count;++i)
     if(conditions[i]->is(time,script,s))
       return true;
@@ -413,7 +518,7 @@ ConditionOr::~ConditionOr(){
   delete[] conditions;
 }
 
-bool ConditionAnd::is(int time,Script script,const String& s){
+bool ConditionAnd::is(int time,Script script,String& s){
   for(int i=0;i<count;++i)
     if(!conditions[i]->is(time,script,s))
       return false;
@@ -469,7 +574,7 @@ void ConditionNot::output(irr::stringc* s,irr::IWriteFile* file){
   }
 }
 
-bool ConditionAfter::is(int time,Script script,const String& s){
+bool ConditionAfter::is(int time,Script script,String& s){
   return script.getTime(event)+delay<=time;
 }
 Used ConditionAfter::parse(char* data,irr::u32 length,bool eof){
@@ -491,7 +596,7 @@ void ConditionAfter::output(irr::stringc* s,irr::IWriteFile* file){
   }
 }
 
-bool ConditionBefore::is(int time,Script script,const String& s){
+bool ConditionBefore::is(int time,Script script,String& s){
   return script.getTime(event)==0;
 }
 Used ConditionBefore::parse(char* data,irr::u32 length,bool eof){
@@ -509,113 +614,6 @@ void ConditionBefore::output(irr::stringc* s,irr::IWriteFile* file){
     file->write(s->c_str(),s->size());
     *s=irr::stringc();
   }
-}
-
-class ConditionStringPositionParser: public InputParser{
-  ConditionStringPosition* c;
-  int i;
-  public:
-    ConditionStringPositionParser(ConditionStringPosition* c):c(c),i(-2){};
-  
-    Used parse(char* data,irr::u32 length,bool eof){
-      char* start=data;
-      char* end=data+length;
-      if(!eof)
-        end-=1;
-      if(i==-1){
-        c->tiestart=strtol(data,&data,10);
-        if(data>=end) return Used(0,false);
-
-        c->tieend=strtol(data,&data,10);
-        if(data>=end) return Used(0,false);
-
-        c->count=strtol(data,&data,10);
-        if(data>=end) return Used(0,false);
-        c->poss=new Vector[c->count];
-        i=0;
-      }
-      
-      char* tmp;
-      while(i<c->count){
-        c->poss[i].X=strtol(data,&tmp,10);
-        if(tmp>=end) return Used(data-start,false);
-        c->poss[i].Y=strtol(tmp,&tmp,10);
-        if(tmp>=end) return Used(data-start,false);
-        c->poss[i].Z=strtol(tmp,&tmp,10);
-        if(tmp>=end) return Used(data-start,false);
-        ++i;
-        data=tmp;
-      }
-      return Used(data-start,true);
-    }
-};
-InputParser* ConditionStringPosition::createParser(){
-  return new ConditionStringPositionParser(this);
-}
-void ConditionStringPosition::output(irr::stringc* s,irr::IWriteFile* file){
-  (*s)+="7 ";(*s)+=tiestart;(*s)+=" ";(*s)+=tieend;(*s)+=" ";(*s)+=count;(*s)+=" ";
-  for(int i=0;i<count;++i){
-    (*s)+=poss[i].X;(*s)+=" ";(*s)+=poss[i].Y;(*s)+=" ";(*s)+=poss[i].Z;(*s)+=" ";
-  }
-  (*s)+="\n";
-  if(file && s->size()>256){
-    file->write(s->c_str(),s->size());
-    *s=irr::stringc();
-  }
-}
-ConditionStringPosition::~ConditionStringPosition(){
-  delete[] poss;
-}
-
-class ConditionStringSelectionParser: public InputParser{
-  ConditionStringSelection* c;
-  int i;
-  public:
-    ConditionStringSelectionParser(ConditionStringSelection* c):c(c),i(-2){};
-  
-    Used parse(char* data,irr::u32 length,bool eof){
-      char* start=data;
-      char* end=data+length;
-      if(!eof)
-        end-=1;
-      if(i==-1){
-        c->tiestart=strtol(data,&data,10);
-        if(data>=end) return Used(0,false);
-
-        c->tieend=strtol(data,&data,10);
-        if(data>=end) return Used(0,false);
-
-        c->count=strtol(data,&data,10);
-        if(data>=end) return Used(0,false);
-        c->sels=new bool[c->count];
-        i=0;
-      }
-      
-      char* tmp;
-      while(i<c->count){
-        c->sels[i]=strtol(data,&tmp,10);
-        if(tmp>=end) return Used(data-start,false);
-        ++i;
-        data=tmp;
-      }
-      return Used(data-start,true);
-    }
-};
-InputParser* ConditionStringSelection::createParser(){
-  return new ConditionStringSelectionParser(this);
-}
-void ConditionStringSelection::output(irr::stringc* s,irr::IWriteFile* file){
-  (*s)+="7 ";(*s)+=tiestart;(*s)+=" ";(*s)+=tieend;(*s)+=" ";(*s)+=count;(*s)+=" ";
-  for(int i=0;i<count;++i)
-    (*s)+=sels[i]+=" ";
-  (*s)+="\n";
-  if(file && s->size()>256){
-    file->write(s->c_str(),s->size());
-    *s=irr::stringc();
-  }
-}
-ConditionStringSelection::~ConditionStringSelection(){
-  delete[] sels;
 }
 
 void Message::output(irr::stringc* s,irr::IWriteFile* file){
@@ -825,6 +823,63 @@ void ActionSelectStringPattern::returnParser(InputParser* parser){
   delete parser;
 };
 
+//class :public ActionCommon,private InputParser{
+//  StringMatcher ranges;
+//  int count;
+//  Dirn* route;
+
+void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
+  if(!ranges.groupCount())
+    return;
+  pair<SP<StringPointer>,SP<StringPointer> >* groups=new pair<SP<StringPointer>,SP<StringPointer> >[ranges.groupCount()];
+  if(!ranges.match(s,groups))
+    return;
+  r.stringChanged=true;
+  StringEdit se(s);
+  for(int i=0;i<ranges.groupCount();++i){
+    se.setStringSegment(*groups[i].first,*groups[i].second,count,route);
+  }
+}
+InputParser* ActionSetStringRoute::createParser(){
+  InputParser** parsers=new InputParser*[2];
+  parsers[0]=ranges.createParser();
+  parsers[1]=this;
+  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
+    Derefer<InputParser,InputParser**>(parsers),
+    Derefer<InputParser,InputParser**>(parsers+2));
+}
+void ActionSetStringRoute::returnParser(InputParser* parser){
+  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
+  ranges.returnParser(*(p->end.data-2));
+  delete[] (p->end.data-2);
+  delete parser;
+}
+Used ActionSetStringRoute::parse(char* data,irr::u32 length,bool eof){
+  char* start=data;
+  char* end=data+length;
+  if(!eof)
+    end-=1;
+  count=strtol(data,&data,10);
+  if(data>=end&&!eof) return Used(0,false);
+  delete[] route;
+  route=new Dirn[count];
+  for(int i=0;i<count;++i){
+		route[i]=from_id(strtol(data,&data,10));
+		if(data>=end) return Used(0,false);
+  }
+  return Used(0,false);
+}
+void ActionSetStringRoute::output(irr::stringc* s,irr::IWriteFile* file){
+  (*s)+="7 ";
+  ranges.output(s,file);
+  (*s)+=count;
+  (*s)+=" ";
+  for(Dirn *d=route;d!=route+count;++d){
+    (*s)+=to_id(*d);
+    (*s)+=" ";
+  }
+  (*s)+="\n";
+}
 
 
 

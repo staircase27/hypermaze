@@ -15,6 +15,7 @@ struct Range{
 struct StringElementCondition{
   // first bit is if we care (1 care, 0 dont). second is the value to match if we do care
   int selectionCondition;
+  int dirnsCondition;
 
   int xrange_count;
   int yrange_count;
@@ -24,7 +25,8 @@ struct StringElementCondition{
   Range* zrange;
   template <class T>
   inline bool matches(T el){
-    if((selectionCondition&1)==0||(((selectionCondition&2)==2)==el->selected)){
+    cout<<"try match "<<el<<" "<<(dirnsCondition&to_mask(el->d)!=0)<<endl;
+    if((selectionCondition&1)==0||(((selectionCondition&2)==2)==el->selected)&&(dirnsCondition&to_mask(el->d)!=0)){
       bool match=xrange_count==0;
       for(int i=0;i<xrange_count&&!match;++i)
         if(xrange[i].inRange(el->pos.X))
@@ -45,7 +47,7 @@ struct StringElementCondition{
     }
     return false;
   }
-  StringElementCondition():selectionCondition(0),xrange_count(0),yrange_count(0),zrange_count(0),xrange(0),yrange(0),zrange(0){};
+  StringElementCondition():selectionCondition(0),dirnsCondition(ALLDIRNSMASK),xrange_count(0),yrange_count(0),zrange_count(0),xrange(0),yrange(0),zrange(0){};
   
   ~StringElementCondition(){
     delete[] xrange;
@@ -64,16 +66,23 @@ class StringConditionParser:public InputParser{
     StringConditionParser(StringElementCondition *c):c(c),stage(0){}
 };
 
-struct PatternTag{
+class StringMatcher;
+
+struct PatternTag:private InputParser{
   int min;
   int max;
   bool greedy;
   PatternTag():min(1),max(1),greedy(true){};
+  private:
+	  Used parse(char* data,irr::u32 length,bool eof);
+	  virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
+	  friend class StringMatcher;
+	  friend class StringMatcherParser;
 };
 
 struct PatternMatch{
-  SP<ConstStringPointer> start;
-  SP<ConstStringPointer> end;
+  SP<StringPointer> start;
+  SP<StringPointer> end;
   int length;
   PatternMatch():start(0),end(0),length(0){};
 };
@@ -95,16 +104,16 @@ public:
     virtual InputParser* createParser();
     virtual void returnParser(InputParser*);
     inline int groupCount(){return group_count;}
-	  bool match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups=0);
+	  bool match(String& s,pair<SP<StringPointer>,SP<StringPointer> >* groups=0);
 	  
 	private:
-	  bool matchStep(const String& s,ConstStringPointer p,PatternMatch* matches,int level);
+	  bool matchStep(String& s,StringPointer p,PatternMatch* matches,int level);
 };
 
 
 class ConditionTrue: public Condition, public InputParser{
   public:
-    virtual bool is(int time,Script script,const String& s){return true;}
+    virtual bool is(int time,Script script,String& s){return true;}
     virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
     virtual InputParser* createParser(){return this;};
     virtual void returnParser(InputParser*){};
@@ -115,7 +124,7 @@ class ConditionOr: public Condition{
   Condition** conditions;
   int count;
   public:
-    virtual bool is(int time,Script script,const String& s);
+    virtual bool is(int time,Script script,String& s);
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser);
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
@@ -125,7 +134,7 @@ class ConditionAnd: public Condition{
   Condition** conditions;
   int count;
   public:
-    virtual bool is(int time,Script script,const String& s);
+    virtual bool is(int time,Script script,String& s);
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser);
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
@@ -134,7 +143,7 @@ class ConditionAnd: public Condition{
 class ConditionNot: public Condition{
   Condition* condition;
   public:
-    virtual bool is(int time,Script script,const String& s){
+    virtual bool is(int time,Script script,String& s){
       return !condition->is(time,script,s);
     }
     virtual InputParser* createParser();
@@ -147,7 +156,7 @@ class ConditionAfter: public Condition,private InputParser{
   int event;
   int delay;
   public:
-    virtual bool is(int time,Script script,const String& s);
+    virtual bool is(int time,Script script,String& s);
     virtual Used parse(char* data,irr::u32 length,bool eof);
     virtual InputParser* createParser(){return this;};
     virtual void returnParser(InputParser*){};
@@ -156,103 +165,27 @@ class ConditionAfter: public Condition,private InputParser{
 class ConditionBefore: public Condition,private InputParser{
   int event;
   public:
-    virtual bool is(int time,Script script,const String& s);
+    virtual bool is(int time,Script script,String& s);
     virtual Used parse(char* data,irr::u32 length,bool eof);
     inline virtual InputParser* createParser(){return this;};
     inline virtual void returnParser(InputParser*){};
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
 };
 
-class ConditionStringPosition: public Condition{
-  Vector* poss;
-  bool tiestart;
-  bool tieend;
-  int count;
-  
-  inline bool checkPath(const String& s,ConstStringPointer sp){
-    Vector* pos=poss;
-    for(;pos!=poss+count;++pos,++sp)
-      if(sp==s.end())
-        if(!(pos && *pos==s.getEnd()))
-          return false;
-      else if(!(pos && *pos==sp->pos))
-        return false;
-    return true;
-  }
-  
-  inline ConstStringPointer spsub(ConstStringPointer sp,int d){
-    for(int i=0;i<d;++i)--sp;
-    return sp;
-  }
+class ConditionStringPattern: public Condition{
+  StringMatcher sm;
   
   public:
-    virtual bool is(int time,Script script,const String& s){
-      if(count>s.length()+1)
-        return false;
-      if(tiestart||tieend){
-        if(tieend && tiestart && count!=(s.length()+1))
-          return false;
-        if(tieend && !tiestart)
-          return checkPath(s,spsub(s.end(),count-1));
-        else
-          return checkPath(s,s.begin());
-      }else{
-        ConstStringPointer spEnd=spsub(s.end(),count-2);
-        for(ConstStringPointer sp=s.begin();sp!=spEnd;++sp)
-          if(checkPath(s,sp))
-            return true;
-        return false;
-      }
+    virtual bool is(int time,Script script,String& s){
+      return sm.match(s);
     }
-    virtual InputParser* createParser();
-    virtual void returnParser(InputParser* parser){delete parser;};
-    friend class ConditionStringPositionParser;
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-    virtual ~ConditionStringPosition();
-};
-class ConditionStringSelection: public Condition{
-  bool* sels;
-  bool tiestart;
-  bool tieend;
-  int count;
-  
-  inline bool checkPath(const String& s,ConstStringPointer sp){
-    bool* sel=sels;
-    for(;sel!=sels+count;++sel,++sp)
-      if(!(sel && *sel==sp->selected))
-        return false;
-    return true;
-   }
-    
-  inline ConstStringPointer spsub(ConstStringPointer sp,int d){
-    for(int i=0;i<d;++i)--sp;
-    return sp;
-  }
-  
-  public:
-    virtual bool is(int time,Script script,const String& s){
-      if(count>s.length())
-        return false;
-      if(tiestart||tieend){
-        if(tieend && tiestart && count!=(s.length()))
-          return false;
-        if(tieend && !tiestart)
-          return checkPath(s,spsub(s.end(),count));
-        else
-          return checkPath(s,s.begin());
-      }else{
-        ConstStringPointer spEnd=spsub(s.end(),count-1);
-        for(ConstStringPointer sp=s.begin();sp!=spEnd;++sp)
-          if(checkPath(s,sp))
-            return true;
-        return false;
-      }
+    virtual InputParser* createParser(){return sm.createParser();}
+    virtual void returnParser(InputParser* parser){sm.returnParser(parser);};
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){
+      (*s)+="7 ";
+      sm.output(s,file);
     }
-    virtual InputParser* createParser();
-    virtual void returnParser(InputParser* parser){delete parser;};
-    friend class ConditionStringSelectionParser;
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-    virtual ~ConditionStringSelection();
+    virtual ~ConditionStringPattern(){};
 };
 
 
@@ -334,6 +267,19 @@ class ActionSelectStringPattern:public ActionCommon{
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* p);
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="6 ";change.output(s,file);select.output(s,file);};
+};
+
+class ActionSetStringRoute:public ActionCommon,private InputParser{
+  StringMatcher ranges;
+  int count;
+  Dirn* route;
+  
+  public:
+    virtual void doCommon(ScriptResponse& r,String&);
+    virtual InputParser* createParser();
+    virtual Used parse(char* data,irr::u32 length,bool eof);
+    virtual void returnParser(InputParser* p);
+    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
 };
 
 
