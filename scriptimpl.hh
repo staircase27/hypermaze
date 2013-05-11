@@ -80,11 +80,18 @@ struct PatternTag:private InputParser{
 	  friend class StringMatcherParser;
 };
 
+template <class POINTER>
 struct PatternMatch{
-  SP<StringPointer> start;
-  SP<StringPointer> end;
+  SP<POINTER> start;
+  SP<POINTER> end;
   int length;
   PatternMatch():start(0),end(0),length(0){};
+};
+
+template <class POINTER>
+class StringMatcherCallback{
+  public:
+    virtual bool process(pair<SP<POINTER>,SP<POINTER> >* groups)=0;
 };
 
 class StringMatcher{
@@ -104,16 +111,21 @@ public:
     virtual InputParser* createParser();
     virtual void returnParser(InputParser*);
     inline int groupCount(){return group_count;}
+	  bool match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups=0);
 	  bool match(String& s,pair<SP<StringPointer>,SP<StringPointer> >* groups=0);
+	  bool match(String& s,StringMatcherCallback<StringPointer>* cb,pair<SP<StringPointer>,SP<StringPointer> >* groups=0);
 	  
 	private:
-	  bool matchStep(String& s,StringPointer p,PatternMatch* matches,int level);
+	  template <class STRING,class POINTER>
+	  bool match(STRING& s,pair<SP<POINTER>,SP<POINTER> >* groups,StringMatcherCallback<POINTER>* cb);
+	  template <class STRING,class POINTER>
+	  bool matchStep(STRING& s,POINTER p,PatternMatch<POINTER>* matches,int level,pair<SP<POINTER>,SP<POINTER> >* groups,StringMatcherCallback<POINTER>* cb);
 };
 
 
 class ConditionTrue: public Condition, public InputParser{
   public:
-    virtual bool is(int time,Script script,String& s){return true;}
+    virtual bool is(int time,const Script& script,const String& s){return true;}
     virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
     virtual InputParser* createParser(){return this;};
     virtual void returnParser(InputParser*){};
@@ -124,7 +136,7 @@ class ConditionOr: public Condition{
   Condition** conditions;
   int count;
   public:
-    virtual bool is(int time,Script script,String& s);
+    virtual bool is(int time,const Script& script,const String& s);
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser);
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
@@ -134,7 +146,7 @@ class ConditionAnd: public Condition{
   Condition** conditions;
   int count;
   public:
-    virtual bool is(int time,Script script,String& s);
+    virtual bool is(int time,const Script& script,const String& s);
     virtual InputParser* createParser();
     virtual void returnParser(InputParser* parser);
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
@@ -143,7 +155,7 @@ class ConditionAnd: public Condition{
 class ConditionNot: public Condition{
   Condition* condition;
   public:
-    virtual bool is(int time,Script script,String& s){
+    virtual bool is(int time,const Script& script,const String& s){
       return !condition->is(time,script,s);
     }
     virtual InputParser* createParser();
@@ -156,7 +168,7 @@ class ConditionAfter: public Condition,private InputParser{
   int event;
   int delay;
   public:
-    virtual bool is(int time,Script script,String& s);
+    virtual bool is(int time,const Script& script,const String& s);
     virtual Used parse(char* data,irr::u32 length,bool eof);
     virtual InputParser* createParser(){return this;};
     virtual void returnParser(InputParser*){};
@@ -165,7 +177,7 @@ class ConditionAfter: public Condition,private InputParser{
 class ConditionBefore: public Condition,private InputParser{
   int event;
   public:
-    virtual bool is(int time,Script script,String& s);
+    virtual bool is(int time,const Script& script,const String& s);
     virtual Used parse(char* data,irr::u32 length,bool eof);
     inline virtual InputParser* createParser(){return this;};
     inline virtual void returnParser(InputParser*){};
@@ -176,7 +188,7 @@ class ConditionStringPattern: public Condition{
   StringMatcher sm;
   
   public:
-    virtual bool is(int time,Script script,String& s){
+    virtual bool is(int time,const Script& script,const String& s){
       return sm.match(s);
     }
     virtual InputParser* createParser(){return sm.createParser();}
@@ -269,11 +281,15 @@ class ActionSelectStringPattern:public ActionCommon{
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="6 ";change.output(s,file);select.output(s,file);};
 };
 
-class ActionSetStringRoute:public ActionCommon,private InputParser{
+class ActionSetStringRoute:public ActionCommon,private InputParser,private StringMatcherCallback<StringPointer>{
   StringMatcher ranges;
   int count;
   Dirn* route;
+  bool all;
   
+  StringEdit* se;
+  
+  virtual bool process(pair<SP<StringPointer>,SP<StringPointer> >* groups);
   public:
     virtual void doCommon(ScriptResponse& r,String&);
     virtual InputParser* createParser();

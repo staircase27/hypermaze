@@ -453,7 +453,7 @@ int main(int argc,char* argv[]){
         "1 * * "
         "1 * * \n\n\n"
         "6 * 63 1 1 3 0 0 N 63 0 0 0 "//selected if not selected for elements with x between 1 and 3 inclusive
-        "7 5 0 6000 0 * 63 0 0 0 1 1 0 N 63 0 0 0 1 6000 0 Y 63 0 0 0 1 1 0 N 63 0 0 0 0 6000 0 * 63 0 0 0 1 2 2 1 0";
+        "7 5 0 10 0 * 63 0 0 0 1 1 0 N 63 0 0 0 1 10 0 Y 63 0 0 0 1 1 0 N 63 0 0 0 0 10 0 * 63 0 0 0 1 2 2 1 0";
         
     cout<<"input"<<endl<<data<<endl;
     irr::IReadFile* file=irr::createMemoryReadFile((void*)data,strlen(data),"",false);

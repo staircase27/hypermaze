@@ -283,28 +283,56 @@ void StringMatcher::returnParser(InputParser* parser){
   delete parser;
 }
 
+bool StringMatcher::match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups){
+  return match<const String,ConstStringPointer>(s,groups,0);
+}
 bool StringMatcher::match(String& s,pair<SP<StringPointer>,SP<StringPointer> >* groups){
-  PatternMatch* m=groups==0?0:new PatternMatch[count];
-  bool valid=matchStep(s,s.begin(),m,0);
-  if(groups!=0){
-    for(int i=0;i<group_count;++i){
-      groups[i].first=m[this->groups[i].first].start;
-      groups[i].second=m[this->groups[i].second].end;
-    }
-  }
+  return match<String,StringPointer>(s,groups,0);
+}
+bool StringMatcher::match(String& s,StringMatcherCallback<StringPointer>* cb,pair<SP<StringPointer>,SP<StringPointer> >* groups){
+  SPA<pair<SP<StringPointer>,SP<StringPointer> > > localgroups;
+  if(groups==0){
+    groups=new pair<SP<StringPointer>,SP<StringPointer> >[group_count];
+	  localgroups=SPA<pair<SP<StringPointer>,SP<StringPointer> > >(groups);
+	}
+  return match<String,StringPointer>(s,groups,cb);
+}
+
+template <class STRING,class POINTER>
+bool StringMatcher::match(STRING& s,pair<SP<POINTER>,SP<POINTER> >* groups,StringMatcherCallback<POINTER>* cb){
+  PatternMatch<POINTER>* m=groups==0?0:new PatternMatch<POINTER>[count];
+  bool valid=true;
+  try{
+	  bool valid=matchStep(s,s.begin(),m,0,groups,cb);
+  }catch(bool){};
   delete[] m;
   return valid;
 }
 
-bool StringMatcher::matchStep(String& s,StringPointer p,PatternMatch* matches,int level){
+template <class STRING,class POINTER>
+bool StringMatcher::matchStep(STRING& s,POINTER p,PatternMatch<POINTER>* matches,int level,pair<SP<POINTER>,SP<POINTER> >* groups,StringMatcherCallback<POINTER>* cb){
   if(level==count){
     cout<<level<<" at end of pattern so are we at the end of te string? "<<(p==s.end())<<endl;
-    return p==s.end();
+    if(p==s.end()){
+			if(groups!=0){
+				for(int i=0;i<group_count;++i){
+				  groups[i].first=matches[this->groups[i].first].start;
+				  groups[i].second=matches[this->groups[i].second].end;
+				}
+			}
+			if(cb==0||cb->process(groups))
+			  throw true;
+      return true;
+    }else{
+      return false;
+    }
+    
   }
+  bool match=false;
   PatternTag& pt=pattern[level].first;
   StringElementCondition& sec=pattern[level].second;
   if(matches)
-    matches[level].start=SP<StringPointer>(new StringPointer(p));
+    matches[level].start=SP<POINTER>(new POINTER(p));
   cout<<level<<" "<<"starting match step from "<<p<<endl;
   int i=0;
   while(i<pt.min){
@@ -315,7 +343,7 @@ bool StringMatcher::matchStep(String& s,StringPointer p,PatternMatch* matches,in
   }
   if(pt.greedy){
     //go to first that doesn't match or max+1 (whichevers first)
-    while(i<pt.max&&p!=s.end()&&sec.matches(p)){
+    while(i<pt.max && p!=s.end() && sec.matches(p)){
       ++i;++p;
       cout<<level<<" "<<"stepping to max "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
     }
@@ -323,27 +351,24 @@ bool StringMatcher::matchStep(String& s,StringPointer p,PatternMatch* matches,in
   }
   //while i is still in valid range
   while(i>=pt.min && i<=pt.max){
-    //see if we can match the next group
-    if(matchStep(s,p,matches,level+1)){
-      cout<<level<<" found a match"<<endl;
-		  if(matches)
-				matches[level].end=SP<StringPointer>(new StringPointer(p));
-      count=count;
-      return true;
-    }
+	  if(matches)
+			matches[level].end=SP<POINTER>(new POINTER(p));
+    count=count;
+    //see if we can match the next group (if matches and we only want one match will throw true else will return as a bool wether it matches)
+    match|=matchStep(s,p,matches,level+1,groups,cb);
+    
     if(pt.greedy){
       cout<<level<<" stepping back "<<i<<" "<<p<<endl;
       --i;--p;
     }else{
 	    cout<<level<<" "<<"stepping up "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
-      if(!sec.matches(p))
+      if(p==s.end() || !sec.matches(p))
         return false;
       ++i;++p;
     }
   }
-  cout<<level<<" no match for trailing groups (but we matched over all allowed repeats)"<<endl;
-  //didn't find a match in the valid range
-  return false;
+  cout<<level<<" tried all options for this pattern"<<endl;
+  return match;
 }
 
 template <class T>
@@ -484,7 +509,7 @@ ListParser<T>::~ListParser(){
 }
 
 
-bool ConditionOr::is(int time,Script script,String& s){
+bool ConditionOr::is(int time,const Script& script,const String& s){
   for(int i=0;i<count;++i)
     if(conditions[i]->is(time,script,s))
       return true;
@@ -518,7 +543,7 @@ ConditionOr::~ConditionOr(){
   delete[] conditions;
 }
 
-bool ConditionAnd::is(int time,Script script,String& s){
+bool ConditionAnd::is(int time,const Script& script,const String& s){
   for(int i=0;i<count;++i)
     if(!conditions[i]->is(time,script,s))
       return false;
@@ -574,7 +599,7 @@ void ConditionNot::output(irr::stringc* s,irr::IWriteFile* file){
   }
 }
 
-bool ConditionAfter::is(int time,Script script,String& s){
+bool ConditionAfter::is(int time,const Script& script,const String& s){
   return script.getTime(event)+delay<=time;
 }
 Used ConditionAfter::parse(char* data,irr::u32 length,bool eof){
@@ -596,7 +621,7 @@ void ConditionAfter::output(irr::stringc* s,irr::IWriteFile* file){
   }
 }
 
-bool ConditionBefore::is(int time,Script script,String& s){
+bool ConditionBefore::is(int time,const Script& script,const String& s){
   return script.getTime(event)==0;
 }
 Used ConditionBefore::parse(char* data,irr::u32 length,bool eof){
@@ -823,22 +848,19 @@ void ActionSelectStringPattern::returnParser(InputParser* parser){
   delete parser;
 };
 
-//class :public ActionCommon,private InputParser{
-//  StringMatcher ranges;
-//  int count;
-//  Dirn* route;
+bool ActionSetStringRoute::process(pair<SP<StringPointer>,SP<StringPointer> >* groups){
+  for(int i=0;i<ranges.groupCount();++i){
+    se->setStringSegment(*groups[i].first,*groups[i].second,count,route);
+  }
+}
 
 void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
   if(!ranges.groupCount())
     return;
-  pair<SP<StringPointer>,SP<StringPointer> >* groups=new pair<SP<StringPointer>,SP<StringPointer> >[ranges.groupCount()];
-  if(!ranges.match(s,groups))
-    return;
-  r.stringChanged=true;
-  StringEdit se(s);
-  for(int i=0;i<ranges.groupCount();++i){
-    se.setStringSegment(*groups[i].first,*groups[i].second,count,route);
-  }
+  se=new StringEdit(s);
+  if(ranges.match(s,this))
+	  r.stringChanged=true;
+	delete se;
 }
 InputParser* ActionSetStringRoute::createParser(){
   InputParser** parsers=new InputParser*[2];

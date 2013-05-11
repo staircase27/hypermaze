@@ -8,7 +8,7 @@ class SP{
     int* c;
   public:
     SP<T>():c(new int(1)),p(0){};
-    SP<T>(T* p):c(new int(1)),p(p){ };
+    SP<T>(T* p):c(new int(1)),p(p){};
     template <class U>
     SP<T>(const SP<U>& op):p(op.p),c(op.c){++*c;}
     friend class SP<const T>;
@@ -55,6 +55,7 @@ class SPA{
     int* c;
     
   public:
+    SPA<T>():c(new int(1)),p(0),h(0){};
     SPA<T>(T* p):c(new int(1)),p(p),h(p){};
     SPA<T>(const SPA<T>& op):p(op.p),c(op.c),h(op.h){++*c;}
     friend class SPA<const T>;

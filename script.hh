@@ -15,7 +15,7 @@ class Script;
 
 class Condition{
   public:
-    virtual bool is(int time,Script script,String& s)=0;
+    virtual bool is(int time,const Script& script,const String& s)=0;
     virtual InputParser* createParser()=0;
     virtual void returnParser(InputParser*)=0;
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0)=0;
@@ -124,7 +124,7 @@ class Script{
     int count;
   
   public:
-    int getTime(int event){
+    int getTime(int event) const{
       return times[event];
     }
     
