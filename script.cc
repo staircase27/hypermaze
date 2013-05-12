@@ -852,6 +852,7 @@ bool ActionSetStringRoute::process(pair<SP<StringPointer>,SP<StringPointer> >* g
   for(int i=0;i<ranges.groupCount();++i){
     se->setStringSegment(*groups[i].first,*groups[i].second,count,route);
   }
+  return !all;
 }
 
 void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
@@ -881,6 +882,8 @@ Used ActionSetStringRoute::parse(char* data,irr::u32 length,bool eof){
   char* end=data+length;
   if(!eof)
     end-=1;
+  all=strtol(data,&data,10);
+  if(data>=end&&!eof) return Used(0,false);
   count=strtol(data,&data,10);
   if(data>=end&&!eof) return Used(0,false);
   delete[] route;
@@ -894,6 +897,8 @@ Used ActionSetStringRoute::parse(char* data,irr::u32 length,bool eof){
 void ActionSetStringRoute::output(irr::stringc* s,irr::IWriteFile* file){
   (*s)+="7 ";
   ranges.output(s,file);
+  (*s)+=all;
+  (*s)+=" ";
   (*s)+=count;
   (*s)+=" ";
   for(Dirn *d=route;d!=route+count;++d){
