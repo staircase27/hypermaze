@@ -9,7 +9,7 @@ struct Range{
   inline bool inRange(int val){
     return ((start==INT_MAX)||(val>=start))&&((end==INT_MAX)||(val<=end));
   }
-  Range():start(0),end(-1){};
+  Range():start(0),end(INT_MAX){};
 };
 
 struct StringElementCondition{

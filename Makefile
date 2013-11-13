@@ -1,3 +1,5 @@
+BUILDDIR=build
+DISTDIR=dist
 
 all: hypermaze
 run: run-hypermaze
