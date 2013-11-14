@@ -57,7 +57,8 @@ class SP{
     /**
      * Updates the reference count for the current data and deletes if needed and then replaces with
      * value pointed to by other pointer
-     * @param the pointer to replace this one with
+     * @param op the pointer to replace this one with
+     * @return a reference to this pointer
      */
     SP<T>& operator=(const SP<T>& op){
       if(p==op.p)
@@ -74,11 +75,17 @@ class SP{
     }
     
     ///Dereference the pointer 
+    /**
+     * @return a reference to the element we point to
+     */
     T& operator* () const{
       return *p;
     }
 
     ///Dereference the pointer to a member 
+    /**
+     * @return A pointer that can be used to access the member requested
+     */
     T* operator-> () const{
       return p;
     }
@@ -87,6 +94,7 @@ class SP{
     /**
      * Returns true if the other pointer points to the same memory location as this pointer
      * @param op the other pointer to compare to this pointer
+     * @return true if they point to the same memory location
      */
     const bool operator==(const  SP<T>& op)const{
       return p==op.p;
@@ -124,7 +132,8 @@ class SPA{
      * @param op the smart pointer to copy
      * @tparam U the type of the pointer we are copying
      */
-    SPA<T>(const SPA<T>& op):p(op.p),c(op.c),h(op.h){++*c;}
+    template <Class U>
+    SPA<T>(const SPA<U>& op):p(op.p),c(op.c),h(op.h){++*c;}
 
     friend class SPA<const T>;
     
@@ -144,7 +153,8 @@ class SPA{
     /**
      * Updates the reference count for the current data and deletes if needed and then replaces with
      * value pointed to by other pointer
-     * @param the pointer to replace this one with
+     * @param op the pointer to replace this one with
+     * @return a reference to this pointer
      */
     SPA<T>& operator=(const SPA<T>& op){
       if(p==op.p)
@@ -162,43 +172,107 @@ class SPA{
     }
 
     ///Dereference the pointer 
+    /**
+     * @return a reference to the element we point to
+     */
     virtual T& operator* () const{
       return *p;
     }
 
     ///Dereference the pointer to a member 
+    /**
+     * @return A pointer that can be used to access the member requested
+     */
     virtual T* operator-> () const{
       return p;
     }
+    ///Derefence the array pointer to an element relative to element we point to
+    /**
+     * @param i the position relative to the element this points to to return
+     * @return a reference to the element
+     */
     T& operator[](const int i){
       return p[i];
     }
+    ///Get a new pointer to the element i after the one this points to
+    /**
+     * @param i the position relative to this pointers element we want to return a pointer to
+     * @return a new pointer that points i elements after this one
+     */
     SPA<T> operator+(const int i) const{
       return SPA<T>(*this)+=i;
     }
+    ///Move this pointer to the element i after the one it currently points to
+    /**
+     * Updates the pointer it's called on and returns a reference to itself
+     * @param i how many positions to move this pointer forwards by
+     * @return a reference to this pointer
+     */
     SPA<T>& operator+=(const int i){
       p+=i;
       return *this;
     }
+    ///Get a new pointer to the element i before the one this points to
+    /**
+     * @param i the position relative to this pointers element we want to return a pointer to
+     * @return a new pointer that points i elements before this one
+     */
     SPA<T> operator-(const int i) const{
       return SPA<T>(*this)-=i;
     }
+    ///Move this pointer to the element i before the one it currently points to
+    /**
+     * Updates the pointer it's called on and returns a reference to itself
+     * @param i how many positions to move this pointer backwards by
+     * @return a reference to this pointer
+     */
     SPA<T>& operator-=(const int i){
       p-=i;
       return *this;
     }
+    ///Increment this pointer by one
+    /**
+     * Updates this pointer and returns a reference to itself
+     * @return a reference to this pointer
+     */
     SPA<T>& operator++(){
       ++p;
       return *this;
     }
+    ///Decrement this pointer by one
+    /**
+     * Updates this pointer and returns a reference to itself
+     * @return a reference to this pointer
+     */
     SPA<T>& operator--(){
       --p;
       return *this;
+    }
+    ///Increment this pointer by one and return a copy of the old value
+    /**
+     * Updates this pointer and returns a reference to itself
+     * @return a reference to this pointer
+     */
+    SPA<T> operator++(int){
+      SPA<T> tmp(*this);
+      ++p;
+      return tmp;
+    }
+    ///Decrement this pointer by one and return a copy of the old value
+    /**
+     * Updates this pointer and returns a reference to itself
+     * @return a reference to this pointer
+     */
+    SPA<T> operator--(int){
+      SPA<T> tmp(*this);
+      --p;
+      return tmp;
     }
     ///Compare this pointer to another pointer
     /**
      * Returns true if the other pointer points to the same memory location as this pointer
      * @param op the other pointer to compare to this pointer
+     * @return true if they point to the same memory location
      */
     const bool operator==(const  SPA<T>& op)const{
       return h==op.h && p==op.p;
@@ -207,9 +281,10 @@ class SPA{
     /**
      * Returns false if the other pointer points to the same memory location as this pointer
      * @param op the other pointer to compare to this pointer
+     * @return true if they point to different memory location
      */
     const bool operator!=(const  SPA<T>& op)const{
-      return h!=op.h && p!=op.p;
+      return h!=op.h || p!=op.p;
     }
 };
 #endif
