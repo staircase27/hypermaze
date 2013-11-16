@@ -75,6 +75,22 @@ void prettyPrint(ostream& o,Maze m,int w){
 }
 #endif
 
+IOResult read(HypIStream& s,Maze& m){
+  Vector size;
+  IOResult r;
+  if(!((r=read(s,size.X,10)).ok&&
+       (r=read(s,size.Y,10)).ok&&
+       (r=read(s,size.Z,10)).ok))
+    return IOResult(false,r.eof);
+  m=Maze(size);
+  int pos=-1;//start at -1 so first increment doesn't sift us of the maze
+  while(++pos<m.size.X*m.size.Y*m.size.Z){
+    if(!(r=read(s,m.maze[pos],16)).ok)
+      return IOResult(false,r.eof);
+  }
+  return IOResult(true,r.eof);
+}
+
 #ifdef IRRLICHT
 class MazeParser:public InputParser{
   Maze* m;
@@ -112,8 +128,13 @@ class MazeParser:public InputParser{
     }
 };
 void Maze::load(irr::IReadFile* in){
+//*
+  IrrHypIStream is(in);
+  read(is,*this);
+/*/
   MazeParser mp(this);
   ::parse(in,&mp);
+//*/
 }
 irr::stringc tostr16(int number){
   // store if negative and make positive

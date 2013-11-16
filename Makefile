@@ -19,24 +19,24 @@ IRRLIBS=-lIrrlicht -isystem/usr/include/irrlicht/
 
 test: CPPOPTS+= -DIOSTREAM
 test: test.o maze.o
-test.o: test.cc maze.hh dirns.hh vector.hh string.hh mazegen.hh
+test.o: test.cc maze.hh dirns.hh vector.hh string.hh mazegen.hh hypio.hh
 run-test: test
 	./test
 
 hypermaze: CPPOPTS+= -DIRRLICHT -DOPENAL -DIOSTREAM
 hypermaze: CPPLIBS+= $(IRRLIBS) -lopenal -lalut
-hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o maze.o keymap.o GUIFormattedText.o sound.o script.o
+hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o hypio.o maze.o keymap.o GUIFormattedText.o sound.o script.o
 
 hypermaze.o: hypermaze.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
- iMyCamera.hh keymap.hh controller.hh irrio.hh script.hh scriptimpl.hh SmartPointer.hh
+ iMyCamera.hh keymap.hh controller.hh irrio.hh script.hh scriptimpl.hh SmartPointer.hh hypio.hh
 
 controller.o: controller.cc controller.hh string.hh maze.hh dirns.hh \
- vector.hh keymap.hh irrdisp.hh gui.hh mazegen.hh helpgui.hh keymapgui.hh GUIFormattedText.hh  irrio.hh SmartPointer.hh
+ vector.hh keymap.hh irrdisp.hh gui.hh mazegen.hh helpgui.hh keymapgui.hh GUIFormattedText.hh  irrio.hh SmartPointer.hh hypio.hh
 
 irrdisp.o: irrdisp.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
- controller.hh keymap.hh irrio.hh SmartPointer.hh
+ controller.hh keymap.hh irrio.hh SmartPointer.hh hypio.hh
 
-maze.o: maze.cc maze.hh dirns.hh vector.hh SmartPointer.hh
+maze.o: maze.cc maze.hh dirns.hh vector.hh SmartPointer.hh hypio.hh
 
 keymap.o: keymap.cc keymap.hh dirns.hh vector.hh irrio.hh
 
@@ -44,11 +44,13 @@ iMyCamera.o: iMyCamera.cpp iMyCamera.hh
 
 GUIFormatedText.o: GUIFormattedText.cc GUIFormatedText.hh
 
+hypio.o: hypio.cc hypio.hh
+
 irrcurl.o: irrcurl.cc irrcurl.hh
 
 sound.o: sound.cc sound.hh
 
-script.o: script.cc script.hh scriptimpl.hh SmartPointer.hh
+script.o: script.cc script.hh scriptimpl.hh SmartPointer.hh hypio.hh
 
 run-hypermaze: hypermaze
 	./hypermaze

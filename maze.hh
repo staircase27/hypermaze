@@ -3,6 +3,8 @@
 
 #include "SmartPointer.hh"
 
+#include "hypio.hh"
+
 #ifdef IRRLICHT
 #include "irrio.hh"
 #endif
@@ -52,7 +54,11 @@ class Maze
     void save(irr::IWriteFile*);
     #endif
     
+    friend IOResult read(HypIStream&,Maze& m);
+    
 };
+
+IOResult read(HypIStream&,Maze&);
 
 class Point{
   private:

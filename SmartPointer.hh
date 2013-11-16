@@ -130,9 +130,16 @@ class SPA{
      * Creates a new copy of the smart pointer refering to the same data and reference count and
      * increments the reference count
      * @param op the smart pointer to copy
+     */
+    SPA<T>(const SPA<T>& op):p(op.p),c(op.c),h(op.h){++*c;}
+    ///Copy Constructor
+    /**
+     * Creates a new copy of the smart pointer refering to the same data and reference count and
+     * increments the reference count
+     * @param op the smart pointer to copy
      * @tparam U the type of the pointer we are copying
      */
-    template <Class U>
+    template <class U>
     SPA<T>(const SPA<U>& op):p(op.p),c(op.c),h(op.h){++*c;}
 
     friend class SPA<const T>;
@@ -167,7 +174,6 @@ class SPA{
       c=op.c;
       h=op.h;
       ++*c;
-      
       return *this;
     }
 
