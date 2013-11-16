@@ -1,7 +1,11 @@
 #include "hypio.hh"
 #include <iostream>
 using namespace std;
-BufHypIStream::BufHypIStream():len(256),buf(new char[len+1]),start(0),end(0),eof(false){}
+BufHypIStream::BufHypIStream():len(255),buf(new char[len+1]),start(0),end(0),eof(false){}
+
+BufHypIStream::~BufHypIStream(){
+  delete[] buf;
+}
 
 void BufHypIStream::consumewhitespace(){
   if(start==end)
@@ -74,7 +78,9 @@ IOResult BufHypIStream::read(char*& str,const bool& delim){
 }
 
 #ifdef IRRLICHT
-IrrHypIStream::IrrHypIStream(irr::IReadFile* f):f(f){}
+IrrHypIStream::IrrHypIStream(irr::IReadFile* f):f(f){f->grab();}
+
+IrrHypIStream::~IrrHypIStream(){f->drop();}
 
 void IrrHypIStream::readtobuf(){
   if(eof)
@@ -104,3 +110,17 @@ IOResult read(HypIStream& s,int& i,const int& base){
 IOResult read(HypIStream& s,char* str,const bool& delim){
   return s.read(str,delim);
 }
+
+BufHypOStream::~BufHypOStream(){
+  delete[] buf;
+}
+
+
+
+bool write(HypOStream& s,const int& i,const int& base){
+  return s.write(i,base);
+}
+bool write(HypOStream& s,const char*& str,const bool& delim){
+  return s.write(str,delim);
+}
+
