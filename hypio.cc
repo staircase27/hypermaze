@@ -111,11 +111,99 @@ IOResult read(HypIStream& s,char* str,const bool& delim){
   return s.read(str,delim);
 }
 
+BufHypOStream::BufHypOStream():delimchars("\"'|\\/^_!@#~.=+-$*\3\1\2"),len(255),buf(new char[len+1]),end(0),needspace(false){}
+
 BufHypOStream::~BufHypOStream(){
+  writeToSink();
   delete[] buf;
 }
 
+bool BufHypOStream::addSpace(){
+  const char* space=nextSpace();
+  int l=strlen(space);
+  if(end+l>len)
+    writeToSink();
+  memcpy(buf+end,space,l);
+  end+=l;
+}
 
+bool BufHypOStream::write(const int& i,const int& base){
+}
+bool BufHypOStream::write(const char*& str,const bool& delim){
+  addSpace();
+  const char* d=delimchars;
+  if(delim){
+    while(strchr(str,*d)!=0)
+      ++d;
+    if(end+1>len)
+      writeToSink();
+    buf[end]=*d;
+    ++end;
+  }
+  int l=strlen(str);
+  int s=0;
+  while(l-s>len-end){
+    memcpy(buf+end,str+s,len-end);
+    end=len;
+    s+=len-end;
+    writeToSink();
+  }
+  memcpy(buf+end,str+s,l-s);
+  end+=l-s;
+  if(delim){
+    if(end+1>len)
+      writeToSink();
+    buf[end]=*d;
+    ++end;
+  }
+  return true;
+}
+
+void itostr(int number,int base=10){
+  // store if negative and make positive
+  bool negative = false;
+  if (number < 0){
+    number *= -1;
+    negative = true;
+  }
+  char* buf=new char[16];
+  int idx = 16;
+  int len = 16;
+  if(!number){
+    buf[--idx]='0';
+  }else{
+    // add numbers
+    while(number){
+      if(--idx<0){
+        char* tmp=new char[len+16];
+        memcpy(tmp+16,buf,len);
+        delete[] buf;
+        buf=tmp;
+        len+=16;
+        idx+=16;
+      }
+      if((number % base)>9)
+        buf[idx] = (irr::c8)('a' - 10 + (number % base));
+      else
+        buf[idx] = (irr::c8)('0' + (number % base));
+      number /= base;
+    }
+
+    // add sign
+    if (negative)
+    {
+      if(--idx<0){
+        char* tmp=new char[len+1];
+        memcpy(tmp+1,buf,len);
+        delete[] buf;
+        buf=tmp;
+        len+=1;
+        idx+=1;
+      }
+      buf[idx] = '-';
+    }
+  }
+}
 
 bool write(HypOStream& s,const int& i,const int& base){
   return s.write(i,base);
@@ -123,4 +211,3 @@ bool write(HypOStream& s,const int& i,const int& base){
 bool write(HypOStream& s,const char*& str,const bool& delim){
   return s.write(str,delim);
 }
-

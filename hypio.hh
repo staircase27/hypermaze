@@ -81,10 +81,10 @@ class HypOStream{
   public:
     virtual ~HypOStream(){};
     
-    void setNextSpace(const char* space){
+    inline void setNextSpace(const char* space){
       nextspace=space;
     }
-    void setDefaultSpace(const char* space){
+    inline void setDefaultSpace(const char* space){
       defaultspace=space;
     }
 };
@@ -94,19 +94,17 @@ class BufHypOStream: public HypOStream{
     int len;
     char* buf;
     int end;
-    virtual void writetosink()=0;
+    virtual void writeToSink()=0;
     const char* delimchars;
+    bool needspace;
     
-    BufHypOStream():delimchars("\"'|\\//^_!@#~.=+-$*\3\1\2"),len(255),buf(new char[len+1]),end(0){}
-    
+    BufHypOStream();
     ~BufHypOStream();
     
-    virtual bool write(const int&,const int&){
-      return false;
-    }
-    virtual bool write(const char*&,const bool&){
-      return false;
-    }
+    bool addSpace();
+    
+    virtual bool write(const int&,const int&);
+    virtual bool write(const char*&,const bool&);
     
 };
 bool write(HypOStream&,const int&,const int&);
