@@ -1,5 +1,6 @@
 #include "hypio.hh"
-#include <iostream>
+#include "hypioimp.hh"
+//#include <iostream>
 using namespace std;
 BufHypIStream::BufHypIStream():len(255),buf(new char[len+1]),start(0),end(0),eof(false){}
 
@@ -114,7 +115,6 @@ IOResult read(HypIStream& s,char* str,const bool& delim){
 BufHypOStream::BufHypOStream():delimchars("\"'|\\/^_!@#~.=+-$*\3\1\2"),len(255),buf(new char[len+1]),end(0),needspace(false){}
 
 BufHypOStream::~BufHypOStream(){
-  writeToSink();
   delete[] buf;
 }
 
@@ -127,7 +127,52 @@ bool BufHypOStream::addSpace(){
   end+=l;
 }
 
-bool BufHypOStream::write(const int& i,const int& base){
+bool BufHypOStream::write(const int& _i,const int& _base){
+  addSpace();
+  int i=_i;
+  int base=_base;
+  // if negative at "-" to buffer and make positive
+  if (i < 0){
+    i *= -1;
+    if(end+1>len)
+      writeToSink();
+    buf[end]='-';
+    ++end;
+  }
+  if(!i){
+    if(end+1>len)
+      writeToSink();
+    buf[end]='0';
+    ++end;
+  }else{
+    if(base==0)
+      base=10;
+    char* ibuf=new char[16];
+    int idx = 16;
+    int ilen = 16;
+    // add numbers
+    while(i){
+      if(--idx<0){
+        char* tmp=new char[len+16];
+        memcpy(tmp+16,ibuf,len);
+        delete[] ibuf;
+        ibuf=tmp;
+        ilen+=16;
+        idx+=16;
+      }
+      if((i % base)>9)
+        ibuf[idx] = (char)('a' - 10 + (i % base));
+      else
+        ibuf[idx] = (char)('0' + (i % base));
+      i /= base;
+    }
+    if(end+ilen-idx>len)
+      writeToSink();
+    memcpy(buf+end,ibuf+idx,ilen-idx);
+    end+=ilen-idx;
+    delete[] ibuf;
+  }
+  return true;
 }
 bool BufHypOStream::write(const char*& str,const bool& delim){
   addSpace();
@@ -159,51 +204,18 @@ bool BufHypOStream::write(const char*& str,const bool& delim){
   return true;
 }
 
-void itostr(int number,int base=10){
-  // store if negative and make positive
-  bool negative = false;
-  if (number < 0){
-    number *= -1;
-    negative = true;
-  }
-  char* buf=new char[16];
-  int idx = 16;
-  int len = 16;
-  if(!number){
-    buf[--idx]='0';
-  }else{
-    // add numbers
-    while(number){
-      if(--idx<0){
-        char* tmp=new char[len+16];
-        memcpy(tmp+16,buf,len);
-        delete[] buf;
-        buf=tmp;
-        len+=16;
-        idx+=16;
-      }
-      if((number % base)>9)
-        buf[idx] = (irr::c8)('a' - 10 + (number % base));
-      else
-        buf[idx] = (irr::c8)('0' + (number % base));
-      number /= base;
-    }
-
-    // add sign
-    if (negative)
-    {
-      if(--idx<0){
-        char* tmp=new char[len+1];
-        memcpy(tmp+1,buf,len);
-        delete[] buf;
-        buf=tmp;
-        len+=1;
-        idx+=1;
-      }
-      buf[idx] = '-';
-    }
-  }
+#ifdef IRRLICHT
+IrrHypOStream::IrrHypOStream(irr::IWriteFile* f):f(f){f->grab();}
+IrrHypOStream::~IrrHypOStream(){
+  writeToSink();
+  f->drop();
 }
+
+bool IrrHypOStream::writeToSink(){
+  bool valid=f->write(buf,end)==end;
+  end=0;
+}
+#endif
 
 bool write(HypOStream& s,const int& i,const int& base){
   return s.write(i,base);

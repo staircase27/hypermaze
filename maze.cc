@@ -91,113 +91,15 @@ IOResult read(HypIStream& s,Maze& m){
   return IOResult(true,r.eof);
 }
 
-#ifdef IRRLICHT
-class MazeParser:public InputParser{
-  Maze* m;
-  int pos;
-  public:
-    MazeParser(Maze* m):m(m),pos(-1){};
-    
-    Used parse(char* data,irr::u32 length,bool eof){
-      char* start=data;
-      char* end=data+length;
-      if(!eof)
-        end-=1;
-      if(pos==-1){
-        Vector size;
-        size.X=strtol(data,&data,10);
-        if(data>=end) return Used(0,false);
-
-        size.Y=strtol(data,&data,10);
-        if(data>=end) return Used(0,false);
-
-        size.Z=strtol(data,&data,10);
-        if(data>=end) return Used(0,false);
-        *m=Maze(size);
-        pos=0;
-      }
-      
-      char* tmp;
-      while(pos<m->size.X*m->size.Y*m->size.Z){
-        m->maze[pos]=strtol(data,&tmp,16);
-        if(tmp>=end) return Used(data-start,false);
-        ++pos;
-        data=tmp;
-      }
-      return Used(data-start,true);
-    }
-};
-void Maze::load(irr::IReadFile* in){
-//*
-  IrrHypIStream is(in);
-  read(is,*this);
-/*/
-  MazeParser mp(this);
-  ::parse(in,&mp);
-//*/
-}
-irr::stringc tostr16(int number){
-  // store if negative and make positive
-  bool negative = false;
-  if (number < 0)
-  {
-    number *= -1;
-    negative = true;
-  }
-
-  // temporary buffer for 16 numbers
-  irr::c8 tmpbuf[16]={0};
-  irr::u32 idx = 15;
-
-  // special case '0'
-
-  if (!number)
-  {
-    tmpbuf[14] = '0';
-    return irr::stringc(&tmpbuf[14]);
-  }
-
-  // add numbers
-  while(number && idx)
-  {
-    --idx;
-    if((number % 16)>9)
-      tmpbuf[idx] = (irr::c8)('a' - 10 + (number % 16));
-    else
-      tmpbuf[idx] = (irr::c8)('0' + (number % 16));
-    number /= 16;
-  }
-
-  // add sign
-  if (negative)
-  {
-    --idx;
-    tmpbuf[idx] = '-';
-  }
-
-  return irr::stringc(&tmpbuf[idx]);
-}
-void Maze::save(irr::IWriteFile* out){
-  irr::stringc str;
-  str+=size.X;
-  str+=" ";
-  str+=size.Y;
-  str+=" ";
-  str+=size.Z;
-  str+="\n";
-  SPA<int> p=maze;
-  SPA<int> end=maze+size.X*size.Y*size.Z;
+bool write(HypOStream& s,const Maze& m){
+  write(s,m.size.X);
+  write(s,m.size.Y);
+  write(s,m.size.Z);
+  s.setNextSpace("\n");
+  SPA<int> p=m.maze;
+  SPA<int> end=m.maze+m.size.X*m.size.Y*m.size.Z;
   while(p!=end){
-    str+=tostr16(*p);
+    write(s,*p,16);
     ++p;
-    str+=" ";
-    if(str.size()>256){
-      out->write(str.c_str(),str.size());
-      str=irr::stringc();
-    }
   }
-  str+="\n";
-  out->write(str.c_str(),str.size());
 }
-#endif
-

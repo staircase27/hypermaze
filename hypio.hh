@@ -1,13 +1,3 @@
-#ifdef IRRLICHT
-#include "irrlicht.h"
-#include <cstring>
-namespace irr{
-  using namespace core;
-  using namespace scene;
-  using namespace io;
-  using namespace video;
-};
-#endif
 #ifndef HYPIO_HH_INC
 #define HYPIO_HH_INC 
 
@@ -28,46 +18,16 @@ class HypIStream{
     inline static bool isspace(const char& c){return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';}
     virtual ~HypIStream(){};
 };
-class BufHypIStream: public HypIStream{
-  protected:
-    int len;
-    char* buf;
-    int start;
-    int end;
-    bool eof;
-    
-    BufHypIStream();
-    
-    virtual void readtobuf()=0;
-    void consumewhitespace();
-    virtual IOResult read(int&,const int&);
-    void mergebufs(char*&,int&,char*,int&,int&);
-    virtual IOResult read(char*&,const bool&);
-  public:
-    virtual ~BufHypIStream();
-};
- 
-#ifdef IRRLICHT
-class IrrHypIStream: public BufHypIStream{
-  irr::IReadFile* f;
 
-  public:
-    IrrHypIStream(irr::IReadFile* f);
-    ~IrrHypIStream();
-
-  protected:
-    virtual void readtobuf();
-};
-#endif
-
-IOResult read(HypIStream& s,int& i,const int& base);
+IOResult read(HypIStream& s,int& i,const int& base=0);
 IOResult read(HypIStream& s,char* str,const bool& delim);
 
 class HypOStream{
   const char* defaultspace;
   const char* nextspace;
+  bool atstart;
   protected:
-    HypOStream():defaultspace(" "),nextspace(" "){}
+    HypOStream():defaultspace(" "),nextspace(" "),atstart(true){}
     
     virtual bool write(const int&,const int&)=0;
     virtual bool write(const char*&,const bool&)=0;
@@ -75,6 +35,10 @@ class HypOStream{
     friend bool write(HypOStream&,const char*&,const bool&);
     const char* nextSpace(){
       const char* tmp=nextspace;
+      if(atstart){
+        tmp="";
+        atstart=false;
+      }
       nextspace=defaultspace;
       return tmp;
     }
@@ -89,25 +53,7 @@ class HypOStream{
     }
 };
 
-class BufHypOStream: public HypOStream{
-  protected:
-    int len;
-    char* buf;
-    int end;
-    virtual void writeToSink()=0;
-    const char* delimchars;
-    bool needspace;
-    
-    BufHypOStream();
-    ~BufHypOStream();
-    
-    bool addSpace();
-    
-    virtual bool write(const int&,const int&);
-    virtual bool write(const char*&,const bool&);
-    
-};
-bool write(HypOStream&,const int&,const int&);
-bool write(HypOStream&,const char*&,const bool&);
+bool write(HypOStream& s,const int& i,const int& base=0);
+bool write(HypOStream& s,const char*& str,const bool& delim);
 
 #endif

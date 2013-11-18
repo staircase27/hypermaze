@@ -5,9 +5,6 @@
 
 #include "hypio.hh"
 
-#ifdef IRRLICHT
-#include "irrio.hh"
-#endif
 #ifdef IOSTREAM
 #include <iostream>
 #endif
@@ -17,9 +14,6 @@
 
 class Point;
 class ConstPoint;
-#ifdef IRRLICHT
-class MazeParser;
-#endif
 
 class Maze
 {
@@ -48,17 +42,13 @@ class Maze
     friend istream& operator>>(istream&,Maze&);
     #endif
     
-    #ifdef IRRLICHT
-    friend class MazeParser;
-    void load(irr::IReadFile* in);
-    void save(irr::IWriteFile*);
-    #endif
-    
     friend IOResult read(HypIStream&,Maze& m);
+    friend bool write(HypOStream& s,const Maze& m);
     
 };
 
 IOResult read(HypIStream&,Maze&);
+bool write(HypOStream& s,const Maze& m);
 
 class Point{
   private:

@@ -1,6 +1,7 @@
 #include "irrlicht.h"
 #include "irrdisp.hh"
 #include "maze.hh"
+#include "hypioimp.hh"
 #include "string.hh"
 #include "mazegen.hh"
 
@@ -245,8 +246,8 @@ class SaveGui: BaseGui{
       this->m=&m;
       main(_device);
       return okClicked;
-   }
-   
+    }
+    
     virtual void createGUI(){
       okClicked=cancelClicked=false;
 
@@ -276,8 +277,9 @@ class SaveGui: BaseGui{
         irr::IWriteFile* out=device->getFileSystem()->createAndWriteFile(fileField->getText());
         if(!out)
           return true;
-        m->save(out);
+        IrrHypOStream os(out);
         out->drop();
+        write(os,*m);        
         return false;
       } 
       return true;
@@ -359,8 +361,9 @@ class OpenGui: BaseGui{
         irr::IReadFile* in=device->getFileSystem()->createAndOpenFile(fileField->getText());
         if(!in)
           return true;
-        m->load(in);
+        IrrHypIStream is(in);
         in->drop();
+        read(is,*m);
         return false;
       }
       return true;
