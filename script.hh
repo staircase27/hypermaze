@@ -22,6 +22,14 @@ class Condition{
     virtual ~Condition(){};
 };
 
+IOResult read(HypIStream& s,SP<Condition>& c);
+bool write(HypOStream& s,const SP<const Condition>& c);
+
+template <class T>
+IOResult read(HypIStream& s,SPA<SP<T>>& c);
+template <class T>
+bool write(HypOStream& s,const SPA<const SP<const T>>& c);
+
 template <class T1,class T2>
 struct Pair{
   T1 a;

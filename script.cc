@@ -8,6 +8,21 @@
 #include "script.hh"
 #include "scriptimpl.hh"
 
+//New code
+IOResult read(HypIStream& s,SP<Condition>& c){
+  return IOResult(false,false);
+}
+bool write(HypOStream& s,const SP<const Condition>& c);
+
+template <class T>
+IOResult read(HypIStream& s,SPA<SP<T>>& c,const int& count){
+  
+}
+template <class T>
+bool write(HypOStream& s,const SPA<const SP<const T>>& c);
+//End new code
+
+
 void StringElementCondition::output(irr::stringc* s,irr::IWriteFile* file){
   if((selectionCondition&1)==0)
     (*s)+="*";
