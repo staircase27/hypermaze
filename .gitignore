@@ -9,3 +9,4 @@
 # don't backup the music
 irrlicht/music
 doc/doxygen/*/
+.directory
