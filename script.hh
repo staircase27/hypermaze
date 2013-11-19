@@ -5,10 +5,10 @@
 #ifndef SCRIPT_HH_INC
 #define SCRIPT_HH_INC
 enum Trigger{
-  TRIGGER_START,
-  TRIGGER_WIN,
-  TRIGGER_MOVE,
-  TRIGGER_SELECT
+  TRIGGER_START=1,
+  TRIGGER_WIN=2,
+  TRIGGER_MOVE=4,
+  TRIGGER_SELECT=8
 };
 
 class Script;
@@ -111,7 +111,8 @@ class ActionCommon: public virtual Action{
 
 class Event{
   public:
-		Trigger trigger;
+		int trigger;
+		int conditionCount;
 		Condition* condition;
 		int actionCount;
 		Action* actions;
