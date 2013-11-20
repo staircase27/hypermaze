@@ -6,10 +6,16 @@
 #define SCRIPT_HH_INC
 
 template <class T>
-IOResult read(HypIStream& s,SPA<SP<T>>& a, int& c);
+IOResult read(HypIStream& s,SPA<SP<T> >& a, int& c);
 template <class T>
-bool write(HypOStream& s,const SPA<const SP<const T>>& a, const int& c);
+bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c);
 
+class PolymorphicHypIO{
+  protected:
+    virtual IOResult doread(HypIStream& s)=0;
+    virtual bool dowrite(HypOStream& s)=0;
+};  
+  
 enum Trigger{
   TRIGGER_START=1,
   TRIGGER_WIN=2,
@@ -27,7 +33,8 @@ class Condition{
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0)=0;
     virtual ~Condition(){};
 
-    public static const SP<Condition> defaultvalue;
+  public:
+    static const SP<Condition> defaultvalue;
 };
 
 IOResult read(HypIStream& s,SP<Condition>& c);

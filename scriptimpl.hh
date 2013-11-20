@@ -3,6 +3,36 @@
 #ifndef SCRIPTIMPL_HH_INC
 #define SCRIPTIMPL_HH_INC
 
+class ConditionTrue;
+
+template <class B,class T>
+struct TypeToID{
+  public:
+    static const int ID=0;
+};
+template <class B,int i>
+struct IDToType{
+};
+template <int i>
+struct IDToType<Condition,i>{
+  public:
+    typedef ConditionTrue type;
+};
+
+#define ADD_TO_TYPE_MAP(BASE,ID,TYPE) template<> class TypeToID<BASE,TYPE>{public: static const int id=ID;};template<> class IDToType<BASE,ID>{public: typedef TYPE type;};
+
+template <class B,class T>
+class PolymorphicHypIOImpl{
+  protected:
+    IOResult doread(HypIStream& s){
+      return read(s,*((T*)this));
+    }
+    bool dowrite(HypOStream& s){
+      if(!write(s,TypeToID<B,T>::id,0))
+      return write(s,*((T*)this));
+    }
+};
+
 struct Range{
   int start;
   int end;

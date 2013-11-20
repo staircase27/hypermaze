@@ -3,6 +3,7 @@
 #include "string.hh"
 #include <map>
 #include <vector>
+#include <set>
 #include <list>
 #include "dirns.hh"
 
