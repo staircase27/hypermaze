@@ -9,6 +9,10 @@
  * <tt>IOResult read(HypIStream&,type&,OPTIONS...)</tt> or
  * <tt>bool write(HypOStream&,const type&,OPTIONS...)</tt>.
  * To implement a reading and writing for new types implement methods like the above.
+ * 
+ * When reading make sure to leave the object in a consistent (if non-sensical) state when
+ * reading it. e.g. if reading an array make sure the array is the size you claim to have made
+ * it and everything has a valid value.
  */
 #ifndef HYPIO_HH_INC
 #define HYPIO_HH_INC 

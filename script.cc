@@ -9,17 +9,45 @@
 #include "scriptimpl.hh"
 
 //New code
+template <class T>template <class T>
+IOResult read(HypIStream& s,SPA<SP<T>>& a, int& c){
+  IOResult r=read(s,c,0);
+  if(!r.ok){
+    c=0;
+    return r;
+  }
+  a=PA<SP<T>>(new SP<T>[c]);
+  int i=0;
+  for(;i<c;++i){
+    if(!(r=read(s,a[i])).ok)
+      break;
+  }
+  if(i<c){
+    for(;i<c;++i)
+      a[i]=T::defaultvalue;
+    return IOResult(false,r.eof);
+  }else{
+    return IOResult(true,r.eof);
+  }
+}
+template <class T>
+bool write(HypOStream& s,const SPA<const SP<const T>>& a, const int& c){
+  if(!write(s,c,0))
+    return false;
+  for(int i=0;i<c;++i)
+    if(!write(s,a[i]))
+      return false;
+  return true;
+}
+
+const SP<Condition> Condition::defaultValue=SP<Condition>(new ConditionTrue());
+
 IOResult read(HypIStream& s,SP<Condition>& c){
   return IOResult(false,false);
 }
-bool write(HypOStream& s,const SP<const Condition>& c);
-
-template <class T>
-IOResult read(HypIStream& s,SPA<SP<T>>& c,const int& count){
+bool write(HypOStream& s,const SP<const Condition>& c){
   
 }
-template <class T>
-bool write(HypOStream& s,const SPA<const SP<const T>>& c);
 //End new code
 
 

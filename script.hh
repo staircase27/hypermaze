@@ -4,6 +4,12 @@
 
 #ifndef SCRIPT_HH_INC
 #define SCRIPT_HH_INC
+
+template <class T>
+IOResult read(HypIStream& s,SPA<SP<T>>& a, int& c);
+template <class T>
+bool write(HypOStream& s,const SPA<const SP<const T>>& a, const int& c);
+
 enum Trigger{
   TRIGGER_START=1,
   TRIGGER_WIN=2,
@@ -20,15 +26,12 @@ class Condition{
     virtual void returnParser(InputParser*)=0;
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0)=0;
     virtual ~Condition(){};
+
+    public static const SP<Condition> defaultvalue;
 };
 
 IOResult read(HypIStream& s,SP<Condition>& c);
 bool write(HypOStream& s,const SP<const Condition>& c);
-
-template <class T>
-IOResult read(HypIStream& s,SPA<SP<T>>& c);
-template <class T>
-bool write(HypOStream& s,const SPA<const SP<const T>>& c);
 
 template <class T1,class T2>
 struct Pair{
