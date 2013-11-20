@@ -50,17 +50,17 @@ void BufHypIStream::mergebufs(char*& addto,int& tolen,char* addfrom,int& fromsta
   tolen+=fromlen;
   fromlen=0;
 }
-IOResult BufHypIStream::read(char*& str,const bool& delim){
+IOResult BufHypIStream::read(char*& str,const bool& quote){
   char d;
   consumewhitespace();
-  if(delim){
+  if(quote){
     d=*(buf+start);
     ++start;
   }
   char* sb=0;
   int sblen=0;
   int l=0;
-  while(! (delim ? *(buf+start+l)==d : HypIStream::isspace(*(buf+start+l))) ){
+  while(! (quote ? *(buf+start+l)==d : HypIStream::isspace(*(buf+start+l))) ){
     ++l;
     if(start+l==end){
       if(eof)
@@ -70,7 +70,7 @@ IOResult BufHypIStream::read(char*& str,const bool& delim){
     }
   }
   mergebufs(sb,sblen,buf,start,l);
-  if( delim && !*(buf+start)==d){
+  if( quote && !*(buf+start)==d){
     delete[] sb;
     return IOResult(false,start==end);
   }
@@ -108,11 +108,11 @@ void IrrHypIStream::readtobuf(){
 IOResult read(HypIStream& s,int& i,const int& base){
   return s.read(i,base);
 }
-IOResult read(HypIStream& s,char* str,const bool& delim){
-  return s.read(str,delim);
+IOResult read(HypIStream& s,char* str,const bool& quote){
+  return s.read(str,quote);
 }
 
-BufHypOStream::BufHypOStream():delimchars("\"'|\\/^_!@#~.=+-$*\3\1\2"),len(255),buf(new char[len+1]),end(0),needspace(false){}
+BufHypOStream::BufHypOStream():quotechars("\"'|\\/^_!@#~.=+-$*\3\1\2"),len(255),buf(new char[len+1]),end(0),needspace(false){}
 
 BufHypOStream::~BufHypOStream(){
   delete[] buf;
@@ -174,10 +174,10 @@ bool BufHypOStream::write(const int& _i,const int& _base){
   }
   return true;
 }
-bool BufHypOStream::write(const char*& str,const bool& delim){
+bool BufHypOStream::write(const char*& str,const bool& quote){
   addSpace();
-  const char* d=delimchars;
-  if(delim){
+  const char* d=quotechars;
+  if(quote){
     while(strchr(str,*d)!=0)
       ++d;
     if(end+1>len)
@@ -195,7 +195,7 @@ bool BufHypOStream::write(const char*& str,const bool& delim){
   }
   memcpy(buf+end,str+s,l-s);
   end+=l-s;
-  if(delim){
+  if(quote){
     if(end+1>len)
       writeToSink();
     buf[end]=*d;
@@ -220,6 +220,6 @@ bool IrrHypOStream::writeToSink(){
 bool write(HypOStream& s,const int& i,const int& base){
   return s.write(i,base);
 }
-bool write(HypOStream& s,const char*& str,const bool& delim){
-  return s.write(str,delim);
+bool write(HypOStream& s,const char*& str,const bool& quote){
+  return s.write(str,quote);
 }

@@ -28,6 +28,7 @@ class BufHypIStream: public HypIStream{
     void mergebufs(char*&,int&,char*,int&,int&);
     IOResult read(char*&,const bool&);
   public:
+    ///virtual destructor to allow deletion of base class type objects
     virtual ~BufHypIStream();
 };
  
@@ -50,7 +51,7 @@ class BufHypOStream: public HypOStream{
     char* buf;
     int end;
     virtual bool writeToSink()=0;
-    const char* delimchars;
+    const char* quotechars;
     bool needspace;
     
     BufHypOStream();

@@ -2,7 +2,6 @@
 #define DIRNS_HH_INC
 
 #include "vector.hh"
-#include <set>
 using namespace std;
 
 
