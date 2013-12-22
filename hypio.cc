@@ -30,8 +30,18 @@ IOResult BufHypIStream::read(int& i,const int& base){
     l=strtol(buf+start,&rend,base);//try again with more data
   }
   //must have used something
-  if(rend==buf+start)
-    return IOResult(false,rend==buf+end);
+  if(rend==buf+start){
+    bool neg=false;
+    if(*rend=='-'){
+      neg=true;
+      ++rend;
+    }
+    if(!*rend=='*')
+      return IOResult(false,rend==buf+end);
+    if(neg)
+      l=INT_MIN;
+    else
+      l=INT_MAX;
   start=rend-buf;
   //must either be at end of file or have whitespace after the number
   if(! (HypIStream::isspace(*rend) || start==end) )
@@ -131,14 +141,28 @@ bool BufHypOStream::write(const int& _i,const int& _base){
   addSpace();
   int i=_i;
   int base=_base;
-  // if negative at "-" to buffer and make positive
+  // if negative add "-" to buffer and make positive
   if (i < 0){
-    i *= -1;
     if(end+1>len)
       writeToSink();
     buf[end]='-';
     ++end;
-  }
+    if(i==INT_MIN){
+      if(end+1>len)
+        writeToSink();
+      buf[end]='*';
+      ++end;
+      return true;
+    }
+    i *= -1;
+  }else
+    if(i==INT_MAX){
+      if(end+1>len)
+        writeToSink();
+      buf[end]='*';
+      ++end;
+      return true;
+    }
   if(!i){
     if(end+1>len)
       writeToSink();
@@ -223,3 +247,14 @@ bool write(HypOStream& s,const int& i,const int& base){
 bool write(HypOStream& s,const char*& str,const bool& quote){
   return s.write(str,quote);
 }
+
+IOResult read(HypIStream& s,bool& b){
+  int tmp;
+  IOResult r=read(s,tmp,0);
+  b=(bool)tmp;
+  return r;
+}
+bool write(HypOStream& s,const bool& b){
+  return write(s,(int)b,0);
+}
+

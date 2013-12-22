@@ -5,14 +5,18 @@
 
 class ConditionTrue;
 
+//keep track of ids for polymorphicly read and written types
 template <class B,class T>
 struct TypeToID{
   public:
     static const int ID=0;
 };
+
 template <class B,int i>
 struct IDToType{
 };
+
+
 template <int i>
 struct IDToType<Condition,i>{
   public:
@@ -43,72 +47,37 @@ struct Range{
 };
 
 struct StringElementCondition{
-  // first bit is if we care (1 care, 0 dont). second is the value to match if we do care
+  // second bit is if we care (0 care, 1 dont). first is the value to match if we do care (values are 0,1,2)
   int selectionCondition;
   int dirnsCondition;
 
   int xrange_count;
   int yrange_count;
   int zrange_count;
-  Range* xrange;
-  Range* yrange;
-  Range* zrange;
+  SPA<Range> xrange;
+  SPA<Range> yrange;
+  SPA<Range> zrange;
   template <class T>
-  inline bool matches(T el){
-    cout<<"try match "<<el<<" "<<(dirnsCondition&to_mask(el->d)!=0)<<endl;
-    if((selectionCondition&1)==0||(((selectionCondition&2)==2)==el->selected)&&(dirnsCondition&to_mask(el->d)!=0)){
-      bool match=xrange_count==0;
-      for(int i=0;i<xrange_count&&!match;++i)
-        if(xrange[i].inRange(el->pos.X))
-          match=true;
-      if(!match)
-        return false;
-      match=yrange_count==0;
-      for(int i=0;i<yrange_count&&!match;++i)
-        if(yrange[i].inRange(el->pos.Y))
-          match=true;
-      if(!match)
-        return false;
-      match=zrange_count==0;
-      for(int i=0;i<zrange_count&&!match;++i)
-        if(zrange[i].inRange(el->pos.Z))
-          match=true;
-      return match;
-    }
-    return false;
-  }
+  inline bool matches(T el);
   StringElementCondition():selectionCondition(0),dirnsCondition(ALLDIRNSMASK),xrange_count(0),yrange_count(0),zrange_count(0),xrange(0),yrange(0),zrange(0){};
-  
-  ~StringElementCondition(){
-    delete[] xrange;
-    delete[] yrange;
-    delete[] zrange;
-  }
-  
-	void output(irr::stringc* s,irr::IWriteFile* file=0);
 };
 
-class StringConditionParser:public InputParser{
-  int stage;
-  StringElementCondition* c;
-  public:
-    Used parse(char* data,irr::u32 length,bool eof);
-    StringConditionParser(StringElementCondition *c):c(c),stage(0){}
-};
+IOResult read(HypIStream& s,StringElementCondition& c);
+bool write(HypOStream& s,const StringElementCondition& c);
 
 class StringMatcher;
 
-struct PatternTag:private InputParser{
+struct PatternTag{
   int min;
   int max;
   bool greedy;
   PatternTag():min(1),max(1),greedy(true){};
   private:
-	  Used parse(char* data,irr::u32 length,bool eof);
-	  virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
 	  friend class StringMatcher;
-	  friend class StringMatcherParser;
 };
+
+IOResult read(HypIStream& s,PatternTag& pt);
+bool write(HypOStream& s,const PatternTag& pt);
 
 template <class POINTER>
 struct PatternMatch{
@@ -127,19 +96,12 @@ class StringMatcherCallback{
 class StringMatcher{
 public:
   int count;
-  pair<PatternTag,StringElementCondition>* pattern;
+  SPA<pair<PatternTag,StringElementCondition> > pattern;
   int group_count;
-  pair<int,int>* groups;
+  SPA<pair<int,int> > groups;
   public:
   
 	  StringMatcher():count(0),group_count(0),pattern(0),groups(0){};
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-    virtual ~StringMatcher(){
-      delete[] pattern;
-      delete[] groups;
-    }
-    virtual InputParser* createParser();
-    virtual void returnParser(InputParser*);
     inline int groupCount(){return group_count;}
 	  bool match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups=0);
 	  bool match(String& s,pair<SP<StringPointer>,SP<StringPointer> >* groups=0);

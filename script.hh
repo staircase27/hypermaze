@@ -13,7 +13,6 @@ bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c);
 class PolymorphicHypIO{
   protected:
     virtual IOResult doread(HypIStream& s)=0;
-    virtual bool dowrite(HypOStream& s)=0;
 };  
   
 enum Trigger{
@@ -25,14 +24,10 @@ enum Trigger{
 
 class Script;
 
-class Condition{
+class Condition: protected PolymorphicHypIO{
   public:
     virtual bool is(int time,const Script& script,const String& s)=0;
-    virtual InputParser* createParser()=0;
-    virtual void returnParser(InputParser*)=0;
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0)=0;
     virtual ~Condition(){};
-
   public:
     static const SP<Condition> defaultvalue;
 };
@@ -40,7 +35,7 @@ class Condition{
 IOResult read(HypIStream& s,SP<Condition>& c);
 bool write(HypOStream& s,const SP<const Condition>& c);
 
-template <class T1,class T2>
+template <class T1,class T2=T1>
 struct Pair{
   T1 a;
   T2 b;
@@ -50,16 +45,15 @@ struct Pair{
 
 struct Message{
   int count;
-  SPA<Pair<irr::stringc,irr::stringc> > paragraphs;
+  SPA<Pair<irr::stringc> > paragraphs;
   Message():paragraphs(0),count(0){};
-  void output(irr::stringc* s,irr::IWriteFile* file=0);
 };
 
 struct ScriptResponse{
   bool stringChanged;
   bool stringSelectionChanged;
   int messageCount;
-  Message* messages;
+  SPA<Message> messages;
   ScriptResponse():stringChanged(false),stringSelectionChanged(false),messageCount(0),messages(0){};
 };
 struct ScriptResponseStart:public ScriptResponse{};
@@ -78,16 +72,13 @@ struct ScriptResponseSelect:public ScriptResponse{
   ScriptResponseSelect():forceWin(false){};
 };
 
-class Action{
+class Action: protected PolymorphicHypIO{
   public:
 		virtual void doStart(ScriptResponseStart&,String&)=0;
 		virtual void doWin(ScriptResponseWin&,String&)=0;
 		virtual void doMove(ScriptResponseMove&,String&)=0;
 		virtual void doSelect(ScriptResponseSelect&,String&)=0;
 		
-		virtual InputParser* createParser()=0;
-		virtual void returnParser(InputParser*)=0;
-		virtual void output(irr::stringc* s,irr::IWriteFile* file=0)=0;
 		virtual ~Action(){};
 };
 class ActionStart: public virtual Action{
@@ -127,28 +118,27 @@ class ActionCommon: public virtual Action{
 		virtual void doSelect(ScriptResponseSelect& r,String& s){doCommon(r,s);};
 };
 
+IOResult read(HypIStream& s,SP<Action>& c);
+bool write(HypOStream& s,const SP<const Action>& c);
+
 class Event{
   public:
 		int trigger;
 		int conditionCount;
-		Condition* condition;
+		SPA<SP<Condition>> condition;
 		int actionCount;
-		Action* actions;
+		SPA<SP<Action>> actions;
 };
 
 class Script{
   private:
-    Event* event;
+    int eventcount
+    SPA<Event> events;
     int* times;
-    int count;
   
   public:
     int getTime(int event) const{
       return times[event];
     }
-    
-    InputParser* createParser(Condition** c);
-    InputParser* createParser(Action*** a,int* count);
-    void returnParser(InputParser* p);
 };
 #endif

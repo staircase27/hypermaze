@@ -247,6 +247,7 @@ int main(int argc,char* argv[]){
     in->drop();
   }
   
+  #ifdef NEVER_DEFINED
   #ifdef IOSTREAM
   
   {
@@ -255,12 +256,12 @@ int main(int argc,char* argv[]){
     irr::stringc str;
     sec.output(&str);
     cout<<str.c_str()<<endl;
-    const char* data="Y "
+    const char* data="1 "
                       "0 "//no x conditions
                       "1 "//one y condition
                       "1 1 "//y is exactly 1
                       "4 "//4 for the z
-                      "* 0 2 3 5 *";//up to 0 2-3 and >5 (plus a missing one)
+                      "* 0 2 3 5 *";//up to <0 2-3 and >5 (plus a missing one)
     cout<<"input"<<endl<<data<<endl;
     irr::IReadFile* file=irr::createMemoryReadFile((void*)data,strlen(data),"",false);
     StringConditionParser secp(&sec);
@@ -491,6 +492,7 @@ int main(int argc,char* argv[]){
   }
   
   
+  #endif
   #endif
 
   while(device->run())

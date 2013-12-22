@@ -14,6 +14,15 @@
  * reading it. e.g. if reading an array make sure the array is the size you claim to have made
  * it and everything has a valid value.
  */
+
+#define USE_CLIM
+#ifdef USE_CLIM
+#include <climits>
+#else
+#define INT_MAX std::numeric_limits<int>::max()
+#define INT_MIN std::numeric_limits<int>::min()
+#endif
+
 #ifndef HYPIO_HH_INC
 #define HYPIO_HH_INC 
 
@@ -36,6 +45,7 @@ class HypIStream{
   protected:
     ///Read a integer from the stream
     /**
+     * Also reads a special form for maximum or minimum values of * and -* respectively
      * @param i reference to an integer variable to store the read integer in
      * @param base the base to read the integer in. 0 means guess based on possible prefix
      * @return an IOResult object that contains the status of the read
@@ -64,6 +74,7 @@ class HypIStream{
 
 ///Read a integer from the stream
 /**
+ * Also reads a special form for maximum or minimum values of * and -* respectively
  * @param s the stream to read from
  * @param i reference to an integer variable to store the read integer in
  * @param base the base to read the integer in. 0 means guess based on possible prefix
@@ -97,6 +108,7 @@ class HypOStream{
     
     ///write an integer to this stream in the specified base
     /**
+     * Writes a special form for maximum or minimum values of * and -* respectively
      * @param i integer to write
      * @param base the base to write i in. 0 means use a base with prefix
      * @return true if i was written ok
@@ -135,4 +147,6 @@ class HypOStream{
 bool write(HypOStream& s,const int& i,const int& base=0);
 bool write(HypOStream& s,const char*& str,const bool& quote);
 
+IOResult read(HypIStream& s,bool& b);
+bool write(HypOStream& s,const bool& b);
 #endif

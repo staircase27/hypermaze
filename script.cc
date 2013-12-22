@@ -1,10 +1,4 @@
 #include <cctype>
-#define USE_CLIM
-#ifdef USE_CLIM
-#include <climits>
-#else
-#define INT_MAX std::numeric_limits<int>::max()
-#endif
 #include "script.hh"
 #include "scriptimpl.hh"
 
@@ -43,287 +37,172 @@ bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c){
 const SP<Condition> Condition::defaultvalue=SP<Condition>(new ConditionTrue());
 
 IOResult read(HypIStream& s,SP<Condition>& c){
-  return IOResult(false,false);
+  int id=0;
+  IOResult r=read(s,id,0);
+  if(!r.ok){
+    c=Condition::defaultvalue;
+    return r;
+  }
+  c=SP<Condition>(new IDToType<Condition,id>::type());
+  return read(s,*((IDToType<Condition,id>::type*)c))
 }
 bool write(HypOStream& s,const SP<const Condition>& c){
-  
+  if(!write(
 }
 //End new code
 
-
-void StringElementCondition::output(irr::stringc* s,irr::IWriteFile* file){
-  if((selectionCondition&1)==0)
-    (*s)+="*";
-  else if((selectionCondition&2)==0)
-    (*s)+="N";
-  else
-    (*s)+="Y";
-  (*s)+=" ";
-  (*s)+=dirnsCondition;
-  (*s)+=" ";
-  (*s)+=xrange_count;
-  for(int i=0;i<xrange_count;++i){
-    (*s)+=" ";
-    if(xrange[i].start==INT_MAX)
-      (*s)+="*";
-    else
-      (*s)+=xrange[i].start;
-    (*s)+=" ";
-    if(xrange[i].end==INT_MAX)
-      (*s)+="*";
-    else
-      (*s)+=xrange[i].end;
-  }
-  (*s)+=" ";
-  if(file && s->size()>256){
-    file->write(s->c_str(),s->size());
-    *s=irr::stringc();
-  }
-  (*s)+=yrange_count;
-  for(int i=0;i<yrange_count;++i){
-    (*s)+=" ";
-    if(yrange[i].start==INT_MAX)
-      (*s)+="*";
-    else
-      (*s)+=yrange[i].start;
-    (*s)+=" ";
-    if(yrange[i].end==INT_MAX)
-      (*s)+="*";
-    else
-      (*s)+=yrange[i].end;
-  }
-  (*s)+=" ";
-  if(file && s->size()>256){
-    file->write(s->c_str(),s->size());
-    *s=irr::stringc();
-  }
-  (*s)+=zrange_count;
-  for(int i=0;i<zrange_count;++i){
-    (*s)+=" ";
-    if(zrange[i].start==INT_MAX)
-      (*s)+="*";
-    else
-      (*s)+=zrange[i].start;
-    (*s)+=" ";
-    if(zrange[i].end==INT_MAX)
-      (*s)+="*";
-    else
-      (*s)+=zrange[i].end;
-  }
-  (*s)+="\n";
-  if(file && s->size()>256){
-    file->write(s->c_str(),s->size());
-    *s=irr::stringc();
-  }
+inline bool StringElementCondition::matches(T el){
+  if((selectionCondition&2)==0&&(((selectionCondition&1)==1)==el->selected))
+    return false;
+  if(dirnsCondition&to_mask(el->d)==0)
+    return false;
+  bool match=xrange_count==0;
+  for(int i=0;i<xrange_count&&!match;++i)
+    if(xrange[i].inRange(el->pos.X))
+      match=true;
+  if(!match)
+    return false;
+  match=yrange_count==0;
+  for(int i=0;i<yrange_count&&!match;++i)
+    if(yrange[i].inRange(el->pos.Y))
+      match=true;
+  if(!match)
+    return false;
+  match=zrange_count==0;
+  for(int i=0;i<zrange_count&&!match;++i)
+    if(zrange[i].inRange(el->pos.Z))
+      match=true;
+  return match;
 }
 
-Used StringConditionParser::parse(char* data,irr::u32 length,bool eof){
-  char* start=data;
-  char* end=data+length;
-  if(!eof)
-    end-=1;
-  while(stage!=4){
-    if(stage==0){
-      while(isspace(*data))
-        if(++data>=end)
-          return Used(data-start,false);
-      if(*data=='*')
-        c->selectionCondition=0;
-      else if(*data=='Y'||*data=='y')
-        c->selectionCondition=3;
-      else
-        c->selectionCondition=1;
-      char* tmp=data+1;
-      while(isspace(*tmp))
-        if(++tmp>=end)
-          return Used(data-start,false);
-      c->dirnsCondition=strtol(tmp,&tmp,10);
-      if(++tmp>=end)
-        return Used(data-start,false);
-      data=tmp;
-      ++stage;
-    }else{
-      int* count;
-      Range** ranges;
-      if((stage&3)==1){
-        count=&c->xrange_count;
-        ranges=&c->xrange;
-      }else if((stage&3)==2){
-        count=&c->yrange_count;
-        ranges=&c->yrange;
-      }else{//(stage&3)==3
-        count=&c->zrange_count;
-        ranges=&c->zrange;
-      }
-      if((stage&~3)==0){
-        char* tmp=data;
-        *count=strtol(data,&tmp,10);
-        if(tmp>=end&&!eof)
-          return Used(data-start,false);
-        (*ranges)=new Range[*count];
-        data=tmp;
-        stage+=4;
-      }
-      for(;(stage&~3)<=4*(*count);stage+=4){
-        while(isspace(*data))
-          if(++data>=end)
-            return Used(data-start,false);
-        char* tmp=data;
-		    if(*data=='*'){
-		      (*ranges)[(stage>>2)-1].start=INT_MAX;
-		      ++tmp;
-		    }else{
-		      (*ranges)[(stage>>2)-1].start=strtol(data,&tmp,10);
-		      if(tmp>=end&&!eof)
-		        return Used(data-start,false);
-		    }
-        while(isspace(*tmp))
-          if(++tmp>=end)
-            return Used(data-start,false);
-		    if(*tmp=='*'){
-		      (*ranges)[(stage>>2)-1].end=INT_MAX;
-		      ++tmp;
-		    }else{
-		      (*ranges)[(stage>>2)-1].end=strtol(tmp,&tmp,10);
-		      if(tmp>=end&&!eof)
-		        return Used(data-start,false);
-		    }
-		    data=tmp;
-	    }
-	    stage=(stage&3)+1;
+IOResult read(HypIStream& s,StringElementCondition& c){
+  IOResult r;
+  if(!(r=read(s,c.selectionCondition,0)).ok)
+    return r;
+  if(!(r=read(s,c.dirnsCondition,0)).ok)
+    return r;
+  if(!(r=read(s,c.xrange_count,0)).ok){
+    c.xrange_count=0;
+    return r;
+  }else{
+    c.xrange=new SPA[new Range[c.xrange_count]];
+    for(int i=0;i<c.xrange_count){
+      if(!(r=read(s,c.xrange[i].start,0)).ok)
+        return r;
+      if(!(r=read(s,c.xrange[i].end,0)).ok)
+        return r;
     }
   }
-  return Used(data-start,true);
-}
-
-Used PatternTag::parse(char* data,irr::u32 length,bool eof){
-  char* start=data;
-  char* end=data+length;
-  if(!eof)
-    end-=1;
-  
-	min=strtol(data,&data,10);
-	if(data>=end&&!eof)
-		return Used(0,false);  
-	max=strtol(data,&data,10);
-	if(data>=end&&!eof)
-		return Used(0,false);  
-	greedy=(bool)strtol(data,&data,10);
-	if(data>=end&&!eof)
-		return Used(0,false);  
-	return Used(data-start,true);
-}
-
-void PatternTag::output(irr::stringc* s,irr::IWriteFile* file){
-  (*s)+=min;
-  (*s)+=" ";
-  (*s)+=max;
-  (*s)+=" ";
-  (*s)+=greedy;
-  (*s)+="\n";
-}
-
-void StringMatcher::output(irr::stringc* s,irr::IWriteFile* file){
-  (*s)+=count;
-  (*s)+="\n";
-  for(int i=0;i<count;++i){
-	  pattern[i].first.output(s,file);
-    pattern[i].second.output(s,file);
+  if(!(r=read(s,c.yrange_count,0)).ok){
+    c.yrange_count=0;
+    return r;
+  }else{
+    c.yrange=new SPA[new Range[c.yrange_count]];
+    for(int i=0;i<c.yrange_count){
+      if(!(r=read(s,c.yrange[i].start,0)).ok)
+        return r;
+      if(!(r=read(s,c.yrange[i].end,0)).ok)
+        return r;
+    }
   }
-  (*s)+=group_count;
-  (*s)+=" ";
-  for(int i=0;i<group_count;++i){
-    (*s)+=groups[i].first;
-    (*s)+=" ";
-    (*s)+=groups[i].second;
-    (*s)+=" ";
+  if(!(r=read(s,c.zrange_count,0)).ok){
+    c.zrange_count=0;
+    return r;
+  }else{
+    c.zrange=new SPA[new Range[c.zrange_count]];
+    for(int i=0;i<c.zrange_count){
+      if(!(r=read(s,c.zrange[i].start,0)).ok)
+        return r;
+      if(!(r=read(s,c.zrange[i].end,0)).ok)
+        return r;
+    }
   }
-};
-
-class StringMatcherGroupsParser:public InputParser{
-  StringMatcher* sm;
-  int stage;
-  public:
-		StringMatcherGroupsParser(StringMatcher* sm):sm(sm),stage(-1){};
-		Used parse(char* data,irr::u32 length,bool eof){
-			char* start=data;
-			char* end=data+length;
-			if(!eof)
-				end-=1;
-		  if(stage==-1){
-				sm->group_count=strtol(data,&data,10);
-				if(data>=end&&!eof)
-					return Used(0,false);
-			  delete[] sm->groups;
-			  sm->groups=new pair<int,int>[sm->group_count];
-		    ++stage;
-		  }
-		  while(stage<sm->group_count){
-		    char* tmp;
-				sm->groups[stage].first=strtol(data,&tmp,10);
-				if(tmp>=end&&!eof)
-					return Used(data-start,false);  
-				sm->groups[stage].second=(bool)strtol(tmp,&tmp,10);
-				if(data>=end&&!eof)
-					return Used(data-start,false);  
-		    data=tmp;
-		    ++stage;
-		  }
-		  return Used(data-start,true);
-		}
-};
-
-class StringMatcherParser:public InputParser{
-  InputParser** dataParser;
-  StringMatcher* sm;
-  public:
-    virtual Used parse(char* data,irr::u32 length,bool eof);
-    StringMatcherParser(InputParser** dataParser,  StringMatcher* sm):
-        dataParser(dataParser),sm(sm){};
-    virtual ~StringMatcherParser();
-};
-
-Used StringMatcherParser::parse(char* data,irr::u32 length,bool eof){
-  char* start=data;
-  char* end=data+length;
-  if(!eof)
-    end-=1;
-  sm->count=strtol(data,&data,10);
-  if(data>=end) return Used(0,false);
-  delete[] sm->pattern;
-  sm->pattern=new pair<PatternTag,StringElementCondition>[sm->count];
-  InputParser** parsers=new InputParser*[2*(sm->count)+1];
-  for(int i=0;i<sm->count;++i){
-    parsers[i*2]=&sm->pattern[i].first;
-    parsers[i*2+1]=new StringConditionParser(&sm->pattern[i].second);
+  return IOResult(true,r.eof);
+}
+bool write(HypOStream& s,const StringElementCondition& c){
+  if(!write(s,c.selectionCondition,0))
+    return false;
+  if(!write(s,c.dirnsCondition,0))
+    return false;
+  if(!write(s,c.xrange_count,0))
+    return false;
+  for(int i=0;i<c.xrange_count){
+    if(!write(s,c.xrange[i].start,0))
+      return false;
+    if(!write(s,c.xrange[i].end,0))
+      return false;
   }
-  parsers[2*sm->count]=new StringMatcherGroupsParser(sm);
-  *dataParser=new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-      Derefer<InputParser,InputParser**>(parsers),
-      Derefer<InputParser,InputParser**>(parsers+(2*(sm->count)+1)));
-  return Used(data-start,true);
+  if(!write(s,c.yrange_count,0))
+    return false;
+  for(int i=0;i<c.yrange_count){
+    if(!write(s,c.yrange[i].start,0))
+      return false;
+    if(!write(s,c.yrange[i].end,0))
+      return false;
+  }
+  if(!write(s,c.zrange_count,0))
+    return false;
+  for(int i=0;i<c.zrange_count){
+    if(!write(s,c.zrange[i].start,0))
+      return false;
+    if(!write(s,c.zrange[i].end,0))
+      return false;
+  }
+  return true;
 }
 
-StringMatcherParser::~StringMatcherParser(){
-  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)(*dataParser);
-  for(int i=0;i<sm->count;++i)
-    delete *(p->end.data-2*(sm->count)+2*i);
-  delete *(p->end.data-1);
-  delete[] (p->end.data-(2*(sm->count)+1));
-  delete p;
+IOResult read(HypIStream& s,PatternTag& pt){
+  IOResult r;
+  if(!(r=read(s,pt.min,0)).ok)
+    return r;
+  if(!(r=read(s,pt.max,0)).ok)
+    return r;
+  if(!(r=read(s,pt.greedy)).ok)
+    return r;
+  return IOResult(true,r.eof);
 }
-InputParser* StringMatcher::createParser(){
-  InputParser** parsers=new InputParser*[2];
-  parsers[0]=new StringMatcherParser(parsers+1,this);
-  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-    Derefer<InputParser,InputParser**>(parsers),
-    Derefer<InputParser,InputParser**>(parsers+2));
+bool write(HypOStream& s,const PatternTag& pt){
+  return write(s,pt.min,0) && write(s,pt.max,0) && write(s,pt.greedy);
 }
-void StringMatcher::returnParser(InputParser* parser){
-  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
-  delete *(p->end.data-2);
-  delete[] (p->end.data-2);
-  delete parser;
+
+IOResult read(HypIStream& s,StringMatcher& sm){
+  IOResult r;
+  if(!(r=read(s,sm.count,0)).ok){
+    sm.count=0;
+    return r;
+  }
+  sm.pattern=new SPA<pair<PatternTag,StringElementCondition> >(new pair<PatternTag,StringElementCondition>[sm.count]);
+  for(int i=0;i<sm.count;++i){
+    if(!(r=read(s,sm.pattern[i].first,0)).ok)
+      return r;
+    if(!(r=read(s,sm.pattern[i].second,0)).ok)
+      return r;
+  }
+  if(!(r=read(s,sm.group_count,0)).ok){
+    sm.group_count=0;
+    return r;
+  }
+  sm.groups=new SPA<pair<int,int> >(new pair<int,int>[sm.group_count]);
+  for(int i=0;i<sm.group_count;++i){
+    if(!(r=read(s,sm.groups[i].first,0)).ok)
+      return r;
+    if(!(r=read(s,sm.groups[i].second,0)).ok)
+      return r;
+  }
+  return IOResult(true,r.eof);
+}
+bool write(HypOStream& s,const StringMatcher& sm){
+  if(!write(s,sm.count,0))
+    return false;
+  for(int i=0;i<sm.count;++i){
+    if(!(write(s,sm.pattern[i].first) && write(s,sm.pattern[i].second)))
+      return false;
+  if(!write(s,sm.group_count,0))
+    return false;
+  for(int i=0;i<sm.group_count;++i){
+    if(!(write(s,sm.groups[i].first,0) && write(s,sm.groups[i].second,0)))
+      return false;
+  return true;
 }
 
 bool StringMatcher::match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups){
