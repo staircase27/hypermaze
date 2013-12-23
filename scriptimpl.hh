@@ -67,56 +67,106 @@ struct StringElementCondition{
   StringElementCondition():selectionCondition(2),dirnsCondition(ALLDIRNSMASK),xrange_count(0),xrange(0),yrange_count(0),yrange(0),zrange_count(0),zrange(0){};
 };
 
+///Read a StringElementCondition from a stream
+/**
+ * @param s the stream to read from
+ * @param c reference to a StringElementCondition variable to store the read data in
+ * @return an IOResult object that contains the status of the read
+ */
 IOResult read(HypIStream& s,StringElementCondition& c);
+///write a StringElementCondition to a stream
+/**
+ * @param s the stream to write to
+ * @param c the StringElementCondition to write
+ * @return true if i was written ok
+ */
 bool write(HypOStream& s,const StringElementCondition& c);
 
-class StringMatcher;
-
+///A class to store properties for each StringElementCondition in a pattern
+/**
+ * Stores how to match the pattern against the string including allowed
+ * number of elements to match and if we should match as many as possible
+ * or as few as possible
+ */
 struct PatternTag{
-  int min;
-  int max;
-  bool greedy;
+  int min;///<the minimum number of times to match the associated condition
+  int max;///<the maximum number of times to match the associated condition
+  bool greedy;///<flag for i we should match greedily or not
+  ///default constructor that sets the tag such that the assicated pattern matches exactly once and greedily
   PatternTag():min(1),max(1),greedy(true){};
-  private:
-	  friend class StringMatcher;
 };
 
+///Read a PatternTag from a stream
+/**
+ * @param s the stream to read from
+ * @param pt reference to a PatternTag variable to store the read data in
+ * @return an IOResult object that contains the status of the read
+ */
 IOResult read(HypIStream& s,PatternTag& pt);
+///write a PatternTag to a stream
+/**
+ * @param s the stream to write to
+ * @param pt the PatternTag to write
+ * @return true if i was written ok
+ */
 bool write(HypOStream& s,const PatternTag& pt);
 
+///Stores the properties of a match during string matching.
+/**
+ * Used internally to store the state of the matcher if output is needed
+ * @tparam POINTER the type of the string pointer we are storing
+ */
 template <class POINTER>
 struct PatternMatch{
-  SP<POINTER> start;
-  SP<POINTER> end;
-  int length;
+  SP<POINTER> start;///<Pointer to the string element at the start of this section of the match
+  SP<POINTER> end;///<Pointer to the string element at the end of this section of the match
+  ///default constructor that sets to matched nothing
   PatternMatch():start(0),end(0),length(0){};
 };
 
+///Class to implement to process matches
+/**
+ * @tparam POINTER the type of the string pointer we are storing
+ */
 template <class POINTER>
 class StringMatcherCallback{
   public:
-    virtual bool process(pair<SP<POINTER>,SP<POINTER> >* groups)=0;
+    ///method to implement to handle matches
+    /**
+     * @param groups a list of the ranges of groups matched by this solution
+     */
+    virtual void process(SPA<pair<SP<POINTER>,SP<POINTER> > > groups)=0;
 };
 
+///A class to implement matching against a string and optionally allow use of the matches
 class StringMatcher{
-public:
-  int count;
-  SPA<pair<PatternTag,StringElementCondition> > pattern;
-  int group_count;
-  SPA<pair<int,int> > groups;
+  private:
+    int count;///<the number of elements to the pattern
+    SPA<pair<PatternTag,StringElementCondition> > pattern;///<a List of the elements of the pattern
+    int group_count;///<the number of groups to output
+    SPA<pair<int,int> > groups;///<the indicies in the part of the start and end of each group to output
   public:
-  
+    ///default constructor that sets up with no pattern elements and no groups
 	  StringMatcher():count(0),pattern(0),group_count(0),groups(0){};
+	  ///get the number of groups this matchers will return
+	  /**
+	   * @return how many groups this matcher will return
+	   */
     inline int groupCount(){return group_count;}
-	  bool match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups=0);
-	  bool match(String& s,pair<SP<StringPointer>,SP<StringPointer> >* groups=0);
-	  bool match(String& s,StringMatcherCallback<StringPointer>* cb,pair<SP<StringPointer>,SP<StringPointer> >* groups=0);
+    
+	  bool match(const String& s,SPA<pair<SP<ConstStringPointer> > > groups=0);
+	  bool match(      String& s,SPA<pair<SP<     StringPointer> > > groups=0);
+	  bool match(const String& s,StringMatcherCallback<ConstStringPointer>& cb,
+	      SPA<pair<SP<ConstStringPointer> > > groups=0);
+	  bool match(      String& s,StringMatcherCallback<     StringPointer>& cb,
+	      SPA<pair<SP<     StringPointer> > > groups=0);
 	  
 	private:
 	  template <class STRING,class POINTER>
-	  bool match(STRING& s,pair<SP<POINTER>,SP<POINTER> >* groups,StringMatcherCallback<POINTER>* cb);
+	  bool match(STRING& s,SPA<pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
 	  template <class STRING,class POINTER>
-	  bool matchStep(STRING& s,POINTER p,PatternMatch<POINTER>* matches,int level,pair<SP<POINTER>,SP<POINTER> >* groups,StringMatcherCallback<POINTER>* cb);
+	  bool matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
+	      SPA<pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
 };
 
 
@@ -286,7 +336,7 @@ class ActionSetStringRoute:public ActionCommon,private InputParser,private Strin
   
   StringEdit* se;
   
-  virtual bool process(pair<SP<StringPointer>,SP<StringPointer> >* groups);
+  virtual void process(SPA<pair<SP<StringPointer>,SP<StringPointer> > > groups);
   public:
     virtual void doCommon(ScriptResponse& r,String&);
     virtual InputParser* createParser();

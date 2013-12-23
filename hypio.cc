@@ -1,3 +1,7 @@
+/**
+ * @file hypio.cc
+ * @brief Implementation of hypio.hh
+ */
 #include "hypio.hh"
 #include "hypioimp.hh"
 //#include <iostream>

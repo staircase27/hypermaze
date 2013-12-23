@@ -212,94 +212,100 @@ bool write(HypOStream& s,const StringMatcher& sm){
 }
 
 // public functions groups is optional in all of these
-bool StringMatcher::match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups){
+bool StringMatcher::match(const String& s,SPA<pair<SP<ConstStringPointer> > > groups){
   return match<const String,ConstStringPointer>(s,groups,0);
 }
-bool StringMatcher::match(String& s,pair<SP<StringPointer>,SP<StringPointer> >* groups){
+bool StringMatcher::match(String& s,SPA<pair<SP<StringPointer> > > groups){
   return match<String,StringPointer>(s,groups,0);
 }
-bool StringMatcher::match(String& s,StringMatcherCallback<StringPointer>* cb,pair<SP<StringPointer>,SP<StringPointer> >* groups){
-  SPA<pair<SP<StringPointer>,SP<StringPointer> > > localgroups;
-  if(groups==0){
-    groups=new pair<SP<StringPointer>,SP<StringPointer> >[group_count];
-	  localgroups=SPA<pair<SP<StringPointer>,SP<StringPointer> > >(groups);
+bool StringMatcher::match(const String& s,SPA<StringMatcherCallback<ConstStringPointer>& cb,
+    pair<SP<ConstStringPointer> > > groups){
+  if(groups.isnull()){
+    groups=SPA<pair<SP<ConstStringPointer> > >()new pair<SP<ConstStringPointer> >[group_count]);
 	}
-  return match<String,StringPointer>(s,groups,cb);
+  return match<const String,ConstStringPointer>(s,groups,&cb);
+}
+bool StringMatcher::match(String& s,SPA<StringMatcherCallback<StringPointer>& cb,
+    pair<SP<StringPointer> > > groups){
+  if(groups.isnull()){
+    groups=SPA<pair<SP<StringPointer> > >()new pair<SP<StringPointer> >[group_count]);
+	}
+  return match<String,StringPointer>(s,groups,&cb);
 }
 
 // internal implementations
-
 template <class STRING,class POINTER>
-bool StringMatcher::match(STRING& s,pair<SP<POINTER>,SP<POINTER> >* groups,StringMatcherCallback<POINTER>* cb){
-  PatternMatch<POINTER>* m=groups==0?0:new PatternMatch<POINTER>[count];
-  bool valid=true;
-  try{
-	  bool valid=matchStep(s,s.begin(),m,0,groups,cb);
-  }catch(bool){};
-  delete[] m;
-  return valid;
+bool StringMatcher::match(STRING& s,SPA<pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
+  SPA<PatternMatch<POINTER> > m(groups.isnull()?0:new PatternMatch<POINTER>[count]);
+  return matchStep(s,s.begin(),m,0,groups,cb);
 }
 
 template <class STRING,class POINTER>
-bool StringMatcher::matchStep(STRING& s,POINTER p,PatternMatch<POINTER>* matches,int level,pair<SP<POINTER>,SP<POINTER> >* groups,StringMatcherCallback<POINTER>* cb){
+bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
+    SPA<pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
   if(level==count){
-    cout<<level<<" at end of pattern so are we at the end of te string? "<<(p==s.end())<<endl;
+    cout<<level<<" at end of pattern so are we at the end of the string? "<<(p==s.end())<<endl;
     if(p==s.end()){
-			if(groups!=0){
+      //valid so store in group if it's defined
+			if(!groups.isnull()){
 				for(int i=0;i<group_count;++i){
 				  groups[i].first=matches[this->groups[i].first].start;
 				  groups[i].second=matches[this->groups[i].second].end;
 				}
+			  if(cb)
+			    cb->process(groups);
 			}
-			if(cb==0||cb->process(groups))
-			  throw true;
       return true;
     }else{
       return false;
     }
-    
-  }
-  bool match=false;
-  PatternTag& pt=pattern[level].first;
-  StringElementCondition& sec=pattern[level].second;
-  if(matches)
-    matches[level].start=SP<POINTER>(new POINTER(p));
-  cout<<level<<" "<<"starting match step from "<<p<<endl;
-  int i=0;
-  while(i<pt.min){
-    cout<<level<<" "<<"stepping to min "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
-    if(p==s.end()||!sec.matches(p))
-      return false;
-    ++i;++p;
-  }
-  if(pt.greedy){
-    //go to first that doesn't match or max+1 (whichevers first)
-    while(i<pt.max && p!=s.end() && sec.matches(p)){
-      ++i;++p;
-      cout<<level<<" "<<"stepping to max "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
-    }
-    cout<<level<<" "<<"at max (or first fail) "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
-  }
-  //while i is still in valid range
-  while(i>=pt.min && i<=pt.max){
-	  if(matches)
-			matches[level].end=SP<POINTER>(new POINTER(p));
-    count=count;
-    //see if we can match the next group (if matches and we only want one match will throw true else will return as a bool wether it matches)
-    match|=matchStep(s,p,matches,level+1,groups,cb);
-    
-    if(pt.greedy){
-      cout<<level<<" stepping back "<<i<<" "<<p<<endl;
-      --i;--p;
-    }else{
-	    cout<<level<<" "<<"stepping up "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
-      if(p==s.end() || !sec.matches(p))
+  }else{
+    bool match=false;
+    PatternTag& pt=pattern[level].first;
+    StringElementCondition& sec=pattern[level].second;
+    if(!matches.isnull())
+      matches[level].start=SP<POINTER>(new POINTER(p));
+    cout<<level<<" "<<"starting match step from "<<p<<endl;
+    int i=0;
+    while(i<pt.min){
+      cout<<level<<" "<<"stepping to min "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
+      if(p==s.end()||!sec.matches(p))
         return false;
       ++i;++p;
     }
+    if(pt.greedy){
+      //go to first that doesn't match or length is max+1 (i is max)  (whichevers first)
+      while(i<pt.max && p!=s.end() && sec.matches(p)){
+        ++i;++p;
+        cout<<level<<" "<<"stepping to max "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
+      }
+      cout<<level<<" "<<"at max (or first fail) "<<i<<" "<<p<<" "<<endl;
+    }
+    //while i is still in valid range
+    while(i>=pt.min && i<=pt.max){
+	    if(!matches.isnull())
+			  matches[level].end=SP<POINTER>(new POINTER(p));
+      //see if we can match the next group
+      match|=matchStep(s,p,matches,level+1,groups,cb);
+      
+      //if we have a match and we don't have a call back then return match (true)
+      if(match && cb==0)
+        return true;
+      
+      if(pt.greedy){
+        //stepping back. don't need to check if valid as was checked while searching forward]
+        cout<<level<<" stepping back "<<i<<" "<<p<<endl;
+        --i;--p;
+      }else{
+	      cout<<level<<" "<<"stepping up "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
+        if(p==s.end() || !sec.matches(p))
+          return match;
+        ++i;++p;
+      }
+    }
+    cout<<level<<" tried all options for this pattern"<<endl;
+    return match;
   }
-  cout<<level<<" tried all options for this pattern"<<endl;
-  return match;
 }
 
 template <class T>
@@ -779,19 +785,23 @@ void ActionSelectStringPattern::returnParser(InputParser* parser){
   delete parser;
 };
 
-bool ActionSetStringRoute::process(pair<SP<StringPointer>,SP<StringPointer> >* groups){
+bool ActionSetStringRoute::process(SPA<pair<SP<StringPointer>,SP<StringPointer> > > groups){
   for(int i=0;i<ranges.groupCount();++i){
     se->setStringSegment(*groups[i].first,*groups[i].second,count,route);
   }
-  return !all;
 }
 
 void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
   if(!ranges.groupCount())
     return;
   se=new StringEdit(s);
-  if(ranges.match(s,this))
+  SPA<pair<SP<StringPointer>,SP<StringPointer> > > groups=SPA<pair<SP<StringPointer>,SP<StringPointer> > >(
+      new pair<SP<StringPointer>,SP<StringPointer> >[ranges.groupCount()]);
+  if(ranges.match(s,all?this:0,groups)){
+    if(!all)
+      process(groups);
 	  r.stringChanged=true;
+	}
 	delete se;
 }
 InputParser* ActionSetStringRoute::createParser(){
