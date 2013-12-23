@@ -99,6 +99,15 @@ class SP{
     const bool operator==(const  SP<T>& op)const{
       return p==op.p;
     }
+    
+    ///Check if this is a null pointer
+    /**
+     * @return true if this is a null pointer
+     */
+    const bool isnull() const{
+      return p==0;
+    }
+
 };
 
 ///A Smart array pointer class
@@ -291,6 +300,14 @@ class SPA{
      */
     const bool operator!=(const  SPA<T>& op)const{
       return h!=op.h || p!=op.p;
+    }
+
+    ///Check if this is a null pointer
+    /**
+     * @return true if this is a null pointer
+     */
+    const bool isnull() const{
+      return p==0;
     }
 };
 #endif

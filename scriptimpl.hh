@@ -5,61 +5,66 @@
 
 class ConditionTrue;
 
-//keep track of ids for polymorphicly read and written types
-template <class B,class T>
-struct TypeToID{
-  public:
-    static const int ID=0;
-};
-
-template <class B,int i>
-struct IDToType{
-};
-
-
-template <int i>
-struct IDToType<Condition,i>{
-  public:
-    typedef ConditionTrue type;
-};
-
-#define ADD_TO_TYPE_MAP(BASE,ID,TYPE) template<> class TypeToID<BASE,TYPE>{public: static const int id=ID;};template<> class IDToType<BASE,ID>{public: typedef TYPE type;};
-
-template <class B,class T>
+///Utility class to implement polymorphic reading of a class
+/**
+ * Writes the ID for the class then delegates writing data for the object to a read function for that type
+ * @tparam T the type this object should be output as. THIS MUST BE THE TYPE OF THE CLASS YOU ARE IMPLEMENTING
+ * @tparam ID the id of this type. THIS MUST BE SAME AS IN THE SWITCH IN read(HypIStream,SP<Condition>)
+ */
+template <class T,int ID>
 class PolymorphicHypIOImpl{
   protected:
-    IOResult doread(HypIStream& s){
-      return read(s,*((T*)this));
-    }
     bool dowrite(HypOStream& s){
-      if(!write(s,TypeToID<B,T>::id,0))
-      return write(s,*((T*)this));
+      if(!write(s,ID,0))
+      return write(s,(T&)*this);
     }
 };
 
+///A class to contain a range for a integer value
 struct Range{
-  int start;
-  int end;
+  int start;///<The lower limit for the value, INT_MAX means no limit
+  int end;///<The upper limit for the value, INT_MAX means no limit
+  ///Check if a value is in this range
+  /**
+   * @param val the value to check
+   * @return true of the value is in the range this represents else false
+   */
   inline bool inRange(int val){
     return ((start==INT_MAX)||(val>=start))&&((end==INT_MAX)||(val<=end));
-  }
-  Range():start(0),end(INT_MAX){};
+  }\
+  ///Default contructor that set the range to have no limit in either direction
+  Range():start(INT_MAX),end(INT_MAX){};
 };
 
+///A condition for a section of string to match with
+/**
+ * Can contain conditions on selectedness, direction and location of the string elements
+ */
 struct StringElementCondition{
-  // second bit is if we care (0 care, 1 dont). first is the value to match if we do care (values are 0,1,2)
+  /// the condition on the selectedness of the string element
+  /**
+   * Second bit is if we care (0 care, 1 dont). First is the value to match if we do care.
+   * Valid values are 0,1,2. All others are equivelent to one of these
+   */
   int selectionCondition;
-  int dirnsCondition;
+  int dirnsCondition;///<Mask of directions to accept
 
-  int xrange_count;
-  int yrange_count;
-  int zrange_count;
-  SPA<Range> xrange;
-  SPA<Range> yrange;
-  SPA<Range> zrange;
+  int xrange_count;///<How many different ranges in the x direction are valid
+  SPA<Range> xrange;///<a list of the valid ranges in the x direction
+  int yrange_count;///<How many different ranges in the y direction are valid
+  SPA<Range> yrange;///<a list of the valid ranges in the y direction
+  int zrange_count;///<How many different ranges in the z direction are valid
+  SPA<Range> zrange;///<a list of the valid ranges in the z direction
+  ///Check if a string element matches this condition
+  /**
+   * @tparam the type for the string pointer
+   * @param el the element of the string
+   * @returns true if the string matches this condition
+   */
   template <class T>
   inline bool matches(T el);
-  StringElementCondition():selectionCondition(0),dirnsCondition(ALLDIRNSMASK),xrange_count(0),yrange_count(0),zrange_count(0),xrange(0),yrange(0),zrange(0){};
+  ///Default constructor that initialises the condition to match everything
+  StringElementCondition():selectionCondition(2),dirnsCondition(ALLDIRNSMASK),xrange_count(0),xrange(0),yrange_count(0),yrange(0),zrange_count(0),zrange(0){};
 };
 
 IOResult read(HypIStream& s,StringElementCondition& c);
@@ -101,7 +106,7 @@ public:
   SPA<pair<int,int> > groups;
   public:
   
-	  StringMatcher():count(0),group_count(0),pattern(0),groups(0){};
+	  StringMatcher():count(0),pattern(0),group_count(0),groups(0){};
     inline int groupCount(){return group_count;}
 	  bool match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups=0);
 	  bool match(String& s,pair<SP<StringPointer>,SP<StringPointer> >* groups=0);

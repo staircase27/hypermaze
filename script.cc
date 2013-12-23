@@ -2,7 +2,6 @@
 #include "script.hh"
 #include "scriptimpl.hh"
 
-//New code
 template <class T>
 IOResult read(HypIStream& s,SPA<SP<T> >& a, int& c){
   IOResult r=read(s,c,0);
@@ -36,6 +35,11 @@ bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c){
 
 const SP<Condition> Condition::defaultvalue=SP<Condition>(new ConditionTrue());
 
+template <class T>
+IOResult createAndRead(HypIStream& s,SP<T>& c){
+  c=SP<T>(new T());
+  return read(s,*c);
+}
 IOResult read(HypIStream& s,SP<Condition>& c){
   int id=0;
   IOResult r=read(s,id,0);
@@ -43,13 +47,15 @@ IOResult read(HypIStream& s,SP<Condition>& c){
     c=Condition::defaultvalue;
     return r;
   }
-  c=SP<Condition>(new IDToType<Condition,id>::type());
-  return read(s,*((IDToType<Condition,id>::type*)c))
+  switch(id){
+    case 0:
+    default:
+      return readAndCreate<ConditionTrue>(s,c);
+  }
 }
 bool write(HypOStream& s,const SP<const Condition>& c){
-  if(!write(
+  c->dowrite(s);
 }
-//End new code
 
 inline bool StringElementCondition::matches(T el){
   if((selectionCondition&2)==0&&(((selectionCondition&1)==1)==el->selected))
@@ -85,7 +91,7 @@ IOResult read(HypIStream& s,StringElementCondition& c){
     c.xrange_count=0;
     return r;
   }else{
-    c.xrange=new SPA[new Range[c.xrange_count]];
+    c.xrange=SPA[new Range[c.xrange_count]];
     for(int i=0;i<c.xrange_count){
       if(!(r=read(s,c.xrange[i].start,0)).ok)
         return r;
@@ -97,7 +103,7 @@ IOResult read(HypIStream& s,StringElementCondition& c){
     c.yrange_count=0;
     return r;
   }else{
-    c.yrange=new SPA[new Range[c.yrange_count]];
+    c.yrange=SPA[new Range[c.yrange_count]];
     for(int i=0;i<c.yrange_count){
       if(!(r=read(s,c.yrange[i].start,0)).ok)
         return r;
@@ -109,7 +115,7 @@ IOResult read(HypIStream& s,StringElementCondition& c){
     c.zrange_count=0;
     return r;
   }else{
-    c.zrange=new SPA[new Range[c.zrange_count]];
+    c.zrange=SPA[new Range[c.zrange_count]];
     for(int i=0;i<c.zrange_count){
       if(!(r=read(s,c.zrange[i].start,0)).ok)
         return r;
@@ -171,7 +177,7 @@ IOResult read(HypIStream& s,StringMatcher& sm){
     sm.count=0;
     return r;
   }
-  sm.pattern=new SPA<pair<PatternTag,StringElementCondition> >(new pair<PatternTag,StringElementCondition>[sm.count]);
+  sm.pattern=SPA<pair<PatternTag,StringElementCondition> >(new pair<PatternTag,StringElementCondition>[sm.count]);
   for(int i=0;i<sm.count;++i){
     if(!(r=read(s,sm.pattern[i].first,0)).ok)
       return r;
@@ -182,7 +188,7 @@ IOResult read(HypIStream& s,StringMatcher& sm){
     sm.group_count=0;
     return r;
   }
-  sm.groups=new SPA<pair<int,int> >(new pair<int,int>[sm.group_count]);
+  sm.groups=SPA<pair<int,int> >(new pair<int,int>[sm.group_count]);
   for(int i=0;i<sm.group_count;++i){
     if(!(r=read(s,sm.groups[i].first,0)).ok)
       return r;
@@ -205,6 +211,7 @@ bool write(HypOStream& s,const StringMatcher& sm){
   return true;
 }
 
+// public functions groups is optional in all of these
 bool StringMatcher::match(const String& s,pair<SP<ConstStringPointer>,SP<ConstStringPointer> >* groups){
   return match<const String,ConstStringPointer>(s,groups,0);
 }
@@ -219,6 +226,8 @@ bool StringMatcher::match(String& s,StringMatcherCallback<StringPointer>* cb,pai
 	}
   return match<String,StringPointer>(s,groups,cb);
 }
+
+// internal implementations
 
 template <class STRING,class POINTER>
 bool StringMatcher::match(STRING& s,pair<SP<POINTER>,SP<POINTER> >* groups,StringMatcherCallback<POINTER>* cb){

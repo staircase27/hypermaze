@@ -12,8 +12,8 @@ bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c);
 
 class PolymorphicHypIO{
   protected:
-    virtual IOResult doread(HypIStream& s)=0;
-};  
+    virtual bool dowrite(HypOStream& s)=0;
+};
   
 enum Trigger{
   TRIGGER_START=1,

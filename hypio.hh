@@ -114,15 +114,23 @@ class HypOStream{
      * @return true if i was written ok
      */
     virtual bool write(const int& i,const int& base)=0;
-    ///write an integer to this stream in the specified base
+    ///write an string to this stream optionally with quoting
     /**
-     * @param i integer to write
-     * @param base the base to write i in. 0 means use a base with prefix
-     * @return true if i was written ok
+     * The quote character is automatically chosen if quoted output is asked for
+     * @param str the string to write
+     * @param quote if the string should be written quoted
+     * @return true if str was written ok
      */
     virtual bool write(const char*& str,const bool& quote)=0;
-    friend bool write(HypOStream& s,const int&,const int&);
-    friend bool write(HypOStream& s,const char*&,const bool&);
+    ///Allow the public functions to access the protected implementations
+    friend bool write(HypOStream& s,const int& i,const int& base);
+    ///Allow the public functions to access the protected implementations
+    friend bool write(HypOStream& s,const char*& str,const bool& quote);
+    ///Get and reset the next space for this stream
+    /**
+     * Should only be called by the stream when it is going to output the space character returned
+     * @return a string containing the white space to use
+     */
     const char* nextSpace(){
       const char* tmp=nextspace;
       if(atstart){
@@ -135,18 +143,55 @@ class HypOStream{
   public:
     ///virtual destructor to allow deletion of base class type objects
     virtual ~HypOStream(){};
-    
+    ///Set the whitespace to use next time one is needed
+    /**
+    * @param space the whitespace to use as a string
+    */
     inline void setNextSpace(const char* space){
       nextspace=space;
     }
+    ///Set the whitespace to use for all but the next time a space is needed
+    /**
+    * @param space the whitespace to use as a string
+    */
     inline void setDefaultSpace(const char* space){
       defaultspace=space;
     }
 };
 
+///write an integer to a stream in the specified base
+/**
+ * Writes a special form for maximum or minimum values of * and -* respectively
+ * @param s the stream to write to
+ * @param i integer to write
+ * @param base the base to write i in. 0 means use a base with prefix
+ * @return true if i was written ok
+ */
 bool write(HypOStream& s,const int& i,const int& base=0);
+///write an string to a stream optionally with quoting
+/**
+ * The quote character is automatically chosen if quoted output is asked for
+ * @param s the stream to write to
+ * @param str the string to write
+ * @param quote if the string should be written quoted
+ * @return true if str was written ok
+ */
 bool write(HypOStream& s,const char*& str,const bool& quote);
 
+///read a boolean from a stream
+/**
+ * reads it as an integer value
+ * @param s the stream to read from
+ * @param b reference to the boolean variable to store the value in
+ * @return an IOResult object that contains the status of the read
+ */
 IOResult read(HypIStream& s,bool& b);
+///write a boolean to a stream
+/**
+ * Write it as an integer value of 0 or 1
+ * @param s the stream to write to
+ * @param b the boolean to write
+ * @return true if b was written ok
+ */
 bool write(HypOStream& s,const bool& b);
 #endif
