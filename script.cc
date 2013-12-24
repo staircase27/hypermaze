@@ -48,9 +48,11 @@ IOResult read(HypIStream& s,SP<Condition>& c){
     return r;
   }
   switch(id){
-    case 0:
+    case 2:
+      return createAndRead<ConditionOr>(s,c);
+    case 1:
     default:
-      return readAndCreate<ConditionTrue>(s,c);
+      return createAndRead<ConditionTrue>(s,c);
   }
 }
 bool write(HypOStream& s,const SP<const Condition>& c){
@@ -211,7 +213,6 @@ bool write(HypOStream& s,const StringMatcher& sm){
   return true;
 }
 
-// public functions groups is optional in all of these
 bool StringMatcher::match(const String& s,SPA<pair<SP<ConstStringPointer> > > groups){
   return match<const String,ConstStringPointer>(s,groups,0);
 }
@@ -233,7 +234,6 @@ bool StringMatcher::match(String& s,SPA<StringMatcherCallback<StringPointer>& cb
   return match<String,StringPointer>(s,groups,&cb);
 }
 
-// internal implementations
 template <class STRING,class POINTER>
 bool StringMatcher::match(STRING& s,SPA<pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
   SPA<PatternMatch<POINTER> > m(groups.isnull()?0:new PatternMatch<POINTER>[count]);
@@ -445,39 +445,17 @@ ListParser<T>::~ListParser(){
   delete p;
 }
 
-
 bool ConditionOr::is(int time,const Script& script,const String& s){
   for(int i=0;i<count;++i)
     if(conditions[i]->is(time,script,s))
       return true;
   return false;
 }
-InputParser* ConditionOr::createParser(){
-  InputParser** parsers=new InputParser*[2];
-  parsers[0]=new ListParser<Condition>(parsers+1,&conditions,&count);
-  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-    Derefer<InputParser,InputParser**>(parsers),
-    Derefer<InputParser,InputParser**>(parsers+2));
-};
-void ConditionOr::returnParser(InputParser* parser){
-  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
-  delete *(p->end.data-2);
-  delete[] (p->end.data-2);
-  delete parser;
-};
-void ConditionOr::output(irr::stringc* s,irr::IWriteFile* file){
-  (*s)+="2 ";(*s)+=count;(*s)+="\n";
-  for(int i=0;i<count;++i)
-    conditions[i]->output(s,file);
-  if(file && s->size()>256){
-    file->write(s->c_str(),s->size());
-    *s=irr::stringc();
-  }
+IOResult read(HypIStream& s,ConditionOr& c){
+  return read(s,c.conditions,c.count);
 }
-ConditionOr::~ConditionOr(){
-  for(int i=0;i<count;++i)
-    delete conditions[i];
-  delete[] conditions;
+bool write(HypOStream& s,const ConditionOr& c){
+  return write(s,c.conditions,c.count);
 }
 
 bool ConditionAnd::is(int time,const Script& script,const String& s){
@@ -486,32 +464,11 @@ bool ConditionAnd::is(int time,const Script& script,const String& s){
       return false;
   return true;
 }
-InputParser* ConditionAnd::createParser(){
-  InputParser** parsers=new InputParser*[2];
-  parsers[0]=new ListParser<Condition>(parsers+1,&conditions,&count);
-  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-    Derefer<InputParser,InputParser**>(parsers),
-    Derefer<InputParser,InputParser**>(parsers+2));
-};
-void ConditionAnd::returnParser(InputParser* parser){
-  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
-  delete *(p->end.data-2);
-  delete[] (p->end.data-2);
-  delete parser;
-};
-void ConditionAnd::output(irr::stringc* s,irr::IWriteFile* file){
-  (*s)+="3 ";(*s)+=count;(*s)+="\n";
-  for(int i=0;i<count;++i)
-    conditions[i]->output(s,file);
-  if(file && s->size()>256){
-    file->write(s->c_str(),s->size());
-    *s=irr::stringc();
-  }
+IOResult read(HypIStream& s,ConditionAnd& c){
+  return read(s,c.conditions,c.count);
 }
-ConditionAnd::~ConditionAnd(){
-  for(int i=0;i<count;++i)
-    delete conditions[i];
-  delete[] conditions;
+bool write(HypOStream& s,const ConditionAnd& c){
+  return write(s,c.conditions,c.count);
 }
 
 InputParser* ConditionNot::createParser(){

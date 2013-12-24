@@ -24,11 +24,21 @@ enum Trigger{
 
 class Script;
 
+///A Condition to select if an event should trigger or not
 class Condition: protected PolymorphicHypIO{
   public:
+    ///Check if the condition is matched
+    /**
+     * @param time the current time in seconds
+     * @param script the script object for the currently running script
+     * @param s the current string object
+     * @return true if the condition is matched and the event should trigger
+     */
     virtual bool is(int time,const Script& script,const String& s)=0;
+    ///virtual destructor to allow overiding in subclasses
     virtual ~Condition(){};
   public:
+    ///the default condition to use when creating lists of conditions
     static const SP<Condition> defaultvalue;
 };
 

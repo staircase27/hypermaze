@@ -138,7 +138,13 @@ class StringMatcherCallback{
     virtual void process(SPA<pair<SP<POINTER>,SP<POINTER> > > groups)=0;
 };
 
-///A class to implement matching against a string and optionally allow use of the matches
+///a class to implement matching against a string and optionally allow use of the matches
+/**
+ * The pattern must match the entire string from start to end. A pattern that can match anywhere in the string
+ * can be implemented by adding a pattern element that can match anything and any length. The match is done
+ * using a recursive backtracking matcher function. The sections of the patter that we are interested in are
+ * specified by groups property.
+ */ 
 class StringMatcher{
   private:
     int count;///<the number of elements to the pattern
@@ -154,51 +160,156 @@ class StringMatcher{
 	   */
     inline int groupCount(){return group_count;}
     
+    ///check a match against a constant String
+    /**
+     * can also return the groups if the optional paramiter groups is included. If included
+     * it must have length groupCount()
+     * @param s the string to match this pattern against
+     * @param groups optional argument that will be filled with the groups matched by this pattern
+     * @return true if there are any matches of this pattern to the string
+     */
 	  bool match(const String& s,SPA<pair<SP<ConstStringPointer> > > groups=0);
+    ///check a match against a non-constant String
+    /**
+     * can also return the groups if the optional paramiter groups is included. If included
+     * it must have length groupCount()
+     * @param s the string to match this pattern against
+     * @param groups optional argument that will be filled with the groups matched by this pattern
+     * @return true if there are any matches of this pattern to the string
+     */
 	  bool match(      String& s,SPA<pair<SP<     StringPointer> > > groups=0);
+    ///check a match against a constant String and process each match found
+    /**
+     * can also return the groups if the optional paramiter groups is included. If included
+     * it must have length groupCount()
+     * @param s the string to match this pattern against
+     * @param cb the call back class to use to process the matches
+     * @param groups optional argument that will be filled with the groups matched by this pattern
+     * @return true if there are any matches of this pattern to the string
+     */
 	  bool match(const String& s,StringMatcherCallback<ConstStringPointer>& cb,
 	      SPA<pair<SP<ConstStringPointer> > > groups=0);
+    ///check a match against a non-constant String
+    /**
+     * can also return the groups if the optional paramiter groups is included. If included
+     * it must have length groupCount()
+     * @param s the string to match this pattern against
+     * @param cb the call back class to use to process the matches
+     * @param groups optional argument that will be filled with the groups matched by this pattern
+     * @return true if there are any matches of this pattern to the string
+     */
 	  bool match(      String& s,StringMatcherCallback<     StringPointer>& cb,
 	      SPA<pair<SP<     StringPointer> > > groups=0);
 	  
 	private:
+	  ///The internal implementation function for matches
+	  /**
+	   * called by all the other match functions. This sets up some data storage and then called
+	   * matchStep to do the matching.
+	   * @tparam STRING the type of the string. Either String or const String
+	   * @tparam POINTER the type of a pointer to an element of the string of type STRING.
+	   * Either StringPointer or ConstStringPointer respectively
+     * @param s the string to match this pattern against
+     * @param groups optional argument that will be filled with the groups matched by this pattern
+     * @param cb option pointer to the callback
+     * @return true if there are any matches of this pattern to the string
+     */
 	  template <class STRING,class POINTER>
 	  bool match(STRING& s,SPA<pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
+	  ///The internal implementation function for a step in matching against a string
+	  /**
+	   * This function does the actual processing. It finds the "best" match for this segment of the pattern
+	   * and calls it's self to check if later steps match. If it doesn't it keeps seaching through "worse"
+	   * options till it finds one. Once the last step in the match has been found the data is stored and the
+	   * callback if provided is called to proccess the match. If a call back was provided then we keep
+	   * searching for solutions till all are found or else we return True immediately.
+	   * @tparam STRING the type of the string. Either String or const String
+	   * @tparam POINTER the type of a pointer to an element of the string of type STRING.
+	   * Either StringPointer or ConstStringPointer respectively
+     * @param s the string to match this pattern against
+     * @param p the place to start matching this pattern element against
+     * @param matches array of objects to use as storage for the match data
+     * @param level the index into the pattern that we are matching against
+     * @param groups optional argument that will be filled with the groups matched by this pattern
+     * @param cb option pointer to the callback
+     * @return true if there are any matches of this pattern to the string
+     */
 	  template <class STRING,class POINTER>
 	  bool matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
 	      SPA<pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
 };
 
-
-class ConditionTrue: public Condition, public InputParser{
+///a condition that always returns True
+class ConditionTrue: public Condition, protected PolymorphicHypIOImpl<ConditionTrue,1>{
   public:
+    ///Always return true as the condition is always matched
+    /**
+     * @copydoc Condition::is
+     */
     virtual bool is(int time,const Script& script,const String& s){return true;}
-    virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
-    virtual InputParser* createParser(){return this;};
-    virtual void returnParser(InputParser*){};
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="1\n";};
 };
 
-class ConditionOr: public Condition{
-  Condition** conditions;
+///Read a ConditionTrue from a stream
+/**
+ * this is actually a no-op as a ConditionTrue has no data
+ * @param s the stream to read from
+ * @param c reference to a ConditionTrue variable. This isn't actually changed
+ * @return an IOResult object that is always the fully ok read response
+ */
+IOResult read(HypIStream& s,ConditionTrue& c){return IOResult(true,false);}
+///write a ConditionTrue to a stream
+/**
+ * this is actually a no-op as a ConditionTrue has no data
+ * @param s the stream to write to
+ * @param c the ConditionTrue that would be written if there was anything to write
+ * @return true always as writing nothing always succeds
+ */
+bool write(HypOStream& s,const ConditionTrue& c){return true;}
+
+///Condition that matches if any of the subconditions match
+class ConditionOr: public Condition, protected PolymorphicHypIOImpl<ConditionOr,2>{
+  SPA<SP<Condition>> conditions;
   int count;
   public:
     virtual bool is(int time,const Script& script,const String& s);
-    virtual InputParser* createParser();
-    virtual void returnParser(InputParser* parser);
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-    virtual ~ConditionOr();
 };
-class ConditionAnd: public Condition{
-  Condition** conditions;
+///Read a ConditionOr from a stream
+/**
+ * @param s the stream to read from
+ * @param pt reference to a ConditionOr variable to store the read data in
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ConditionOr& c);
+///write a ConditionOr to a stream
+/**
+ * @param s the stream to write to
+ * @param pt the ConditionOr to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ConditionOr& c);
+
+///Condition that matches if all of the subconditions match
+class ConditionAnd: public Condition, protected PolymorphicHypIOImpl<ConditionAnd,3>{
+  SPA<SP<Condition>> conditions;
   int count;
   public:
     virtual bool is(int time,const Script& script,const String& s);
-    virtual InputParser* createParser();
-    virtual void returnParser(InputParser* parser);
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-    virtual ~ConditionAnd();
 };
+///Read a ConditionAnd from a stream
+/**
+ * @param s the stream to read from
+ * @param pt reference to a ConditionAnd variable to store the read data in
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ConditionAnd& c);
+///write a ConditionAnd to a stream
+/**
+ * @param s the stream to write to
+ * @param pt the ConditionAnd to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ConditionAnd& c);
+
 class ConditionNot: public Condition{
   Condition* condition;
   public:
