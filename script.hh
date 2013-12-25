@@ -1,6 +1,5 @@
 #include "maze.hh"
 #include "string.hh"
-#include "irrio.hh"
 
 #ifndef SCRIPT_HH_INC
 #define SCRIPT_HH_INC
@@ -116,54 +115,101 @@ struct Message{
   /**
    * first member of the pair is a style string. second member is the text for the paragraph
    */
-  SPA<Pair<char*> > paragraphs;
+  SPA<Pair<SPA<char> > > paragraphs;
   ///default constructor that initialises this as having no paragraphs
   Message():paragraphs(0),count(0){};
 };
 
+///common part of the response from a script
 struct ScriptResponse{
-  bool stringChanged;
-  bool stringSelectionChanged;
-  int messageCount;
-  SPA<Message> messages;
+  bool stringChanged;///<has the string been changed by the script
+  bool stringSelectionChanged;///<has the selection been changed by the script
+  int messageCount;///<the number of messages that need to be shown
+  SPA<Message> messages;///<the messages that need to be shown
+  ///default constructor to setup the response as no actions taken or to take
   ScriptResponse():stringChanged(false),stringSelectionChanged(false),messageCount(0),messages(0){};
 };
+///response from a script for a start event
+/**
+ * no more script responses available
+ */
 struct ScriptResponseStart:public ScriptResponse{};
+///response from a script for a win event
 struct ScriptResponseWin:public ScriptResponse{
-  bool block;
-  Message winMessage;
-  Pair<irr::stringc> nextLevel;
+  bool block;///<block the winning
+  Message winMessage;///<message to show on the win screen
+  Pair<irr::stringc> nextLevel;///<next level to offer on the win screen
+  ///default constructor to setup the response as use defaults
   ScriptResponseWin():block(false),winMessage(),nextLevel("",""){}
 };
+///response from a script for a move event
 struct ScriptResponseMove:public ScriptResponse{
-  bool forceWin;
+  bool forceWin;///<force a win now
+  ///default constructor that doesn't set a win forced
   ScriptResponseMove():forceWin(false){};
 };
+///response from a script for a select event
 struct ScriptResponseSelect:public ScriptResponse{
-  bool forceWin;
+  bool forceWin;///<force a win now
+  ///default constructor that doesn't set a win forced
   ScriptResponseSelect():forceWin(false){};
 };
 
+///A general action object
 class Action: protected PolymorphicHypIO{
   public:
-		virtual void doStart(ScriptResponseStart&,String&)=0;
-		virtual void doWin(ScriptResponseWin&,String&)=0;
-		virtual void doMove(ScriptResponseMove&,String&)=0;
-		virtual void doSelect(ScriptResponseSelect&,String&)=0;
-		
-		virtual ~Action(){};
+    ///do the appropriate action for a start event
+    /**
+     * @param r the response to record our actions in
+     * @param s the string to act on
+     */
+		virtual void doStart(ScriptResponseStart& r,String& s)=0;
+    ///do the appropriate action for a win event
+    /**
+     * @param r the response to record our actions in
+     * @param s the string to act on
+     */
+		virtual void doWin(ScriptResponseWin& r,String& s)=0;
+    ///do the appropriate action for a move event
+    /**
+     * @param r the response to record our actions in
+     * @param s the string to act on
+     */
+		virtual void doMove(ScriptResponseMove& r,String& s)=0;
+    ///do the appropriate action for a move event
+    /**
+     * @param r the response to record our actions in
+     * @param s the string to act on
+     */
+		virtual void doSelect(ScriptResponseSelect& r,String& s)=0;
+    ///the default Action to use when creating lists of Actions
+    static const SP<Action> defaultvalue;
 };
 
+///Read an Action (as a pointer) from a stream
+/**
+ * fills the pointer with a new Action object. The actual instance type
+ * is read from the stream.
+ * @param s the stream to read from
+ * @param c pointer to Action variable to stick the read Action in
+ * @return an IOResult object that contains the status of the read
+ */
 IOResult read(HypIStream& s,SP<Action>& c);
+///write an Action (from a pointer) to a stream
+/**
+ * @param s the stream to write to
+ * @param c the Action to write
+ * @return true if i was written ok
+ */
 bool write(HypOStream& s,const SP<const Action>& c);
 
 class Event{
   public:
 		int trigger;
 		int conditionCount;
-		SPA<SP<Condition>> condition;
+		SPA<SP<Condition> > condition;
 		int actionCount;
-		SPA<SP<Action>> actions;
+		SPA<SP<Action> > actions;
 };
 
 class Script{

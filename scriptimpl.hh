@@ -427,65 +427,61 @@ bool write(HypOStream& s,const ConditionBefore& c){
   return write(s,c.sm);
 }
 
-class ActionStart: public virtual Action{
-  public:
-		virtual void doStart(ScriptResponseStart&,String&)=0;
-		virtual void doWin(ScriptResponseWin&,String& s){};
-		virtual void doMove(ScriptResponseMove&,String&){};
-		virtual void doSelect(ScriptResponseSelect&,String&){};
-};
+///A specialisation of Action for Actions that apply to win events only
 class ActionWin: public virtual Action{
   public:
-		virtual void doStart(ScriptResponseStart&,String&){};
-		virtual void doWin(ScriptResponseWin&,String&)=0;
-		virtual void doMove(ScriptResponseMove&,String&){};
-		virtual void doSelect(ScriptResponseSelect&,String&){};
+    ///@copydoc Action::doStart
+    ///implemented as a no-op
+		virtual void doStart(ScriptResponseStart& r,String& s){};
+    ///@copydoc Action::doWin
+    ///only do method to implement
+		virtual void doWin(ScriptResponseWin& r,String& s)=0;
+    ///@copydoc Action::doMove
+    ///implemented as a no-op
+		virtual void doMove(ScriptResponseMove& r,String& s){};
+    ///@copydoc Action::doSelect
+    ///implemented as a no-op
+		virtual void doSelect(ScriptResponseSelect& r,String& s){};
 };
-class ActionMove: public virtual Action{
-  public:
-		virtual void doStart(ScriptResponseStart&,String&){};
-		virtual void doWin(ScriptResponseWin&,String&){};
-		virtual void doMove(ScriptResponseMove&,String&)=0;
-		virtual void doSelect(ScriptResponseSelect&,String&){};
-};
-class ActionSelect: public virtual Action{
-  public:
-		virtual void doStart(ScriptResponseStart&,String&){};
-		virtual void doWin(ScriptResponseWin&,String&){};
-		virtual void doMove(ScriptResponseMove&,String&){};
-		virtual void doSelect(ScriptResponseSelect&,String&)=0;
-};
+///A specialisation of Action for Actions that apply to all events the same way
 class ActionCommon: public virtual Action{
   public:
-		virtual void doCommon(ScriptResponse&,String&)=0;
+    ///do the appropriate action for an event
+    /**
+     * @param r the response to record our actions in
+     * @param s the string to act on
+     */
+		virtual void doCommon(ScriptResponse& r,String& s)=0;
+    ///@copydoc Action::doStart
+    ///calls doCommon
 		virtual void doStart(ScriptResponseStart& r,String& s){doCommon(r,s);};
+    ///@copydoc Action::doWin
+    ///calls doCommon
 		virtual void doWin(ScriptResponseWin& r,String& s){doCommon(r,s);};
+    ///@copydoc Action::doMove
+    ///calls doCommon
 		virtual void doMove(ScriptResponseMove& r,String& s){doCommon(r,s);};
+    ///@copydoc Action::doSelect
+    ///calls doCommon
 		virtual void doSelect(ScriptResponseSelect& r,String& s){doCommon(r,s);};
 };
 
-class ActionNothing:public ActionCommon,protected {
+class ActionNothing:public ActionCommon, protected PolymorphicHypIOImpl<ActionNothing,1>{
   public:
-    virtual void doCommon(ScriptResponse&,String&){};
+    virtual void doCommon(ScriptResponse& r,String& s){};
 };
 
 class ActionMessage:public ActionCommon{
   public:
     Message m;
     virtual void doCommon(ScriptResponse& r,String&);
-      
 };
-class ActionBlockWin:public ActionWin,private InputParser{
+class ActionBlockWin:public ActionWin{
   public:
     virtual void doWin(ScriptResponseWin& r,String&){
       cout<<"Win Blocked"<<endl;
       r.block=true;
     };
-    virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
-    virtual InputParser* createParser(){return this;};
-    virtual void returnParser(InputParser*){};
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="2\n";};
-    virtual ~ActionBlockWin(){};
 };
 class ActionWinMessage:public ActionWin{
   public:
@@ -493,10 +489,6 @@ class ActionWinMessage:public ActionWin{
     virtual void doWin(ScriptResponseWin& r,String&){
       r.winMessage=m;
     };
-    virtual InputParser* createParser();
-    virtual void returnParser(InputParser* parser){delete parser;};
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-    virtual ~ActionWinMessage(){};
 };
 class ActionWinNextLevel:public ActionWin{
   Pair<irr::stringc> nextLevel;
@@ -504,24 +496,14 @@ class ActionWinNextLevel:public ActionWin{
     virtual void doWin(ScriptResponseWin& r,String&){
       r.nextLevel=nextLevel;
     };
-    virtual InputParser* createParser();
-    virtual void returnParser(InputParser* parser){delete parser;};
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-    virtual ~ActionWinNextLevel(){};
 };
 
-class ActionForceWin:public Action,private InputParser{
+class ActionForceWin:public Action{
   public:
 		virtual void doStart(ScriptResponseStart&,String&){};
 		virtual void doWin(ScriptResponseWin&,String&){};
 		virtual void doMove(ScriptResponseMove& r,String&){r.forceWin=true;};
 		virtual void doSelect(ScriptResponseSelect& r,String&){r.forceWin=true;};
-		
-    virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
-    virtual InputParser* createParser(){return this;};
-    virtual void returnParser(InputParser*){};
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="5\n";};
-    virtual ~ActionForceWin(){};
 };
 
 class ActionSelectStringPattern:public ActionCommon{
@@ -530,12 +512,9 @@ class ActionSelectStringPattern:public ActionCommon{
   
   public:
     virtual void doCommon(ScriptResponse& r,String&);
-    virtual InputParser* createParser();
-    virtual void returnParser(InputParser* p);
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="6 ";change.output(s,file);select.output(s,file);};
 };
 
-class ActionSetStringRoute:public ActionCommon,private InputParser,private StringMatcherCallback<StringPointer>{
+class ActionSetStringRoute:public ActionCommon,private StringMatcherCallback<StringPointer>{
   StringMatcher ranges;
   int count;
   Dirn* route;
@@ -546,17 +525,5 @@ class ActionSetStringRoute:public ActionCommon,private InputParser,private Strin
   virtual void process(SPA<Pair<SP<StringPointer> > > groups);
   public:
     virtual void doCommon(ScriptResponse& r,String&);
-    virtual InputParser* createParser();
-    virtual Used parse(char* data,irr::u32 length,bool eof);
-    virtual void returnParser(InputParser* p);
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-};
-
-class SomeAction{
-  virtual void doStart(ScriptResponseStart&,String&)=0;
-  virtual void doWin(ScriptResponseWin&,String&)=0;
-  virtual void doMove(ScriptResponseMove&,String&)=0;
-  virtual void doSelect(ScriptResponseSelect&,String&)=0;
-  virtual void doCommon(ScriptResponse&,String&)=0;
 };
 #endif

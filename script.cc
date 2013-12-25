@@ -309,7 +309,7 @@ IOResult read(HypIStream& s,SP<Condition>& c){
   }
 }
 bool write(HypOStream& s,const SP<const Condition>& c){
-  c->dowrite(s);
+  return c->dowrite(s);
 }
 
 bool ConditionOr::is(int time,const Script& script,const String& s){
@@ -368,7 +368,6 @@ bool write(HypOStream& s,const ConditionBefore& c){
   return write(s,c.event,0);
 }
 
-
 void Message::output(irr::stringc* s,irr::IWriteFile* file){
   *s+=count;
   *s+="\n";
@@ -390,63 +389,25 @@ void Message::output(irr::stringc* s,irr::IWriteFile* file){
   }
 }
 
-class MessageParser: public InputParser{
-  Message* m;
-  int pos;
-  irr::stringc lines;
-  char delim;
-  public:
-    MessageParser(Message* m):m(m),pos(-1),lines(),delim(0){};
-    Used parse(char* data,irr::u32 length,bool eof){
-      char* start=data;
-      char* end=data+length;
-      if(!eof)
-        end-=1;
-      if(pos==-1){
-        int len=strtol(data,&data,10);
-        if(data>=end) return Used(0,false);
-        m->paragraphs=new Pair<irr::stringc>[len];
-        m->count=len;
-        pos=0;
-      }
-      
-      char* tmp;
-      while(pos<2*m->count){
-        if(pos%2==0){
-          while(isspace(*data))
-            if(++data>=end)
-              return Used(data-start,false);
-          tmp=data;
-          while(!isspace(*tmp))
-            if(++tmp>=end)
-              return Used(data-start,false);
-          m->paragraphs[pos/2].a=irr::stringc(data,tmp-data);
-          data=tmp;
-          ++pos;
-        }
-        if(!delim){
-          while(isspace(*data))
-            if(++data>=end)
-              return Used(data-start,false);
-          delim=*data;
-          if(++data>=end)
-            return Used(data-start,false);
-        }
-        tmp=(char*)memchr(data,delim,end-data);
-        if(!tmp){
-          lines.append(data,end-data);
-          return Used(end-start,false);
-        }
-        lines+=irr::stringc(data,tmp-data);
-        m->paragraphs[pos/2].b=lines;
-        lines=irr::stringc();
-        delim=0;
-        ++pos;
-        data=tmp+1;
-      }
-      return Used(data-start,true);
-    }
-};
+const SP<Action> Action::defaultvalue=SP<Action>(new ActionNothing());
+
+IOResult read(HypIStream& s,SP<Action>& a){
+  int id=0;
+  IOResult r=read(s,id,0);
+  if(!r.ok){
+    a=Action::defaultvalue;
+    return r;
+  }
+  switch(id){
+    case 1:
+      return createAndRead<ActionNothing>(s,a);
+    default:
+      a=Action::defaultvalue;
+  }
+}
+bool write(HypOStream& s,const SP<const Action>& a){
+  return a->dowrite(s);
+}
 
 void ActionMessage::doCommon(ScriptResponse& r,String&){
   if(r.messageCount==0){
