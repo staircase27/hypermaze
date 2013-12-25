@@ -3,8 +3,6 @@
 #ifndef SCRIPTIMPL_HH_INC
 #define SCRIPTIMPL_HH_INC
 
-class ConditionTrue;
-
 ///Utility class to implement polymorphic reading of a class
 /**
  * Writes the ID for the class then delegates writing data for the object to a read function for that type
@@ -12,8 +10,10 @@ class ConditionTrue;
  * @tparam ID the id of this type. THIS MUST BE SAME AS IN THE SWITCH IN read(HypIStream,SP<Condition>)
  */
 template <class T,int ID>
-class PolymorphicHypIOImpl{
+class PolymorphicHypIOImpl: public PolymorphicHypIO{
   protected:
+    ///@copydoc PolymorphicHypIO
+    ///writes the id provided as a template aram then delegates writing data to the function for the templated type T
     bool dowrite(HypOStream& s){
       if(!write(s,ID,0))
       return write(s,(T&)*this);
@@ -135,7 +135,7 @@ class StringMatcherCallback{
     /**
      * @param groups a list of the ranges of groups matched by this solution
      */
-    virtual void process(SPA<pair<SP<POINTER>,SP<POINTER> > > groups)=0;
+    virtual void process(SPA<Pair<SP<POINTER> > > groups)=0;
 };
 
 ///a class to implement matching against a string and optionally allow use of the matches
@@ -148,9 +148,9 @@ class StringMatcherCallback{
 class StringMatcher{
   private:
     int count;///<the number of elements to the pattern
-    SPA<pair<PatternTag,StringElementCondition> > pattern;///<a List of the elements of the pattern
+    SPA<Pair<PatternTag,StringElementCondition> > pattern;///<a List of the elements of the pattern
     int group_count;///<the number of groups to output
-    SPA<pair<int,int> > groups;///<the indicies in the part of the start and end of each group to output
+    SPA<Pair<int> > groups;///<the indicies in the part of the start and end of each group to output
   public:
     ///default constructor that sets up with no pattern elements and no groups
 	  StringMatcher():count(0),pattern(0),group_count(0),groups(0){};
@@ -168,7 +168,7 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(const String& s,SPA<pair<SP<ConstStringPointer> > > groups=0);
+	  bool match(const String& s,SPA<Pair<SP<ConstStringPointer> > > groups=0);
     ///check a match against a non-constant String
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -177,7 +177,7 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(      String& s,SPA<pair<SP<     StringPointer> > > groups=0);
+	  bool match(      String& s,SPA<Pair<SP<     StringPointer> > > groups=0);
     ///check a match against a constant String and process each match found
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -188,7 +188,7 @@ class StringMatcher{
      * @return true if there are any matches of this pattern to the string
      */
 	  bool match(const String& s,StringMatcherCallback<ConstStringPointer>& cb,
-	      SPA<pair<SP<ConstStringPointer> > > groups=0);
+	      SPA<Pair<SP<ConstStringPointer> > > groups=0);
     ///check a match against a non-constant String
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -199,7 +199,7 @@ class StringMatcher{
      * @return true if there are any matches of this pattern to the string
      */
 	  bool match(      String& s,StringMatcherCallback<     StringPointer>& cb,
-	      SPA<pair<SP<     StringPointer> > > groups=0);
+	      SPA<Pair<SP<     StringPointer> > > groups=0);
 	  
 	private:
 	  ///The internal implementation function for matches
@@ -215,7 +215,7 @@ class StringMatcher{
      * @return true if there are any matches of this pattern to the string
      */
 	  template <class STRING,class POINTER>
-	  bool match(STRING& s,SPA<pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
+	  bool match(STRING& s,SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
 	  ///The internal implementation function for a step in matching against a string
 	  /**
 	   * This function does the actual processing. It finds the "best" match for this segment of the pattern
@@ -236,7 +236,7 @@ class StringMatcher{
      */
 	  template <class STRING,class POINTER>
 	  bool matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
-	      SPA<pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
+	      SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
 };
 
 ///a condition that always returns True
@@ -248,7 +248,6 @@ class ConditionTrue: public Condition, protected PolymorphicHypIOImpl<ConditionT
      */
     virtual bool is(int time,const Script& script,const String& s){return true;}
 };
-
 ///Read a ConditionTrue from a stream
 /**
  * this is actually a no-op as a ConditionTrue has no data
@@ -268,105 +267,206 @@ bool write(HypOStream& s,const ConditionTrue& c){return true;}
 
 ///Condition that matches if any of the subconditions match
 class ConditionOr: public Condition, protected PolymorphicHypIOImpl<ConditionOr,2>{
-  SPA<SP<Condition>> conditions;
-  int count;
+  SPA<SP<Condition>> conditions;///< the conditions whose results are ored together
+  int count;///< the number of conditions we combine the results of
   public:
+    ///return true if any of the contained conditions return true
+    /**
+     * @copydoc Condition::is
+     */
     virtual bool is(int time,const Script& script,const String& s);
 };
 ///Read a ConditionOr from a stream
 /**
  * @param s the stream to read from
- * @param pt reference to a ConditionOr variable to store the read data in
+ * @param c reference to a ConditionOr variable to store the read data in
  * @return an IOResult object that contains the status of the read
  */
 IOResult read(HypIStream& s,ConditionOr& c);
 ///write a ConditionOr to a stream
 /**
  * @param s the stream to write to
- * @param pt the ConditionOr to write
+ * @param c the ConditionOr to write
  * @return true if i was written ok
  */
 bool write(HypOStream& s,const ConditionOr& c);
 
 ///Condition that matches if all of the subconditions match
 class ConditionAnd: public Condition, protected PolymorphicHypIOImpl<ConditionAnd,3>{
-  SPA<SP<Condition>> conditions;
-  int count;
+  SPA<SP<Condition>> conditions;///< the conditions whose results are anded together
+  int count;///< the number of conditions we combine the results of
   public:
+    ///return false if any of the contained conditions return false
+    /**
+     * @copydoc Condition::is
+     */
     virtual bool is(int time,const Script& script,const String& s);
 };
 ///Read a ConditionAnd from a stream
 /**
  * @param s the stream to read from
- * @param pt reference to a ConditionAnd variable to store the read data in
+ * @param c reference to a ConditionAnd variable to store the read data in
  * @return an IOResult object that contains the status of the read
  */
 IOResult read(HypIStream& s,ConditionAnd& c);
 ///write a ConditionAnd to a stream
 /**
  * @param s the stream to write to
- * @param pt the ConditionAnd to write
+ * @param c the ConditionAnd to write
  * @return true if i was written ok
  */
 bool write(HypOStream& s,const ConditionAnd& c);
 
-class ConditionNot: public Condition{
-  Condition* condition;
+///condition that matches if the contained condition doesn't match
+class ConditionNot: public Condition, protected PolymorphicHypIOImpl<ConditionNot,4>{
+  SP<Condition> condition;///<the condition whose result is negated
   public:
+    ///return false if the contained condition returns true
+    /**
+     * @copydoc Condition::is
+     */
     virtual bool is(int time,const Script& script,const String& s){
       return !condition->is(time,script,s);
     }
-    virtual InputParser* createParser();
-    virtual void returnParser(InputParser* parser);
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-    virtual ~ConditionNot(){delete condition;}
 };
+///Read a ConditionNot from a stream
+/**
+ * @param s the stream to read from
+ * @param c reference to a ConditionNot variable to store the read data in
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ConditionNot& c);
+///write a ConditionNot to a stream
+/**
+ * @param s the stream to write to
+ * @param c the ConditionNot to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ConditionNot& c);
 
-class ConditionAfter: public Condition,private InputParser{
-  int event;
-  int delay;
+///condition that matches if another event has run and last ran a specified number of seconds ago
+class ConditionAfter: public Condition, protected PolymorphicHypIOImpl<ConditionAfter,5>{
+  int event;///<the id of the event that has to run before this can match
+  int delay;///<the delay after the event has run before this can match
   public:
+    ///return true if the specified event has run and the specified delay has passed
+    /**
+     * @copydoc Condition::is
+     */
     virtual bool is(int time,const Script& script,const String& s);
-    virtual Used parse(char* data,irr::u32 length,bool eof);
-    virtual InputParser* createParser(){return this;};
-    virtual void returnParser(InputParser*){};
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
 };
-class ConditionBefore: public Condition,private InputParser{
-  int event;
-  public:
-    virtual bool is(int time,const Script& script,const String& s);
-    virtual Used parse(char* data,irr::u32 length,bool eof);
-    inline virtual InputParser* createParser(){return this;};
-    inline virtual void returnParser(InputParser*){};
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-};
+///Read a ConditionAfter from a stream
+/**
+ * @param s the stream to read from
+ * @param c reference to a ConditionAfter variable to store the read data in
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ConditionAfter& c);
+///write a ConditionAfter to a stream
+/**
+ * @param s the stream to write to
+ * @param c the ConditionAfter to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ConditionAfter& c);
 
-class ConditionStringPattern: public Condition{
-  StringMatcher sm;
+///condition that matches if another event hasn't run yet
+class ConditionBefore: public Condition, protected PolymorphicHypIOImpl<ConditionBefore,6>{
+  int event;///<the id of the event that has to run before this can match
+  public:
+    ///return true if the specified event hasn't run
+    /**
+     * @copydoc Condition::is
+     */
+    virtual bool is(int time,const Script& script,const String& s);
+};
+///Read a ConditionBefore from a stream
+/**
+ * @param s the stream to read from
+ * @param c reference to a ConditionBefore variable to store the read data in
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ConditionBefore& c);
+///write a ConditionBefore to a stream
+/**
+ * @param s the stream to write to
+ * @param c the ConditionBefore to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ConditionBefore& c);
+
+///condition that matches if the string matches a StringMatcher pattern
+class ConditionStringPattern: public Condition, protected PolymorphicHypIOImpl<ConditionStringPattern,7>{
+  StringMatcher sm;///<the string matcher to check the string against
   
   public:
+    ///return true if the string matches the StringMatcher
+    /**
+     * @copydoc Condition::is
+     */
     virtual bool is(int time,const Script& script,const String& s){
       return sm.match(s);
     }
-    virtual InputParser* createParser(){return sm.createParser();}
-    virtual void returnParser(InputParser* parser){sm.returnParser(parser);};
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){
-      (*s)+="7 ";
-      sm.output(s,file);
-    }
-    virtual ~ConditionStringPattern(){};
+};
+///Read a ConditionStringPattern from a stream
+/**
+ * @param s the stream to read from
+ * @param c reference to a ConditionStringPattern variable to store the read data in
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ConditionStringPattern& c){
+  return read(s,c.sm);
+}
+///write a ConditionStringPattern to a stream
+/**
+ * @param s the stream to write to
+ * @param c the ConditionStringPattern to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ConditionBefore& c){
+  return write(s,c.sm);
+}
+
+class ActionStart: public virtual Action{
+  public:
+		virtual void doStart(ScriptResponseStart&,String&)=0;
+		virtual void doWin(ScriptResponseWin&,String& s){};
+		virtual void doMove(ScriptResponseMove&,String&){};
+		virtual void doSelect(ScriptResponseSelect&,String&){};
+};
+class ActionWin: public virtual Action{
+  public:
+		virtual void doStart(ScriptResponseStart&,String&){};
+		virtual void doWin(ScriptResponseWin&,String&)=0;
+		virtual void doMove(ScriptResponseMove&,String&){};
+		virtual void doSelect(ScriptResponseSelect&,String&){};
+};
+class ActionMove: public virtual Action{
+  public:
+		virtual void doStart(ScriptResponseStart&,String&){};
+		virtual void doWin(ScriptResponseWin&,String&){};
+		virtual void doMove(ScriptResponseMove&,String&)=0;
+		virtual void doSelect(ScriptResponseSelect&,String&){};
+};
+class ActionSelect: public virtual Action{
+  public:
+		virtual void doStart(ScriptResponseStart&,String&){};
+		virtual void doWin(ScriptResponseWin&,String&){};
+		virtual void doMove(ScriptResponseMove&,String&){};
+		virtual void doSelect(ScriptResponseSelect&,String&)=0;
+};
+class ActionCommon: public virtual Action{
+  public:
+		virtual void doCommon(ScriptResponse&,String&)=0;
+		virtual void doStart(ScriptResponseStart& r,String& s){doCommon(r,s);};
+		virtual void doWin(ScriptResponseWin& r,String& s){doCommon(r,s);};
+		virtual void doMove(ScriptResponseMove& r,String& s){doCommon(r,s);};
+		virtual void doSelect(ScriptResponseSelect& r,String& s){doCommon(r,s);};
 };
 
-
-class ActionNothing:public ActionCommon,private InputParser{
+class ActionNothing:public ActionCommon,protected {
   public:
     virtual void doCommon(ScriptResponse&,String&){};
-    virtual Used parse(char* data,irr::u32 length,bool eof){return Used(0,true);}
-    virtual InputParser* createParser(){return this;};
-    virtual void returnParser(InputParser*){};
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0){(*s)+="0\n";};
-    virtual ~ActionNothing(){};
 };
 
 class ActionMessage:public ActionCommon{
@@ -374,10 +474,6 @@ class ActionMessage:public ActionCommon{
     Message m;
     virtual void doCommon(ScriptResponse& r,String&);
       
-    virtual InputParser* createParser();
-    virtual void returnParser(InputParser* parser){delete parser;};
-    virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
-    virtual ~ActionMessage(){};
 };
 class ActionBlockWin:public ActionWin,private InputParser{
   public:
@@ -403,7 +499,7 @@ class ActionWinMessage:public ActionWin{
     virtual ~ActionWinMessage(){};
 };
 class ActionWinNextLevel:public ActionWin{
-  Pair<irr::stringc,irr::stringc> nextLevel;
+  Pair<irr::stringc> nextLevel;
   public:
     virtual void doWin(ScriptResponseWin& r,String&){
       r.nextLevel=nextLevel;
@@ -447,7 +543,7 @@ class ActionSetStringRoute:public ActionCommon,private InputParser,private Strin
   
   StringEdit* se;
   
-  virtual void process(SPA<pair<SP<StringPointer>,SP<StringPointer> > > groups);
+  virtual void process(SPA<Pair<SP<StringPointer> > > groups);
   public:
     virtual void doCommon(ScriptResponse& r,String&);
     virtual InputParser* createParser();
@@ -455,7 +551,6 @@ class ActionSetStringRoute:public ActionCommon,private InputParser,private Strin
     virtual void returnParser(InputParser* p);
     virtual void output(irr::stringc* s,irr::IWriteFile* file=0);
 };
-
 
 class SomeAction{
   virtual void doStart(ScriptResponseStart&,String&)=0;

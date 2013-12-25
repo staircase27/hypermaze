@@ -2,63 +2,6 @@
 #include "script.hh"
 #include "scriptimpl.hh"
 
-template <class T>
-IOResult read(HypIStream& s,SPA<SP<T> >& a, int& c){
-  IOResult r=read(s,c,0);
-  if(!r.ok){
-    c=0;
-    return r;
-  }
-  a=SPA<SP<T> >(new SP<T>[c]);
-  int i=0;
-  for(;i<c;++i){
-    if(!(r=read(s,a[i])).ok)
-      break;
-  }
-  if(i<c){
-    for(;i<c;++i)
-      a[i]=T::defaultvalue;
-    return IOResult(false,r.eof);
-  }else{
-    return IOResult(true,r.eof);
-  }
-}
-template <class T>
-bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c){
-  if(!write(s,c,0))
-    return false;
-  for(int i=0;i<c;++i)
-    if(!write(s,a[i]))
-      return false;
-  return true;
-}
-
-const SP<Condition> Condition::defaultvalue=SP<Condition>(new ConditionTrue());
-
-template <class T>
-IOResult createAndRead(HypIStream& s,SP<T>& c){
-  c=SP<T>(new T());
-  return read(s,*c);
-}
-IOResult read(HypIStream& s,SP<Condition>& c){
-  int id=0;
-  IOResult r=read(s,id,0);
-  if(!r.ok){
-    c=Condition::defaultvalue;
-    return r;
-  }
-  switch(id){
-    case 2:
-      return createAndRead<ConditionOr>(s,c);
-    case 1:
-    default:
-      return createAndRead<ConditionTrue>(s,c);
-  }
-}
-bool write(HypOStream& s,const SP<const Condition>& c){
-  c->dowrite(s);
-}
-
 inline bool StringElementCondition::matches(T el){
   if((selectionCondition&2)==0&&(((selectionCondition&1)==1)==el->selected))
     return false;
@@ -161,13 +104,8 @@ bool write(HypOStream& s,const StringElementCondition& c){
 
 IOResult read(HypIStream& s,PatternTag& pt){
   IOResult r;
-  if(!(r=read(s,pt.min,0)).ok)
-    return r;
-  if(!(r=read(s,pt.max,0)).ok)
-    return r;
-  if(!(r=read(s,pt.greedy)).ok)
-    return r;
-  return IOResult(true,r.eof);
+  (r=read(s,pt.min,0)).ok && (r=read(s,pt.max,0)).ok && (r=read(s,pt.greedy)).ok;
+  return r;
 }
 bool write(HypOStream& s,const PatternTag& pt){
   return write(s,pt.min,0) && write(s,pt.max,0) && write(s,pt.greedy);
@@ -179,22 +117,22 @@ IOResult read(HypIStream& s,StringMatcher& sm){
     sm.count=0;
     return r;
   }
-  sm.pattern=SPA<pair<PatternTag,StringElementCondition> >(new pair<PatternTag,StringElementCondition>[sm.count]);
+  sm.pattern=SPA<Pair<PatternTag,StringElementCondition> >(new Pair<PatternTag,StringElementCondition>[sm.count]);
   for(int i=0;i<sm.count;++i){
-    if(!(r=read(s,sm.pattern[i].first,0)).ok)
+    if(!(r=read(s,sm.pattern[i].a,0)).ok)
       return r;
-    if(!(r=read(s,sm.pattern[i].second,0)).ok)
+    if(!(r=read(s,sm.pattern[i].b,0)).ok)
       return r;
   }
   if(!(r=read(s,sm.group_count,0)).ok){
     sm.group_count=0;
     return r;
   }
-  sm.groups=SPA<pair<int,int> >(new pair<int,int>[sm.group_count]);
+  sm.groups=SPA<Pair<int> >(new Pair<int>[sm.group_count]);
   for(int i=0;i<sm.group_count;++i){
-    if(!(r=read(s,sm.groups[i].first,0)).ok)
+    if(!(r=read(s,sm.groups[i].a,0)).ok)
       return r;
-    if(!(r=read(s,sm.groups[i].second,0)).ok)
+    if(!(r=read(s,sm.groups[i].b,0)).ok)
       return r;
   }
   return IOResult(true,r.eof);
@@ -203,54 +141,54 @@ bool write(HypOStream& s,const StringMatcher& sm){
   if(!write(s,sm.count,0))
     return false;
   for(int i=0;i<sm.count;++i){
-    if(!(write(s,sm.pattern[i].first) && write(s,sm.pattern[i].second)))
+    if(!(write(s,sm.pattern[i].a) && write(s,sm.pattern[i].b)))
       return false;
   if(!write(s,sm.group_count,0))
     return false;
   for(int i=0;i<sm.group_count;++i){
-    if(!(write(s,sm.groups[i].first,0) && write(s,sm.groups[i].second,0)))
+    if(!(write(s,sm.groups[i].a,0) && write(s,sm.groups[i].b,0)))
       return false;
   return true;
 }
 
-bool StringMatcher::match(const String& s,SPA<pair<SP<ConstStringPointer> > > groups){
+bool StringMatcher::match(const String& s,SPA<Pair<SP<ConstStringPointer> > > groups){
   return match<const String,ConstStringPointer>(s,groups,0);
 }
-bool StringMatcher::match(String& s,SPA<pair<SP<StringPointer> > > groups){
+bool StringMatcher::match(String& s,SPA<Pair<SP<StringPointer> > > groups){
   return match<String,StringPointer>(s,groups,0);
 }
 bool StringMatcher::match(const String& s,SPA<StringMatcherCallback<ConstStringPointer>& cb,
-    pair<SP<ConstStringPointer> > > groups){
+    Pair<SP<ConstStringPointer> > > groups){
   if(groups.isnull()){
-    groups=SPA<pair<SP<ConstStringPointer> > >()new pair<SP<ConstStringPointer> >[group_count]);
+    groups=SPA<Pair<SP<ConstStringPointer> > >()new Pair<SP<ConstStringPointer> >[group_count]);
 	}
   return match<const String,ConstStringPointer>(s,groups,&cb);
 }
 bool StringMatcher::match(String& s,SPA<StringMatcherCallback<StringPointer>& cb,
-    pair<SP<StringPointer> > > groups){
+    Pair<SP<StringPointer> > > groups){
   if(groups.isnull()){
-    groups=SPA<pair<SP<StringPointer> > >()new pair<SP<StringPointer> >[group_count]);
+    groups=SPA<Pair<SP<StringPointer> > >()new Pair<SP<StringPointer> >[group_count]);
 	}
   return match<String,StringPointer>(s,groups,&cb);
 }
 
 template <class STRING,class POINTER>
-bool StringMatcher::match(STRING& s,SPA<pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
+bool StringMatcher::match(STRING& s,SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
   SPA<PatternMatch<POINTER> > m(groups.isnull()?0:new PatternMatch<POINTER>[count]);
   return matchStep(s,s.begin(),m,0,groups,cb);
 }
 
 template <class STRING,class POINTER>
 bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
-    SPA<pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
+    SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
   if(level==count){
     cout<<level<<" at end of pattern so are we at the end of the string? "<<(p==s.end())<<endl;
     if(p==s.end()){
       //valid so store in group if it's defined
 			if(!groups.isnull()){
 				for(int i=0;i<group_count;++i){
-				  groups[i].first=matches[this->groups[i].first].start;
-				  groups[i].second=matches[this->groups[i].second].end;
+				  groups[i].a=matches[this->groups[i].a].start;
+				  groups[i].b=matches[this->groups[i].b].end;
 				}
 			  if(cb)
 			    cb->process(groups);
@@ -261,8 +199,8 @@ bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > ma
     }
   }else{
     bool match=false;
-    PatternTag& pt=pattern[level].first;
-    StringElementCondition& sec=pattern[level].second;
+    PatternTag& pt=pattern[level].a;
+    StringElementCondition& sec=pattern[level].b;
     if(!matches.isnull())
       matches[level].start=SP<POINTER>(new POINTER(p));
     cout<<level<<" "<<"starting match step from "<<p<<endl;
@@ -309,140 +247,69 @@ bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > ma
 }
 
 template <class T>
-class Parser:public InputParser{
-  InputParser** dataParser;
-  T** newT;
-  public:
-    Used parse(char* data,irr::u32 length,bool eof);
-    Parser(InputParser** dataParser,T** newT):dataParser(dataParser),newT(newT){};
-    virtual ~Parser();
-};
-template <>
-Used Parser<Condition>::parse(char* data,irr::u32 length,bool eof){
-  char* start=data;
-  char* end=data+length;
-  if(!eof)
-    end-=1;
-  int type=strtol(data,&data,10);
-  if(!eof){
-    if(data>=end) return Used(0,false);
+IOResult read(HypIStream& s,SPA<SP<T> >& a, int& c){
+  IOResult r=read(s,c,0);
+  if(!r.ok){
+    c=0;
+    return r;
+  }
+  a=SPA<SP<T> >(new SP<T>[c]);
+  int i=0;
+  for(;i<c;++i){
+    if(!(r=read(s,a[i])).ok)
+      break;
+  }
+  if(i<c){
+    for(;i<c;++i)
+      a[i]=T::defaultvalue;
+    return IOResult(false,r.eof);
   }else{
-    if(data>end){
-      type=0;
-      data=end;
-    }
+    return IOResult(true,r.eof);
   }
-  switch(type){
+}
+template <class T>
+bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c){
+  if(!write(s,c,0))
+    return false;
+  for(int i=0;i<c;++i)
+    if(!write(s,a[i]))
+      return false;
+  return true;
+}
+
+const SP<Condition> Condition::defaultvalue=SP<Condition>(new ConditionTrue());
+
+template <class T>
+IOResult createAndRead(HypIStream& s,SP<T>& c){
+  c=SP<T>(new T());
+  return read(s,*c);
+}
+IOResult read(HypIStream& s,SP<Condition>& c){
+  int id=0;
+  IOResult r=read(s,id,0);
+  if(!r.ok){
+    c=Condition::defaultvalue;
+    return r;
+  }
+  switch(id){
     case 1:
-      *newT=new ConditionTrue();
-      break;
+      return createAndRead<ConditionTrue>(s,c);
     case 2:
-      *newT=new ConditionOr();
-      break;
+      return createAndRead<ConditionOr>(s,c);
     case 3:
-      *newT=new ConditionAnd();
-      break;
+      return createAndRead<ConditionAnd>(s,c);
     case 4:
-      *newT=new ConditionNot();
-      break;
+      return createAndRead<ConditionNot>(s,c);
     case 5:
-      *newT=new ConditionAfter();
-      break;
+      return createAndRead<ConditionAfter>(s,c);
     case 6:
-      *newT=new ConditionBefore();
-      break;
-    case 7:
-      *newT=new ConditionStringPattern();
-      break;
+      return createAndRead<ConditionBefore>(s,c);
     default:
-      *newT=new ConditionTrue();
+      c=Condition::defaultvalue;
   }
-  *dataParser=(*newT)->createParser();
-  return Used(data-start,true);
 }
-template<>
-Used Parser<Action>::parse(char* data,irr::u32 length,bool eof){
-  char* start=data;
-  char* end=data+length;
-  if(!eof)
-    end-=1;
-  int type=strtol(data,&data,10);
-  if(!eof){
-    if(data>=end) return Used(0,false);
-  }else{
-    if(data>end){
-      type=0;
-      data=end;
-    }
-  }
-  switch(type){
-    case 1:
-      *newT=new ActionMessage();
-      break;
-    case 2:
-      *newT=new ActionBlockWin();
-      break;
-    case 3:
-      *newT=new ActionWinMessage();
-      break;
-    case 4:
-      *newT=new ActionWinNextLevel();
-      break;
-    case 5:
-      *newT=new ActionForceWin();
-      break;
-    case 6:
-      *newT=new ActionSelectStringPattern();
-      break;
-    case 7:
-      *newT=new ActionSetStringRoute();
-      break;
-    default:
-      *newT=new ActionNothing();
-      break;
-  }
-  *dataParser=(*newT)->createParser();
-  return Used(data-start,true);
-}
-template <class T>
-Parser<T>::~Parser(){
-  (*newT)->returnParser(*dataParser);
-}
-template <class T>
-class ListParser:public InputParser{
-  InputParser** dataParser;
-  T*** newTs;
-  int* count;
-  public:
-    virtual Used parse(char* data,irr::u32 length,bool eof);
-    ListParser(InputParser** dataParser,T*** newTs,int* count):
-        dataParser(dataParser),newTs(newTs),count(count){};
-    virtual ~ListParser();
-};
-template <class T>
-Used ListParser<T>::parse(char* data,irr::u32 length,bool eof){
-  char* start=data;
-  char* end=data+length;
-  if(!eof)
-    end-=1;
-  *count=strtol(data,&data,10);
-  if(data>=end) return Used(0,false);
-  *newTs=new T*[*count];
-  InputParser** parsers=new InputParser*[2*(*count)];
-  for(int i=0;i<*count;++i)
-    parsers[i*2]=new Parser<T>(parsers+i*2+1,(*newTs)+i);
-  *dataParser=new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-      Derefer<InputParser,InputParser**>(parsers),
-      Derefer<InputParser,InputParser**>(parsers+2*(*count)));
-  return Used(data-start,true);
-}
-template <class T>
-ListParser<T>::~ListParser(){
-  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)(*dataParser);
-  for(int i=0;i<*count;++i)
-    delete *(p->end.data-2*(*count)+2*i);
-  delete[] (p->end.data-2*(*count));
-  delete p;
+bool write(HypOStream& s,const SP<const Condition>& c){
+  c->dowrite(s);
 }
 
 bool ConditionOr::is(int time,const Script& script,const String& s){
@@ -471,69 +338,36 @@ bool write(HypOStream& s,const ConditionAnd& c){
   return write(s,c.conditions,c.count);
 }
 
-InputParser* ConditionNot::createParser(){
-  InputParser** parsers=new InputParser*[2];
-  parsers[0]=new Parser<Condition>(parsers+1,&condition);
-  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-    Derefer<InputParser,InputParser**>(parsers),
-    Derefer<InputParser,InputParser**>(parsers+2));
-};
-void ConditionNot::returnParser(InputParser* parser){
-  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
-  delete *(p->end.data-2);
-  delete[] (p->end.data-2);
-  delete parser;
-};
-void ConditionNot::output(irr::stringc* s,irr::IWriteFile* file){
-  (*s)+="4\n";
-  condition->output(s,file);
-  if(file && s->size()>256){
-    file->write(s->c_str(),s->size());
-    *s=irr::stringc();
-  }
+IOResult read(HypIStream& s,ConditionNot& c){
+  return read(s,c.condition);
+}
+bool write(HypOStream& s,const ConditionNot& c){
+  return write(s,c.condition);
 }
 
 bool ConditionAfter::is(int time,const Script& script,const String& s){
   return script.getTime(event)+delay<=time;
 }
-Used ConditionAfter::parse(char* data,irr::u32 length,bool eof){
-  char* start=data;
-  char* end=data+length;
-  if(!eof)
-    end-=1;
-  event=strtol(data,&data,10);
-  if(data>=end) return Used(0,false);
-  delay=strtol(data,&data,10);
-  if(data>=end) return Used(0,false);
-  return Used(data-start,true);
+IOResult read(HypIStream& s,ConditionAfter& c){
+  IOResult r=read(s,c.event,0);
+  if(!r.ok)
+    return r;
+  return read(s,c.delay,0);
 }
-void ConditionAfter::output(irr::stringc* s,irr::IWriteFile* file){
-  (*s)+="5 ";(*s)+=event;(*s)+=" ";(*s)+=delay;(*s)+="\n";
-  if(file && s->size()>256){
-    file->write(s->c_str(),s->size());
-    *s=irr::stringc();
-  }
+bool write(HypOStream& s,const ConditionAfter& c){
+  return write(s,c.event,0) && write(s,c.delay,0);
 }
 
 bool ConditionBefore::is(int time,const Script& script,const String& s){
   return script.getTime(event)==0;
 }
-Used ConditionBefore::parse(char* data,irr::u32 length,bool eof){
-  char* start=data;
-  char* end=data+length;
-  if(!eof)
-    end-=1;
-  event=strtol(data,&data,10);
-  if(data>=end) return Used(0,false);
-  return Used(data-start,true);
+IOResult read(HypIStream& s,ConditionBefore& c){
+  return read(s,c.event,0);
 }
-void ConditionBefore::output(irr::stringc* s,irr::IWriteFile* file){
-  (*s)+="6 ";(*s)+=event;(*s)+="\n";
-  if(file && s->size()>256){
-    file->write(s->c_str(),s->size());
-    *s=irr::stringc();
-  }
+bool write(HypOStream& s,const ConditionBefore& c){
+  return write(s,c.event,0);
 }
+
 
 void Message::output(irr::stringc* s,irr::IWriteFile* file){
   *s+=count;
@@ -571,7 +405,7 @@ class MessageParser: public InputParser{
       if(pos==-1){
         int len=strtol(data,&data,10);
         if(data>=end) return Used(0,false);
-        m->paragraphs=new Pair<irr::stringc,irr::stringc>[len];
+        m->paragraphs=new Pair<irr::stringc>[len];
         m->count=len;
         pos=0;
       }
@@ -641,12 +475,12 @@ void ActionWinMessage::output(irr::stringc* s,irr::IWriteFile* file){
 }
 
 class dataDescParser:public InputParser{
-  Pair<irr::stringc,irr::stringc>* d;
+  Pair<irr::stringc>* d;
   int pos;
   irr::stringc lines;
   char delim;
   public:
-    dataDescParser  (Pair<irr::stringc,irr::stringc>* d):d(d),pos(0),lines(),delim(0){};
+    dataDescParser  (Pair<irr::stringc>* d):d(d),pos(0),lines(),delim(0){};
     Used parse(char* data,irr::u32 length,bool eof){
       char* start=data;
       char* end=data+length;
@@ -742,9 +576,9 @@ void ActionSelectStringPattern::returnParser(InputParser* parser){
   delete parser;
 };
 
-bool ActionSetStringRoute::process(SPA<pair<SP<StringPointer>,SP<StringPointer> > > groups){
+bool ActionSetStringRoute::process(SPA<Pair<SP<StringPointer> > > groups){
   for(int i=0;i<ranges.groupCount();++i){
-    se->setStringSegment(*groups[i].first,*groups[i].second,count,route);
+    se->setStringSegment(*groups[i].a,*groups[i].b,count,route);
   }
 }
 
@@ -752,8 +586,8 @@ void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
   if(!ranges.groupCount())
     return;
   se=new StringEdit(s);
-  SPA<pair<SP<StringPointer>,SP<StringPointer> > > groups=SPA<pair<SP<StringPointer>,SP<StringPointer> > >(
-      new pair<SP<StringPointer>,SP<StringPointer> >[ranges.groupCount()]);
+  SPA<Pair<SP<StringPointer> > > groups=SPA<Pair<SP<StringPointer> > >(
+      new Pair<SP<StringPointer> >[ranges.groupCount()]);
   if(ranges.match(s,all?this:0,groups)){
     if(!all)
       process(groups);
