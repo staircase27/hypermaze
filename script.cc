@@ -418,6 +418,10 @@ IOResult read(HypIStream& s,SP<Action>& a){
       return createAndRead<ActionMesage>(s,a);
     case 3:
       return createAndRead<ActionBlockWin>(s,a);
+    case 4:
+      return createAndRead<ActionWinMessage>(s,a);
+    case 5:
+      return createAndRead<ActionWinNextLevel>(s,a);
     default:
       a=Action::defaultvalue;
   }

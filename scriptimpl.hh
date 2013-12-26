@@ -545,7 +545,7 @@ bool write(HypOStream& s,const ActionBlockWin& a){
 }
 
 ///set the message to show in the win screen
-class ActionWinMessage:public ActionWin{
+class ActionWinMessage:public ActionWin, protected PolymorphicHypIOImpl<ActionWinMessage,4>{
   public:
     Message m;///<the message to show
     ///@copydoc Action::doWin
@@ -570,7 +570,7 @@ IOResult read(HypIStream& s,ActionWinMessage& a);
 bool write(HypOStream& s,const ActionWinMessage& a);
 
 ///set the next level to show on the win screen
-class ActionWinNextLevel:public ActionWin{
+class ActionWinNextLevel:public ActionWin, protected PolymorphicHypIOImpl<ActionWinNextLevel,5>{
   Pair<SPA<const char>> nextLevel;///<the next level's url and a "name" for it
   public:
     ///@copydoc Action::doWin
