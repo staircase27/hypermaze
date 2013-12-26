@@ -115,7 +115,7 @@ struct Message{
   /**
    * first member of the pair is a style string. second member is the text for the paragraph
    */
-  SPA<Pair<SPA<char> > > paragraphs;
+  SPA<Pair<SPA<const char> > > paragraphs;
   ///default constructor that initialises this as having no paragraphs
   Message():paragraphs(0),count(0){};
 };
@@ -124,14 +124,14 @@ struct Message{
 /**
  * fills the pointer with a new message object
  * @param s the stream to read from
- * @param c pointer to Message variable to stick the read Message in
+ * @param m pointer to Message variable to stick the read Message in
  * @return an IOResult object that contains the status of the read
  */
 IOResult read(HypIStream& s,Message& m);
 ///write a Message to a stream
 /**
  * @param s the stream to write to
- * @param c the message to write
+ * @param m the message to write
  * @return true if i was written ok
  */
 bool write(HypOStream& s,const Message& m);
@@ -154,7 +154,7 @@ struct ScriptResponseStart:public ScriptResponse{};
 struct ScriptResponseWin:public ScriptResponse{
   bool block;///<block the winning
   Message winMessage;///<message to show on the win screen
-  Pair<irr::stringc> nextLevel;///<next level to offer on the win screen
+  Pair<const irr::stringc> nextLevel;///<next level to offer on the win screen
   ///default constructor to setup the response as use defaults
   ScriptResponseWin():block(false),winMessage(),nextLevel("",""){}
 };
@@ -222,7 +222,7 @@ bool write(HypOStream& s,const SP<const Action>& c);
 class Event{
   public:
 		int trigger;
-		int conditionCount;
+		in  t conditionCount;
 		SPA<SP<Condition> > condition;
 		int actionCount;
 		SPA<SP<Action> > actions;

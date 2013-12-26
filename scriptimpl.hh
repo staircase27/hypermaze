@@ -498,7 +498,7 @@ class ActionMessage:public ActionCommon, protected PolymorphicHypIOImpl<ActionMe
     Message m;///<the message to show
     ///@copydoc ActionCommon::doCommon
     ///adds a message to the message list in the response
-    virtual void doCommon(ScriptResponse& r,String&);
+    virtual void doCommon(ScriptResponse& r,String& s);
 };
 ///Read an ActionMessage from a stream
 /**
@@ -520,7 +520,7 @@ class ActionBlockWin:public ActionWin, protected PolymorphicHypIOImpl<ActionBloc
   public:
     ///@copydoc Action::doWin
     ///sets the block win flag in the response object
-    virtual void doWin(ScriptResponseWin& r,String&){
+    virtual void doWin(ScriptResponseWin& r,String& s){
       cout<<"Win Blocked"<<endl;
       r.block=true;
     };
@@ -550,7 +550,7 @@ class ActionWinMessage:public ActionWin{
     Message m;///<the message to show
     ///@copydoc Action::doWin
     ///sets the message to show on the win screen in the response object
-    virtual void doWin(ScriptResponseWin& r,String&){
+    virtual void doWin(ScriptResponseWin& r,String& s){
       r.winMessage=m;
     };
 };
@@ -569,13 +569,30 @@ IOResult read(HypIStream& s,ActionWinMessage& a);
  */
 bool write(HypOStream& s,const ActionWinMessage& a);
 
+///set the next level to show on the win screen
 class ActionWinNextLevel:public ActionWin{
-  Pair<irr::stringc> nextLevel;
+  Pair<SPA<const char>> nextLevel;///<the next level's url and a "name" for it
   public:
-    virtual void doWin(ScriptResponseWin& r,String&){
+    ///@copydoc Action::doWin
+    ///sets the next level to show on the win screen in the response object
+    virtual void doWin(ScriptResponseWin& r,String& s){
       r.nextLevel=nextLevel;
     };
 };
+///Read an ActionWinNextLevel from a stream
+/**
+ * @param s the stream to read from
+ * @param a ActionWinNextLevel variable to read the data into
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ActionWinNextLevel& a);
+///write an ActionWinNextLevel to a stream
+/**
+ * @param s the stream to write to
+ * @param a the ActionWinNextLevel to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ActionWinNextLevel& a);
 
 class ActionForceWin:public Action{
   public:

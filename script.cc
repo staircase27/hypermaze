@@ -452,77 +452,13 @@ bool write(HypOStream& s,const ActionWinMessage& a){
   return write(s,a.m);
 }
 
-class dataDescParser:public InputParser{
-  Pair<irr::stringc>* d;
-  int pos;
-  irr::stringc lines;
-  char delim;
-  public:
-    dataDescParser  (Pair<irr::stringc>* d):d(d),pos(0),lines(),delim(0){};
-    Used parse(char* data,irr::u32 length,bool eof){
-      char* start=data;
-      char* end=data+length;
-      if(!eof)
-        end-=1;
-      char* tmp;
-      if(pos<2){
-        if(pos==0){
-          while(isspace(*data))
-            if(++data>=end)
-              return Used(data-start,false);
-          tmp=data;
-          while(!isspace(*tmp))
-            if(++tmp>=end)
-              return Used(data-start,false);
-          d->a=irr::stringc(data,tmp-data);
-          data=tmp;
-          pos=1;
-        }
-        if(!delim){
-          while(isspace(*data))
-            if(++data>=end)
-              return Used(data-start,false);
-          delim=*data;
-          if(++data>=end)
-            return Used(data-start,false);
-        }
-        tmp=(char*)memchr(data,delim,end-data);
-        if(!tmp){
-          lines.append(data,end-data);
-          return Used(end-start,false);
-        }
-        lines+=irr::stringc(data,tmp-data);
-        d->b=lines;
-        lines=irr::stringc();
-        delim=0;
-        pos=2;
-        data=tmp+1;
-      }
-      return Used(data-start,true);
-    }
-};
-
-InputParser* ActionWinNextLevel::createParser(){
-  return new dataDescParser(&nextLevel);
+IOResult read(HypIStream& s,ActionWinNextLevel& a){
+  IOResult r;
+  (r=read(s,a.nextLevel.a,true)).ok && (r=read(s,a.nextLevel.b,true)).ok;
+  return r;
 }
-void ActionWinNextLevel::output(irr::stringc* s,irr::IWriteFile* file){
-  *s+="4 ";
-  const char* const delims="\"'|^_!\\\3";
-  if(nextLevel.a=="")
-    nextLevel.a="-";
-  *s+=nextLevel.a;
-  *s+=" ";
-  const char* delim=delims;
-  while(nextLevel.b.findFirst(*delim)!=-1)
-      ++delim; // if this fails then you have a string with '\3' in it!!!!!!!!
-  *s+=*delim;
-  *s+=nextLevel.b;
-  *s+=*delim;
-  *s+="\n";
-  if(file && s->size()>256){
-    file->write(s->c_str(),s->size());
-    *s=irr::stringc();
-  }
+bool write(HypOStream& s,const ActionWinNextLevel& a){
+  return write(s,a.nextLevel.a,true) && write(s,a.nextLevel.b,true);
 }
 
 void ActionSelectStringPattern::doCommon(ScriptResponse& r,String& s){
