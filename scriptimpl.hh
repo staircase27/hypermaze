@@ -466,30 +466,109 @@ class ActionCommon: public virtual Action{
 		virtual void doSelect(ScriptResponseSelect& r,String& s){doCommon(r,s);};
 };
 
+///an action that does nothing
 class ActionNothing:public ActionCommon, protected PolymorphicHypIOImpl<ActionNothing,1>{
   public:
+    ///@copydoc ActionCommon::doCommon
+    ///implemented as a no-op
     virtual void doCommon(ScriptResponse& r,String& s){};
 };
+///Read an ActionNothing from a stream
+/**
+ * @param s the stream to read from
+ * @param a ActionNothing variable to read the data into
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ActionNothing& a){
+  return IOResult(true,false);
+}
+///write an ActionNothing to a stream
+/**
+ * @param s the stream to write to
+ * @param a the ActionNothing to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ActionNothing& a){
+  return true;
+}
 
-class ActionMessage:public ActionCommon{
+//an action to display a message to the player
+class ActionMessage:public ActionCommon, protected PolymorphicHypIOImpl<ActionMessage,2>{
   public:
-    Message m;
+    Message m;///<the message to show
+    ///@copydoc ActionCommon::doCommon
+    ///adds a message to the message list in the response
     virtual void doCommon(ScriptResponse& r,String&);
 };
-class ActionBlockWin:public ActionWin{
+///Read an ActionMessage from a stream
+/**
+ * @param s the stream to read from
+ * @param a ActionMessage variable to read the data into
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ActionMessage& a);
+///write an ActionMessage to a stream
+/**
+ * @param s the stream to write to
+ * @param a the ActionMessage to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ActionMessage& a);
+
+///an action to block the win
+class ActionBlockWin:public ActionWin, protected PolymorphicHypIOImpl<ActionBlockWin,3>{
   public:
+    ///@copydoc Action::doWin
+    ///sets the block win flag in the response object
     virtual void doWin(ScriptResponseWin& r,String&){
       cout<<"Win Blocked"<<endl;
       r.block=true;
     };
 };
+///Read an ActionBlockWin from a stream
+/**
+ * @param s the stream to read from
+ * @param a ActionBlockWin variable to read the data into
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ActionBlockWin& a){
+  return IOResult(true,false);
+}
+///write an ActionBlockWin to a stream
+/**
+ * @param s the stream to write to
+ * @param a the ActionBlockWin to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ActionBlockWin& a){
+  return true;
+}
+
+///set the message to show in the win screen
 class ActionWinMessage:public ActionWin{
   public:
-    Message m;
+    Message m;///<the message to show
+    ///@copydoc Action::doWin
+    ///sets the message to show on the win screen in the response object
     virtual void doWin(ScriptResponseWin& r,String&){
       r.winMessage=m;
     };
 };
+///Read an ActionWinMessage from a stream
+/**
+ * @param s the stream to read from
+ * @param a ActionWinMessage variable to read the data into
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ActionWinMessage& a);
+///write an ActionWinMessage to a stream
+/**
+ * @param s the stream to write to
+ * @param a the ActionWinMessage to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ActionWinMessage& a);
+
 class ActionWinNextLevel:public ActionWin{
   Pair<irr::stringc> nextLevel;
   public:

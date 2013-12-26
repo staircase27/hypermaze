@@ -120,6 +120,22 @@ struct Message{
   Message():paragraphs(0),count(0){};
 };
 
+///Read a Message from a stream
+/**
+ * fills the pointer with a new message object
+ * @param s the stream to read from
+ * @param c pointer to Message variable to stick the read Message in
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,Message& m);
+///write a Message to a stream
+/**
+ * @param s the stream to write to
+ * @param c the message to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const Message& m);
+
 ///common part of the response from a script
 struct ScriptResponse{
   bool stringChanged;///<has the string been changed by the script

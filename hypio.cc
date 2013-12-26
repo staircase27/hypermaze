@@ -122,7 +122,7 @@ void IrrHypIStream::readtobuf(){
 IOResult read(HypIStream& s,int& i,const int& base){
   return s.read(i,base);
 }
-IOResult read(HypIStream& s,char* str,const bool& quote){
+IOResult read(HypIStream& s,char*& str,const bool& quote){
   return s.read(str,quote);
 }
 
@@ -260,5 +260,15 @@ IOResult read(HypIStream& s,bool& b){
 }
 bool write(HypOStream& s,const bool& b){
   return write(s,(int)b,0);
+}
+
+IOResult read(HypIStream& s,SPA<char>& str,const bool delim&){
+  char* tmp=0;
+  IOResult r=read(s,tmp,delim);
+  str=SPA<char>(tmp);
+  return r;
+}
+bool write(HypOStream& s,const SPA<const char>& str,const bool& quote){
+  return write(s,&(*str),quote);
 }
 

@@ -304,6 +304,8 @@ IOResult read(HypIStream& s,SP<Condition>& c){
       return createAndRead<ConditionAfter>(s,c);
     case 6:
       return createAndRead<ConditionBefore>(s,c);
+    case 7:
+      return createAndRead<ConditionStringPattern>(s,c);
     default:
       c=Condition::defaultvalue;
   }
@@ -368,25 +370,36 @@ bool write(HypOStream& s,const ConditionBefore& c){
   return write(s,c.event,0);
 }
 
-void Message::output(irr::stringc* s,irr::IWriteFile* file){
-  *s+=count;
-  *s+="\n";
-  const char* const delims="\"'|^_!\\\3";
-  for(int i=0;i<count;++i){
-    *s+=paragraphs[i].a;
-    *s+=" ";
-    const char* delim=delims;
-    while(paragraphs[i].b.findFirst(*delim)!=-1)
-      ++delim; // if this fails then you have a string with '\3' in it!!!!!!!!
-    *s+=*delim;
-    *s+=paragraphs[i].b;
-    *s+=*delim;
-    *s+="\n";
-    if(file && s->size()>256){
-      file->write(s->c_str(),s->size());
-      *s=irr::stringc();
+IOResult read(HypIStream& s,Message& m){
+  IOResult r=read(s,m.count,0);
+  if(!r.ok){
+    m.count=0;
+    return r;
+  }
+  m.paragraphs=SPA<Pair<SPA<char> > >(new Pair<SPA<char> >[m.count]);
+  int i=0;
+  for(;i<m.count;++i)
+    if(!((r=read(s,m.paragraphs[i].a,false)).ok && (r=read(s,m.paragraphs[i].b,true)).ok))
+      break;
+  if(i<c){
+    SP<char> defaultvalue(new char[1]);
+    defaultvalue[0]='\0';
+    for(;i<c;++i){
+      m.paragraphs[i].a=defaultvalue;
+      m.paragraphs[i].b=defaultvalue;
     }
   }
+  return r;
+}
+
+bool write(HypOStream& s,const Message& m){
+  if(!write(s,m.count,0))
+    return false;
+  for(int i=0;i<m.count;++i){
+    if(!(write(s,m.paragraphs[i].a,false) && write(s,m.paragraphs[i].b,true)))
+      return false;
+  }
+  return true;
 }
 
 const SP<Action> Action::defaultvalue=SP<Action>(new ActionNothing());
@@ -401,6 +414,10 @@ IOResult read(HypIStream& s,SP<Action>& a){
   switch(id){
     case 1:
       return createAndRead<ActionNothing>(s,a);
+    case 2:
+      return createAndRead<ActionMesage>(s,a);
+    case 3:
+      return createAndRead<ActionBlockWin>(s,a);
     default:
       a=Action::defaultvalue;
   }
@@ -420,19 +437,19 @@ void ActionMessage::doCommon(ScriptResponse& r,String&){
   r.messages[r.messageCount]=m;
   ++r.messageCount;
 };
-InputParser* ActionMessage::createParser(){
-  return new MessageParser(&m);
+
+IOResult read(HypIStream& s,ActionMessage& a){
+  return read(s,a.m);
 }
-void ActionMessage::output(irr::stringc* s,irr::IWriteFile* file){
-  *s+="1 ";
-  m.output(s,file);
+bool write(HypOStream& s,const ActionMessage& a){
+  return write(s,a.m);
 }
-InputParser* ActionWinMessage::createParser(){
-  return new MessageParser(&m);
+
+IOResult read(HypIStream& s,ActionWinMessage& a){
+  return read(s,a.m);
 }
-void ActionWinMessage::output(irr::stringc* s,irr::IWriteFile* file){
-  *s+="3 ";
-  m.output(s,file);
+bool write(HypOStream& s,const ActionWinMessage& a){
+  return write(s,a.m);
 }
 
 class dataDescParser:public InputParser{
