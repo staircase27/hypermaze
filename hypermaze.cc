@@ -446,7 +446,7 @@ int main(int argc,char* argv[]){
         "oad Asadsadaad sadadydpsoadhaphd \n swdad A "// a final format and paragraph (with no whitespace after the previous paragraph
         "\t\n\t\n 2"//next action
         "  4" //third action
-        " http://domain.path/asdadad/adsdadad.dasad?=%20%43 'adadadaodiy!\"£'    "//a url and description
+        " 'http://domain.path/asdadad/adsdadad.dasad?=%20%43' 'adadadaodiy!\"£'    "//a url and description
         "\n\n6\n"//a selection change action
         "* 63 0 0 0\t "//applying to all
         "* 63 "

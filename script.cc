@@ -422,6 +422,12 @@ IOResult read(HypIStream& s,SP<Action>& a){
       return createAndRead<ActionWinMessage>(s,a);
     case 5:
       return createAndRead<ActionWinNextLevel>(s,a);
+    case 6:
+      return createAndRead<ActionForceWin>(s,a);
+    case 7:
+      return createAndRead<ActionStringConditionSelect>(s,a);
+    case 9:
+      return createAndRead<ActionSetStringRoute>(s,a);
     default:
       a=Action::defaultvalue;
   }
@@ -465,7 +471,7 @@ bool write(HypOStream& s,const ActionWinNextLevel& a){
   return write(s,a.nextLevel.a,true) && write(s,a.nextLevel.b,true);
 }
 
-void ActionSelectStringPattern::doCommon(ScriptResponse& r,String& s){
+void ActionStringConditionSelect::doCommon(ScriptResponse& r,String& s){
   StringEdit se(s);
   for(StringPointer p=s.begin();p!=s.end();++p){
     if(!change.matches(p))
@@ -477,107 +483,52 @@ void ActionSelectStringPattern::doCommon(ScriptResponse& r,String& s){
     }
   }
 }
-
-InputParser* ActionSelectStringPattern::createParser(){
-  InputParser** parsers=new InputParser*[2];
-  parsers[0]=new StringConditionParser(&this->change);
-  parsers[1]=new StringConditionParser(&this->select);
-  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-    Derefer<InputParser,InputParser**>(parsers),
-    Derefer<InputParser,InputParser**>(parsers+2));
-};
-void ActionSelectStringPattern::returnParser(InputParser* parser){
-  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
-  delete *(p->end.data-2);
-  delete *(p->end.data-1);
-  delete[] (p->end.data-2);
-  delete parser;
-};
-
-bool ActionSetStringRoute::process(SPA<Pair<SP<StringPointer> > > groups){
-  for(int i=0;i<ranges.groupCount();++i){
-    se->setStringSegment(*groups[i].a,*groups[i].b,count,route);
-  }
+IOResult read(HypIStream& s,ActionStringConditionSelect& a){
+  IOResult r;
+  (r=read(s,a.change)).ok && (r=read(s,a.select)).ok;
+  return r;
+}
+bool write(HypOStream& s,const ActionStringConditionSelect& a){
+  return write(s,a.change) && write(s,a.select);
 }
 
 void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
   if(!ranges.groupCount())
     return;
-  se=new StringEdit(s);
+  StringEdit se(s);
   SPA<Pair<SP<StringPointer> > > groups=SPA<Pair<SP<StringPointer> > >(
       new Pair<SP<StringPointer> >[ranges.groupCount()]);
-  if(ranges.match(s,all?this:0,groups)){
-    if(!all)
-      process(groups);
+  while(ranges.match(s,groups)){
+    for(int i=0;i<ranges.groupCount();++i){
+      se.setStringSegment(*groups[i].a,*groups[i].b,count,&*route);
+    }
 	  r.stringChanged=true;
+	  if(!all)
+	    break;
 	}
-	delete se;
 }
-InputParser* ActionSetStringRoute::createParser(){
-  InputParser** parsers=new InputParser*[2];
-  parsers[0]=ranges.createParser();
-  parsers[1]=this;
-  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-    Derefer<InputParser,InputParser**>(parsers),
-    Derefer<InputParser,InputParser**>(parsers+2));
-}
-void ActionSetStringRoute::returnParser(InputParser* parser){
-  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
-  ranges.returnParser(*(p->end.data-2));
-  delete[] (p->end.data-2);
-  delete parser;
-}
-Used ActionSetStringRoute::parse(char* data,irr::u32 length,bool eof){
-  char* start=data;
-  char* end=data+length;
-  if(!eof)
-    end-=1;
-  all=strtol(data,&data,10);
-  if(data>=end&&!eof) return Used(0,false);
-  count=strtol(data,&data,10);
-  if(data>=end&&!eof) return Used(0,false);
-  delete[] route;
-  route=new Dirn[count];
-  for(int i=0;i<count;++i){
-		route[i]=from_id(strtol(data,&data,10));
-		if(data>=end) return Used(0,false);
+IOResult read(HypIStream& s,ActionSetStringRoute& a){
+  IOResult r=read(s,a.ranges);
+  if(!r.ok)
+    return r;
+  if(!(r=read(s,a.count,0).ok){
+    a.count=0;
+    return r;
   }
-  return Used(0,false);
-}
-void ActionSetStringRoute::output(irr::stringc* s,irr::IWriteFile* file){
-  (*s)+="7 ";
-  ranges.output(s,file);
-  (*s)+=all;
-  (*s)+=" ";
-  (*s)+=count;
-  (*s)+=" ";
-  for(Dirn *d=route;d!=route+count;++d){
-    (*s)+=to_id(*d);
-    (*s)+=" ";
+  a.route=SPA<Dirn>(new Dirn[a.count]);
+  for(int i=0;i<a.count;++i){
+    if(!(r=read(s,(int)a.route[i],0)))
+      return r;
   }
-  (*s)+="\n";
+  return read(s,a.all);
+}
+bool write(HypOStream& s,const ActionSetStringRoute& a){
+  if(!(write(s,a.ranges) && write(s,a.count)))
+    return false;
+  for(int i=0;i<a.count;++i)
+    if(!write(s,(int)a.route[i],0))
+      return false;
+  return write(s,a.all);
 }
 
-
-
-InputParser* Script::createParser(Condition** condition){
-  InputParser** parsers=new InputParser*[2];
-  parsers[0]=new Parser<Condition>(parsers+1,condition);
-  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-      Derefer<InputParser,InputParser**>(parsers),
-      Derefer<InputParser,InputParser**>(parsers+2));
-}
-InputParser* Script::createParser(Action*** action,int* count){
-  InputParser** parsers=new InputParser*[2];
-  parsers[0]=new ListParser<Action>(parsers+1,action,count);
-  return new SequentialInputParser<Derefer<InputParser,InputParser**> >(
-      Derefer<InputParser,InputParser**>(parsers),
-      Derefer<InputParser,InputParser**>(parsers+2));
-}
-void Script::returnParser(InputParser* parser){
-  SequentialInputParser<Derefer<InputParser,InputParser**> >* p=(SequentialInputParser<Derefer<InputParser,InputParser**> >*)parser;
-  delete *(p->end.data-2);
-  delete[] (p->end.data-2);
-  delete parser;
-};
 

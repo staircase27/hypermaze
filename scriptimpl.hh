@@ -594,32 +594,92 @@ IOResult read(HypIStream& s,ActionWinNextLevel& a);
  */
 bool write(HypOStream& s,const ActionWinNextLevel& a);
 
-class ActionForceWin:public Action{
+///force win after a move or select even when the normal win condition isn't true
+class ActionForceWin:public Action, protected PolymorphicHypIOImpl<ActionForceWin,6>{
   public:
-		virtual void doStart(ScriptResponseStart&,String&){};
-		virtual void doWin(ScriptResponseWin&,String&){};
-		virtual void doMove(ScriptResponseMove& r,String&){r.forceWin=true;};
-		virtual void doSelect(ScriptResponseSelect& r,String&){r.forceWin=true;};
+    ///@copydoc Action::doStart
+    ///implemented as a no-op as doesn't make sence to force a win at startup
+		virtual void doStart(ScriptResponseStart& r,String& s){};
+    ///@copydoc Action::doWin
+    ///implemented as a no-op as can't force win when already winning
+		virtual void doWin(ScriptResponseWin& r,String& s){};
+    ///@copydoc Action::doMove
+    ///sets the force win flag in the response objct
+		virtual void doMove(ScriptResponseMove& r,String& s){r.forceWin=true;};
+    ///@copydoc Action::doSelect
+    ///sets the force win flag in the response objct
+		virtual void doSelect(ScriptResponseSelect& r,String& s){r.forceWin=true;};
 };
+///Read an ActionForceWin from a stream
+/**
+ * @param s the stream to read from
+ * @param a ActionForceWin variable to read the data into
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ActionForceWin& a){
+  return IOResult(true,false);
+}
+///write an ActionForceWin to a stream
+/**
+ * @param s the stream to write to
+ * @param a the ActionForceWin to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ActionForceWin& a){
+  return true;
+}
 
-class ActionSelectStringPattern:public ActionCommon{
-  StringElementCondition change;
-  StringElementCondition select;
+///action to select or deselect portions of a string based on conditions
+class ActionStringConditionSelect:public ActionCommon, protected PolymorphicHypIOImpl<ActionStringConditionSelect,7>{
+  StringElementCondition change; ///<if the string element's selectedness should be changed
+  StringElementCondition select; ///<if the string element should be changed to selected or deselected
   
   public:
-    virtual void doCommon(ScriptResponse& r,String&);
+    ///@copydoc ActionCommon::doCommon
+    ///changes the selectedness of string elements and records that changes have been made in the response
+    virtual void doCommon(ScriptResponse& r,String& s);
 };
+///Read an ActionStringConditionSelect from a stream
+/**
+ * @param s the stream to read from
+ * @param a ActionStringConditionSelect variable to read the data into
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ActionStringConditionSelect& a);
+///write an ActionStringConditionSelect to a stream
+/**
+ * @param s the stream to write to
+ * @param a the ActionStringConditionSelect to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ActionStringConditionSelect& a);
 
-class ActionSetStringRoute:public ActionCommon,private StringMatcherCallback<StringPointer>{
-  StringMatcher ranges;
-  int count;
-  Dirn* route;
-  bool all;
+///action to set the route that selected parts of the string follow
+class ActionSetStringRoute:public ActionCommon, protected PolymorphicHypIOImpl<ActionSetStringRoute,9>{
+  StringMatcher ranges;///<String matcher to select the ranges to set the route for
+  int count;///<the number of elements in the new route
+  SPA<Dirn> route;///<the directions the string goes in the new route
+  bool all;///<set the route for all matches or just the first. if all then the changed string must eventually not match
   
-  StringEdit* se;
-  
-  virtual void process(SPA<Pair<SP<StringPointer> > > groups);
   public:
-    virtual void doCommon(ScriptResponse& r,String&);
+    ///@copydoc ActionCommon::doCommon
+    ///this calls the StringMatcher to find a match then edits the retuned match.
+    ///if all is true this is repeated till the pattern fails to match. this can lead to infinite loops
+    virtual void doCommon(ScriptResponse& r,String& s);
 };
+///Read an ActionSetStringRoute from a stream
+/**
+ * @param s the stream to read from
+ * @param a ActionSetStringRoute variable to read the data into
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ActionSetStringRoute& a);
+///write an ActionSetStringRoute to a stream
+/**
+ * @param s the stream to write to
+ * @param a the ActionSetStringRoute to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ActionSetStringRoute& a);
+
 #endif
