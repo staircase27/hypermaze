@@ -206,7 +206,7 @@ class SPA{
      * @param i the position relative to the element this points to to return
      * @return a reference to the element
      */
-    T& operator[](const int i){
+    T& operator[](const int i) const{
       return p[i];
     }
     ///Get a new pointer to the element i after the one this points to

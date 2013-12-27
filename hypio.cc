@@ -46,13 +46,14 @@ IOResult BufHypIStream::read(int& i,const int& base){
       l=INT_MIN;
     else
       l=INT_MAX;
+  }
   start=rend-buf;
   //must either be at end of file or have whitespace after the number
   if(! (HypIStream::isspace(*rend) || start==end) )
     return IOResult(false,start==end);
   i=(int)l;//cast. Am just going to force the cast for now may add checks later
   return IOResult(true,start==end);
-}
+};
 void BufHypIStream::mergebufs(char*& addto,int& tolen,char* addfrom,int& fromstart,int& fromlen){
   char* tmp=new char[tolen+fromlen+1];
   memcpy(tmp,addto,tolen);
@@ -262,7 +263,7 @@ bool write(HypOStream& s,const bool& b){
   return write(s,(int)b,0);
 }
 
-IOResult read(HypIStream& s,SPA<char>& str,const bool quote&){
+IOResult read(HypIStream& s,SPA<char>& str,const bool& quote){
   char* tmp=0;
   IOResult r=read(s,tmp,quote);
   str=SPA<char>(tmp);

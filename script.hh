@@ -1,5 +1,6 @@
 #include "maze.hh"
 #include "string.hh"
+#include "SmartPointer.hh"
 
 #ifndef SCRIPT_HH_INC
 #define SCRIPT_HH_INC
@@ -60,7 +61,7 @@ class PolymorphicHypIO{
      * @param s the stream to write this object to
      * @return true if the array was written ok
      */
-    virtual bool dowrite(HypOStream& s)=0;
+    virtual bool dowrite(HypOStream& s) const=0;
 };
 
 ///the different maze events that can trigger scripts  
@@ -89,6 +90,7 @@ class Condition: protected PolymorphicHypIO{
   public:
     ///the default condition to use when creating lists of conditions
     static const SP<Condition> defaultvalue;
+    friend bool write(HypOStream& s,const SP<const Condition>& c);
 };
 
 ///Read a Condition (as a pointer) from a stream
@@ -154,7 +156,7 @@ struct ScriptResponseStart:public ScriptResponse{};
 struct ScriptResponseWin:public ScriptResponse{
   bool block;///<block the winning
   Message winMessage;///<message to show on the win screen
-  Pair<const irr::stringc> nextLevel;///<next level to offer on the win screen
+  Pair<SPA<const char> > nextLevel;///<next level to offer on the win screen
   ///default constructor to setup the response as use defaults
   ScriptResponseWin():block(false),winMessage(),nextLevel("",""){}
 };
@@ -222,7 +224,7 @@ bool write(HypOStream& s,const SP<const Action>& c);
 class Event{
   public:
 		int trigger;
-		in  t conditionCount;
+		int conditionCount;
 		SPA<SP<Condition> > condition;
 		int actionCount;
 		SPA<SP<Action> > actions;
@@ -230,7 +232,7 @@ class Event{
 
 class Script{
   private:
-    int eventcount
+    int eventcount;
     SPA<Event> events;
     int* times;
   

@@ -22,6 +22,7 @@
 #define INT_MAX std::numeric_limits<int>::max()
 #define INT_MIN std::numeric_limits<int>::min()
 #endif
+#include "SmartPointer.hh"
 
 #ifndef HYPIO_HH_INC
 #define HYPIO_HH_INC 

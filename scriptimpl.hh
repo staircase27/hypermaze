@@ -13,8 +13,8 @@ template <class T,int ID>
 class PolymorphicHypIOImpl: public PolymorphicHypIO{
   protected:
     ///@copydoc PolymorphicHypIO
-    ///writes the id provided as a template aram then delegates writing data to the function for the templated type T
-    bool dowrite(HypOStream& s){
+    ///writes the id provided as a template param then delegates writing data to the function for the templated type T
+    virtual bool dowrite(HypOStream& s) const{
       if(!write(s,ID,0))
       return write(s,(T&)*this);
     }
@@ -121,7 +121,7 @@ struct PatternMatch{
   SP<POINTER> start;///<Pointer to the string element at the start of this section of the match
   SP<POINTER> end;///<Pointer to the string element at the end of this section of the match
   ///default constructor that sets to matched nothing
-  PatternMatch():start(0),end(0),length(0){};
+  PatternMatch():start(0),end(0){};
 };
 
 ///Class to implement to process matches
@@ -146,12 +146,11 @@ class StringMatcherCallback{
  * specified by groups property.
  */ 
 class StringMatcher{
-  private:
+  public:
     int count;///<the number of elements to the pattern
     SPA<Pair<PatternTag,StringElementCondition> > pattern;///<a List of the elements of the pattern
     int group_count;///<the number of groups to output
     SPA<Pair<int> > groups;///<the indicies in the part of the start and end of each group to output
-  public:
     ///default constructor that sets up with no pattern elements and no groups
 	  StringMatcher():count(0),pattern(0),group_count(0),groups(0){};
 	  ///get the number of groups this matchers will return
@@ -239,6 +238,22 @@ class StringMatcher{
 	      SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
 };
 
+///Read a StringMatcher from a stream
+/**
+ * @param s the stream to read from
+ * @param sm reference to a StringMatcher variable to store the read data in
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,StringMatcher sm);
+///write a StringMatcher to a stream
+/**
+ * @param s the stream to write to
+ * @param sm the StringMatcher to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const StringMatcher& sm);
+
+
 ///a condition that always returns True
 class ConditionTrue: public Condition, protected PolymorphicHypIOImpl<ConditionTrue,1>{
   public:
@@ -267,7 +282,7 @@ bool write(HypOStream& s,const ConditionTrue& c){return true;}
 
 ///Condition that matches if any of the subconditions match
 class ConditionOr: public Condition, protected PolymorphicHypIOImpl<ConditionOr,2>{
-  SPA<SP<Condition>> conditions;///< the conditions whose results are ored together
+  SPA<SP<Condition> > conditions;///< the conditions whose results are ored together
   int count;///< the number of conditions we combine the results of
   public:
     ///return true if any of the contained conditions return true
@@ -293,7 +308,7 @@ bool write(HypOStream& s,const ConditionOr& c);
 
 ///Condition that matches if all of the subconditions match
 class ConditionAnd: public Condition, protected PolymorphicHypIOImpl<ConditionAnd,3>{
-  SPA<SP<Condition>> conditions;///< the conditions whose results are anded together
+  SPA<SP<Condition> > conditions;///< the conditions whose results are anded together
   int count;///< the number of conditions we combine the results of
   public:
     ///return false if any of the contained conditions return false
@@ -397,9 +412,9 @@ bool write(HypOStream& s,const ConditionBefore& c);
 
 ///condition that matches if the string matches a StringMatcher pattern
 class ConditionStringPattern: public Condition, protected PolymorphicHypIOImpl<ConditionStringPattern,7>{
-  StringMatcher sm;///<the string matcher to check the string against
-  
   public:
+    StringMatcher sm;///<the string matcher to check the string against
+  
     ///return true if the string matches the StringMatcher
     /**
      * @copydoc Condition::is
@@ -423,7 +438,7 @@ IOResult read(HypIStream& s,ConditionStringPattern& c){
  * @param c the ConditionStringPattern to write
  * @return true if i was written ok
  */
-bool write(HypOStream& s,const ConditionBefore& c){
+bool write(HypOStream& s,const ConditionStringPattern& c){
   return write(s,c.sm);
 }
 
@@ -571,7 +586,7 @@ bool write(HypOStream& s,const ActionWinMessage& a);
 
 ///set the next level to show on the win screen
 class ActionWinNextLevel:public ActionWin, protected PolymorphicHypIOImpl<ActionWinNextLevel,5>{
-  Pair<SPA<const char>> nextLevel;///<the next level's url and a "name" for it
+  Pair<SPA<const char> > nextLevel;///<the next level's url and a "name" for it
   public:
     ///@copydoc Action::doWin
     ///sets the next level to show on the win screen in the response object
