@@ -12,6 +12,7 @@ namespace irr{
 
 #ifndef HYPIOIMP_HH_INC
 #define HYPIOIMP_HH_INC
+
 class BufHypIStream: public HypIStream{
   protected:
     int len;
@@ -45,6 +46,16 @@ class IrrHypIStream: public BufHypIStream{
 };
 #endif
 
+class MemoryHypIStream: public BufHypIStream{
+  public:
+    MemoryHypIStream(SPA<const char> buf,int len);
+    MemoryHypIStream(char const* buf,int len);
+    ~MemoryHypIStream(){};
+
+  protected:
+    void readtobuf(){};
+};
+
 class BufHypOStream: public HypOStream{
   protected:
     int len;
@@ -61,6 +72,10 @@ class BufHypOStream: public HypOStream{
     
     bool write(const int&,const int&);
     bool write(const char*&,const bool&);
+  public:
+    virtual void flush(){
+      writeToSink();
+    }
     
 };
 
@@ -77,6 +92,15 @@ class IrrHypOStream: public BufHypOStream{
     
 };
 #endif
+class MemoryHypOStream: public BufHypOStream{
+  public:
+    SPA<char>& str;
+    int strlen;
+    MemoryHypOStream(SPA<char>& str);
+    
+  protected:
+    bool writeToSink();
+    
+};
 
-//test
 #endif

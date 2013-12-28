@@ -159,6 +159,8 @@ class HypOStream{
     inline void setDefaultSpace(const char* space){
       defaultspace=space;
     }
+    ///force writing of any data to the underlying storage
+    virtual void flush()=0;
 };
 
 ///write an integer to a stream in the specified base

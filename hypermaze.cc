@@ -10,6 +10,7 @@
 #include "script.hh"
 
 //for testing REMOVE LATER
+#include "hypioimp.hh"
 #include "scriptimpl.hh"
 
 
@@ -247,138 +248,150 @@ int main(int argc,char* argv[]){
     in->drop();
   }
   
-  #ifdef NEVER_DEFINED
   #ifdef IOSTREAM
   
   {
     StringElementCondition sec;
-    cout<<"output for blank"<<endl;
-    irr::stringc str;
-    sec.output(&str);
-    cout<<str.c_str()<<endl;
-    const char* data="1 "
+    cout<<"output for blank StringElementCondition"<<endl;
+    SPA<char> str;
+    MemoryHypOStream os(str);
+    if(!write(os,sec))
+      cout<<"error writing"<<endl;
+    os.flush();
+    cout<<"'"<<&*str<<"'"<<endl;
+    const char* data=" 1 0 "//
                       "0 "//no x conditions
                       "1 "//one y condition
                       "1 1 "//y is exactly 1
                       "4 "//4 for the z
                       "* 0 2 3 5 *";//up to <0 2-3 and >5 (plus a missing one)
-    cout<<"input"<<endl<<data<<endl;
-    irr::IReadFile* file=irr::createMemoryReadFile((void*)data,strlen(data),"",false);
-    StringConditionParser secp(&sec);
-    ::parse(file,&secp);
-    str=irr::stringc();
-    sec.output(&str);
-    cout<<"output"<<endl<<str.c_str()<<endl;
+    cout<<"input"<<endl<<"'"<<data<<"'"<<endl;
+    MemoryHypIStream is(data,strlen(data));
+    read(is,sec);
+    os.strlen=0;
+    cout<<"output"<<endl;
+    if(!write(os,sec))
+      cout<<"error writing"<<endl;
+    os.flush();
+    cout<<"'"<<&*str<<"'"<<endl;
   }
   
   {
-    irr::stringc str;
+    SPA<char> str;
+    MemoryHypOStream os(str);
+
     StringMatcher sm;
     
     sm.count=1;
-    sm.pattern=new pair<PatternTag,StringElementCondition>[5];
+    sm.pattern=new Pair<PatternTag,StringElementCondition>[5];
     
-    str=irr::stringc();
-    sm.output(&str);
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
-    sm.pattern[0].first.max=6000;
-    str=irr::stringc();
-    sm.output(&str);
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    sm.pattern[0].a.max=6000;
+    os.strlen=0;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
     cout<<sm.match(pd.s)<<endl;
      
-    sm.pattern[0].first.greedy=false;
-    str=irr::stringc();
-     sm.output(&str);
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    sm.pattern[0].a.greedy=false;
+    os.strlen=0;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
     cout<<sm.match(pd.s)<<endl;
      
-    sm.pattern[0].first.min=6000;
-    str=irr::stringc();
-    sm.output(&str);
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    sm.pattern[0].a.min=6000;
+    os.strlen=0;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
-    sm.pattern[0].first.min=0;
-    sm.pattern[0].second.selectionCondition=1;
-    str=irr::stringc();
-    sm.output(&str);
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    sm.pattern[0].a.min=0;
+    sm.pattern[0].b.selectionCondition=1;
+    os.strlen=0;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
-    sm.pattern[1].first.max=6000;
+    sm.pattern[1].a.max=6000;
     sm.count=2;
-    str=irr::stringc();
-    sm.output(&str);
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    os.strlen=0;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
-    sm.pattern[0].first.greedy=true;
-    str=irr::stringc();
-    sm.output(&str);
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    sm.pattern[0].a.greedy=true;
+    os.strlen=0;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
-    sm.pattern[0].second.selectionCondition=0;
-    sm.pattern[1].first.min=3;
-    sm.pattern[1].first.max=3;
-    str=irr::stringc();
-    sm.output(&str);
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    sm.pattern[0].b.selectionCondition=0;
+    sm.pattern[1].a.min=3;
+    sm.pattern[1].a.max=3;
+    os.strlen=0;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
-    sm.pattern[0].first.greedy=false;
-    str=irr::stringc();
-    sm.output(&str);
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    sm.pattern[0].a.greedy=false;
+    os.strlen=0;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
-    sm.groups=new pair<int,int>[2];
-    sm.groups[0].first=0;
-    sm.groups[0].second=1;
-    sm.groups[1].first=1;
-    sm.groups[1].second=0;
+    sm.groups=new Pair<int>[2];
+    sm.groups[0].a=0;
+    sm.groups[0].b=1;
+    sm.groups[1].a=1;
+    sm.groups[1].b=0;
     sm.group_count=2;
     
-    pair<SP<StringPointer>,SP<StringPointer> >* groups=new pair<SP<StringPointer>,SP<StringPointer> >[2];
-    str=irr::stringc();
-    sm.output(&str);
-    irr::stringc data(str);//save to reload later
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    SPA<Pair<SP<StringPointer> > > groups(new Pair<SP<StringPointer> >[2]);
+    os.strlen=0;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
+    SPA<char> data(str);//save to reload later
     cout<<sm.match(pd.s,groups)<<endl;
-    cout<<*groups[0].first<<" "<<*groups[0].second<<endl;
-    cout<<*groups[1].first<<" "<<*groups[1].second<<endl;
-    delete[] groups;
+    cout<<*groups[0].a<<" "<<*groups[0].b<<endl;
+    cout<<*groups[1].a<<" "<<*groups[1].b<<endl;
 
-    groups=new pair<SP<StringPointer>,SP<StringPointer> >[2];
-    sm.pattern[0].second.selectionCondition=3;
-    str=irr::stringc();
-    sm.output(&str);
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    groups=SPA<Pair<SP<StringPointer> > >(new Pair<SP<StringPointer>,SP<StringPointer> >[2]);
+    sm.pattern[0].b.selectionCondition=3;
+    os.strlen=0;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
     cout<<sm.match(pd.s,groups)<<endl;
-    cout<<&*groups[0].first<<" "<<&*groups[0].second<<endl;
-    cout<<&*groups[1].first<<" "<<&*groups[1].second<<endl;
-    delete[] groups;
+    cout<<&*groups[0].a<<" "<<&*groups[0].b<<endl;
+    cout<<&*groups[1].a<<" "<<&*groups[1].b<<endl;
     
-    cout<<"input"<<endl<<data.c_str()<<endl;
-    irr::IReadFile* file=irr::createMemoryReadFile((void*)data.c_str(),strlen(data.c_str()),"",false);
-    InputParser* parser=sm.createParser();
-    ::parse(file,parser);
-    sm.returnParser(parser);
-    file->drop();
+    cout<<"input"<<endl<<&*data<<endl;
+    MemoryHypIStream is(data,strlen(&*data));
+    read(is,sm);
     
-    groups=new pair<SP<StringPointer>,SP<StringPointer> >[2];
-    str=irr::stringc();
-    sm.output(&str);
-    cout<<"pattern"<<endl<<str.c_str()<<endl;
+    groups=SPA<Pair<SP<StringPointer> > >(new Pair<SP<StringPointer>,SP<StringPointer> >[2]);
+    os.strlen=0;
+    write(os,sm);
+    os.flush();
+    cout<<"pattern"<<endl<<&*str<<endl;
     cout<<sm.match(pd.s,groups)<<endl;
-    cout<<*groups[0].first<<" "<<*groups[0].second<<endl;
-    cout<<*groups[1].first<<" "<<*groups[1].second<<endl;
-    delete[] groups;
+    cout<<*groups[0].a<<" "<<*groups[0].b<<endl;
+    cout<<*groups[1].a<<" "<<*groups[1].b<<endl;
   }
 
+  #ifdef NEVER_DEFINED
   {
     const char* data=""// ((True or (True and (Not True))) And String is selected and pointing left)
       "3 2 "

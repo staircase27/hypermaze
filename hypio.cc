@@ -42,6 +42,7 @@ IOResult BufHypIStream::read(int& i,const int& base){
     }
     if(!*rend=='*')
       return IOResult(false,rend==buf+end);
+    ++rend;
     if(neg)
       l=INT_MIN;
     else
@@ -120,6 +121,25 @@ void IrrHypIStream::readtobuf(){
     eof=true;
 }
 #endif
+MemoryHypIStream::MemoryHypIStream(SPA<const char> _buf,int _len){
+  delete[] buf;
+  len=_len+1;
+  buf=new char[len];
+  memcpy(buf,&*_buf,_len);
+  buf[_len]='\0';
+  end=_len;
+  eof=true;
+}
+MemoryHypIStream::MemoryHypIStream(const char* _buf,int _len){
+  delete[] buf;
+  len=_len+1;
+  buf=new char[len];
+  memcpy(buf,_buf,_len);
+  buf[_len]='\0';
+  end=_len;
+  eof=true;
+}
+
 IOResult read(HypIStream& s,int& i,const int& base){
   return s.read(i,base);
 }
@@ -245,6 +265,17 @@ bool IrrHypOStream::writeToSink(){
   end=0;
 }
 #endif
+MemoryHypOStream::MemoryHypOStream(SPA<char>& str):str(str),strlen(0){};
+
+bool MemoryHypOStream::writeToSink(){
+  char* tmp=new char[strlen+end+1];
+  memcpy(tmp,&*str,strlen);
+  memcpy(tmp+strlen,buf,end);
+  tmp[strlen+end]='\0';
+  str=SPA<char>(tmp);
+  strlen=strlen+end;
+  end=0;
+}
 
 bool write(HypOStream& s,const int& i,const int& base){
   return s.write(i,base);
