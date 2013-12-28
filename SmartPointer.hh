@@ -39,7 +39,8 @@ class SP{
     template <class U>
     SP<T>(const SP<U>& op):p(op.p),c(op.c){++*c;}
     
-    friend class SP<const T>;
+    template <class U>
+    friend class SP;
     
     ///Destructor for pointer
     /**
@@ -151,7 +152,8 @@ class SPA{
     template <class U>
     SPA<T>(const SPA<U>& op):p(op.p),c(op.c),h(op.h){++*c;}
 
-    friend class SPA<const T>;
+    template <class U>
+    friend class SPA;
     
     ///Destructor for pointer
     /**

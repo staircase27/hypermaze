@@ -48,7 +48,7 @@ IOResult read(HypIStream& s,SPA<SP<T> >& a, int& c);
  * @return true if the array was written ok
  */
 template <class T>
-bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c);
+bool write(HypOStream& s,const SPA<SP<T> >& a, const int& c);
 
 ///Helper class to allow classes to be written to a stream using a pointer to a base type
 /**
@@ -75,7 +75,7 @@ enum Trigger{
 class Script;
 
 ///A Condition to select if an event should trigger or not
-class Condition: protected PolymorphicHypIO{
+class Condition: protected virtual PolymorphicHypIO{
   public:
     ///Check if the condition is matched
     /**
@@ -174,7 +174,7 @@ struct ScriptResponseSelect:public ScriptResponse{
 };
 
 ///A general action object
-class Action: protected PolymorphicHypIO{
+class Action: protected virtual PolymorphicHypIO{
   public:
     ///do the appropriate action for a start event
     /**
@@ -202,6 +202,8 @@ class Action: protected PolymorphicHypIO{
 		virtual void doSelect(ScriptResponseSelect& r,String& s)=0;
     ///the default Action to use when creating lists of Actions
     static const SP<Action> defaultvalue;
+    ///enable write to access the protected method
+    friend bool write(HypOStream& s,const SP<const Action>& c);
 };
 
 ///Read an Action (as a pointer) from a stream

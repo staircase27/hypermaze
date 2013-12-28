@@ -207,7 +207,7 @@ bool write(HypOStream& s,const bool& b);
  * @param quote if the string to read will be quoted
  * @return an IOResult object that contains the status of the read
  */
-IOResult read(HypIStream& s,SPA<char>& str,const bool& quote);
+IOResult read(HypIStream& s,SPA<const char>& str,const bool& quote);
 ///write an string from a smart pointer to a stream optionally with quoting
 /**
  * The quote character is automatically chosen if quoted output is asked for

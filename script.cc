@@ -264,7 +264,7 @@ IOResult read(HypIStream& s,SPA<SP<T> >& a, int& c){
   }
 }
 template <class T>
-bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c){
+bool write(HypOStream& s,const SPA<SP<T> >& a, const int& c){
   if(!write(s,c,0))
     return false;
   for(int i=0;i<c;++i)
@@ -275,10 +275,11 @@ bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c){
 
 const SP<Condition> Condition::defaultvalue=SP<Condition>(new ConditionTrue());
 
-template <class T>
-IOResult createAndRead(HypIStream& s,SP<T>& c){
-  c=SP<T>(new T());
-  return read(s,*c);
+template <class T,class U>
+IOResult createAndRead(HypIStream& s,SP<U>& c){
+  SP<T> ac=SP<T>(new T());
+  c=ac;
+  return read(s,*ac);
 }
 IOResult read(HypIStream& s,SP<Condition>& c){
   int id=0;
@@ -372,15 +373,15 @@ IOResult read(HypIStream& s,Message& m){
     m.count=0;
     return r;
   }
-  m.paragraphs=SPA<Pair<SPA<char> > >(new Pair<SPA<char> >[m.count]);
+  m.paragraphs=SPA<Pair<SPA<const char> > >(new Pair<SPA<const char> >[m.count]);
   int i=0;
   for(;i<m.count;++i)
     if(!((r=read(s,m.paragraphs[i].a,false)).ok && (r=read(s,m.paragraphs[i].b,true)).ok))
       break;
-  if(i<c){
-    SP<char> defaultvalue(new char[1]);
+  if(i<m.count){
+    SPA<char> defaultvalue(new char[1]);
     defaultvalue[0]='\0';
-    for(;i<c;++i){
+    for(;i<m.count;++i){
       m.paragraphs[i].a=defaultvalue;
       m.paragraphs[i].b=defaultvalue;
     }
@@ -411,7 +412,7 @@ IOResult read(HypIStream& s,SP<Action>& a){
     case 1:
       return createAndRead<ActionNothing>(s,a);
     case 2:
-      return createAndRead<ActionMesage>(s,a);
+      return createAndRead<ActionMessage>(s,a);
     case 3:
       return createAndRead<ActionBlockWin>(s,a);
     case 4:
@@ -437,8 +438,8 @@ void ActionMessage::doCommon(ScriptResponse& r,String&){
     r.messages=new Message[1];
   }else{
     Message* tmp=new Message[r.messageCount+1];
-    memcpy(tmp,r.messages,r.messageCount*sizeof(Message));
-    r.messages=tmp;
+    memcpy(tmp,&*r.messages,r.messageCount*sizeof(Message));
+    r.messages=SPA<Message>(tmp);
   }
   r.messages[r.messageCount]=m;
   ++r.messageCount;
@@ -507,13 +508,13 @@ IOResult read(HypIStream& s,ActionSetStringRoute& a){
   IOResult r=read(s,a.ranges);
   if(!r.ok)
     return r;
-  if(!(r=read(s,a.count,0).ok){
+  if(!(r=read(s,a.count,0)).ok){
     a.count=0;
     return r;
   }
   a.route=SPA<Dirn>(new Dirn[a.count]);
   for(int i=0;i<a.count;++i){
-    if(!(r=read(s,(int)a.route[i],0)))
+    if(!(r=read(s,(int&)a.route[i],0)).ok)
       return r;
   }
   return read(s,a.all);
@@ -526,5 +527,3 @@ bool write(HypOStream& s,const ActionSetStringRoute& a){
       return false;
   return write(s,a.all);
 }
-
-

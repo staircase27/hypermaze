@@ -10,7 +10,7 @@
  * @tparam ID the id of this type. THIS MUST BE SAME AS IN THE SWITCH IN read(HypIStream,SP<Condition>)
  */
 template <class T,int ID>
-class PolymorphicHypIOImpl: public PolymorphicHypIO{
+class PolymorphicHypIOImpl: protected virtual PolymorphicHypIO{
   protected:
     ///@copydoc PolymorphicHypIO
     ///writes the id provided as a template param then delegates writing data to the function for the templated type T
@@ -255,7 +255,7 @@ bool write(HypOStream& s,const StringMatcher& sm);
 
 
 ///a condition that always returns True
-class ConditionTrue: public Condition, protected PolymorphicHypIOImpl<ConditionTrue,1>{
+class ConditionTrue: public Condition, public PolymorphicHypIOImpl<ConditionTrue,1>{
   public:
     ///Always return true as the condition is always matched
     /**
@@ -281,10 +281,10 @@ IOResult read(HypIStream& s,ConditionTrue& c){return IOResult(true,false);}
 bool write(HypOStream& s,const ConditionTrue& c){return true;}
 
 ///Condition that matches if any of the subconditions match
-class ConditionOr: public Condition, protected PolymorphicHypIOImpl<ConditionOr,2>{
-  SPA<SP<Condition> > conditions;///< the conditions whose results are ored together
-  int count;///< the number of conditions we combine the results of
+class ConditionOr: public Condition, public PolymorphicHypIOImpl<ConditionOr,2>{
   public:
+    SPA<SP<Condition> > conditions;///< the conditions whose results are ored together
+    int count;///< the number of conditions we combine the results of
     ///return true if any of the contained conditions return true
     /**
      * @copydoc Condition::is
@@ -308,9 +308,9 @@ bool write(HypOStream& s,const ConditionOr& c);
 
 ///Condition that matches if all of the subconditions match
 class ConditionAnd: public Condition, protected PolymorphicHypIOImpl<ConditionAnd,3>{
-  SPA<SP<Condition> > conditions;///< the conditions whose results are anded together
-  int count;///< the number of conditions we combine the results of
   public:
+    SPA<SP<Condition> > conditions;///< the conditions whose results are anded together
+    int count;///< the number of conditions we combine the results of
     ///return false if any of the contained conditions return false
     /**
      * @copydoc Condition::is
@@ -334,8 +334,8 @@ bool write(HypOStream& s,const ConditionAnd& c);
 
 ///condition that matches if the contained condition doesn't match
 class ConditionNot: public Condition, protected PolymorphicHypIOImpl<ConditionNot,4>{
-  SP<Condition> condition;///<the condition whose result is negated
   public:
+    SP<Condition> condition;///<the condition whose result is negated
     ///return false if the contained condition returns true
     /**
      * @copydoc Condition::is
@@ -361,9 +361,9 @@ bool write(HypOStream& s,const ConditionNot& c);
 
 ///condition that matches if another event has run and last ran a specified number of seconds ago
 class ConditionAfter: public Condition, protected PolymorphicHypIOImpl<ConditionAfter,5>{
-  int event;///<the id of the event that has to run before this can match
-  int delay;///<the delay after the event has run before this can match
   public:
+    int event;///<the id of the event that has to run before this can match
+    int delay;///<the delay after the event has run before this can match
     ///return true if the specified event has run and the specified delay has passed
     /**
      * @copydoc Condition::is
@@ -387,8 +387,8 @@ bool write(HypOStream& s,const ConditionAfter& c);
 
 ///condition that matches if another event hasn't run yet
 class ConditionBefore: public Condition, protected PolymorphicHypIOImpl<ConditionBefore,6>{
-  int event;///<the id of the event that has to run before this can match
   public:
+    int event;///<the id of the event that has to run before this can match
     ///return true if the specified event hasn't run
     /**
      * @copydoc Condition::is
@@ -586,8 +586,8 @@ bool write(HypOStream& s,const ActionWinMessage& a);
 
 ///set the next level to show on the win screen
 class ActionWinNextLevel:public ActionWin, protected PolymorphicHypIOImpl<ActionWinNextLevel,5>{
-  Pair<SPA<const char> > nextLevel;///<the next level's url and a "name" for it
   public:
+    Pair<SPA<const char> > nextLevel;///<the next level's url and a "name" for it
     ///@copydoc Action::doWin
     ///sets the next level to show on the win screen in the response object
     virtual void doWin(ScriptResponseWin& r,String& s){
@@ -646,10 +646,10 @@ bool write(HypOStream& s,const ActionForceWin& a){
 
 ///action to select or deselect portions of a string based on conditions
 class ActionStringConditionSelect:public ActionCommon, protected PolymorphicHypIOImpl<ActionStringConditionSelect,7>{
-  StringElementCondition change; ///<if the string element's selectedness should be changed
-  StringElementCondition select; ///<if the string element should be changed to selected or deselected
-  
   public:
+    StringElementCondition change; ///<if the string element's selectedness should be changed
+    StringElementCondition select; ///<if the string element should be changed to selected or deselected
+  
     ///@copydoc ActionCommon::doCommon
     ///changes the selectedness of string elements and records that changes have been made in the response
     virtual void doCommon(ScriptResponse& r,String& s);
@@ -671,12 +671,12 @@ bool write(HypOStream& s,const ActionStringConditionSelect& a);
 
 ///action to set the route that selected parts of the string follow
 class ActionSetStringRoute:public ActionCommon, protected PolymorphicHypIOImpl<ActionSetStringRoute,9>{
-  StringMatcher ranges;///<String matcher to select the ranges to set the route for
-  int count;///<the number of elements in the new route
-  SPA<Dirn> route;///<the directions the string goes in the new route
-  bool all;///<set the route for all matches or just the first. if all then the changed string must eventually not match
-  
   public:
+    StringMatcher ranges;///<String matcher to select the ranges to set the route for
+    int count;///<the number of elements in the new route
+    SPA<Dirn> route;///<the directions the string goes in the new route
+    bool all;///<set the route for all matches or just the first. if all then the changed string must eventually not match
+  
     ///@copydoc ActionCommon::doCommon
     ///this calls the StringMatcher to find a match then edits the retuned match.
     ///if all is true this is repeated till the pattern fails to match. this can lead to infinite loops
