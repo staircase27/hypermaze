@@ -264,7 +264,7 @@ IOResult read(HypIStream& s,SPA<SP<T> >& a, int& c){
   }
 }
 template <class T>
-bool write(HypOStream& s,const SPA<SP<T> >& a, const int& c){
+bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c){
   if(!write(s,c,0))
     return false;
   for(int i=0;i<c;++i)
@@ -321,7 +321,7 @@ IOResult read(HypIStream& s,ConditionOr& c){
   return read(s,c.conditions,c.count);
 }
 bool write(HypOStream& s,const ConditionOr& c){
-  return write(s,c.conditions,c.count);
+  return write(s,(SPA<const SP<const Condition> >&)c.conditions,c.count);
 }
 
 bool ConditionAnd::is(int time,const Script& script,const String& s){
@@ -334,14 +334,14 @@ IOResult read(HypIStream& s,ConditionAnd& c){
   return read(s,c.conditions,c.count);
 }
 bool write(HypOStream& s,const ConditionAnd& c){
-  return write(s,c.conditions,c.count);
+  return write(s,(SPA<const SP<const Condition> >&)c.conditions,c.count);
 }
 
 IOResult read(HypIStream& s,ConditionNot& c){
   return read(s,c.condition);
 }
 bool write(HypOStream& s,const ConditionNot& c){
-  return write(s,c.condition);
+  return write(s,(SP<const Condition>&)c.condition);
 }
 
 bool ConditionAfter::is(int time,const Script& script,const String& s){

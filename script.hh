@@ -48,7 +48,7 @@ IOResult read(HypIStream& s,SPA<SP<T> >& a, int& c);
  * @return true if the array was written ok
  */
 template <class T>
-bool write(HypOStream& s,const SPA<SP<T> >& a, const int& c);
+bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c);
 
 ///Helper class to allow classes to be written to a stream using a pointer to a base type
 /**

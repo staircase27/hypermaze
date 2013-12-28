@@ -253,9 +253,8 @@ IOResult read(HypIStream& s,StringMatcher sm);
  */
 bool write(HypOStream& s,const StringMatcher& sm);
 
-
 ///a condition that always returns True
-class ConditionTrue: public Condition, public PolymorphicHypIOImpl<ConditionTrue,1>{
+class ConditionTrue: public Condition, protected PolymorphicHypIOImpl<ConditionTrue,1>{
   public:
     ///Always return true as the condition is always matched
     /**
@@ -270,7 +269,7 @@ class ConditionTrue: public Condition, public PolymorphicHypIOImpl<ConditionTrue
  * @param c reference to a ConditionTrue variable. This isn't actually changed
  * @return an IOResult object that is always the fully ok read response
  */
-IOResult read(HypIStream& s,ConditionTrue& c){return IOResult(true,false);}
+inline IOResult read(HypIStream& s,ConditionTrue& c){return IOResult(true,false);}
 ///write a ConditionTrue to a stream
 /**
  * this is actually a no-op as a ConditionTrue has no data
@@ -278,10 +277,10 @@ IOResult read(HypIStream& s,ConditionTrue& c){return IOResult(true,false);}
  * @param c the ConditionTrue that would be written if there was anything to write
  * @return true always as writing nothing always succeds
  */
-bool write(HypOStream& s,const ConditionTrue& c){return true;}
+inline bool write(HypOStream& s,const ConditionTrue& c){return true;}
 
 ///Condition that matches if any of the subconditions match
-class ConditionOr: public Condition, public PolymorphicHypIOImpl<ConditionOr,2>{
+class ConditionOr: public Condition, protected PolymorphicHypIOImpl<ConditionOr,2>{
   public:
     SPA<SP<Condition> > conditions;///< the conditions whose results are ored together
     int count;///< the number of conditions we combine the results of
@@ -429,7 +428,7 @@ class ConditionStringPattern: public Condition, protected PolymorphicHypIOImpl<C
  * @param c reference to a ConditionStringPattern variable to store the read data in
  * @return an IOResult object that contains the status of the read
  */
-IOResult read(HypIStream& s,ConditionStringPattern& c){
+inline IOResult read(HypIStream& s,ConditionStringPattern& c){
   return read(s,c.sm);
 }
 ///write a ConditionStringPattern to a stream
@@ -438,7 +437,7 @@ IOResult read(HypIStream& s,ConditionStringPattern& c){
  * @param c the ConditionStringPattern to write
  * @return true if i was written ok
  */
-bool write(HypOStream& s,const ConditionStringPattern& c){
+inline bool write(HypOStream& s,const ConditionStringPattern& c){
   return write(s,c.sm);
 }
 
@@ -494,7 +493,7 @@ class ActionNothing:public ActionCommon, protected PolymorphicHypIOImpl<ActionNo
  * @param a ActionNothing variable to read the data into
  * @return an IOResult object that contains the status of the read
  */
-IOResult read(HypIStream& s,ActionNothing& a){
+inline IOResult read(HypIStream& s,ActionNothing& a){
   return IOResult(true,false);
 }
 ///write an ActionNothing to a stream
@@ -503,7 +502,7 @@ IOResult read(HypIStream& s,ActionNothing& a){
  * @param a the ActionNothing to write
  * @return true if i was written ok
  */
-bool write(HypOStream& s,const ActionNothing& a){
+inline bool write(HypOStream& s,const ActionNothing& a){
   return true;
 }
 
@@ -546,7 +545,7 @@ class ActionBlockWin:public ActionWin, protected PolymorphicHypIOImpl<ActionBloc
  * @param a ActionBlockWin variable to read the data into
  * @return an IOResult object that contains the status of the read
  */
-IOResult read(HypIStream& s,ActionBlockWin& a){
+inline IOResult read(HypIStream& s,ActionBlockWin& a){
   return IOResult(true,false);
 }
 ///write an ActionBlockWin to a stream
@@ -555,7 +554,7 @@ IOResult read(HypIStream& s,ActionBlockWin& a){
  * @param a the ActionBlockWin to write
  * @return true if i was written ok
  */
-bool write(HypOStream& s,const ActionBlockWin& a){
+inline bool write(HypOStream& s,const ActionBlockWin& a){
   return true;
 }
 
@@ -631,7 +630,7 @@ class ActionForceWin:public Action, protected PolymorphicHypIOImpl<ActionForceWi
  * @param a ActionForceWin variable to read the data into
  * @return an IOResult object that contains the status of the read
  */
-IOResult read(HypIStream& s,ActionForceWin& a){
+inline IOResult read(HypIStream& s,ActionForceWin& a){
   return IOResult(true,false);
 }
 ///write an ActionForceWin to a stream
@@ -640,7 +639,7 @@ IOResult read(HypIStream& s,ActionForceWin& a){
  * @param a the ActionForceWin to write
  * @return true if i was written ok
  */
-bool write(HypOStream& s,const ActionForceWin& a){
+inline bool write(HypOStream& s,const ActionForceWin& a){
   return true;
 }
 
