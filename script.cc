@@ -207,7 +207,7 @@ bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > ma
   }
 }
 
-IOResult read(HypIStream& s,StringMatcher sm){
+IOResult read(HypIStream& s,StringMatcher& sm){
   IOResult r;
   if(!(r=read(s,sm.count,0)).ok){
     sm.count=0;
@@ -252,8 +252,10 @@ IOResult read(HypIStream& s,SPA<SP<T> >& a, int& c){
   a=SPA<SP<T> >(new SP<T>[c]);
   int i=0;
   for(;i<c;++i){
-    if(!(r=read(s,a[i])).ok)
+    if(!(r=read(s,a[i])).ok){
+      ++i;
       break;
+    }
   }
   if(i<c){
     for(;i<c;++i)

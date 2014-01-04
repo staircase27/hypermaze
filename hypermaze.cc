@@ -391,34 +391,37 @@ int main(int argc,char* argv[]){
     cout<<*groups[1].a<<" "<<*groups[1].b<<endl;
   }
 
-  #ifdef NEVER_DEFINED
   {
     const char* data=""// ((True or (True and (Not True))) And String is selected and pointing left)
-      "3 2 "
+      "3 2 "//and with two elements
         "2 2 "//add a or with 2 elements
             "1 "// add a true
           "3 2 "//add a and with 2 elements
             "1 "//add a true
             "4 1 "//add a not true
-        "7 1 0 6000 1 Y 2 0 0 0";
-    cout<<data<<endl;
-    irr::IReadFile* file=irr::createMemoryReadFile((void*)data,strlen(data),"",false);//cast is safe as read file
-    Condition* condition;
-    Script s;
-    InputParser* parser=s.createParser(&condition);
-    ::parse(file,parser);
-    s.returnParser(parser);
+        "7 1 0 * 1 1 2 0 0 0 0";// string condition of any length string where all selected and pointing left
+    
+    cout<<"input"<<endl<<&*data<<endl;
+    MemoryHypIStream is(data,strlen(&*data));
+
+    SP<Condition> condition;
+    read(is,condition);
+
     cout<<"parsed"<<endl;
-    cout<<condition->is(0,Script(),pd.s)<<endl;
-    cout<<"output"<<endl;
-    irr::stringc str;
-    condition->output(&str);
-    cout<<str.c_str()<<endl;
-    file->drop();
-    delete condition;
+    Script s;
+    cout<<condition->is(0,s,pd.s)<<endl;
+
+    SPA<char> str;
+    MemoryHypOStream os(str);
+
+    write(os,(SP<const Condition>&)condition);
+    os.flush();
+    cout<<"output"<<endl<<&*str<<endl;
+    
     cout<<"end condition test"<<endl;
   }
 
+  #ifdef NEVER_DEFINED
   {
   	StringEdit se(pd.s);
   	StringPointer ps=pd.s.begin();

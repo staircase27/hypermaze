@@ -16,6 +16,7 @@ class PolymorphicHypIOImpl: protected virtual PolymorphicHypIO{
     ///writes the id provided as a template param then delegates writing data to the function for the templated type T
     virtual bool dowrite(HypOStream& s) const{
       if(!write(s,ID,0))
+        return false;
       return write(s,(T&)*this);
     }
 };
@@ -244,7 +245,7 @@ class StringMatcher{
  * @param sm reference to a StringMatcher variable to store the read data in
  * @return an IOResult object that contains the status of the read
  */
-IOResult read(HypIStream& s,StringMatcher sm);
+IOResult read(HypIStream& s,StringMatcher& sm);
 ///write a StringMatcher to a stream
 /**
  * @param s the stream to write to

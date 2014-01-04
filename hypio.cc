@@ -4,8 +4,9 @@
  */
 #include "hypio.hh"
 #include "hypioimp.hh"
+
 //#include <iostream>
-using namespace std;
+//using namespace std;
 BufHypIStream::BufHypIStream():len(255),buf(new char[len+1]),start(0),end(0),eof(false){}
 
 BufHypIStream::~BufHypIStream(){
@@ -13,23 +14,25 @@ BufHypIStream::~BufHypIStream(){
 }
 
 void BufHypIStream::consumewhitespace(){
-  if(start==end)
+  if(start>=end)
     if(eof)
       return;
     else
       readtobuf();
-  while(HypIStream::isspace(buf[start]))
-    if(++start==end)
+  while(HypIStream::isspace(buf[start])){
+    if(++start>=end){
       if(eof)
         return;
       else
         readtobuf();
+    }
+  }
 }
 IOResult BufHypIStream::read(int& i,const int& base){
   consumewhitespace();//ensure first char is not whitespace so can check if anything was parsed
   char* rend=0;
   long l=strtol(buf+start,&rend,base);
-  while(rend==buf+end && !eof){//try reading more data
+  while(rend>=buf+end && !eof){//try reading more data
     readtobuf();
     l=strtol(buf+start,&rend,base);//try again with more data
   }
@@ -40,7 +43,7 @@ IOResult BufHypIStream::read(int& i,const int& base){
       neg=true;
       ++rend;
     }
-    if(!*rend=='*')
+    if(!(*rend=='*'))
       return IOResult(false,rend==buf+end);
     ++rend;
     if(neg)
@@ -50,7 +53,7 @@ IOResult BufHypIStream::read(int& i,const int& base){
   }
   start=rend-buf;
   //must either be at end of file or have whitespace after the number
-  if(! (HypIStream::isspace(*rend) || start==end) )
+  if(! (start>=end || HypIStream::isspace(*rend)) )
     return IOResult(false,start==end);
   i=(int)l;//cast. Am just going to force the cast for now may add checks later
   return IOResult(true,start==end);
