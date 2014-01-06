@@ -65,7 +65,7 @@ struct StringElementCondition{
   template <class T>
   inline bool matches(T el);
   ///Default constructor that initialises the condition to match everything
-  StringElementCondition():selectionCondition(2),dirnsCondition(ALLDIRNSMASK),xrange_count(0),xrange(0),yrange_count(0),yrange(0),zrange_count(0),zrange(0){};
+  StringElementCondition():selectionCondition(2),dirnsCondition(ALLDIRNSMASK),xrange_count(0),xrange(),yrange_count(0),yrange(),zrange_count(0),zrange(){};
 };
 
 ///Read a StringElementCondition from a stream
@@ -153,7 +153,7 @@ class StringMatcher{
     int group_count;///<the number of groups to output
     SPA<Pair<int> > groups;///<the indicies in the part of the start and end of each group to output
     ///default constructor that sets up with no pattern elements and no groups
-	  StringMatcher():count(0),pattern(0),group_count(0),groups(0){};
+	  StringMatcher():count(0),pattern(),group_count(0),groups(){};
 	  ///get the number of groups this matchers will return
 	  /**
 	   * @return how many groups this matcher will return
@@ -168,7 +168,7 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(const String& s,SPA<Pair<SP<ConstStringPointer> > > groups=0);
+	  bool match(const String& s,SPA<Pair<SP<ConstStringPointer> > > groups=SPA<Pair<SP<ConstStringPointer> > >());
     ///check a match against a non-constant String
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -177,7 +177,7 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(      String& s,SPA<Pair<SP<     StringPointer> > > groups=0);
+	  bool match(      String& s,SPA<Pair<SP<     StringPointer> > > groups=SPA<Pair<SP<     StringPointer> > >());
     ///check a match against a constant String and process each match found
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -188,7 +188,7 @@ class StringMatcher{
      * @return true if there are any matches of this pattern to the string
      */
 	  bool match(const String& s,StringMatcherCallback<ConstStringPointer>& cb,
-	      SPA<Pair<SP<ConstStringPointer> > > groups=0);
+	      SPA<Pair<SP<ConstStringPointer> > > groups=SPA<Pair<SP<ConstStringPointer> > >());
     ///check a match against a non-constant String
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -199,7 +199,7 @@ class StringMatcher{
      * @return true if there are any matches of this pattern to the string
      */
 	  bool match(      String& s,StringMatcherCallback<     StringPointer>& cb,
-	      SPA<Pair<SP<     StringPointer> > > groups=0);
+	      SPA<Pair<SP<     StringPointer> > > groups=SPA<Pair<SP<     StringPointer> > >());
 	  
 	private:
 	  ///The internal implementation function for matches

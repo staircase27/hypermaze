@@ -7,6 +7,10 @@
 #ifndef SMARTPOINTER_HH_INC
 #define SMARTPOINTER_HH_INC
 
+#ifdef IOSTREAM
+#include <iostream>
+using namespace std;
+#endif
 
 ///A Smart pointer class
 /**
@@ -28,7 +32,16 @@ class SP{
      * should try to delete or access unless directly unless you ensure that a smart pointer is also kept
      * @param p the pointer to the data to be managed
      */
-    SP<T>(T* p):c(new int(1)),p(p){};
+    explicit SP<T>(T* p):c(new int(1)),p(p){};
+
+    ///Copy Constructor
+    /**
+     * Creates a new copy of the smart pointer refering to the same data and reference count and
+     * increments the reference count
+     * @param op the smart pointer to copy
+     */
+    SP<T>(const SP<T>& op):p(op.p),c(op.c){++*c;}
+
     ///Copy Constructor
     /**
      * Creates a new copy of the smart pointer refering to the same data and reference count and
@@ -109,6 +122,11 @@ class SP{
       return p==0;
     }
 
+    #ifdef IOSTREAM
+    template<class U>
+    friend ostream& operator<<(ostream&,const SP<U>&);
+    #endif
+
 };
 
 ///A Smart array pointer class
@@ -134,7 +152,7 @@ class SPA{
      * should try to delete or access unless directly unless you ensure that a smart pointer is also kept
      * @param p the pointer to the data to be managed
      */
-    SPA<T>(T* p):c(new int(1)),p(p),h(p){};
+    explicit SPA<T>(T* p):c(new int(1)),p(p),h(p){};
     ///Copy Constructor
     /**
      * Creates a new copy of the smart pointer refering to the same data and reference count and
@@ -192,7 +210,7 @@ class SPA{
     /**
      * @return a reference to the element we point to
      */
-    virtual T& operator* () const{
+    T& operator* () const{
       return *p;
     }
 
@@ -200,7 +218,7 @@ class SPA{
     /**
      * @return A pointer that can be used to access the member requested
      */
-    virtual T* operator-> () const{
+    T* operator-> () const{
       return p;
     }
     ///Derefence the array pointer to an element relative to element we point to
@@ -311,5 +329,23 @@ class SPA{
     const bool isnull() const{
       return p==0;
     }
+
+    #ifdef IOSTREAM
+    template<class U>
+    friend ostream& operator<<(ostream&,const SPA<U>&);
+    #endif
+
 };
+
+#ifdef IOSTREAM
+template <class T>
+ostream& operator<<(ostream& o,const SP<T>& p){
+  return o<<"<SP: "<<p.p<<" ("<<*p.c<<")>";
+}
+template <class T>
+ostream& operator<<(ostream& o,const SPA<T>& p){
+  return o<<"<SPA: "<<p.p<<" from "<<(void*)p.h<<" ("<<*p.c<<")>";
+}
+#endif
+
 #endif

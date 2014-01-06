@@ -89,10 +89,12 @@ IOResult BufHypIStream::read(char*& str,const bool& quote){
     }
   }
   mergebufs(sb,sblen,buf,start,l);
-  if( quote && !*(buf+start)==d){
-    delete[] sb;
-    return IOResult(false,start==end);
-  }
+  if( quote )
+    if(!(*(buf+start)==d)){
+      delete[] sb;
+      return IOResult(false,start==end);
+    }else
+      ++start;
   str=sb;
   return IOResult(true,start==end);
 }
@@ -304,6 +306,7 @@ IOResult read(HypIStream& s,SPA<const char>& str,const bool& quote){
   return r;
 }
 bool write(HypOStream& s,const SPA<const char>& str,const bool& quote){
-  return write(s,&(*str),quote);
+  const char* tmp=&*str;
+  return write(s,tmp,quote);
 }
 

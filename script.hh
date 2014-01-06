@@ -158,7 +158,7 @@ struct ScriptResponseWin:public ScriptResponse{
   Message winMessage;///<message to show on the win screen
   Pair<SPA<const char> > nextLevel;///<next level to offer on the win screen
   ///default constructor to setup the response as use defaults
-  ScriptResponseWin():block(false),winMessage(),nextLevel("",""){}
+  ScriptResponseWin():block(false),winMessage(),nextLevel(){}
 };
 ///response from a script for a move event
 struct ScriptResponseMove:public ScriptResponse{
@@ -227,7 +227,7 @@ class Event{
   public:
 		int trigger;
 		int conditionCount;
-		SPA<SP<Condition> > condition;
+		SPA<SP<Condition> > conditions;
 		int actionCount;
 		SPA<SP<Action> > actions;
 };

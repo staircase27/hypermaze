@@ -4,7 +4,7 @@
 
 template <class T>
 bool StringElementCondition::matches(T el){
-  if((selectionCondition&2)==0&&(((selectionCondition&1)==1)==el->selected))
+  if((selectionCondition&2)==0&&(((selectionCondition&1)==1)!=el->selected))
     return false;
   if(dirnsCondition&to_mask(el->d)==0)
     return false;
@@ -143,7 +143,6 @@ template <class STRING,class POINTER>
 bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
     SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
   if(level==count){
-    cout<<level<<" at end of pattern so are we at the end of the string? "<<(p==s.end())<<endl;
     if(p==s.end()){
       //valid so store in group if it's defined
 			if(!groups.isnull()){
@@ -164,10 +163,8 @@ bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > ma
     StringElementCondition& sec=pattern[level].b;
     if(!matches.isnull())
       matches[level].start=SP<POINTER>(new POINTER(p));
-    cout<<level<<" "<<"starting match step from "<<p<<endl;
     int i=0;
     while(i<pt.min){
-      cout<<level<<" "<<"stepping to min "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
       if(p==s.end()||!sec.matches(p))
         return false;
       ++i;++p;
@@ -176,9 +173,7 @@ bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > ma
       //go to first that doesn't match or length is max+1 (i is max)  (whichevers first)
       while(i<pt.max && p!=s.end() && sec.matches(p)){
         ++i;++p;
-        cout<<level<<" "<<"stepping to max "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
       }
-      cout<<level<<" "<<"at max (or first fail) "<<i<<" "<<p<<" "<<endl;
     }
     //while i is still in valid range
     while(i>=pt.min && i<=pt.max){
@@ -193,16 +188,13 @@ bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > ma
       
       if(pt.greedy){
         //stepping back. don't need to check if valid as was checked while searching forward]
-        cout<<level<<" stepping back "<<i<<" "<<p<<endl;
         --i;--p;
       }else{
-	      cout<<level<<" "<<"stepping up "<<i<<" "<<p<<" "<<sec.matches(p)<<endl;
         if(p==s.end() || !sec.matches(p))
           return match;
         ++i;++p;
       }
     }
-    cout<<level<<" tried all options for this pattern"<<endl;
     return match;
   }
 }
@@ -437,7 +429,7 @@ bool write(HypOStream& s,const SP<const Action>& a){
 
 void ActionMessage::doCommon(ScriptResponse& r,String&){
   if(r.messageCount==0){
-    r.messages=new Message[1];
+    r.messages=SPA<Message>(new Message[1]);
   }else{
     Message* tmp=new Message[r.messageCount+1];
     memcpy(tmp,&*r.messages,r.messageCount*sizeof(Message));
@@ -476,7 +468,7 @@ void ActionStringConditionSelect::doCommon(ScriptResponse& r,String& s){
     if(!change.matches(p))
       continue;
     bool newsel=select.matches(p);
-    if(newsel^p->selected){
+    if(newsel!=p->selected){
       r.stringSelectionChanged=true;
       se.setSelected(p,newsel);
     }
@@ -498,6 +490,7 @@ void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
   SPA<Pair<SP<StringPointer> > > groups=SPA<Pair<SP<StringPointer> > >(
       new Pair<SP<StringPointer> >[ranges.groupCount()]);
   while(ranges.match(s,groups)){
+    cout<<"found match"<<endl;
     for(int i=0;i<ranges.groupCount();++i){
       se.setStringSegment(*groups[i].a,*groups[i].b,count,&*route);
     }
@@ -528,4 +521,18 @@ bool write(HypOStream& s,const ActionSetStringRoute& a){
     if(!write(s,(int)a.route[i],0))
       return false;
   return write(s,a.all);
+}
+
+IOResult read(HypIStream& s,Event& e){
+  IOResult r=read(s,e.trigger,0);
+  if(!r.ok)
+    return r;
+  if(!(r=read(s,e.conditions,e.conditionCount)).ok)
+    return r;
+  return read(s,e.actions,e.actionCount);
+}
+bool write(HypOStream& s,const Event& e){
+  return write(s,e.trigger) &&
+      write(s,(SPA<const SP<const Condition> >&)e.conditions,e.conditionCount) &&
+      write(s,(SPA<const SP<const Action> >&)e.actions,e.actionCount);
 }
