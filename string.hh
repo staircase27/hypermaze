@@ -26,7 +26,7 @@ class StringPointer{
       return *el;
     }
     const StringElement* operator ->() const{
-      return &*el;
+      return el.operator->();
     }
     
     StringPointer& operator++(){
@@ -64,7 +64,7 @@ class ConstStringPointer{
       return *el;
     }
     const StringElement* operator ->()const{
-      return &*el;
+      return el.operator->();
     }
     
     ConstStringPointer& operator++(){

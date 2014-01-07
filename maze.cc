@@ -8,9 +8,9 @@ ConstPoint Maze::operator [](Vector p) const{
   return ConstPoint(size,maze+(p.X+size.X*(p.Y+size.Y*p.Z)));
 };
 
-Maze::Maze(Vector size):maze(new int[size.X*size.Y*size.Z]),size(size){
+Maze::Maze(Vector size):maze(size.X*size.Y*size.Z),size(size){
   int defmask=ALLDIRNSMASK&~to_mask(UP)&~to_mask(DOWN);
-  memset(&*maze,0,size.X*size.Y*size.Z*sizeof(int));
+  cout<<"new maze"<<*this<<endl;
   for(int x=0;x<size.X;++x){
     int mask=defmask;
     if(x==0)
@@ -26,11 +26,12 @@ Maze::Maze(Vector size):maze(new int[size.X*size.Y*size.Z]),size(size){
     *(*this)[Vector(x,0,size.Z-1)]&=~to_mask(FORWARD);
     *(*this)[Vector(x,size.Y-1,size.Z-1)]&=~to_mask(FORWARD);
   }
+  cout<<"setup maze"<<*this<<endl;
 };
 
 Maze::Maze(Maze& m):maze(m.maze),size(m.size){
 };
-Maze::Maze(const Maze& m):maze(new int[m.size.X*m.size.Y*m.size.Z]),size(m.size){
+Maze::Maze(const Maze& m):maze(m.size.X*m.size.Y*m.size.Z),size(m.size){
   memcpy(&*maze,&*m.maze,sizeof(int)*m.size.X*m.size.Y*m.size.Z);
 }
 Maze::~Maze(){}

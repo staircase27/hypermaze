@@ -37,7 +37,7 @@ IOResult read(HypIStream& s,StringElementCondition& c){
     c.xrange_count=0;
     return r;
   }else{
-    c.xrange=SPA<Range>(new Range[c.xrange_count]);
+    c.xrange=SPA<Range>(c.xrange_count);
     for(int i=0;i<c.xrange_count;++i){
       if(!(r=read(s,c.xrange[i].start,0)).ok)
         return r;
@@ -49,7 +49,7 @@ IOResult read(HypIStream& s,StringElementCondition& c){
     c.yrange_count=0;
     return r;
   }else{
-    c.yrange=SPA<Range>(new Range[c.yrange_count]);
+    c.yrange=SPA<Range>(c.yrange_count);
     for(int i=0;i<c.yrange_count;++i){
       if(!(r=read(s,c.yrange[i].start,0)).ok)
         return r;
@@ -61,7 +61,7 @@ IOResult read(HypIStream& s,StringElementCondition& c){
     c.zrange_count=0;
     return r;
   }else{
-    c.zrange=SPA<Range>(new Range[c.zrange_count]);
+    c.zrange=SPA<Range>(c.zrange_count);
     for(int i=0;i<c.zrange_count;++i){
       if(!(r=read(s,c.zrange[i].start,0)).ok)
         return r;
@@ -121,21 +121,23 @@ bool StringMatcher::match(String& s,SPA<Pair<SP<StringPointer> > > groups){
 bool StringMatcher::match(const String& s,StringMatcherCallback<ConstStringPointer>& cb,
     SPA<Pair<SP<ConstStringPointer> > > groups){
   if(groups.isnull()){
-    groups=SPA<Pair<SP<ConstStringPointer> > >(new Pair<SP<ConstStringPointer> >[group_count]);
+    groups=SPA<Pair<SP<ConstStringPointer> > >(group_count);
 	}
   return match<const String,ConstStringPointer>(s,groups,&cb);
 }
 bool StringMatcher::match(String& s,StringMatcherCallback<StringPointer>& cb,
     SPA<Pair<SP<StringPointer> > >groups){
   if(groups.isnull()){
-    groups=SPA<Pair<SP<StringPointer> > >(new Pair<SP<StringPointer> >[group_count]);
+    groups=SPA<Pair<SP<StringPointer> > >(group_count);
 	}
   return match<String,StringPointer>(s,groups,&cb);
 }
 
 template <class STRING,class POINTER>
 bool StringMatcher::match(STRING& s,SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
-  SPA<PatternMatch<POINTER> > m(groups.isnull()?0:new PatternMatch<POINTER>[count]);
+  SPA<PatternMatch<POINTER> > m;
+  if(!groups.isnull())
+    m=SPA<PatternMatch<POINTER> >(count);
   return matchStep(s,s.begin(),m,0,groups,cb);
 }
 
@@ -205,7 +207,7 @@ IOResult read(HypIStream& s,StringMatcher& sm){
     sm.count=0;
     return r;
   }
-  sm.pattern=SPA<Pair<PatternTag,StringElementCondition> >(new Pair<PatternTag,StringElementCondition>[sm.count]);
+  sm.pattern=SPA<Pair<PatternTag,StringElementCondition> >(sm.count);
   for(int i=0;i<sm.count;++i)
     if(!((r=read(s,sm.pattern[i].a)).ok && (r=read(s,sm.pattern[i].b)).ok))
       return r;
@@ -213,7 +215,7 @@ IOResult read(HypIStream& s,StringMatcher& sm){
     sm.group_count=0;
     return r;
   }
-  sm.groups=SPA<Pair<int> >(new Pair<int>[sm.group_count]);
+  sm.groups=SPA<Pair<int> >(sm.group_count);
   for(int i=0;i<sm.group_count;++i)
     if(!((r=read(s,sm.groups[i].a,0)).ok && (r=read(s,sm.groups[i].b,0)).ok))
       return r;
@@ -241,7 +243,7 @@ IOResult read(HypIStream& s,SPA<SP<T> >& a, int& c){
     c=0;
     return r;
   }
-  a=SPA<SP<T> >(new SP<T>[c]);
+  a=SPA<SP<T> >(c);
   int i=0;
   for(;i<c;++i){
     if(!(r=read(s,a[i])).ok){
@@ -367,13 +369,13 @@ IOResult read(HypIStream& s,Message& m){
     m.count=0;
     return r;
   }
-  m.paragraphs=SPA<Pair<SPA<const char> > >(new Pair<SPA<const char> >[m.count]);
+  m.paragraphs=SPA<Pair<SPA<const char> > >(m.count);
   int i=0;
   for(;i<m.count;++i)
     if(!((r=read(s,m.paragraphs[i].a,false)).ok && (r=read(s,m.paragraphs[i].b,true)).ok))
       break;
   if(i<m.count){
-    SPA<char> defaultvalue(new char[1]);
+    SPA<char> defaultvalue(1);
     defaultvalue[0]='\0';
     for(;i<m.count;++i){
       m.paragraphs[i].a=defaultvalue;
@@ -429,11 +431,11 @@ bool write(HypOStream& s,const SP<const Action>& a){
 
 void ActionMessage::doCommon(ScriptResponse& r,String&){
   if(r.messageCount==0){
-    r.messages=SPA<Message>(new Message[1]);
+    r.messages=SPA<Message>(1);
   }else{
-    Message* tmp=new Message[r.messageCount+1];
-    memcpy(tmp,&*r.messages,r.messageCount*sizeof(Message));
-    r.messages=SPA<Message>(tmp);
+    SPA<Message> tmp(r.messageCount+1);
+    memcpy(&*tmp,&*r.messages,r.messageCount*sizeof(Message));
+    r.messages=tmp;
   }
   r.messages[r.messageCount]=m;
   ++r.messageCount;
@@ -487,8 +489,7 @@ void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
   if(!ranges.groupCount())
     return;
   StringEdit se(s);
-  SPA<Pair<SP<StringPointer> > > groups=SPA<Pair<SP<StringPointer> > >(
-      new Pair<SP<StringPointer> >[ranges.groupCount()]);
+  SPA<Pair<SP<StringPointer> > > groups(ranges.groupCount());
   while(ranges.match(s,groups)){
     cout<<"found match"<<endl;
     for(int i=0;i<ranges.groupCount();++i){
@@ -507,7 +508,7 @@ IOResult read(HypIStream& s,ActionSetStringRoute& a){
     a.count=0;
     return r;
   }
-  a.route=SPA<Dirn>(new Dirn[a.count]);
+  a.route=SPA<Dirn>(a.count);
   for(int i=0;i<a.count;++i){
     if(!(r=read(s,(int&)a.route[i],0)).ok)
       return r;

@@ -284,7 +284,7 @@ int main(int argc,char* argv[]){
     StringMatcher sm;
     
     sm.count=1;
-    sm.pattern=SPA<Pair<PatternTag,StringElementCondition> >(new Pair<PatternTag,StringElementCondition>[5]);
+    sm.pattern=SPA<Pair<PatternTag,StringElementCondition> >(5);
     
     write(os,sm);
     os.flush();
@@ -351,14 +351,14 @@ int main(int argc,char* argv[]){
     cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
-    sm.groups=SPA<Pair<int> >(new Pair<int>[2]);
+    sm.groups=SPA<Pair<int> >(2);
     sm.groups[0].a=0;
     sm.groups[0].b=1;
     sm.groups[1].a=1;
     sm.groups[1].b=0;
     sm.group_count=2;
     
-    SPA<Pair<SP<StringPointer> > > groups(new Pair<SP<StringPointer> >[2]);
+    SPA<Pair<SP<StringPointer> > > groups(2);
     os.strlen=0;
     write(os,sm);
     os.flush();
@@ -368,7 +368,7 @@ int main(int argc,char* argv[]){
     cout<<*groups[0].a<<" "<<*groups[0].b<<endl;
     cout<<*groups[1].a<<" "<<*groups[1].b<<endl;
 
-    groups=SPA<Pair<SP<StringPointer> > >(new Pair<SP<StringPointer>,SP<StringPointer> >[2]);
+    groups=SPA<Pair<SP<StringPointer> > >(2);
     sm.pattern[0].b.selectionCondition=3;
     os.strlen=0;
     write(os,sm);
@@ -382,7 +382,7 @@ int main(int argc,char* argv[]){
     MemoryHypIStream is(data,strlen(&*data));
     read(is,sm);
     
-    groups=SPA<Pair<SP<StringPointer> > >(new Pair<SP<StringPointer>,SP<StringPointer> >[2]);
+    groups=SPA<Pair<SP<StringPointer> > >(2);
     os.strlen=0;
     write(os,sm);
     os.flush();
