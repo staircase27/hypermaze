@@ -86,8 +86,8 @@ class ConstPoint{
 #ifdef IOSTREAM
 inline ostream& operator<<(ostream& o,const Maze& m){
   o<<m.size.X<<" "<<m.size.Y<<" "<<m.size.Z<<hex<<endl;
-  const int* p=&*m.maze;
-  for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i){
+  SPA<int> p=m.maze;
+  for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i,++p){
     o<<*p<<" ";
     #ifdef DEBUG
     if((i+1)%m.size.X==0)
@@ -95,7 +95,6 @@ inline ostream& operator<<(ostream& o,const Maze& m){
     if((i+1)%(m.size.X*m.size.Y)==0)
       o<<endl;
     #endif
-    ++p;
   }
   o<<dec<<endl;
   return o;
@@ -104,10 +103,9 @@ inline ostream& operator<<(ostream& o,const Maze& m){
 inline istream& operator>>(istream& o,Maze& m){
   o>>m.size.X>>m.size.Y>>m.size.Z>>hex;
   m=Maze(m.size);
-  int* p=&*m.maze;
-  for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i){
+  SPA<int> p=m.maze;
+  for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i,++p){
     o>>*p;
-    ++p;
   }
   return o>>dec;
 }

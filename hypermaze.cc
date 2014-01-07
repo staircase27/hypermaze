@@ -259,7 +259,7 @@ int main(int argc,char* argv[]){
     if(!write(os,sec))
       cout<<"error writing"<<endl;
     os.flush();
-    cout<<"'"<<&*str<<"'"<<endl;
+    cout<<"'"<<str<<"'"<<endl;
     const char* data=" 1 0 "//
                       "0 "//no x conditions
                       "1 "//one y condition
@@ -274,7 +274,7 @@ int main(int argc,char* argv[]){
     if(!write(os,sec))
       cout<<"error writing"<<endl;
     os.flush();
-    cout<<"'"<<&*str<<"'"<<endl;
+    cout<<"'"<<str<<"'"<<endl;
   }
   
   {
@@ -288,28 +288,28 @@ int main(int argc,char* argv[]){
     
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
     sm.pattern[0].a.max=6000;
     os.strlen=0;
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s)<<endl;
      
     sm.pattern[0].a.greedy=false;
     os.strlen=0;
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s)<<endl;
      
     sm.pattern[0].a.min=6000;
     os.strlen=0;
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
     sm.pattern[0].a.min=0;
@@ -317,7 +317,7 @@ int main(int argc,char* argv[]){
     os.strlen=0;
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
     sm.pattern[1].a.max=6000;
@@ -325,14 +325,14 @@ int main(int argc,char* argv[]){
     os.strlen=0;
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
     sm.pattern[0].a.greedy=true;
     os.strlen=0;
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
     sm.pattern[0].b.selectionCondition=1;
@@ -341,14 +341,14 @@ int main(int argc,char* argv[]){
     os.strlen=0;
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
     sm.pattern[0].a.greedy=false;
     os.strlen=0;
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s)<<endl;
     
     sm.groups=SPA<Pair<int> >(new Pair<int>[2]);
@@ -362,7 +362,7 @@ int main(int argc,char* argv[]){
     os.strlen=0;
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     SPA<char> data(str);//save to reload later
     cout<<sm.match(pd.s,groups)<<endl;
     cout<<*groups[0].a<<" "<<*groups[0].b<<endl;
@@ -373,12 +373,12 @@ int main(int argc,char* argv[]){
     os.strlen=0;
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s,groups)<<endl;
-    cout<<&*groups[0].a<<" "<<&*groups[0].b<<endl;
-    cout<<&*groups[1].a<<" "<<&*groups[1].b<<endl;
+    cout<<groups[0].a<<" "<<groups[0].b<<endl;
+    cout<<groups[1].a<<" "<<groups[1].b<<endl;
     
-    cout<<"input"<<endl<<&*data<<endl;
+    cout<<"input"<<endl<<data<<endl;
     MemoryHypIStream is(data,strlen(&*data));
     read(is,sm);
     
@@ -386,7 +386,7 @@ int main(int argc,char* argv[]){
     os.strlen=0;
     write(os,sm);
     os.flush();
-    cout<<"pattern"<<endl<<&*str<<endl;
+    cout<<"pattern"<<endl<<str<<endl;
     cout<<sm.match(pd.s,groups)<<endl;
     cout<<*groups[0].a<<" "<<*groups[0].b<<endl;
     cout<<*groups[1].a<<" "<<*groups[1].b<<endl;
@@ -417,7 +417,7 @@ int main(int argc,char* argv[]){
 
     write(os,(SP<const Condition>&)condition);
     os.flush();
-    cout<<"output"<<endl<<&*str<<endl;
+    cout<<"output"<<endl<<str<<endl;
     
     cout<<"end condition test"<<endl;
   }
@@ -524,7 +524,7 @@ int main(int argc,char* argv[]){
     write(os,(SPA<const SP<const Action> >&)as,count);
     os.flush();
     
-    cout<<"output"<<endl<<&*str<<endl;
+    cout<<"output"<<endl<<str<<endl;
   }
   #endif
 

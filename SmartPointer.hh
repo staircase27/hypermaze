@@ -1,8 +1,7 @@
 /**
  * @file
  * This file provides two smart pointer classes.
- */  
-
+ */
 
 #ifndef SMARTPOINTER_HH_INC
 #define SMARTPOINTER_HH_INC
@@ -146,6 +145,13 @@ class SPA{
   public:
     ///Construct a new smart pointer pointing to null
     SPA<T>():c(new int(1)),p(0),h(0){};
+    ///Construct a new smart pointer for a new array of len elements
+    /**
+     * this will point to the first element in the new array
+     * (explicit to stop this being used as a cast from an integer which doesn't make sence)
+     * @param the number of elements for the new array to contain
+     */ 
+    explicit SPA<T>(const int& len):c(new int(1)),p(new T[len]),h(p){};
     ///Construct a smart pointer pointing to the provided data
     /**
      * The provided pointer should be a freshly created pointer to a c style array that nothing else
@@ -338,14 +344,24 @@ class SPA{
 };
 
 #ifdef IOSTREAM
+
 template <class T>
 ostream& operator<<(ostream& o,const SP<T>& p){
+#ifdef DEBUGPOINTER
   return o<<"<SP: "<<p.p<<" ("<<*p.c<<")>";
+#else
+  return o<<p.p;
+#endif
 }
 template <class T>
 ostream& operator<<(ostream& o,const SPA<T>& p){
+#ifdef DEBUGPOINTER
   return o<<"<SPA: "<<p.p<<" from "<<(void*)p.h<<" ("<<*p.c<<")>";
+#else
+  return o<<p.p;
+#endif
 }
+
 #endif
 
 #endif
