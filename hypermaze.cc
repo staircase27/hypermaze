@@ -251,7 +251,6 @@ int main(int argc,char* argv[]){
   
   #ifdef IOSTREAM
 
-  #ifdef NOTDEFINED  
   {
     StringElementCondition sec;
     cout<<"output for blank StringElementCondition"<<endl;
@@ -452,7 +451,6 @@ int main(int argc,char* argv[]){
   	pd.stringUpdated();
     cout<<"edited string - should be straight again"<<endl;
   }
-  #endif
   
   {
     const char* data= 

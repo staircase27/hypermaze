@@ -152,15 +152,6 @@ class SPA{
      * @param the number of elements for the new array to contain
      */ 
     explicit SPA<T>(const int& len):c(new int(1)),p(new T[len]()),h(p){};
-#ifdef NOTDEFINED
-    ///Construct a smart pointer pointing to the provided data
-    /**
-     * The provided pointer should be a freshly created pointer to a c style array that nothing else
-     * should try to delete or access unless directly unless you ensure that a smart pointer is also kept
-     * @param p the pointer to the data to be managed
-     */
-    explicit SPA<T>(T* p):c(new int(1)),p(p),h(p){};
-#endif
     ///Copy Constructor
     /**
      * Creates a new copy of the smart pointer refering to the same data and reference count and
