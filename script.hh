@@ -119,7 +119,7 @@ struct Message{
    */
   SPA<Pair<SPA<const char> > > paragraphs;
   ///default constructor that initialises this as having no paragraphs
-  Message():paragraphs(0),count(0){};
+  Message():paragraphs(),count(0){};
 };
 
 ///Read a Message from a stream
@@ -200,6 +200,10 @@ class Action: protected virtual PolymorphicHypIO{
      * @param s the string to act on
      */
 		virtual void doSelect(ScriptResponseSelect& r,String& s)=0;
+		
+		///virtual destructor so that implementations will delete correctly
+		virtual ~Action(){};
+		
     ///the default Action to use when creating lists of Actions
     static const SP<Action> defaultvalue;
     ///enable write to access the protected method

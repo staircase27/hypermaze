@@ -74,7 +74,7 @@ class SP{
      * @return a reference to this pointer
      */
     SP<T>& operator=(const SP<T>& op){
-      if(p==op.p)
+      if(p==op.p && op.c==op.c)
         return *this;
       if(--*c==0){
         delete p;
@@ -148,17 +148,19 @@ class SPA{
     ///Construct a new smart pointer for a new array of len elements
     /**
      * this will point to the first element in the new array
-     * (explicit to stop this being used as a cast from an integer which doesn't make sence)
+     * (explicit to stop this being used as a cast from an integer as that doesn't make sence)
      * @param the number of elements for the new array to contain
      */ 
     explicit SPA<T>(const int& len):c(new int(1)),p(new T[len]()),h(p){};
+#ifdef NOTDEFINED
     ///Construct a smart pointer pointing to the provided data
     /**
      * The provided pointer should be a freshly created pointer to a c style array that nothing else
      * should try to delete or access unless directly unless you ensure that a smart pointer is also kept
      * @param p the pointer to the data to be managed
      */
-//    explicit SPA<T>(T* p):c(new int(1)),p(p),h(p){};
+    explicit SPA<T>(T* p):c(new int(1)),p(p),h(p){};
+#endif
     ///Copy Constructor
     /**
      * Creates a new copy of the smart pointer refering to the same data and reference count and
@@ -199,7 +201,8 @@ class SPA{
      * @return a reference to this pointer
      */
     SPA<T>& operator=(const SPA<T>& op){
-      if(p==op.p)
+      ++*op.c;//claim op's data before freeing own in case they are part of the same array
+      if(p==op.p && h==op.h && c==op.c)//if they are identical then do nothing
         return *this;
       if(--*c==0){
         delete[] h;
@@ -208,7 +211,6 @@ class SPA{
       p=op.p;
       c=op.c;
       h=op.h;
-      ++*c;
       return *this;
     }
 

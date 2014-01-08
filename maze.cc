@@ -10,7 +10,6 @@ ConstPoint Maze::operator [](Vector p) const{
 
 Maze::Maze(Vector size):maze(size.X*size.Y*size.Z),size(size){
   int defmask=ALLDIRNSMASK&~to_mask(UP)&~to_mask(DOWN);
-  cout<<"new maze"<<*this<<endl;
   for(int x=0;x<size.X;++x){
     int mask=defmask;
     if(x==0)
@@ -26,7 +25,6 @@ Maze::Maze(Vector size):maze(size.X*size.Y*size.Z),size(size){
     *(*this)[Vector(x,0,size.Z-1)]&=~to_mask(FORWARD);
     *(*this)[Vector(x,size.Y-1,size.Z-1)]&=~to_mask(FORWARD);
   }
-  cout<<"setup maze"<<*this<<endl;
 };
 
 Maze::Maze(Maze& m):maze(m.maze),size(m.size){

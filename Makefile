@@ -13,12 +13,13 @@ dist/%:%
 
 CPP=g++
 CPPOPTS=-ggdb
+#CPPOPTS+= -rdynamic
 CPPLIBS=
 
 IRRLIBS=-lIrrlicht -isystem/usr/include/irrlicht/
 
 test: CPPOPTS+= -DIOSTREAM
-test: test.o maze.o
+test: test.o maze.o hypio.o
 test.o: test.cc maze.hh dirns.hh vector.hh string.hh mazegen.hh hypio.hh
 run-test: test
 	./test

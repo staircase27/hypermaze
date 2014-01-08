@@ -250,7 +250,8 @@ int main(int argc,char* argv[]){
   }
   
   #ifdef IOSTREAM
-  
+
+  #ifdef NOTDEFINED  
   {
     StringElementCondition sec;
     cout<<"output for blank StringElementCondition"<<endl;
@@ -451,6 +452,7 @@ int main(int argc,char* argv[]){
   	pd.stringUpdated();
     cout<<"edited string - should be straight again"<<endl;
   }
+  #endif
   
   {
     const char* data= 
@@ -492,14 +494,14 @@ int main(int argc,char* argv[]){
     
     cout<<"parsed "<<count<<endl;
 
-    cout<<as<<endl;
-    cout<<as[0]<<endl;    
+    cout<<"as "<<as<<endl;
+    cout<<"as0 "<<as[0]<<endl;    
     
     SP<Action> a(as[0]);
     
-    cout<<as<<endl;
-    cout<<as[0]<<endl;    
-    cout<<a<<endl;
+    cout<<"as "<<as<<endl;
+    cout<<"as0 "<<as[0]<<endl;    
+    cout<<"a "<<a<<endl;
 
     ScriptResponseWin sr;
     for(int i=0;i<count;++i)
@@ -524,7 +526,7 @@ int main(int argc,char* argv[]){
     write(os,(SPA<const SP<const Action> >&)as,count);
     os.flush();
     
-    cout<<"output"<<endl<<str<<endl;
+    cout<<"output"<<endl<<str<<endl<<flush;
   }
   #endif
 

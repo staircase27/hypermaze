@@ -122,7 +122,7 @@ struct PatternMatch{
   SP<POINTER> start;///<Pointer to the string element at the start of this section of the match
   SP<POINTER> end;///<Pointer to the string element at the end of this section of the match
   ///default constructor that sets to matched nothing
-  PatternMatch():start(0),end(0){};
+  PatternMatch():start(),end(){};
 };
 
 ///Class to implement to process matches
@@ -457,6 +457,8 @@ class ActionWin: public virtual Action{
     ///@copydoc Action::doSelect
     ///implemented as a no-op
 		virtual void doSelect(ScriptResponseSelect& r,String& s){};
+		///virtual destructor so that implementations will delete correctly
+		virtual ~ActionWin(){};
 };
 ///A specialisation of Action for Actions that apply to all events the same way
 class ActionCommon: public virtual Action{
@@ -479,6 +481,8 @@ class ActionCommon: public virtual Action{
     ///@copydoc Action::doSelect
     ///calls doCommon
 		virtual void doSelect(ScriptResponseSelect& r,String& s){doCommon(r,s);};
+		///virtual destructor so that implementations will delete correctly
+		virtual ~ActionCommon(){};
 };
 
 ///an action that does nothing

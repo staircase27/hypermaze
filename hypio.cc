@@ -4,6 +4,7 @@
  */
 #include "hypio.hh"
 #include "hypioimp.hh"
+#include <cstdlib>
 
 //#include <iostream>
 //using namespace std;
@@ -273,11 +274,11 @@ bool IrrHypOStream::writeToSink(){
 MemoryHypOStream::MemoryHypOStream(SPA<char>& str):str(str),strlen(0){};
 
 bool MemoryHypOStream::writeToSink(){
-  char* tmp=new char[strlen+end+1];
-  memcpy(tmp,&*str,strlen);
-  memcpy(tmp+strlen,buf,end);
+  SPA<char> tmp(strlen+end+1);
+  memcpy(&*tmp ,&*str,strlen);
+  memcpy(&*(tmp+strlen),buf,end);
   tmp[strlen+end]='\0';
-  str=SPA<char>(tmp);
+  str=tmp;
   strlen=strlen+end;
   end=0;
 }
@@ -302,7 +303,10 @@ bool write(HypOStream& s,const bool& b){
 IOResult read(HypIStream& s,SPA<const char>& str,const bool& quote){
   char* tmp=0;
   IOResult r=read(s,tmp,quote);
-  str=SPA<char>(tmp);
+  int len=strlen(tmp)+1;
+  str=SPA<const char>(len);
+  memcpy((void*)&*str,tmp,len);
+  delete[] tmp;
   return r;
 }
 bool write(HypOStream& s,const SPA<const char>& str,const bool& quote){
