@@ -493,7 +493,7 @@ void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
   while(ranges.match(s,groups)){
     cout<<"found match"<<endl;
     for(int i=0;i<ranges.groupCount();++i){
-      se.setStringSegment(*groups[i].a,*groups[i].b,count,&*route);
+      se.setStringSegment(*groups[i].a,*groups[i].b,count,route);
     }
 	  r.stringChanged=true;
 	  if(!all)

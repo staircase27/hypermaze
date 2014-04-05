@@ -321,6 +321,46 @@ class SPA{
       return h!=op.h || p!=op.p;
     }
 
+    ///Compare this pointer to another pointer
+    /**
+     * Returns true of the other pointer points to a location that compares less than the location
+     * this points to
+     * @param op the other pointer to compare to this pointer
+     * @return true if they compare as less
+     */
+    const bool operator <(const SPA<T>& op)const{
+      return p<op.p;
+    }
+    ///Compare this pointer to another pointer
+    /**
+     * Returns true of the other pointer points to a location that compares greater than the location
+     * this points to
+     * @param op the other pointer to compare to this pointer
+     * @return true if they compare as greater
+     */
+    const bool operator >(const SPA<T>& op)const{
+      return p>op.p;
+    }
+    ///Compare this pointer to another pointer
+    /**
+     * Returns true of the other pointer points to a location that compares less than or equal to the location
+     * this points to
+     * @param op the other pointer to compare to this pointer
+     * @return true if they compare as less than or equal
+     */
+    const bool operator <=(const SPA<T>& op)const{
+      return p<=op.p;
+    }
+    ///Compare this pointer to another pointer
+    /**
+     * Returns true of the other pointer points to a location that compares greater than or equal to the location
+     * this points to
+     * @param op the other pointer to compare to this pointer
+     * @return true if they compare as greater than or equal
+     */
+    const bool operator >=(const SPA<T>& op)const{
+      return p>=op.p;
+    }
     ///Check if this is a null pointer
     /**
      * @return true if this is a null pointer

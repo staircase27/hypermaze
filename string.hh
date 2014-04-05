@@ -177,43 +177,43 @@ class String{
 };
 
 class StringPlay{
-  String* s;
+  String& s;
 
   public:
-    StringPlay(String& s):s(&s){};
+    StringPlay(String& s):s(s){};
   
     String& getString(){
-      return *s;
+      return s;
     }
     
     bool slide(bool moveEnd,bool out){
       if(moveEnd){
         list<StringElement>::reverse_iterator it;
-        for(it=s->route.rbegin();it!=s->route.rend();++it)
+        for(it=s.route.rbegin();it!=s.route.rend();++it)
           if(it->selected)
             break;
         if(out){
-          if(it==s->route.rbegin())
+          if(it==s.route.rbegin())
             return false;
           --it;
           it->selected=true;
         }else{
-          if(it==s->route.rend())
+          if(it==s.route.rend())
             return false;
           it->selected=false;
         }
       }else{
         list<StringElement>::iterator it;
-        for(it=s->route.begin();it!=s->route.end();++it)
+        for(it=s.route.begin();it!=s.route.end();++it)
           if(it->selected)
             break;
         if(out){
-          if(it==s->route.begin())
+          if(it==s.route.begin())
             return false;
           --it;
           it->selected=true;
         }else{
-          if(it==s->route.end())
+          if(it==s.route.end())
             return false;
           it->selected=false;
         }
@@ -227,21 +227,21 @@ class StringPlay{
     
     bool canMove(Dirn d){
       bool any=false;
-      if((d==s->stringDir||d==opposite(s->stringDir))&&(s->route.front().selected||s->route.back().selected))
+      if((d==s.stringDir||d==opposite(s.stringDir))&&(s.route.front().selected||s.route.back().selected))
         return false;
-      for(list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it){
+      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
         if(!it->selected)
           continue;
         any=true;
-        if(d==UP && it->pos.Y>=s->maze.size.Y-1)
+        if(d==UP && it->pos.Y>=s.maze.size.Y-1)
           return false;
         if(d==DOWN && it->pos.Y<=1)
           return false;
         if(it->d!=d && it->d!=opposite(d)){
           Vector wall=it->pos+to_shift_vector(it->d)+to_shift_vector(d);
           Dirn wallDirn=perpendicular(it->d,d);
-          if(inCube(wall,Vector(0,0,0),s->maze.size)){
-            if(((*s->maze[wall])&to_mask(wallDirn))!=0)
+          if(inCube(wall,Vector(0,0,0),s.maze.size)){
+            if(((*s.maze[wall])&to_mask(wallDirn))!=0)
               return false;
           }
         }
@@ -251,38 +251,38 @@ class StringPlay{
     
     void doMove(Dirn d){
       bool lastselected=false;
-      for(list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it){
+      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
         if(it->selected){
           if(!lastselected){
-            if(it!=s->route.begin()){
+            if(it!=s.route.begin()){
               list<StringElement>::iterator nit=it;
               --nit;
               if(nit->d==opposite(d))
-                s->route.erase(nit);
+                s.route.erase(nit);
               else
-                s->route.insert(it,StringElement(it->pos,d,false));
+                s.route.insert(it,StringElement(it->pos,d,false));
             }
           }
           it->pos+=to_vector(d);
         }else if(lastselected){
-          if(it==s->route.end()){
-            s->endPos+=to_vector(d);
+          if(it==s.route.end()){
+            s.endPos+=to_vector(d);
           }else{
             if(it->d==d){
-              it=s->route.erase(it);
-              if(it==s->route.end()){
+              it=s.route.erase(it);
+              if(it==s.route.end()){
                 lastselected=false;
                 break;
               }
             }else{
-              s->route.insert(it,StringElement(it->pos+to_vector(d),opposite(d),false));
+              s.route.insert(it,StringElement(it->pos+to_vector(d),opposite(d),false));
             }
           }
         }
         lastselected=it->selected;
       }
       if(lastselected)
-        s->endPos+=to_vector(d);
+        s.endPos+=to_vector(d);
     }
     
     bool tryMove(Dirn d){
@@ -305,31 +305,31 @@ class StringPlay{
 };
 
 class StringEdit{
-  String* s;
+  String& s;
 
   public:
-    StringEdit(String& s):s(&s){};
+    StringEdit(String& s):s(s){};
   
     String& getString(){
-      return *s;
+      return s;
     }
 
     void setSelected(StringPointer p,bool selected){
       p.el->selected=selected;
     }
-    void setStringSegment(StringPointer sp,StringPointer ep,int count,Dirn* newRoute){
+    void setStringSegment(StringPointer sp,StringPointer ep,int count,SPA<Dirn> newRoute){
       list<StringElement>::iterator it=sp.el;
       Vector pos=it->pos;
       bool endSel=true;
-      if(ep!=s->end())
+      if(ep!=s.end())
         endSel=ep.el->selected;
-      for(Dirn* d=newRoute;d<newRoute+count;++it,++d){
+      for(SPA<Dirn> d=newRoute;d<newRoute+count;++it,++d){
         //run out of bits of string to move so add a new one
         if(it==ep.el){
           --it;
           bool sel=it->selected&&endSel;
           ++it;
-          it=s->route.insert(it,StringElement(pos,*d,sel));
+          it=s.route.insert(it,StringElement(pos,*d,sel));
         }else{
           it->pos=pos;
           it->d=*d;
@@ -338,8 +338,8 @@ class StringEdit{
       }
       {
 		    //connect up to the right distance across
-		    Dirn d=s->stringDir;
-		    int dist=to_vector(d).dotProduct((ep==s->end()?s->endPos:ep.el->pos)-pos);
+		    Dirn d=s.stringDir;
+		    int dist=to_vector(d).dotProduct((ep==s.end()?s.endPos:ep.el->pos)-pos);
 		    if(dist<0){
 		      dist=-dist;
 		      d=opposite(d);
@@ -349,7 +349,7 @@ class StringEdit{
 		        --it;
 		        bool sel=it->selected&&endSel;
 		        ++it;
-		        it=s->route.insert(it,StringElement(pos,d,sel));
+		        it=s.route.insert(it,StringElement(pos,d,sel));
 		      }else{
 		        it->pos=pos;
 		        it->d=d;
@@ -359,14 +359,14 @@ class StringEdit{
       }
       //delete any spares
       while(it!=ep.el)
-	      it=s->route.erase(it);
+	      it=s.route.erase(it);
       
       //slide the rest of the string across to line up
-      for(it=ep.el;it!=s->route.end();++it){
+      for(it=ep.el;it!=s.route.end();++it){
         it->pos=pos;
         pos+=to_vector(it->d);
       }
-      s->endPos=pos;
+      s.endPos=pos;
     }
 };
 
@@ -380,9 +380,9 @@ inline ostream& operator<<(ostream& o,String s){
 
 inline ostream& operator<<(ostream& o,StringPlay s){
   o<<"<StringPlay ";
-  for(list<StringElement>::iterator it=s.s->route.begin();it!=s.s->route.end();++it)
+  for(list<StringElement>::iterator it=s.s.route.begin();it!=s.s.route.end();++it)
     cout<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";
-  return cout<<s.s->endPos<<">";
+  return cout<<s.s.endPos<<">";
 }
 #endif
 

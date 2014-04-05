@@ -62,11 +62,11 @@ class HypIStream{
      * @param quote if the string to read will be quoted
      * @return an IOResult object that contains the status of the read
      */
-    virtual IOResult read(char*& str,const bool& quote)=0;
+    virtual IOResult read(SPA<char const>& str,const bool& quote)=0;
     ///Allow the public functions to access the protected implementations
     friend IOResult read(HypIStream& s,int& i,const int& base);
     ///Allow the public functions to access the protected implementations
-    friend IOResult read(HypIStream& s,char*& str,const bool& quote);
+    friend IOResult read(HypIStream& s,SPA<char const>& str,const bool& quote);
   public:
     ///Check if a character is considered a space by the hypio system
     inline static bool isspace(const char& c){return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';}
@@ -93,7 +93,7 @@ IOResult read(HypIStream& s,int& i,const int& base=0);
  * @param quote if the string to read will be quoted
  * @return an IOResult object that contains the status of the read
  */
-IOResult read(HypIStream& s,char*& str,const bool& quote);
+IOResult read(HypIStream& s,SPA<char const>& str,const bool& quote);
 
 ///Base class for outputting to in the hypio system
 /**
@@ -199,17 +199,6 @@ IOResult read(HypIStream& s,bool& b);
  */
 bool write(HypOStream& s,const bool& b);
 
-///Read a string into a smart pointer from the stream
-/**
- * If the quote flag is false then the string read is whitespace delimited and will stop reading at the first
- * whitespace character. If the quote flag is true then the first white space character is a quote character and
- * the string is read up till the next occurance of the quote charachter.
- * @param s the stream to read from
- * @param str reference to a string variable to store the read string in
- * @param quote if the string to read will be quoted
- * @return an IOResult object that contains the status of the read
- */
-IOResult read(HypIStream& s,SPA<const char>& str,const bool& quote);
 ///write an string from a smart pointer to a stream optionally with quoting
 /**
  * The quote character is automatically chosen if quoted output is asked for

@@ -59,25 +59,24 @@ IOResult BufHypIStream::read(int& i,const int& base){
   i=(int)l;//cast. Am just going to force the cast for now may add checks later
   return IOResult(true,start==end);
 };
-void BufHypIStream::mergebufs(char*& addto,int& tolen,char* addfrom,int& fromstart,int& fromlen){
-  char* tmp=new char[tolen+fromlen+1];
-  memcpy(tmp,addto,tolen);
-  memcpy(tmp+tolen,addfrom+fromstart,fromlen);
+void BufHypIStream::mergebufs(SPA<char>& addto,int& tolen,char const* const& addfrom,int& fromstart,int& fromlen){
+  SPA<char> tmp(tolen+fromlen+1);
+  memcpy(&*tmp,&*addto,tolen);
+  memcpy(&*(tmp+tolen),(addfrom+fromstart),fromlen);
   tmp[tolen+fromlen]='\0';
-  delete[] addto;
   addto=tmp;
   fromstart+=fromlen;
   tolen+=fromlen;
   fromlen=0;
 }
-IOResult BufHypIStream::read(char*& str,const bool& quote){
+IOResult BufHypIStream::read(SPA<char const>& str,const bool& quote){
   char d;
   consumewhitespace();
   if(quote){
     d=*(buf+start);
     ++start;
   }
-  char* sb=0;
+  SPA<char> sb  ;
   int sblen=0;
   int l=0;
   while(! (quote ? *(buf+start+l)==d : HypIStream::isspace(*(buf+start+l))) ){
@@ -91,10 +90,9 @@ IOResult BufHypIStream::read(char*& str,const bool& quote){
   }
   mergebufs(sb,sblen,buf,start,l);
   if( quote )
-    if(!(*(buf+start)==d)){
-      delete[] sb;
+    if(!(*(buf+start)==d))
       return IOResult(false,start==end);
-    }else
+    else
       ++start;
   str=sb;
   return IOResult(true,start==end);
@@ -149,7 +147,7 @@ MemoryHypIStream::MemoryHypIStream(const char* _buf,int _len){
 IOResult read(HypIStream& s,int& i,const int& base){
   return s.read(i,base);
 }
-IOResult read(HypIStream& s,char*& str,const bool& quote){
+IOResult read(HypIStream& s,SPA<char const>& str,const bool& quote){
   return s.read(str,quote);
 }
 
@@ -300,15 +298,6 @@ bool write(HypOStream& s,const bool& b){
   return write(s,(int)b,0);
 }
 
-IOResult read(HypIStream& s,SPA<const char>& str,const bool& quote){
-  char* tmp=0;
-  IOResult r=read(s,tmp,quote);
-  int len=strlen(tmp)+1;
-  str=SPA<const char>(len);
-  memcpy((void*)&*str,tmp,len);
-  delete[] tmp;
-  return r;
-}
 bool write(HypOStream& s,const SPA<const char>& str,const bool& quote){
   const char* tmp=&*str;
   return write(s,tmp,quote);

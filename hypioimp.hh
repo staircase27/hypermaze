@@ -26,8 +26,8 @@ class BufHypIStream: public HypIStream{
     virtual void readtobuf()=0;
     void consumewhitespace();
     IOResult read(int&,const int&);
-    void mergebufs(char*&,int&,char*,int&,int&);
-    IOResult read(char*&,const bool&);
+    void mergebufs(SPA<char>&,int&,char const* const&,int&,int&);
+    IOResult read(SPA<char const>&,const bool&);
   public:
     ///virtual destructor to allow deletion of base class type objects
     virtual ~BufHypIStream();

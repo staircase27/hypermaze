@@ -432,21 +432,22 @@ int main(int argc,char* argv[]){
   	StringPointer pe=ps;
   	++pe;
   	++pe;
-  	Dirn d=FORWARD;
-  	se.setStringSegment(ps,pe,1,&d);
+  	SPA<Dirn> d(1);
+  	*d=FORWARD;
+  	se.setStringSegment(ps,pe,1,d);
 
   	ps=pd.s.begin();
   	++ps;
   	pe=ps;
   	++pe;
   	++pe;
-  	d=BACK;
-  	se.setStringSegment(ps,pe,1,&d);
+  	*d=BACK;
+  	se.setStringSegment(ps,pe,1,d);
   	
   	++pe;
   	++pe;
-  	d=LEFT;
-  	se.setStringSegment(ps,pe,1,&d);
+  	*d=LEFT;
+  	se.setStringSegment(ps,pe,1,d);
   	
   	pd.stringUpdated();
     cout<<"edited string - should be straight again"<<endl;
