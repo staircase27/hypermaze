@@ -157,7 +157,7 @@ class SPA{
     /**
      * this will point to the first element in the new array
      * (explicit to stop this being used as a cast from an integer as that doesn't make sence)
-     * @param the number of elements for the new array to contain
+     * @param len the number of elements for the new array to contain
      */ 
     explicit SPA<T>(const int& len):c(new int(1)),p(new T[len]()),h(p){};
     ///Copy Constructor

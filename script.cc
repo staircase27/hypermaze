@@ -405,6 +405,8 @@ IOResult read(HypIStream& s,SP<Action>& a){
     return r;
   }
   switch(id){
+    case 0:
+      return createAndRead<ActionMulti>(s,a);
     case 1:
       return createAndRead<ActionNothing>(s,a);
     case 2:
@@ -427,6 +429,13 @@ IOResult read(HypIStream& s,SP<Action>& a){
 }
 bool write(HypOStream& s,const SP<const Action>& a){
   return a->dowrite(s);
+}
+
+IOResult read(HypIStream& s,ActionMulti& a){
+  return read(s,a.actions,a.num);
+}
+bool write(HypOStream& s,const ActionMulti& a){
+  return write(s,(SPA<const SP<const Action> >&)a.actions,a.num);
 }
 
 void ActionMessage::doCommon(ScriptResponse& r,String&){
@@ -528,12 +537,58 @@ IOResult read(HypIStream& s,Event& e){
   IOResult r=read(s,e.trigger,0);
   if(!r.ok)
     return r;
-  if(!(r=read(s,e.conditions,e.conditionCount)).ok)
+  if(!(r=read(s,e.condition)).ok)
     return r;
-  return read(s,e.actions,e.actionCount);
+  return read(s,e.action);
 }
 bool write(HypOStream& s,const Event& e){
   return write(s,e.trigger) &&
-      write(s,(SPA<const SP<const Condition> >&)e.conditions,e.conditionCount) &&
-      write(s,(SPA<const SP<const Action> >&)e.actions,e.actionCount);
+      write(s,(SP<const Condition>&)e.condition) &&
+      write(s,(SP<const Action>&)e.action);
 }
+
+ScriptResponseStart Script::runStart(int time,String& s){
+  ScriptResponseStart r;
+  for(int i=0;i<eventcount;++i){
+    if(events[i].trigger&TRIGGER_START!=0)
+      if(events[i].condition->is(time,*this,s)){
+        events[i].action->doStart(r,s);
+        times[i]=time;
+      }
+  }
+  return r;
+}
+ScriptResponseWin Script::runWin(int time,String& s){
+  ScriptResponseWin r;
+  for(int i=0;i<eventcount;++i){
+    if(events[i].trigger&TRIGGER_WIN!=0)
+      if(events[i].condition->is(time,*this,s)){
+        events[i].action->doWin(r,s);
+        times[i]=time;
+      }
+  }
+  return r;
+}
+ScriptResponseMove Script::runMove(int time,String& s){
+  ScriptResponseMove r;
+  for(int i=0;i<eventcount;++i){
+    if(events[i].trigger&TRIGGER_MOVE!=0)
+      if(events[i].condition->is(time,*this,s)){
+        events[i].action->doMove(r,s);
+        times[i]=time;
+      }
+  }
+  return r;
+}
+ScriptResponseSelect Script::runSelect(int time,String& s){
+  ScriptResponseSelect r;
+  for(int i=0;i<eventcount;++i){
+    if(events[i].trigger&TRIGGER_SELECT!=0)
+      if(events[i].condition->is(time,*this,s)){
+        events[i].action->doSelect(r,s);
+        times[i]=time;
+      }
+  }
+  return r;
+}
+

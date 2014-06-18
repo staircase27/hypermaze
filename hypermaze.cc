@@ -409,7 +409,7 @@ int main(int argc,char* argv[]){
     read(is,condition);
 
     cout<<"parsed"<<endl;
-    Script s;
+    Script s(0,SPA<const Event>());
     cout<<condition->is(0,s,pd.s)<<endl;
 
     SPA<char> str;
@@ -488,7 +488,7 @@ int main(int argc,char* argv[]){
 
     SPA<SP<Action> > as;
     int count;
-    Script s;
+    Script s(0,SPA<const Event>());
     read(is,as,count);
     
     cout<<"parsed "<<count<<endl;

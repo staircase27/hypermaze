@@ -227,26 +227,34 @@ IOResult read(HypIStream& s,SP<Action>& c);
  */
 bool write(HypOStream& s,const SP<const Action>& c);
 
+///An event in a script
+/**
+ * contains trigger for an event and conditions on it's trigger and the actions
+ * to execute when the event is triggered
+ */
 class Event{
   public:
 		int trigger;
-		int conditionCount;
-		SPA<SP<Condition> > conditions;
-		int actionCount;
-		SPA<SP<Action> > actions;
+		SP<Condition> condition;
+		SP<Action> action;
+		
+		Event(int trigger,SP<Condition> condition,SP<Action> action):
+		    trigger(trigger),condition(condition),action(action){};
 };
-
-
 
 class Script{
   private:
-    int eventcount;
-    SPA<Event> events;
-    SPA<int> times;
-  
+    const int eventcount;
+    const SPA<const Event> events;
+    const SPA<int> times;
   public:
-    int getTime(int event) const{
+    Script(int eventcount,const SPA<const Event> events):eventcount(eventcount),events(events),times(eventcount){};  
+    inline int getTime(int event) const{
       return times[event];
     }
+    ScriptResponseStart runStart(int time,String& s);
+    ScriptResponseWin runWin(int time,String& s);
+    ScriptResponseMove runMove(int time,String& s);
+    ScriptResponseSelect runSelect(int time,String& s);
 };
 #endif

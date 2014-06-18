@@ -442,6 +442,55 @@ inline bool write(HypOStream& s,const ConditionStringPattern& c){
   return write(s,c.sm);
 }
 
+///An action class that does a list of actions
+class ActionMulti: public virtual Action, protected PolymorphicHypIOImpl<ActionMulti,0>{
+  public:
+    int num;
+    SPA<SP<Action> >actions;
+    ///@copydoc Action::doStart
+    ///delegates to the stored actions
+		virtual void doStart(ScriptResponseStart& r,String& s){
+		  for(int i=0;i<num;++i)
+		    actions[i]->doStart(r,s);
+		};
+    ///@copydoc Action::doWin
+    ///delegates to the stored actions
+		virtual void doWin(ScriptResponseWin& r,String& s){
+		  for(int i=0;i<num;++i)
+		    actions[i]->doWin(r,s);
+		}
+    ///@copydoc Action::doMove
+    ///delegates to the stored actions
+		virtual void doMove(ScriptResponseMove& r,String& s){
+		  for(int i=0;i<num;++i)
+		    actions[i]->doMove(r,s);
+		};
+    ///@copydoc Action::doSelect
+    ///delegates to the stored actions
+		virtual void doSelect(ScriptResponseSelect& r,String& s){
+		  for(int i=0;i<num;++i)
+		    actions[i]->doSelect(r,s);
+		};
+		///virtual destructor so that implementations will delete correctly
+		virtual ~ActionMulti(){};
+};
+
+///Read a ActionMulti from a stream
+/**
+ * @param s the stream to read from
+ * @param c reference to a ActionMulti variable to store the read data in
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ActionMulti& c);
+///write a ActionMulti to a stream
+/**
+ * @param s the stream to write to
+ * @param c the ActionMulti to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ActionMulti& c);
+
+
 ///A specialisation of Action for Actions that apply to win events only
 class ActionWin: public virtual Action{
   public:
@@ -700,5 +749,21 @@ IOResult read(HypIStream& s,ActionSetStringRoute& a);
  * @return true if i was written ok
  */
 bool write(HypOStream& s,const ActionSetStringRoute& a);
+
+///Read an Event from a stream
+/**
+ * @param s the stream to read from
+ * @param e Event variable to read the data into
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,Event& e);
+
+///write an Event to a stream
+/**
+ * @param s the stream to write to
+ * @param e the Event to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const Event& e);
 
 #endif
