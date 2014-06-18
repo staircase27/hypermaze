@@ -8,6 +8,7 @@
 
 #ifdef IOSTREAM
 #include <iostream>
+#include <cstring>
 using namespace std;
 #endif
 
@@ -127,6 +128,13 @@ class SP{
     #endif
 
 };
+
+template <class T> class SPA;
+
+template<class T> inline void memcopy(SPA<T>,SPA<const T>,size_t);
+template<class T> inline void memcopy(SPA<T>,const T*,size_t);
+template<class T> inline void memcopy(T*,SPA<const T>,size_t);
+template<class T> inline void memcopy(T*,const T*,size_t);
 
 ///A Smart array pointer class
 /**
@@ -368,13 +376,49 @@ class SPA{
     const bool isnull() const{
       return p==0;
     }
+    
+    operator SPA<const T>(){
+      return SPA<const T>(*this);
+    }
 
     #ifdef IOSTREAM
     template<class U>
     friend ostream& operator<<(ostream&,const SPA<U>&);
     #endif
-
+    
+    friend size_t strlen(const SPA<const char>);
+    template<class U> friend void memcopy(SPA<U>,SPA<const U>,size_t);
+    template<class U> friend void memcopy(U*,SPA<const U>,size_t);
+    template<class U> friend void memcopy(SPA<U>,const U*,size_t);
 };
+
+inline size_t strlen(const SPA<const char> s){
+   return strlen(s.p);
+}
+
+template<class T> inline void memcopy(SPA<T> dest,SPA<T> src,size_t num){
+  memcopy(dest,SPA<const T>(src),num);
+}
+template<class T> inline void memcopy(T* dest,SPA<T> src,size_t num){
+  memcopy(dest,SPA<const T>(src),num);
+}
+template<class T>
+inline void memcopy(SPA<T> dest,SPA<const T> src,size_t num){
+  memcopy(dest.p,src.p,num);
+}
+template<class T>
+inline void memcopy(T* dest,SPA<const T> src,size_t num){
+  memcopy(dest,src.p,num);
+}
+template<class T>
+inline void memcopy(SPA<T> dest,const T* src,size_t num){
+  memcopy(dest.p,src,num);
+}
+template<class T>
+inline void memcopy(T* dest,const T* src,size_t num){
+  memcpy(dest,src,num*sizeof(T));
+}
+
 
 #ifdef IOSTREAM
 

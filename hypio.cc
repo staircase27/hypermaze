@@ -61,8 +61,8 @@ IOResult BufHypIStream::read(int& i,const int& base){
 };
 void BufHypIStream::mergebufs(SPA<char>& addto,int& tolen,char const* const& addfrom,int& fromstart,int& fromlen){
   SPA<char> tmp(tolen+fromlen+1);
-  memcpy(&*tmp,&*addto,tolen);
-  memcpy(&*(tmp+tolen),(addfrom+fromstart),fromlen);
+  memcopy(tmp,addto,tolen);
+  memcopy(tmp+tolen,addfrom+fromstart,fromlen);
   tmp[tolen+fromlen]='\0';
   addto=tmp;
   fromstart+=fromlen;
@@ -114,7 +114,7 @@ void IrrHypIStream::readtobuf(){
   if(end==len){
     len*=2;
     char* tmp=new char[len+1];
-    memcpy(tmp,buf,end);
+    memcopy(tmp,buf,end);
     delete[] buf;
     buf=tmp;
   }
@@ -129,7 +129,7 @@ MemoryHypIStream::MemoryHypIStream(SPA<const char> _buf,int _len){
   delete[] buf;
   len=_len+1;
   buf=new char[len];
-  memcpy(buf,&*_buf,_len);
+  memcopy(buf,_buf,_len);
   buf[_len]='\0';
   end=_len;
   eof=true;
@@ -138,7 +138,7 @@ MemoryHypIStream::MemoryHypIStream(const char* _buf,int _len){
   delete[] buf;
   len=_len+1;
   buf=new char[len];
-  memcpy(buf,_buf,_len);
+  memcopy(buf,_buf,_len);
   buf[_len]='\0';
   end=_len;
   eof=true;
@@ -162,7 +162,7 @@ bool BufHypOStream::addSpace(){
   int l=strlen(space);
   if(end+l>len)
     writeToSink();
-  memcpy(buf+end,space,l);
+  memcopy(buf+end,space,l);
   end+=l;
 }
 
@@ -207,7 +207,7 @@ bool BufHypOStream::write(const int& _i,const int& _base){
     while(i){
       if(--idx<0){
         char* tmp=new char[len+16];
-        memcpy(tmp+16,ibuf,len);
+        memcopy(tmp+16,ibuf,len);
         delete[] ibuf;
         ibuf=tmp;
         ilen+=16;
@@ -221,7 +221,7 @@ bool BufHypOStream::write(const int& _i,const int& _base){
     }
     if(end+ilen-idx>len)
       writeToSink();
-    memcpy(buf+end,ibuf+idx,ilen-idx);
+    memcopy(buf+end,ibuf+idx,ilen-idx);
     end+=ilen-idx;
     delete[] ibuf;
   }
@@ -241,12 +241,12 @@ bool BufHypOStream::write(const char*& str,const bool& quote){
   int l=strlen(str);
   int s=0;
   while(l-s>len-end){
-    memcpy(buf+end,str+s,len-end);
+    memcopy(buf+end,str+s,len-end);
     end=len;
     s+=len-end;
     writeToSink();
   }
-  memcpy(buf+end,str+s,l-s);
+  memcopy(buf+end,str+s,l-s);
   end+=l-s;
   if(quote){
     if(end+1>len)
@@ -273,8 +273,8 @@ MemoryHypOStream::MemoryHypOStream(SPA<char>& str):str(str),strlen(0){};
 
 bool MemoryHypOStream::writeToSink(){
   SPA<char> tmp(strlen+end+1);
-  memcpy(&*tmp ,&*str,strlen);
-  memcpy(&*(tmp+strlen),buf,end);
+  memcopy(tmp,str,strlen);
+  memcopy((tmp+strlen),buf,end);
   tmp[strlen+end]='\0';
   str=tmp;
   strlen=strlen+end;

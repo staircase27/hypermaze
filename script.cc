@@ -434,7 +434,7 @@ void ActionMessage::doCommon(ScriptResponse& r,String&){
     r.messages=SPA<Message>(1);
   }else{
     SPA<Message> tmp(r.messageCount+1);
-    memcpy(&*tmp,&*r.messages,r.messageCount*sizeof(Message));
+    memcopy(tmp,r.messages,r.messageCount);
     r.messages=tmp;
   }
   r.messages[r.messageCount]=m;

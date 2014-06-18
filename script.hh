@@ -236,11 +236,13 @@ class Event{
 		SPA<SP<Action> > actions;
 };
 
+
+
 class Script{
   private:
     int eventcount;
     SPA<Event> events;
-    int* times;
+    SPA<int> times;
   
   public:
     int getTime(int event) const{

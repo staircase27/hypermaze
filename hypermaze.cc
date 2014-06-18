@@ -379,7 +379,7 @@ int main(int argc,char* argv[]){
     cout<<groups[1].a<<" "<<groups[1].b<<endl;
     
     cout<<"input"<<endl<<data<<endl;
-    MemoryHypIStream is(data,strlen(&*data));
+    MemoryHypIStream is(data,strlen(data));
     read(is,sm);
     
     groups=SPA<Pair<SP<StringPointer> > >(2);
