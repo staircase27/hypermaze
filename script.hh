@@ -238,17 +238,18 @@ class Event{
 		SP<Condition> condition;
 		SP<Action> action;
 		
+		Event():trigger(0),condition(Condition::defaultvalue),action(Action::defaultvalue){};
 		Event(int trigger,SP<Condition> condition,SP<Action> action):
 		    trigger(trigger),condition(condition),action(action){};
 };
 
 class Script{
   private:
-    const int eventcount;
-    const SPA<const Event> events;
-    const SPA<int> times;
+    int eventcount;
+    SPA<const Event> events;
+    SPA<int> times;
   public:
-    Script(int eventcount,const SPA<const Event> events):eventcount(eventcount),events(events),times(eventcount){};  
+    Script(int eventcount,const SPA<const Event> events):eventcount(eventcount),events(events),times(eventcount){};
     inline int getTime(int event) const{
       return times[event];
     }
@@ -256,5 +257,13 @@ class Script{
     ScriptResponseWin runWin(int time,String& s);
     ScriptResponseMove runMove(int time,String& s);
     ScriptResponseSelect runSelect(int time,String& s);
+    
+    friend IOResult read(HypIStream&,Script&);
+    friend bool write(HypOStream&,const Script&);
 };
+
+IOResult read(HypIStream& s,Script& sc);
+bool write(HypOStream& s,const Script& sc);
+
+
 #endif

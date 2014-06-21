@@ -547,6 +547,33 @@ bool write(HypOStream& s,const Event& e){
       write(s,(SP<const Action>&)e.action);
 }
 
+IOResult read(HypIStream& s,Script& sc){
+  int n=0;
+  IOResult r=read(s,n,0);
+  if(!r.ok){
+    return r;
+  }
+  sc.eventcount=n;
+  SPA<Event> es(n);
+  for(int i=0;i<n;++i)
+    if(!(r=read(s,es[i])).ok){
+      sc.events=es;
+      sc.times=SPA<int>(n);
+      return r;
+    }
+  sc.events=es;
+  sc.times=SPA<int>(n);
+  return r;
+}
+bool write(HypOStream& s,const Script& sc){
+  if(!write(s,sc.eventcount))
+    return false;
+  for(int i=0;sc.eventcount;++i)
+     if(!write(s,sc.events[i]))
+       return false;
+  return true;
+}
+
 ScriptResponseStart Script::runStart(int time,String& s){
   ScriptResponseStart r;
   for(int i=0;i<eventcount;++i){
