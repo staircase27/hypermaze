@@ -176,7 +176,7 @@ struct ScriptResponseSelect:public ScriptResponse{
 };
 
 ///A general action object
-class Action: protected virtual PolymorphicHypIO{
+class Action: public virtual PolymorphicHypIO{
   public:
     ///do the appropriate action for a start event
     /**
@@ -263,6 +263,13 @@ class Script{
     
     friend IOResult read(HypIStream&,Script&);
     friend bool write(HypOStream&,const Script&);
+    
+    inline const SPA<const Event>& getevents() const{
+      return events;
+    }
+    inline const int& geteventcount() const{
+      return eventcount;
+    }
 };
 
 IOResult read(HypIStream& s,Script& sc);

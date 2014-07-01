@@ -448,7 +448,7 @@ inline bool write(HypOStream& s,const ConditionStringPattern& c){
 }
 
 ///An action class that does a list of actions
-class ActionMulti: public virtual Action, public PolymorphicHypIOImpl<ActionMulti,0>{
+class ActionMulti: public Action, public PolymorphicHypIOImpl<ActionMulti,0>{
   public:
     int num;
     SPA<SP<Action> >actions;
@@ -497,7 +497,7 @@ bool write(HypOStream& s,const ActionMulti& c);
 
 
 ///A specialisation of Action for Actions that apply to win events only
-class ActionWin: public virtual Action{
+class ActionWin: public Action{
   public:
     ///@copydoc Action::doStart
     ///implemented as a no-op
@@ -515,7 +515,7 @@ class ActionWin: public virtual Action{
 		virtual ~ActionWin(){};
 };
 ///A specialisation of Action for Actions that apply to all events the same way
-class ActionCommon: public virtual Action{
+class ActionCommon: public Action{
   public:
     ///do the appropriate action for an event
     /**

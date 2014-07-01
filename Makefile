@@ -26,13 +26,16 @@ run-test: test
 
 scriptedit: scriptedit.o script.o hypio.o
 
+run-scriptedit: scriptedit
+	./scriptedit
+
 scriptedit.o: scriptedit.cc scriptimpl.hh script.hh hypio.hh
 
 hypermaze: CPPOPTS+= -DIRRLICHT -DOPENAL -DIOSTREAM
 hypermaze: CPPLIBS+= $(IRRLIBS) -lopenal -lalut
 hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o hypio.o maze.o keymap.o GUIFormattedText.o sound.o script.o
 
-.run-hypermaze: hypermaze
+run-hypermaze: hypermaze
 	./hypermaze
 
 hypermaze.o: hypermaze.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
