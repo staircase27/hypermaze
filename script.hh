@@ -62,6 +62,8 @@ class PolymorphicHypIO{
      * @return true if the array was written ok
      */
     virtual bool dowrite(HypOStream& s) const=0;
+  public:
+    virtual int getid() const=0;
 };
 
 ///the different maze events that can trigger scripts  
@@ -75,7 +77,7 @@ enum Trigger{
 class Script;
 
 ///A Condition to select if an event should trigger or not
-class Condition: protected virtual PolymorphicHypIO{
+class Condition: public virtual PolymorphicHypIO{
   public:
     ///Check if the condition is matched
     /**
@@ -249,6 +251,7 @@ class Script{
     SPA<const Event> events;
     SPA<int> times;
   public:
+    Script():eventcount(0),events(),times(){};
     Script(int eventcount,const SPA<const Event> events):eventcount(eventcount),events(events),times(eventcount){};
     inline int getTime(int event) const{
       return times[event];

@@ -8,9 +8,9 @@
 
 #ifdef IOSTREAM
 #include <iostream>
+#endif
 #include <cstring>
 using namespace std;
-#endif
 
 ///A Smart pointer class
 /**
@@ -50,7 +50,7 @@ class SP{
      * @tparam U the type of the pointer we are copying
      */
     template <class U>
-    SP<T>(const SP<U>& op):p(op.p),c(op.c){++*c;}
+    explicit SP<T>(const SP<U>& op):p((T*)op.p),c(op.c){++*c;}
     
     template <class U>
     friend class SP;
@@ -88,6 +88,28 @@ class SP{
       return *this;
     }
     
+    ///Type Cast Assignment operator
+    /**
+     * Updates the reference count for the current data and deletes if needed and then replaces with
+     * value pointed to by other pointer
+     * @param op the pointer to replace this one with
+     * @return a reference to this pointer
+     */
+    template<class U>
+    SP<T>& operator=(const SP<U>& op){
+      if(p==op.p && op.c==op.c)
+        return *this;
+      if(--*c==0){
+        delete p;
+        delete c;
+      }
+      p=(T*)op.p;
+      c=op.c;
+      ++*c;
+      
+      return *this;
+    }
+
     ///Dereference the pointer 
     /**
      * @return a reference to the element we point to

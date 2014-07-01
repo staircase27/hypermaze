@@ -285,19 +285,19 @@ IOResult read(HypIStream& s,SP<Condition>& c){
     return r;
   }
   switch(id){
-    case 1:
+    case ConditionTrue::id:
       return createAndRead<ConditionTrue>(s,c);
-    case 2:
+    case ConditionOr::id:
       return createAndRead<ConditionOr>(s,c);
-    case 3:
+    case ConditionAnd::id:
       return createAndRead<ConditionAnd>(s,c);
-    case 4:
+    case ConditionNot::id:
       return createAndRead<ConditionNot>(s,c);
-    case 5:
+    case ConditionAfter::id:
       return createAndRead<ConditionAfter>(s,c);
-    case 6:
+    case ConditionBefore::id:
       return createAndRead<ConditionBefore>(s,c);
-    case 7:
+    case ConditionStringPattern::id:
       return createAndRead<ConditionStringPattern>(s,c);
     default:
       c=Condition::defaultvalue;
@@ -405,23 +405,23 @@ IOResult read(HypIStream& s,SP<Action>& a){
     return r;
   }
   switch(id){
-    case 0:
+    case ActionMulti::id:
       return createAndRead<ActionMulti>(s,a);
-    case 1:
+    case ActionNothing::id:
       return createAndRead<ActionNothing>(s,a);
-    case 2:
+    case ActionMessage::id:
       return createAndRead<ActionMessage>(s,a);
-    case 3:
+    case ActionBlockWin::id:
       return createAndRead<ActionBlockWin>(s,a);
-    case 4:
+    case ActionWinMessage::id:
       return createAndRead<ActionWinMessage>(s,a);
-    case 5:
+    case ActionWinNextLevel::id:
       return createAndRead<ActionWinNextLevel>(s,a);
-    case 6:
+    case ActionForceWin::id:
       return createAndRead<ActionForceWin>(s,a);
-    case 7:
+    case ActionStringConditionSelect::id:
       return createAndRead<ActionStringConditionSelect>(s,a);
-    case 9:
+    case ActionSetStringRoute::id:
       return createAndRead<ActionSetStringRoute>(s,a);
     default:
       a=Action::defaultvalue;
@@ -500,7 +500,6 @@ void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
   StringEdit se(s);
   SPA<Pair<SP<StringPointer> > > groups(ranges.groupCount());
   while(ranges.match(s,groups)){
-    cout<<"found match"<<endl;
     for(int i=0;i<ranges.groupCount();++i){
       se.setStringSegment(*groups[i].a,*groups[i].b,count,route);
     }
