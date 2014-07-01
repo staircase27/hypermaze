@@ -7,37 +7,37 @@ using namespace std;
 
 ostream& operator<<(ostream& s,SP<Condition> e);
 
-ostream& operator<<(ostream& s,SP<ConditionTrue> e){
+ostream& operator<<(ostream& s,const ConditionTrue& e){
   return s<<"True";
 }
 
-ostream& operator<<(ostream& s,SP<ConditionNot> e){
-  return s<<"Not "<<e->condition;
+ostream& operator<<(ostream& s,const ConditionNot& e){
+  return s<<"Not "<<e.condition;
 }
 
-ostream& operator<<(ostream& s,SP<ConditionOr> e){
+ostream& operator<<(ostream& s,const ConditionOr& e){
   s<<"Any of [";
-  for(int i=0;i<e->count;++i){
+  for(int i=0;i<e.count;++i){
     if(i!=0)
       s<<", ";
-    s<<e->conditions[i];
+    s<<e.conditions[i];
   }
   return s<<"]";
 }
-ostream& operator<<(ostream& s,SP<ConditionAnd> e){
+ostream& operator<<(ostream& s,const ConditionAnd& e){
   s<<"All of [";
-  for(int i=0;i<e->count;++i){
+  for(int i=0;i<e.count;++i){
     if(i!=0)
       s<<", ";
-    s<<e->conditions[i];
+    s<<e.conditions[i];
   }
   return s<<"]";
 }
-ostream& operator<<(ostream& s,SP<ConditionAfter> e){
-  return s<<"At least "<<e->delay<<" after event "<<e->event;
+ostream& operator<<(ostream& s,const ConditionAfter& e){
+  return s<<"At least "<<e.delay<<" after event "<<e.event;
 }
-ostream& operator<<(ostream& s,SP<ConditionBefore> e){
-  return s<<"Before event "<<e->event;
+ostream& operator<<(ostream& s,const ConditionBefore& e){
+  return s<<"Before event "<<e.event;
 }
 
 ostream& operator<<(ostream& s,const StringElementCondition& b){
@@ -101,18 +101,18 @@ ostream& operator<<(ostream& s,Pair<PatternTag,StringElementCondition>& p){
   return s<<"matching "<<p.b;
 }
 
-ostream& operator<<(ostream& s,SP<ConditionStringPattern> e){
+ostream& operator<<(ostream& s,const ConditionStringPattern& e){
   s<<"String Pattern [";
-  for(int i=0;i<e->sm.count;++i){
+  for(int i=0;i<e.sm.count;++i){
     if(i!=0)
       s<<", ";
-    s<<e->sm.pattern[i];
+    s<<e.sm.pattern[i];
   }
   return s<<"]";
 }
 
 #define MAKECASE(T) case T::id:\
-                       s<<(SP<T>)e;\
+                       s<<(T&)*e;\
                        break;
 ostream& operator<<(ostream& s,SP<Condition> e){
   if(e.isnull())
@@ -135,17 +135,17 @@ ostream& operator<<(ostream& s,SP<Condition> e){
 
 ostream& operator<<(ostream& s,SP<Action> e);
 
-ostream& operator<<(ostream& s,SP<ActionMulti> e){
+ostream& operator<<(ostream& s,const ActionMulti& e){
   s<<"Do all of [";
-  for(int i=0;i<e->num;++i){
+  for(int i=0;i<e.num;++i){
     if(i!=0)
       s<<", ";
-    s<<e->actions[i];
+    s<<e.actions[i];
   }
   return s<<"]";
 }
 
-ostream& operator<<(ostream& s,SP<ActionNothing> e){
+ostream& operator<<(ostream& s,const ActionNothing& e){
   return s<<"Nothing";
 }
 
@@ -159,63 +159,63 @@ ostream& operator<<(ostream& s,const Message& m){
   return s<<"]";
 }
 
-ostream& operator<<(ostream& s,SP<ActionMessage> e){
-  return s<<"Show message: "<<e->m;
+ostream& operator<<(ostream& s,const ActionMessage& e){
+  return s<<"Show message: "<<e.m;
 }
 
-ostream& operator<<(ostream& s,SP<ActionBlockWin> e){
+ostream& operator<<(ostream& s,const ActionBlockWin& e){
   return s<<"Block Win";
 }
 
-ostream& operator<<(ostream& s,SP<ActionWinMessage> e){
-  return s<<"Show win message: "<<e->m;
+ostream& operator<<(ostream& s,const ActionWinMessage& e){
+  return s<<"Show win message: "<<e.m;
 }
 
-ostream& operator<<(ostream& s,SP<ActionWinNextLevel> e){
-  return s<<"Next Level of \""<<e->nextLevel.a<<"\" called \""<<e->nextLevel.b<<"\"";
+ostream& operator<<(ostream& s,const ActionWinNextLevel& e){
+  return s<<"Next Level of \""<<e.nextLevel.a<<"\" called \""<<e.nextLevel.b<<"\"";
 }
 
-ostream& operator<<(ostream& s,SP<ActionForceWin> e){
+ostream& operator<<(ostream& s,const ActionForceWin& e){
   return s<<"Force Win";
 }
 
-ostream& operator<<(ostream& s,SP<ActionStringConditionSelect> e){
-  return s<<"Set selection status for string matching "<<e->change<<" to "<<e->select;
+ostream& operator<<(ostream& s,const ActionStringConditionSelect& e){
+  return s<<"Set selection status for string matching "<<e.change<<" to "<<e.select;
 }
 
-ostream& operator<<(ostream& s,SP<ActionSetStringRoute> e){
-  return s<<"Set route for string matching pattern [";
-  for(int i=0;i<e->ranges.count;++i){
+ostream& operator<<(ostream& s,const ActionSetStringRoute& e){
+  s<<"Set route for string matching pattern [";
+  for(int i=0;i<e.ranges.count;++i){
     if(i!=0)
       s<<", ";
-    s<<e->ranges.pattern[i];
+    s<<e.ranges.pattern[i];
   }
   s<<"] element";
-  if(e->ranges.group_count!=1)
+  if(e.ranges.group_count!=1)
     s<<"s [";
   else
     s<<" ";
-  for(int i=0;i<e->ranges.group_count;++i){
+  for(int i=0;i<e.ranges.group_count;++i){
     if(i!=0)
       s<<", ";
-    s<<e->ranges.groups[i].a<<"-"<<e->ranges.groups[i].b;
+    s<<e.ranges.groups[i].a<<"-"<<e.ranges.groups[i].b;
   }
-  if(e->ranges.group_count!=1)
+  if(e.ranges.group_count!=1)
     s<<"]";
   s<<" to [";
-  for(int i=0;i<e->count;++i){
+  for(int i=0;i<e.count;++i){
     if(i!=0)
       s<<", ";
-    s<<e->route[i];
+    s<<e.route[i];
   }
   s<<"]";
-  if(e->all)
+  if(e.all)
     s<<" repeatedly";
   return s;
 }
 
 #define MAKECASE(T) case T::id:\
-                       s<<(SP<T>)e;\
+                       s<<(T&)*e;\
                        break;
 ostream& operator<<(ostream& s,SP<Action> e){
   if(e.isnull())
@@ -251,6 +251,321 @@ ostream& operator<<(ostream& s,const Script& e){
   return s<<"]";
 }
 
+/*
+bool edit(Event& e){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<e<<endl;
+        break;
+    }
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+*/
+
+bool edit(SP<Action>&);
+
+bool edit(ActionMulti& a){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<a<<endl;
+        break;
+      case 'r':{
+        cout<<"currently there are "<<a.num<<" Actions's"<<endl<<"how many would you like there to be? ";
+        int newlen=-1;
+        c=' ';
+        cin>>newlen;
+        while(newlen<0){
+          cout<<"must be positive"<<endl<<": ";
+          cin>>newlen;
+        }
+        while(c!='y'&&c!='n'){
+          cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
+          cin>>c;
+        }
+        if(c=='n')
+          break;
+        if(newlen==a.num)
+          break;
+        SPA<SP<Action> > newactions(newlen);
+        for(int i=0;i<newlen&&i<a.num;++i)
+          newactions[i]=a.actions[i];
+        if(newlen>a.num)
+          for(int i=a.num;i<newlen;++i)
+            newactions[i]=Action::defaultvalue;
+        a.num=newlen;
+        a.actions=newactions;
+        changed=true;
+        break;
+      }
+      case 'e':{
+        cout<<"which action do you wish to edit? ";
+        int n;
+        cin>>n;
+        while(n>=a.num||n<0){
+          cout<<"no such element: ";
+          cin>>n;
+        }
+        changed|=edit(a.actions[n]);
+        break;
+      }
+    }
+    cout<<"Please select an action to use on this Multi Action:"<<endl<<"p) Print"<<endl<<"r) Resize action list"<<endl<<"e) Edit an Action"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+bool edit(ActionNothing& e){
+  cout<<"nothing to edit for a nothing action"<<endl;
+  return false;
+}
+bool edit(ActionMessage& e){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<e<<endl;
+        break;
+    }
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+bool edit(ActionBlockWin& e){
+  cout<<"nothing to edit for a block win action"<<endl;
+  return false;
+}
+bool edit(ActionWinMessage& e){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<e<<endl;
+        break;
+    }
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+bool edit(ActionWinNextLevel& e){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<e<<endl;
+        break;
+    }
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+bool edit(ActionForceWin& e){
+  cout<<"nothing to edit for a force win action"<<endl;
+  return false;
+}
+bool edit(ActionStringConditionSelect& e){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<e<<endl;
+        break;
+    }
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+bool edit(ActionSetStringRoute& a){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<a<<endl;
+        break;
+    }
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+#define PRINTIDNAME(T) cout<<T::id<<") "<<#T<<endl;
+#define MAKEREPCASE(T) case T::id:\
+                         p=SP<T>(new T());\
+                         break;
+#define MAKEEDITCASE(T) case T::id:\
+                          changed!=edit((T&)*p);\
+                          break;
+bool edit(SP<Action>& p){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<p<<endl;
+        break;
+      case 'r':{
+        cout<<"choose a new action"<<endl;
+        PRINTIDNAME(ActionMulti)
+        PRINTIDNAME(ActionNothing)
+        PRINTIDNAME(ActionMessage)
+        PRINTIDNAME(ActionBlockWin)
+        PRINTIDNAME(ActionWinMessage)
+        PRINTIDNAME(ActionWinNextLevel)
+        PRINTIDNAME(ActionForceWin)
+        PRINTIDNAME(ActionStringConditionSelect)
+        PRINTIDNAME(ActionSetStringRoute)
+        int i;
+        bool done=false;
+        while(!done){
+          cout<<": ";
+          cin>>i;
+          done=true;
+          switch(i){
+            MAKEREPCASE(ActionMulti)
+            MAKEREPCASE(ActionNothing)
+            MAKEREPCASE(ActionMessage)
+            MAKEREPCASE(ActionBlockWin)
+            MAKEREPCASE(ActionWinMessage)
+            MAKEREPCASE(ActionWinNextLevel)
+            MAKEREPCASE(ActionForceWin)
+            MAKEREPCASE(ActionStringConditionSelect)
+            MAKEREPCASE(ActionSetStringRoute)
+            default:
+              done=false;
+              cout<<"Unknown Action"<<endl;
+          }
+        }
+        changed=true;
+        break;
+      }
+      case 'e':
+        switch(p->getid()){
+          MAKEEDITCASE(ActionMulti)
+          MAKEEDITCASE(ActionNothing)
+          MAKEEDITCASE(ActionMessage)
+          MAKEEDITCASE(ActionBlockWin)
+          MAKEEDITCASE(ActionWinMessage)
+          MAKEEDITCASE(ActionWinNextLevel)
+          MAKEEDITCASE(ActionForceWin)
+          MAKEEDITCASE(ActionStringConditionSelect)
+          MAKEEDITCASE(ActionSetStringRoute)
+          default:
+            cout<<"unknown action can't edit"<<endl;
+        }
+        break;
+    }
+    cout<<"Please select an action to use on this Action:"<<endl<<"p) Print"<<endl<<"r) Replace"<<endl<<"e) Edit"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+bool edit(SP<Condition>& p){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<p<<endl;
+        break;
+    }
+    cout<<"Please select an action to use on this Condition:"<<endl<<"p) Print"<<endl<<"r) Replace"<<endl<<"e) Edit"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+bool edit(Event& e){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<e<<endl;
+        break;
+      case 't':{
+        cout<<"please input new trigger: ";
+        cin>>e.trigger;
+        changed=true;
+        break;
+      }
+      case 'c':
+        changed|=edit(e.condition);
+        break;
+      case 'a':
+        changed|=edit(e.action);
+        break;
+    }
+    cout<<"Please select an action to use on this Event:"<<endl<<"p) Print"<<endl<<"t) Change trigger"<<endl<<"c) Edit the condition"<<endl<<"a) Edit the action"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+
+bool edit(Script& s){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<s<<endl;
+        break;
+      case 'r':{
+        cout<<"currently there are "<<s.geteventcount()<<" event's"<<endl<<"how many would you like there to be? ";
+        int newlen=-1;
+        c=' ';
+        cin>>newlen;
+        while(newlen<0){
+          cout<<"must be positive"<<endl<<": ";
+          cin>>newlen;
+        }
+        while(c!='y'&&c!='n'){
+          cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
+          cin>>c;
+        }
+        if(c=='n')
+          break;
+        if(newlen==s.geteventcount())
+          break;
+        SPA<Event> newevents(newlen);
+        for(int i=0;i<newlen&&i<s.geteventcount();++i)
+          newevents[i]=s.getevents()[i];
+        s=Script(newlen,newevents);
+        changed=true;
+        break;
+      }
+      case 'e':{
+        cout<<"which event do you wish to edit? ";
+        int n;
+        cin>>n;
+        while(n>=s.geteventcount()||n<0){
+          cout<<"no such element: ";
+          cin>>n;
+        }
+        changed|=edit(s.getevents()[n]);
+        break;
+      }
+    }
+    cout<<"Please select an action to use on this Script:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
 
 int main(){
   Script s;
@@ -267,7 +582,9 @@ int main(){
   SPA<Event> c(1);
   c[0].condition=test;
   s=Script(1,c);
-  cout<<s;
+  cout<<s<<endl;
+  cout<<"STARTING EDIT"<<endl;
+  cout<<edit(s);
 }
 
 

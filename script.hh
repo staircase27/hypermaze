@@ -248,11 +248,11 @@ class Event{
 class Script{
   private:
     int eventcount;
-    SPA<const Event> events;
+    SPA<Event> events;
     SPA<int> times;
   public:
     Script():eventcount(0),events(),times(){};
-    Script(int eventcount,const SPA<const Event> events):eventcount(eventcount),events(events),times(eventcount){};
+    Script(int eventcount,const SPA<Event>& events):eventcount(eventcount),events(events),times(eventcount){};
     inline int getTime(int event) const{
       return times[event];
     }
@@ -264,7 +264,7 @@ class Script{
     friend IOResult read(HypIStream&,Script&);
     friend bool write(HypOStream&,const Script&);
     
-    inline const SPA<const Event>& getevents() const{
+    inline const SPA<Event>& getevents() const{
       return events;
     }
     inline const int& geteventcount() const{
