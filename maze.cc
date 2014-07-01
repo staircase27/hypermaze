@@ -30,7 +30,7 @@ Maze::Maze(Vector size):maze(size.X*size.Y*size.Z),size(size){
 Maze::Maze(Maze& m):maze(m.maze),size(m.size){
 };
 Maze::Maze(const Maze& m):maze(m.size.X*m.size.Y*m.size.Z),size(m.size){
-  memcpy(&*maze,&*m.maze,sizeof(int)*m.size.X*m.size.Y*m.size.Z);
+  memcopy(maze,(SPA<const int>)m.maze,m.size.X*m.size.Y*m.size.Z);
 }
 Maze::~Maze(){}
 

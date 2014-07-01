@@ -8,8 +8,9 @@
 
 #ifdef IOSTREAM
 #include <iostream>
-using namespace std;
 #endif
+#include <cstring>
+using namespace std;
 
 ///A Smart pointer class
 /**
@@ -49,7 +50,7 @@ class SP{
      * @tparam U the type of the pointer we are copying
      */
     template <class U>
-    SP<T>(const SP<U>& op):p(op.p),c(op.c){++*c;}
+    explicit SP<T>(const SP<U>& op):p((T*)op.p),c(op.c){++*c;}
     
     template <class U>
     friend class SP;
@@ -87,6 +88,28 @@ class SP{
       return *this;
     }
     
+    ///Type Cast Assignment operator
+    /**
+     * Updates the reference count for the current data and deletes if needed and then replaces with
+     * value pointed to by other pointer
+     * @param op the pointer to replace this one with
+     * @return a reference to this pointer
+     */
+    template<class U>
+    SP<T>& operator=(const SP<U>& op){
+      if(p==op.p && op.c==op.c)
+        return *this;
+      if(--*c==0){
+        delete p;
+        delete c;
+      }
+      p=(T*)op.p;
+      c=op.c;
+      ++*c;
+      
+      return *this;
+    }
+
     ///Dereference the pointer 
     /**
      * @return a reference to the element we point to
@@ -128,6 +151,13 @@ class SP{
 
 };
 
+template <class T> class SPA;
+
+template<class T> inline void memcopy(SPA<T>,SPA<const T>,size_t);
+template<class T> inline void memcopy(SPA<T>,const T*,size_t);
+template<class T> inline void memcopy(T*,SPA<const T>,size_t);
+template<class T> inline void memcopy(T*,const T*,size_t);
+
 ///A Smart array pointer class
 /**
  * This class provides a more advanced smart pointer class that reference
@@ -149,7 +179,7 @@ class SPA{
     /**
      * this will point to the first element in the new array
      * (explicit to stop this being used as a cast from an integer as that doesn't make sence)
-     * @param the number of elements for the new array to contain
+     * @param len the number of elements for the new array to contain
      */ 
     explicit SPA<T>(const int& len):c(new int(1)),p(new T[len]()),h(p){};
     ///Copy Constructor
@@ -368,13 +398,49 @@ class SPA{
     const bool isnull() const{
       return p==0;
     }
+    
+    operator SPA<const T>(){
+      return SPA<const T>(*this);
+    }
 
     #ifdef IOSTREAM
     template<class U>
     friend ostream& operator<<(ostream&,const SPA<U>&);
     #endif
-
+    
+    friend size_t strlen(const SPA<const char>);
+    template<class U> friend void memcopy(SPA<U>,SPA<const U>,size_t);
+    template<class U> friend void memcopy(U*,SPA<const U>,size_t);
+    template<class U> friend void memcopy(SPA<U>,const U*,size_t);
 };
+
+inline size_t strlen(const SPA<const char> s){
+   return strlen(s.p);
+}
+
+template<class T> inline void memcopy(SPA<T> dest,SPA<T> src,size_t num){
+  memcopy(dest,SPA<const T>(src),num);
+}
+template<class T> inline void memcopy(T* dest,SPA<T> src,size_t num){
+  memcopy(dest,SPA<const T>(src),num);
+}
+template<class T>
+inline void memcopy(SPA<T> dest,SPA<const T> src,size_t num){
+  memcopy(dest.p,src.p,num);
+}
+template<class T>
+inline void memcopy(T* dest,SPA<const T> src,size_t num){
+  memcopy(dest,src.p,num);
+}
+template<class T>
+inline void memcopy(SPA<T> dest,const T* src,size_t num){
+  memcopy(dest.p,src,num);
+}
+template<class T>
+inline void memcopy(T* dest,const T* src,size_t num){
+  memcpy(dest,src,num*sizeof(T));
+}
+
 
 #ifdef IOSTREAM
 

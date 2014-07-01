@@ -405,6 +405,8 @@ IOResult read(HypIStream& s,SP<Action>& a){
     return r;
   }
   switch(id){
+    case ActionMulti::id:
+      return createAndRead<ActionMulti>(s,a);
     case ActionNothing::id:
       return createAndRead<ActionNothing>(s,a);
     case ActionMessage::id:
@@ -429,12 +431,19 @@ bool write(HypOStream& s,const SP<const Action>& a){
   return a->dowrite(s);
 }
 
+IOResult read(HypIStream& s,ActionMulti& a){
+  return read(s,a.actions,a.num);
+}
+bool write(HypOStream& s,const ActionMulti& a){
+  return write(s,(SPA<const SP<const Action> >&)a.actions,a.num);
+}
+
 void ActionMessage::doCommon(ScriptResponse& r,String&){
   if(r.messageCount==0){
     r.messages=SPA<Message>(1);
   }else{
     SPA<Message> tmp(r.messageCount+1);
-    memcpy(&*tmp,&*r.messages,r.messageCount*sizeof(Message));
+    memcopy(tmp,r.messages,r.messageCount);
     r.messages=tmp;
   }
   r.messages[r.messageCount]=m;
@@ -491,7 +500,6 @@ void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
   StringEdit se(s);
   SPA<Pair<SP<StringPointer> > > groups(ranges.groupCount());
   while(ranges.match(s,groups)){
-    cout<<"found match"<<endl;
     for(int i=0;i<ranges.groupCount();++i){
       se.setStringSegment(*groups[i].a,*groups[i].b,count,route);
     }
@@ -530,10 +538,83 @@ IOResult read(HypIStream& s,Event& e){
     return r;
   if(!(r=read(s,e.condition)).ok)
     return r;
-  return read(s,e.actions,e.actionCount);
+  return read(s,e.action);
 }
 bool write(HypOStream& s,const Event& e){
   return write(s,e.trigger) &&
       write(s,(SP<const Condition>&)e.condition) &&
-      write(s,(SPA<const SP<const Action> >&)e.actions,e.actionCount);
+      write(s,(SP<const Action>&)e.action);
 }
+
+IOResult read(HypIStream& s,Script& sc){
+  int n=0;
+  IOResult r=read(s,n,0);
+  if(!r.ok){
+    return r;
+  }
+  sc.eventcount=n;
+  SPA<Event> es(n);
+  for(int i=0;i<n;++i)
+    if(!(r=read(s,es[i])).ok){
+      sc.events=es;
+      sc.times=SPA<int>(n);
+      return r;
+    }
+  sc.events=es;
+  sc.times=SPA<int>(n);
+  return r;
+}
+bool write(HypOStream& s,const Script& sc){
+  if(!write(s,sc.eventcount))
+    return false;
+  for(int i=0;sc.eventcount;++i)
+     if(!write(s,sc.events[i]))
+       return false;
+  return true;
+}
+
+ScriptResponseStart Script::runStart(int time,String& s){
+  ScriptResponseStart r;
+  for(int i=0;i<eventcount;++i){
+    if(events[i].trigger&TRIGGER_START!=0)
+      if(events[i].condition->is(time,*this,s)){
+        events[i].action->doStart(r,s);
+        times[i]=time;
+      }
+  }
+  return r;
+}
+ScriptResponseWin Script::runWin(int time,String& s){
+  ScriptResponseWin r;
+  for(int i=0;i<eventcount;++i){
+    if(events[i].trigger&TRIGGER_WIN!=0)
+      if(events[i].condition->is(time,*this,s)){
+        events[i].action->doWin(r,s);
+        times[i]=time;
+      }
+  }
+  return r;
+}
+ScriptResponseMove Script::runMove(int time,String& s){
+  ScriptResponseMove r;
+  for(int i=0;i<eventcount;++i){
+    if(events[i].trigger&TRIGGER_MOVE!=0)
+      if(events[i].condition->is(time,*this,s)){
+        events[i].action->doMove(r,s);
+        times[i]=time;
+      }
+  }
+  return r;
+}
+ScriptResponseSelect Script::runSelect(int time,String& s){
+  ScriptResponseSelect r;
+  for(int i=0;i<eventcount;++i){
+    if(events[i].trigger&TRIGGER_SELECT!=0)
+      if(events[i].condition->is(time,*this,s)){
+        events[i].action->doSelect(r,s);
+        times[i]=time;
+      }
+  }
+  return r;
+}
+

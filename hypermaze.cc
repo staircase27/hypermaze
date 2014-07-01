@@ -10,13 +10,14 @@
 #include "script.hh"
 #include "SmartPointer.hh"
 
+#ifdef IOSTREAM
+#include <iostream>
+#endif
+
+#ifdef SCRIPTTESTING
 //for testing REMOVE LATER
 #include "hypioimp.hh"
 #include "scriptimpl.hh"
-
-
-#ifdef IOSTREAM
-#include <iostream>
 #endif
 
 using namespace std;
@@ -249,284 +250,289 @@ int main(int argc,char* argv[]){
     in->drop();
   }
   
+  
   #ifdef IOSTREAM
-
+  #ifdef TESTING
   {
-    StringElementCondition sec;
-    cout<<"output for blank StringElementCondition"<<endl;
-    SPA<char> str;
-    MemoryHypOStream os(str);
-    if(!write(os,sec))
-      cout<<"error writing"<<endl;
-    os.flush();
-    cout<<"'"<<str<<"'"<<endl;
-    const char* data=" 1 0 "//
-                      "0 "//no x conditions
-                      "1 "//one y condition
-                      "1 1 "//y is exactly 1
-                      "4 "//4 for the z
-                      "* 0 2 3 5 *";//up to <0 2-3 and >5 (plus a missing one)
-    cout<<"input"<<endl<<"'"<<data<<"'"<<endl;
-    MemoryHypIStream is(data,strlen(data));
-    read(is,sec);
-    os.strlen=0;
-    cout<<"output"<<endl;
-    if(!write(os,sec))
-      cout<<"error writing"<<endl;
-    os.flush();
-    cout<<"'"<<str<<"'"<<endl;
+
+    {
+      StringElementCondition sec;
+      cout<<"output for blank StringElementCondition"<<endl;
+      SPA<char> str;
+      MemoryHypOStream os(str);
+      if(!write(os,sec))
+        cout<<"error writing"<<endl;
+      os.flush();
+      cout<<"'"<<str<<"'"<<endl;
+      const char* data=" 1 0 "//
+                        "0 "//no x conditions
+                        "1 "//one y condition
+                        "1 1 "//y is exactly 1
+                        "4 "//4 for the z
+                        "* 0 2 3 5 *";//up to <0 2-3 and >5 (plus a missing one)
+      cout<<"input"<<endl<<"'"<<data<<"'"<<endl;
+      MemoryHypIStream is(data,strlen(data));
+      read(is,sec);
+      os.strlen=0;
+      cout<<"output"<<endl;
+      if(!write(os,sec))
+        cout<<"error writing"<<endl;
+      os.flush();
+      cout<<"'"<<str<<"'"<<endl;
+    }
+    
+    {
+      SPA<char> str;
+      MemoryHypOStream os(str);
+
+      StringMatcher sm;
+      
+      sm.count=1;
+      sm.pattern=SPA<Pair<PatternTag,StringElementCondition> >(5);
+      
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      cout<<sm.match(pd.s)<<endl;
+      
+      sm.pattern[0].a.max=6000;
+      os.strlen=0;
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      cout<<sm.match(pd.s)<<endl;
+       
+      sm.pattern[0].a.greedy=false;
+      os.strlen=0;
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      cout<<sm.match(pd.s)<<endl;
+       
+      sm.pattern[0].a.min=6000;
+      os.strlen=0;
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      cout<<sm.match(pd.s)<<endl;
+      
+      sm.pattern[0].a.min=0;
+      sm.pattern[0].b.selectionCondition=0;
+      os.strlen=0;
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      cout<<sm.match(pd.s)<<endl;
+      
+      sm.pattern[1].a.max=6000;
+      sm.count=2;
+      os.strlen=0;
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      cout<<sm.match(pd.s)<<endl;
+      
+      sm.pattern[0].a.greedy=true;
+      os.strlen=0;
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      cout<<sm.match(pd.s)<<endl;
+      
+      sm.pattern[0].b.selectionCondition=1;
+      sm.pattern[1].a.min=3;
+      sm.pattern[1].a.max=3;
+      os.strlen=0;
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      cout<<sm.match(pd.s)<<endl;
+      
+      sm.pattern[0].a.greedy=false;
+      os.strlen=0;
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      cout<<sm.match(pd.s)<<endl;
+      
+      sm.groups=SPA<Pair<int> >(2);
+      sm.groups[0].a=0;
+      sm.groups[0].b=1;
+      sm.groups[1].a=1;
+      sm.groups[1].b=0;
+      sm.group_count=2;
+      
+      SPA<Pair<SP<StringPointer> > > groups(2);
+      os.strlen=0;
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      SPA<char> data(str);//save to reload later
+      cout<<sm.match(pd.s,groups)<<endl;
+      cout<<*groups[0].a<<" "<<*groups[0].b<<endl;
+      cout<<*groups[1].a<<" "<<*groups[1].b<<endl;
+
+      groups=SPA<Pair<SP<StringPointer> > >(2);
+      sm.pattern[0].b.selectionCondition=3;
+      os.strlen=0;
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      cout<<sm.match(pd.s,groups)<<endl;
+      cout<<groups[0].a<<" "<<groups[0].b<<endl;
+      cout<<groups[1].a<<" "<<groups[1].b<<endl;
+      
+      cout<<"input"<<endl<<data<<endl;
+      MemoryHypIStream is(data,strlen(data));
+      read(is,sm);
+      
+      groups=SPA<Pair<SP<StringPointer> > >(2);
+      os.strlen=0;
+      write(os,sm);
+      os.flush();
+      cout<<"pattern"<<endl<<str<<endl;
+      cout<<sm.match(pd.s,groups)<<endl;
+      cout<<*groups[0].a<<" "<<*groups[0].b<<endl;
+      cout<<*groups[1].a<<" "<<*groups[1].b<<endl;
+    }
+
+    {
+      const char* data=""// ((True or (True and (Not True))) And String is selected and pointing left)
+        "3 2 "//and with two elements
+          "2 2 "//add a or with 2 elements
+              "1 "// add a true
+            "3 2 "//add a and with 2 elements
+              "1 "//add a true
+              "4 1 "//add a not true
+          "7 1 0 * 1 1 2 0 0 0 0";// string condition of any length string where all selected and pointing left
+      
+      cout<<"input"<<endl<<data<<endl;
+      MemoryHypIStream is(data,strlen(data));
+
+      SP<Condition> condition;
+      read(is,condition);
+
+      cout<<"parsed"<<endl;
+      Script s(0,SPA<const Event>());
+      cout<<condition->is(0,s,pd.s)<<endl;
+
+      SPA<char> str;
+      MemoryHypOStream os(str);
+
+      write(os,(SP<const Condition>&)condition);
+      os.flush();
+      cout<<"output"<<endl<<str<<endl;
+      
+      cout<<"end condition test"<<endl;
+    }
+
+    {
+      cout<<"editing string"<<endl;
+    	StringEdit se(pd.s);
+    	StringPointer ps=pd.s.begin();
+    	++ps;
+    	++ps;
+    	++ps;
+    	StringPointer pe=ps;
+    	++pe;
+    	++pe;
+    	SPA<Dirn> d(1);
+    	*d=FORWARD;
+    	se.setStringSegment(ps,pe,1,d);
+
+    	ps=pd.s.begin();
+    	++ps;
+    	pe=ps;
+    	++pe;
+    	++pe;
+    	*d=BACK;
+    	se.setStringSegment(ps,pe,1,d);
+    	
+    	++pe;
+    	++pe;
+    	*d=LEFT;
+    	se.setStringSegment(ps,pe,1,d);
+    	
+    	pd.stringUpdated();
+      cout<<"edited string - should be straight again"<<endl;
+    }
+    
+    {
+      const char* data= 
+          " 6 " //six actions
+          "2 " //action message (1st)
+          " \n 4 " //4 paragraphs
+          "  \n daas£4;ca \n  \n" // format string 1
+          "| dsadADy6 aa \n dsAD012 SADu12 !%^)*£\"$&  | " // paragaph 1 using |
+          " sdpadhyapd ||"// entry 2 with no paragraph contents
+          "\ndsaghoaiugsd !  aSDP123 \\\"£OU\n |   ! " //format and paragraph 3
+          "oad Asadsadaad sadadydpsoadhaphd \n swdad A "// final format and paragraph 
+          "\t\n\t\n 3"//no-op action (2nd)
+          "  5" //action next level (3rd)
+          " 'http://domain.path/asdadad/adsdadad.dasad?=%20%43' 'adadadaodiy!\"£'    "//url and description
+          "\n\n7\n"//selection change action (4th)
+          "3 63 0 0 0\t "//applying to all
+          "3 63 "//selected if any selectedness and any direction and
+          "2 0 0 3 4 "//x is 1 or 3-4 and
+          "1 * * "//any y and
+          "1 * * "//any z
+          "7 3 63 1 0 3 0 0 0 63 0 0 0 \n\n"//selected if not selected for elements with x between 1 and 3 inclusive
+          "9 5 "//Action Set String Route with 5 string pattern elements
+          "0 10 1 3 63 0 0 0 "//0-10 (not greedy) of any selectedness or direction in any location
+          "1 1 0 0 63 0 0 0 "//exactly 1 not selected string element in any direction at any location
+          "1 10 0 1 63 0 0 0 "//0-10 (not greedy) of selected in any direction in any location
+          "1 1 0 0 63 0 0 0 "//exactly 1 not selected string element in any direction at any location
+          "0 10 1 3 63 0 0 0 "//0-10 (not greedy) of any selectedness or direction in any location
+          "1 2 2 "//one group to replace which is the 3rd pattern element
+          "1 0 "//new route is one UP (then connect)
+          "0";//only one match
+          
+      cout<<"input"<<endl<<data<<endl;
+      MemoryHypIStream is(data,strlen(data));
+
+      SPA<SP<Action> > as;
+      int count;
+      Script s(0,SPA<const Event>());
+      read(is,as,count);
+      
+      cout<<"parsed "<<count<<endl;
+
+      cout<<"as "<<as<<endl;
+      cout<<"as0 "<<as[0]<<endl;    
+      
+      SP<Action> a(as[0]);
+      
+      cout<<"as "<<as<<endl;
+      cout<<"as0 "<<as[0]<<endl;    
+      cout<<"a "<<a<<endl;
+
+      ScriptResponseWin sr;
+      for(int i=0;i<count;++i)
+	      as[i]->doWin(sr,pd.s);
+	    
+      pd.stringUpdated();
+      
+      cout<<sr.messageCount<<endl;
+      cout<<sr.messages->count<<endl;
+      cout<<"format \""<<sr.messages->paragraphs[0].a<<"\""<<endl;
+      cout<<"paragraph \""<<sr.messages->paragraphs[0].b<<"\""<<endl;
+      cout<<"format \""<<sr.messages->paragraphs[1].a<<"\""<<endl;
+      cout<<"paragraph \""<<sr.messages->paragraphs[1].b<<"\""<<endl;
+      cout<<"format \""<<sr.messages->paragraphs[2].a<<"\""<<endl;
+      cout<<"paragraph \""<<sr.messages->paragraphs[2].b<<"\""<<endl;
+      cout<<"format \""<<sr.messages->paragraphs[3].a<<"\""<<endl;
+      cout<<"paragraph \""<<sr.messages->paragraphs[3].b<<"\""<<endl;
+      
+      SPA<char> str;
+      MemoryHypOStream os(str);
+
+      write(os,(SPA<const SP<const Action> >&)as,count);
+      os.flush();
+      
+      cout<<"output"<<endl<<str<<endl<<flush;
+    }
   }
-  
-  {
-    SPA<char> str;
-    MemoryHypOStream os(str);
-
-    StringMatcher sm;
-    
-    sm.count=1;
-    sm.pattern=SPA<Pair<PatternTag,StringElementCondition> >(5);
-    
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    cout<<sm.match(pd.s)<<endl;
-    
-    sm.pattern[0].a.max=6000;
-    os.strlen=0;
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    cout<<sm.match(pd.s)<<endl;
-     
-    sm.pattern[0].a.greedy=false;
-    os.strlen=0;
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    cout<<sm.match(pd.s)<<endl;
-     
-    sm.pattern[0].a.min=6000;
-    os.strlen=0;
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    cout<<sm.match(pd.s)<<endl;
-    
-    sm.pattern[0].a.min=0;
-    sm.pattern[0].b.selectionCondition=0;
-    os.strlen=0;
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    cout<<sm.match(pd.s)<<endl;
-    
-    sm.pattern[1].a.max=6000;
-    sm.count=2;
-    os.strlen=0;
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    cout<<sm.match(pd.s)<<endl;
-    
-    sm.pattern[0].a.greedy=true;
-    os.strlen=0;
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    cout<<sm.match(pd.s)<<endl;
-    
-    sm.pattern[0].b.selectionCondition=1;
-    sm.pattern[1].a.min=3;
-    sm.pattern[1].a.max=3;
-    os.strlen=0;
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    cout<<sm.match(pd.s)<<endl;
-    
-    sm.pattern[0].a.greedy=false;
-    os.strlen=0;
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    cout<<sm.match(pd.s)<<endl;
-    
-    sm.groups=SPA<Pair<int> >(2);
-    sm.groups[0].a=0;
-    sm.groups[0].b=1;
-    sm.groups[1].a=1;
-    sm.groups[1].b=0;
-    sm.group_count=2;
-    
-    SPA<Pair<SP<StringPointer> > > groups(2);
-    os.strlen=0;
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    SPA<char> data(str);//save to reload later
-    cout<<sm.match(pd.s,groups)<<endl;
-    cout<<*groups[0].a<<" "<<*groups[0].b<<endl;
-    cout<<*groups[1].a<<" "<<*groups[1].b<<endl;
-
-    groups=SPA<Pair<SP<StringPointer> > >(2);
-    sm.pattern[0].b.selectionCondition=3;
-    os.strlen=0;
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    cout<<sm.match(pd.s,groups)<<endl;
-    cout<<groups[0].a<<" "<<groups[0].b<<endl;
-    cout<<groups[1].a<<" "<<groups[1].b<<endl;
-    
-    cout<<"input"<<endl<<data<<endl;
-    MemoryHypIStream is(data,strlen(&*data));
-    read(is,sm);
-    
-    groups=SPA<Pair<SP<StringPointer> > >(2);
-    os.strlen=0;
-    write(os,sm);
-    os.flush();
-    cout<<"pattern"<<endl<<str<<endl;
-    cout<<sm.match(pd.s,groups)<<endl;
-    cout<<*groups[0].a<<" "<<*groups[0].b<<endl;
-    cout<<*groups[1].a<<" "<<*groups[1].b<<endl;
-  }
-
-  {
-    const char* data=""// ((True or (True and (Not True))) And String is selected and pointing left)
-      "3 2 "//and with two elements
-        "2 2 "//add a or with 2 elements
-            "1 "// add a true
-          "3 2 "//add a and with 2 elements
-            "1 "//add a true
-            "4 1 "//add a not true
-        "7 1 0 * 1 1 2 0 0 0 0";// string condition of any length string where all selected and pointing left
-    
-    cout<<"input"<<endl<<data<<endl;
-    MemoryHypIStream is(data,strlen(data));
-
-    SP<Condition> condition;
-    read(is,condition);
-
-    cout<<"parsed"<<endl;
-    Script s;
-    cout<<condition->is(0,s,pd.s)<<endl;
-
-    SPA<char> str;
-    MemoryHypOStream os(str);
-
-    write(os,(SP<const Condition>&)condition);
-    os.flush();
-    cout<<"output"<<endl<<str<<endl;
-    
-    cout<<"end condition test"<<endl;
-  }
-
-  {
-    cout<<"editing string"<<endl;
-  	StringEdit se(pd.s);
-  	StringPointer ps=pd.s.begin();
-  	++ps;
-  	++ps;
-  	++ps;
-  	StringPointer pe=ps;
-  	++pe;
-  	++pe;
-  	SPA<Dirn> d(1);
-  	*d=FORWARD;
-  	se.setStringSegment(ps,pe,1,d);
-
-  	ps=pd.s.begin();
-  	++ps;
-  	pe=ps;
-  	++pe;
-  	++pe;
-  	*d=BACK;
-  	se.setStringSegment(ps,pe,1,d);
-  	
-  	++pe;
-  	++pe;
-  	*d=LEFT;
-  	se.setStringSegment(ps,pe,1,d);
-  	
-  	pd.stringUpdated();
-    cout<<"edited string - should be straight again"<<endl;
-  }
-  
-  {
-    const char* data= 
-        " 6 " //six actions
-        "2 " //action message (1st)
-        " \n 4 " //4 paragraphs
-        "  \n daas£4;ca \n  \n" // format string 1
-        "| dsadADy6 aa \n dsAD012 SADu12 !%^)*£\"$&  | " // paragaph 1 using |
-        " sdpadhyapd ||"// entry 2 with no paragraph contents
-        "\ndsaghoaiugsd !  aSDP123 \\\"£OU\n |   ! " //format and paragraph 3
-        "oad Asadsadaad sadadydpsoadhaphd \n swdad A "// final format and paragraph 
-        "\t\n\t\n 3"//no-op action (2nd)
-        "  5" //action next level (3rd)
-        " 'http://domain.path/asdadad/adsdadad.dasad?=%20%43' 'adadadaodiy!\"£'    "//url and description
-        "\n\n7\n"//selection change action (4th)
-        "3 63 0 0 0\t "//applying to all
-        "3 63 "//selected if any selectedness and any direction and
-        "2 0 0 3 4 "//x is 1 or 3-4 and
-        "1 * * "//any y and
-        "1 * * "//any z
-        "7 3 63 1 0 3 0 0 0 63 0 0 0 \n\n"//selected if not selected for elements with x between 1 and 3 inclusive
-        "9 5 "//Action Set String Route with 5 string pattern elements
-        "0 10 1 3 63 0 0 0 "//0-10 (not greedy) of any selectedness or direction in any location
-        "1 1 0 0 63 0 0 0 "//exactly 1 not selected string element in any direction at any location
-        "1 10 0 1 63 0 0 0 "//0-10 (not greedy) of selected in any direction in any location
-        "1 1 0 0 63 0 0 0 "//exactly 1 not selected string element in any direction at any location
-        "0 10 1 3 63 0 0 0 "//0-10 (not greedy) of any selectedness or direction in any location
-        "1 2 2 "//one group to replace which is the 3rd pattern element
-        "1 0 "//new route is one UP (then connect)
-        "0";//only one match
-        
-    cout<<"input"<<endl<<data<<endl;
-    MemoryHypIStream is(data,strlen(data));
-
-    SPA<SP<Action> > as;
-    int count;
-    Script s;
-    read(is,as,count);
-    
-    cout<<"parsed "<<count<<endl;
-
-    cout<<"as "<<as<<endl;
-    cout<<"as0 "<<as[0]<<endl;    
-    
-    SP<Action> a(as[0]);
-    
-    cout<<"as "<<as<<endl;
-    cout<<"as0 "<<as[0]<<endl;    
-    cout<<"a "<<a<<endl;
-
-    ScriptResponseWin sr;
-    for(int i=0;i<count;++i)
-	    as[i]->doWin(sr,pd.s);
-	  
-    pd.stringUpdated();
-    
-    cout<<sr.messageCount<<endl;
-    cout<<sr.messages->count<<endl;
-    cout<<"format \""<<sr.messages->paragraphs[0].a<<"\""<<endl;
-    cout<<"paragraph \""<<sr.messages->paragraphs[0].b<<"\""<<endl;
-    cout<<"format \""<<sr.messages->paragraphs[1].a<<"\""<<endl;
-    cout<<"paragraph \""<<sr.messages->paragraphs[1].b<<"\""<<endl;
-    cout<<"format \""<<sr.messages->paragraphs[2].a<<"\""<<endl;
-    cout<<"paragraph \""<<sr.messages->paragraphs[2].b<<"\""<<endl;
-    cout<<"format \""<<sr.messages->paragraphs[3].a<<"\""<<endl;
-    cout<<"paragraph \""<<sr.messages->paragraphs[3].b<<"\""<<endl;
-    
-    SPA<char> str;
-    MemoryHypOStream os(str);
-
-    write(os,(SPA<const SP<const Action> >&)as,count);
-    os.flush();
-    
-    cout<<"output"<<endl<<str<<endl<<flush;
-  }
+  #endif
   #endif
 
   while(device->run())

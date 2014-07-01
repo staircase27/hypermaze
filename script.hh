@@ -62,6 +62,8 @@ class PolymorphicHypIO{
      * @return true if the array was written ok
      */
     virtual bool dowrite(HypOStream& s) const=0;
+  public:
+    virtual int getid() const=0;
 };
 
 ///the different maze events that can trigger scripts  
@@ -75,7 +77,7 @@ enum Trigger{
 class Script;
 
 ///A Condition to select if an event should trigger or not
-class Condition: protected virtual PolymorphicHypIO{
+class Condition: public virtual PolymorphicHypIO{
   public:
     ///Check if the condition is matched
     /**
@@ -227,35 +229,44 @@ IOResult read(HypIStream& s,SP<Action>& c);
  */
 bool write(HypOStream& s,const SP<const Action>& c);
 
-///A script event
+///An event in a script
 /**
- * this class contains the conditions for it to fire along with the actions
- * that should fire when this event is triggered
+ * contains trigger for an event and conditions on it's trigger and the actions
+ * to execute when the event is triggered
  */
 class Event{
   public:
-    int trigger;///<a bit mask of the triggers that should cause this event to fire.
-    SP<Condition> condition;///<the conditions to check before fireing this event/
-    int actionCount;///<the number of actions to take when this event is fired.
-    SPA<SP<Action> > actions;///<the list of actions to take when this event is fired.
+		int trigger;
+		SP<Condition> condition;
+		SP<Action> action;
+		
+		Event():trigger(0),condition(Condition::defaultvalue),action(Action::defaultvalue){};
+		Event(int trigger,SP<Condition> condition,SP<Action> action):
+		    trigger(trigger),condition(condition),action(action){};
 };
 
 class Script{
   private:
     int eventcount;
-    SPA<Event> events;
+    SPA<const Event> events;
     SPA<int> times;
-    SPA<SPA<int> > triggereventcache;
-  
   public:
-    int getTime(int event) const{
+    Script():eventcount(0),events(),times(){};
+    Script(int eventcount,const SPA<const Event> events):eventcount(eventcount),events(events),times(eventcount){};
+    inline int getTime(int event) const{
       return times[event];
     }
-
     ScriptResponseStart runStart(int time,String& s);
+    ScriptResponseWin runWin(int time,String& s);
     ScriptResponseMove runMove(int time,String& s);
     ScriptResponseSelect runSelect(int time,String& s);
-    ScriptResponseWin runWin(int time,String& s);
-
+    
+    friend IOResult read(HypIStream&,Script&);
+    friend bool write(HypOStream&,const Script&);
 };
+
+IOResult read(HypIStream& s,Script& sc);
+bool write(HypOStream& s,const Script& sc);
+
+
 #endif
