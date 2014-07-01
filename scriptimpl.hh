@@ -19,6 +19,8 @@ class PolymorphicHypIOImpl: protected virtual PolymorphicHypIO{
         return false;
       return write(s,(T&)*this);
     }
+  public:
+    static const int id=ID;
 };
 
 ///A class to contain a range for a integer value
@@ -255,7 +257,7 @@ IOResult read(HypIStream& s,StringMatcher& sm);
 bool write(HypOStream& s,const StringMatcher& sm);
 
 ///a condition that always returns True
-class ConditionTrue: public Condition, protected PolymorphicHypIOImpl<ConditionTrue,1>{
+class ConditionTrue: public Condition, public PolymorphicHypIOImpl<ConditionTrue,1>{
   public:
     ///Always return true as the condition is always matched
     /**
@@ -281,7 +283,7 @@ inline IOResult read(HypIStream& s,ConditionTrue& c){return IOResult(true,false)
 inline bool write(HypOStream& s,const ConditionTrue& c){return true;}
 
 ///Condition that matches if any of the subconditions match
-class ConditionOr: public Condition, protected PolymorphicHypIOImpl<ConditionOr,2>{
+class ConditionOr: public Condition, public PolymorphicHypIOImpl<ConditionOr,2>{
   public:
     SPA<SP<Condition> > conditions;///< the conditions whose results are ored together
     int count;///< the number of conditions we combine the results of
@@ -307,7 +309,7 @@ IOResult read(HypIStream& s,ConditionOr& c);
 bool write(HypOStream& s,const ConditionOr& c);
 
 ///Condition that matches if all of the subconditions match
-class ConditionAnd: public Condition, protected PolymorphicHypIOImpl<ConditionAnd,3>{
+class ConditionAnd: public Condition, public PolymorphicHypIOImpl<ConditionAnd,3>{
   public:
     SPA<SP<Condition> > conditions;///< the conditions whose results are anded together
     int count;///< the number of conditions we combine the results of
@@ -333,7 +335,7 @@ IOResult read(HypIStream& s,ConditionAnd& c);
 bool write(HypOStream& s,const ConditionAnd& c);
 
 ///condition that matches if the contained condition doesn't match
-class ConditionNot: public Condition, protected PolymorphicHypIOImpl<ConditionNot,4>{
+class ConditionNot: public Condition, public PolymorphicHypIOImpl<ConditionNot,4>{
   public:
     SP<Condition> condition;///<the condition whose result is negated
     ///return false if the contained condition returns true
@@ -360,7 +362,7 @@ IOResult read(HypIStream& s,ConditionNot& c);
 bool write(HypOStream& s,const ConditionNot& c);
 
 ///condition that matches if another event has run and last ran a specified number of seconds ago
-class ConditionAfter: public Condition, protected PolymorphicHypIOImpl<ConditionAfter,5>{
+class ConditionAfter: public Condition, public PolymorphicHypIOImpl<ConditionAfter,5>{
   public:
     int event;///<the id of the event that has to run before this can match
     int delay;///<the delay after the event has run before this can match
@@ -386,7 +388,7 @@ IOResult read(HypIStream& s,ConditionAfter& c);
 bool write(HypOStream& s,const ConditionAfter& c);
 
 ///condition that matches if another event hasn't run yet
-class ConditionBefore: public Condition, protected PolymorphicHypIOImpl<ConditionBefore,6>{
+class ConditionBefore: public Condition, public PolymorphicHypIOImpl<ConditionBefore,6>{
   public:
     int event;///<the id of the event that has to run before this can match
     ///return true if the specified event hasn't run
@@ -411,7 +413,7 @@ IOResult read(HypIStream& s,ConditionBefore& c);
 bool write(HypOStream& s,const ConditionBefore& c);
 
 ///condition that matches if the string matches a StringMatcher pattern
-class ConditionStringPattern: public Condition, protected PolymorphicHypIOImpl<ConditionStringPattern,7>{
+class ConditionStringPattern: public Condition, public PolymorphicHypIOImpl<ConditionStringPattern,7>{
   public:
     StringMatcher sm;///<the string matcher to check the string against
   
@@ -486,7 +488,7 @@ class ActionCommon: public virtual Action{
 };
 
 ///an action that does nothing
-class ActionNothing:public ActionCommon, protected PolymorphicHypIOImpl<ActionNothing,1>{
+class ActionNothing:public ActionCommon, public PolymorphicHypIOImpl<ActionNothing,1>{
   public:
     ///@copydoc ActionCommon::doCommon
     ///implemented as a no-op
@@ -512,7 +514,7 @@ inline bool write(HypOStream& s,const ActionNothing& a){
 }
 
 //an action to display a message to the player
-class ActionMessage:public ActionCommon, protected PolymorphicHypIOImpl<ActionMessage,2>{
+class ActionMessage:public ActionCommon, public PolymorphicHypIOImpl<ActionMessage,2>{
   public:
     Message m;///<the message to show
     ///@copydoc ActionCommon::doCommon
@@ -535,7 +537,7 @@ IOResult read(HypIStream& s,ActionMessage& a);
 bool write(HypOStream& s,const ActionMessage& a);
 
 ///an action to block the win
-class ActionBlockWin:public ActionWin, protected PolymorphicHypIOImpl<ActionBlockWin,3>{
+class ActionBlockWin:public ActionWin, public PolymorphicHypIOImpl<ActionBlockWin,3>{
   public:
     ///@copydoc Action::doWin
     ///sets the block win flag in the response object
@@ -564,7 +566,7 @@ inline bool write(HypOStream& s,const ActionBlockWin& a){
 }
 
 ///set the message to show in the win screen
-class ActionWinMessage:public ActionWin, protected PolymorphicHypIOImpl<ActionWinMessage,4>{
+class ActionWinMessage:public ActionWin, public PolymorphicHypIOImpl<ActionWinMessage,4>{
   public:
     Message m;///<the message to show
     ///@copydoc Action::doWin
@@ -589,7 +591,7 @@ IOResult read(HypIStream& s,ActionWinMessage& a);
 bool write(HypOStream& s,const ActionWinMessage& a);
 
 ///set the next level to show on the win screen
-class ActionWinNextLevel:public ActionWin, protected PolymorphicHypIOImpl<ActionWinNextLevel,5>{
+class ActionWinNextLevel:public ActionWin, public PolymorphicHypIOImpl<ActionWinNextLevel,5>{
   public:
     Pair<SPA<const char> > nextLevel;///<the next level's url and a "name" for it
     ///@copydoc Action::doWin
@@ -614,7 +616,7 @@ IOResult read(HypIStream& s,ActionWinNextLevel& a);
 bool write(HypOStream& s,const ActionWinNextLevel& a);
 
 ///force win after a move or select even when the normal win condition isn't true
-class ActionForceWin:public Action, protected PolymorphicHypIOImpl<ActionForceWin,6>{
+class ActionForceWin:public Action, public PolymorphicHypIOImpl<ActionForceWin,6>{
   public:
     ///@copydoc Action::doStart
     ///implemented as a no-op as doesn't make sence to force a win at startup
@@ -649,7 +651,7 @@ inline bool write(HypOStream& s,const ActionForceWin& a){
 }
 
 ///action to select or deselect portions of a string based on conditions
-class ActionStringConditionSelect:public ActionCommon, protected PolymorphicHypIOImpl<ActionStringConditionSelect,7>{
+class ActionStringConditionSelect:public ActionCommon, public PolymorphicHypIOImpl<ActionStringConditionSelect,7>{
   public:
     StringElementCondition change; ///<if the string element's selectedness should be changed
     StringElementCondition select; ///<if the string element should be changed to selected or deselected
@@ -674,7 +676,7 @@ IOResult read(HypIStream& s,ActionStringConditionSelect& a);
 bool write(HypOStream& s,const ActionStringConditionSelect& a);
 
 ///action to set the route that selected parts of the string follow
-class ActionSetStringRoute:public ActionCommon, protected PolymorphicHypIOImpl<ActionSetStringRoute,9>{
+class ActionSetStringRoute:public ActionCommon, public PolymorphicHypIOImpl<ActionSetStringRoute,9>{
   public:
     StringMatcher ranges;///<String matcher to select the ranges to set the route for
     int count;///<the number of elements in the new route
