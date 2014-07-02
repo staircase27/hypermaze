@@ -644,6 +644,7 @@ bool write(HypOStream& s,const ActionWinMessage& a);
 ///set the next level to show on the win screen
 class ActionWinNextLevel:public ActionWin, public PolymorphicHypIOImpl<ActionWinNextLevel,5>{
   public:
+    ActionWinNextLevel():nextLevel(SPA<const char>(1),SPA<const char>(1)){};
     Pair<SPA<const char> > nextLevel;///<the next level's url and a "name" for it
     ///@copydoc Action::doWin
     ///sets the next level to show on the win screen in the response object

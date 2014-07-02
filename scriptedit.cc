@@ -1,7 +1,9 @@
 #define IOSTREAM
 #include "script.hh"
 #include "scriptimpl.hh"
+#include "hypioimp.hh"
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -567,6 +569,98 @@ bool edit(Script& s){
   return changed;
 }
 
+void edit(){
+  char c='p';
+  Script s;
+  bool changed;
+  char* fname=new char[256];
+  while(true){
+    switch(c){
+      case 'p':
+        cout<<"Current script is: "<<s<<endl;
+        break;
+      case 'l':{
+        if(changed){
+          cout<<"The current script has unsaved changes. Are you sure you want to load a new one? (y/n) ";
+          cin>>c;
+          while(c!='y' && c!='n'){
+            cout<<"invalid response. ";
+            cin>>c;
+          }
+          if(c=='n')
+            break;
+        }
+        cout<<"please enter the filename: ";
+        cin>>ws;
+        cin.getline(fname,256);
+        cout<<"opening "<<fname<<endl;
+        ifstream is(fname);
+        if(!is.is_open()){
+          cout<<"error opening file"<<endl;
+          break;
+        }
+        CPPHypIStream ihs(is);
+        read(ihs,s);
+        cout<<"new script loaded: "<<s<<endl;
+        break;
+      }
+      case 'n':
+        if(changed){
+          cout<<"The current script has unsaved changes. Are you sure you want to create a new one? (y/n) ";
+          cin>>c;
+          while(c!='y' && c!='n'){
+            cout<<"invalid response. ";
+            cin>>c;
+          }
+          if(c=='n')
+            break;
+        }
+        s=Script();
+        break;
+      case 's':{
+        char* tmp=new char[256];
+        cout<<"Current filename is "<<fname<<"please enter the filename or leave blank to use same name: ";
+        cin>>ws;
+        cin.getline(tmp,256);
+        if(strlen(tmp)!=0){
+          delete[] fname;
+          fname=tmp;
+        }else{
+          delete[] tmp;
+        }
+        cout<<"saving to "<<fname<<endl;
+        ofstream os(fname);
+        if(!os.is_open()){
+          cout<<"error opening file"<<endl;
+          break;
+        }
+        CPPHypOStream ohs(os);
+        write(ohs,s);
+        cout<<"script saved"<<endl;
+        changed=false;
+        break;
+      }
+      case 'e':
+        changed|=edit(s);
+        break;
+      case 'd':
+        if(changed){
+          cout<<"The current script has unsaved changes. Are you sure you want to create a new one? (y/n) ";
+          cin>>c;
+          while(c!='y' && c!='n'){
+            cout<<"invalid response. ";
+            cin>>c;
+          }
+          if(c=='n')
+            break;
+        }
+        return;
+    }
+    cout<<"What would you like to do?"<<endl<<"p) Print the current Script"<<endl<<"l) Load a script from file"<<endl<<"n) Create a new empty script"<<endl<<"s) Save the current script"<<endl<<"e) Edit the current script"<<endl<<"d) Done with editing"<<endl<<": ";
+    cin>>c;
+  }      
+}
+
 int main(){
   Script s;
   cout<<s<<endl;
@@ -585,6 +679,7 @@ int main(){
   cout<<s<<endl;
   cout<<"STARTING EDIT"<<endl;
   cout<<edit(s);
+  edit();
 }
 
 

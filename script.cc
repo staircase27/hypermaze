@@ -567,7 +567,7 @@ IOResult read(HypIStream& s,Script& sc){
 bool write(HypOStream& s,const Script& sc){
   if(!write(s,sc.eventcount))
     return false;
-  for(int i=0;sc.eventcount;++i)
+  for(int i=0;i<sc.eventcount;++i)
      if(!write(s,sc.events[i]))
        return false;
   return true;

@@ -13,6 +13,17 @@ namespace irr{
 #ifndef HYPIOIMP_HH_INC
 #define HYPIOIMP_HH_INC
 
+#ifdef IOSTREAM
+class CPPHypIStream: public HypIStream{
+  std::istream &is;
+  public:
+    CPPHypIStream(std::istream& is):is(is){};
+  protected:
+    IOResult read(int&,const int&);
+    IOResult read(SPA<char const>&,const bool&);
+};
+#endif
+
 class BufHypIStream: public HypIStream{
   protected:
     int len;
@@ -56,14 +67,35 @@ class MemoryHypIStream: public BufHypIStream{
     void readtobuf(){};
 };
 
-class BufHypOStream: public HypOStream{
+
+class BaseHypOStream: public HypOStream{
+  protected:
+    static const char* quotechars;
+    
+    BaseHypOStream(){};
+    virtual ~BaseHypOStream(){};
+};
+
+#ifdef IOSTREAM
+class CPPHypOStream: public BaseHypOStream{
+  std::ostream &os;
+  public:
+    CPPHypOStream(std::ostream& os):os(os){};
+  protected:
+    bool write(const int&,const int&);
+    bool write(const char*&,const bool&);
+    virtual void flush(){
+      os.flush();
+    }
+};
+#endif
+
+class BufHypOStream: public BaseHypOStream{
   protected:
     int len;
     char* buf;
     int end;
     virtual bool writeToSink()=0;
-    const char* quotechars;
-    bool needspace;
     
     BufHypOStream();
     virtual ~BufHypOStream();
