@@ -42,6 +42,19 @@ ostream& operator<<(ostream& s,const ConditionBefore& e){
   return s<<"Before event "<<e.event;
 }
 
+ostream& operator<<(ostream& s,const Range& r){
+  if(r.start==INT_MAX)
+    s<<'*';
+  else
+    s<<r.start;
+  s<<'-';
+  if(r.end==INT_MAX)
+    s<<'*';
+  else
+    s<<r.end;
+  return s;
+}
+
 ostream& operator<<(ostream& s,const StringElementCondition& b){
   if((b.selectionCondition&2)==0)
     if((b.selectionCondition&1)==0)
@@ -60,7 +73,7 @@ ostream& operator<<(ostream& s,const StringElementCondition& b){
     for(int i=0;i<b.xrange_count;++i){
       if(i!=0)
         s<<", ";
-      s<<b.xrange[i].start<<"-"<<b.xrange[i].end;
+      s<<b.xrange[i];
     }
     if(b.xrange_count>1)
       s<<"}";
@@ -74,7 +87,7 @@ ostream& operator<<(ostream& s,const StringElementCondition& b){
     for(int i=0;i<b.yrange_count;++i){
       if(i!=0)
         s<<", ";
-      s<<b.yrange[i].start<<"-"<<b.yrange[i].end;
+      s<<b.yrange[i];
     }
     if(b.yrange_count>1)
       s<<"}";
@@ -88,7 +101,7 @@ ostream& operator<<(ostream& s,const StringElementCondition& b){
     for(int i=0;i<b.zrange_count;++i){
       if(i!=0)
         s<<", ";
-      s<<b.zrange[i].start<<"-"<<b.zrange[i].end;
+      s<<b.zrange[i];
     }
     if(b.zrange_count>1)
       s<<"}";
@@ -270,6 +283,94 @@ bool edit(Event& e){
 }
 */
 
+
+bool edit(Range& r){
+  cout<<"Enter the start and end seperated by spaces (* means no limit): ";
+  while(true){
+    cin>>ws;
+    if(cin.peek()=='*'){
+      cin.ignore(1);
+      r.start=INT_MAX;
+    }else{
+      cin>>r.start;
+    }
+    cin>>ws;
+    if(cin.peek()=='*'){
+      cin.ignore(1);
+       r.end=INT_MAX;
+    }else{
+      cin>>r.end;
+    }
+    if(!cin.fail())
+      return true;
+    cin.clear();
+    cin.ignore(100,'\n');
+    cout<<"invalid input"<<endl<<": ";
+  }
+}
+
+bool edit(SPA<Range>& r,int& num){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<"[";
+        for(int i=0;i<num;++i)
+          cout<<r[i];
+        cout<<"]"<<endl;
+        break;
+      case 'r':{
+        cout<<"currently there are "<<num<<" Ranges"<<endl<<"how many would you like there to be? ";
+        int newlen=-1;
+        c=' ';
+        cin>>newlen;
+        while(newlen<0||!cin.good()){
+          cout<<"must be positive integer"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>newlen;
+        }
+        while(c!='y'&&c!='n'){
+          cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
+          cin>>c;
+        }
+        if(c=='n')
+          break;
+        if(newlen==num)
+          break;
+        SPA<Range> newr(newlen);
+        for(int i=0;i<newlen&&i<num;++i)
+          newr[i]=r[i];
+        num=newlen;
+        r=newr;
+        changed=true;
+        break;
+      }
+      case 'e':{
+        if(c<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which range do you wish to edit? ";
+        int n;
+        cin>>n;
+        while(n>=num||n<0){
+          cout<<"no such element: ";
+          cin>>n;
+        }
+        changed|=edit(r[n]);
+        break;
+      }
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
+    }
+    cout<<"Please select an action to use on this list of ranges:"<<endl<<"p) Print"<<endl<<"r) Resize list of ranges"<<endl<<"e) Edit a range"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+
+
 bool edit(SP<Action>&);
 
 bool edit(ActionMulti& a){
@@ -285,8 +386,10 @@ bool edit(ActionMulti& a){
         int newlen=-1;
         c=' ';
         cin>>newlen;
-        while(newlen<0){
-          cout<<"must be positive"<<endl<<": ";
+        while(newlen<0||!cin.good()){
+          cout<<"must be positive integer"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
           cin>>newlen;
         }
         while(c!='y'&&c!='n'){
@@ -309,6 +412,10 @@ bool edit(ActionMulti& a){
         break;
       }
       case 'e':{
+        if(a.num<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
         cout<<"which action do you wish to edit? ";
         int n;
         cin>>n;
@@ -319,6 +426,7 @@ bool edit(ActionMulti& a){
         changed|=edit(a.actions[n]);
         break;
       }
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
     cout<<"Please select an action to use on this Multi Action:"<<endl<<"p) Print"<<endl<<"r) Resize action list"<<endl<<"e) Edit an Action"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
@@ -329,6 +437,7 @@ bool edit(ActionNothing& e){
   cout<<"nothing to edit for a nothing action"<<endl;
   return false;
 }
+
 bool edit(ActionMessage& e){
   char c='p';
   bool changed=false;
@@ -337,8 +446,94 @@ bool edit(ActionMessage& e){
       case 'p':
         cout<<e<<endl;
         break;
+      case 'r':{
+        cout<<"currently there are "<<e.m.count<<" paragraphs's"<<endl<<"how many would you like there to be? ";
+        int newlen=-1;
+        c=' ';
+        cin>>newlen;
+        while(newlen<0||!cin.good()){
+          cout<<"must be positive integer"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>newlen;
+        }
+        while(c!='y'&&c!='n'){
+          cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
+          cin>>c;
+        }
+        if(c=='n')
+          break;
+        if(newlen==e.m.count)
+          break;
+        SPA<Pair<SPA<const char> > > newpars(newlen);
+        for(int i=0;i<newlen&&i<e.m.count;++i)
+          newpars[i]=e.m.paragraphs[i];
+        if(newlen>e.m.count)
+          for(int i=e.m.count;i<newlen;++i)
+            newpars[i]=Pair<SPA<const char> >(SPA<const char>(1),SPA<const char>(1));
+        e.m.count=newlen;
+        e.m.paragraphs=newpars;
+        changed=true;
+        break;
+      }
+      case 't':{
+        if(e.m.count<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which paragraph to change the tag for: ";
+        int i;
+        cin>>i;
+        while(i<0 || i>=e.m.count || cin.fail()){
+          cout<<"invalid index"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>i;
+        }
+        cout<<"please enter the new tag for the paragraph \""<<e.m.paragraphs[i].b<<"\": ";
+        string s;
+	cin.ignore(100,'\n');
+        getline(cin,s);
+        cout<<"\""<<s<<"\""<<endl;
+        if(s.length()<=0)
+          break;
+        SPA<char> tmp(s.length()+1);
+        memcopy(tmp,s.c_str(),s.length());
+        tmp[s.length()]='\0';
+        e.m.paragraphs[i].a=tmp;
+        changed=true;
+        break;
+      }
+      case 'e':{
+        if(e.m.count<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which paragraph to change the text for: ";
+        int i;
+        cin>>i;
+        while(i<0 || i>=e.m.count || cin.fail()){
+          cout<<"invalid index"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>i;
+        }
+        cout<<"please enter new text for the paragraph: ";
+        string s;
+	cin.ignore(100,'\n');
+        getline(cin,s);
+        if(s.length()<=0)
+          break;
+        SPA<char> tmp(s.length()+1);
+        memcopy(tmp,s.c_str(),s.length());
+        tmp[s.length()]='\0';
+        e.m.paragraphs[i].b=tmp;
+        changed=true;
+        break;
+      }
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
-    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize the message"<<endl<<"t) Edit a paragraph tag"<<endl<<"e) Edit a paragraph text"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
   }
   return changed;
@@ -355,8 +550,94 @@ bool edit(ActionWinMessage& e){
       case 'p':
         cout<<e<<endl;
         break;
+      case 'r':{
+        cout<<"currently there are "<<e.m.count<<" paragraphs's"<<endl<<"how many would you like there to be? ";
+        int newlen=-1;
+        c=' ';
+        cin>>newlen;
+        while(newlen<0||!cin.good()){
+          cout<<"must be positive integer"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>newlen;
+        }
+        while(c!='y'&&c!='n'){
+          cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
+          cin>>c;
+        }
+        if(c=='n')
+          break;
+        if(newlen==e.m.count)
+          break;
+        SPA<Pair<SPA<const char> > > newpars(newlen);
+        for(int i=0;i<newlen&&i<e.m.count;++i)
+          newpars[i]=e.m.paragraphs[i];
+        if(newlen>e.m.count)
+          for(int i=e.m.count;i<newlen;++i)
+            newpars[i]=Pair<SPA<const char> >(SPA<const char>(1),SPA<const char>(1));
+        e.m.count=newlen;
+        e.m.paragraphs=newpars;
+        changed=true;
+        break;
+      }
+      case 't':{
+        if(e.m.count<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which paragraph to change the tag for: ";
+        int i;
+        cin>>i;
+        while(i<0 || i>=e.m.count || cin.fail()){
+          cout<<"invalid index"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>i;
+        }
+        cout<<"please enter the new tag for the paragraph \""<<e.m.paragraphs[i].b<<"\": ";
+        string s;
+	cin.ignore(100,'\n');
+        getline(cin,s);
+        cout<<"\""<<s<<"\""<<endl;
+        if(s.length()<=0)
+          break;
+        SPA<char> tmp(s.length()+1);
+        memcopy(tmp,s.c_str(),s.length());
+        tmp[s.length()]='\0';
+        e.m.paragraphs[i].a=tmp;
+        changed=true;
+        break;
+      }
+      case 'e':{
+        if(e.m.count<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which paragraph to change the text for: ";
+        int i;
+        cin>>i;
+        while(i<0 || i>=e.m.count || cin.fail()){
+          cout<<"invalid index"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>i;
+        }
+        cout<<"please enter new text for the paragraph: ";
+        string s;
+	cin.ignore(100,'\n');
+        getline(cin,s);
+        if(s.length()<=0)
+          break;
+        SPA<char> tmp(s.length()+1);
+        memcopy(tmp,s.c_str(),s.length());
+        tmp[s.length()]='\0';
+        e.m.paragraphs[i].b=tmp;
+        changed=true;
+        break;
+      }
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
-    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize the message"<<endl<<"t) Edit a paragraph tag"<<endl<<"e) Edit a paragraph text"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
   }
   return changed;
@@ -369,8 +650,37 @@ bool edit(ActionWinNextLevel& e){
       case 'p':
         cout<<e<<endl;
         break;
+      case 'u':{
+        cout<<"please enter the new url: ";
+        string s;
+	cin.ignore(100,'\n');
+        getline(cin,s);
+        if(s.length()<=0)
+          break;
+        SPA<char> tmp(s.length()+1);
+        memcopy(tmp,s.c_str(),s.length());
+        tmp[s.length()]='\0';
+        e.nextLevel.a=tmp;
+        changed=true;
+        break;
+      }
+      case 'n':{
+        cout<<"please enter the new name: ";
+        string s;
+	cin.ignore(100,'\n');
+        getline(cin,s);
+        if(s.length()<=0)
+          break;
+        SPA<char> tmp(s.length()+1);
+        memcopy(tmp,s.c_str(),s.length());
+        tmp[s.length()]='\0';
+        e.nextLevel.b=tmp;
+        changed=true;
+        break;
+      }
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
-    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"u) Change the path/url"<<endl<<"n) Change the name to show"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
   }
   return changed;
@@ -379,6 +689,54 @@ bool edit(ActionForceWin& e){
   cout<<"nothing to edit for a force win action"<<endl;
   return false;
 }
+
+bool edit(StringElementCondition& e){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<e<<endl;
+        break;
+      case 's':
+        cout<<"what selection status condition do you want?"<<endl<<"0) Not selected"<<endl<<"1) Selected"<<endl<<"2) Don't care"<<endl<<": ";
+        cin>>e.selectionCondition;
+        while(cin.fail()){
+          cout<<"invalid input: ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>e.selectionCondition;
+        }
+        changed=true;
+        break;
+      case 'd':
+        cout<<"what dirns do you want?"<<endl<<": ";
+        cin>>e.dirnsCondition;
+        while(cin.fail()){
+          cout<<"invalid input: ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>e.dirnsCondition;
+        }
+        changed=true;
+        break;
+      case 'x':
+        changed|=edit(e.xrange,e.xrange_count);
+        break;
+      case 'y':
+        changed|=edit(e.yrange,e.yrange_count);
+        break;
+      case 'z':
+        changed|=edit(e.zrange,e.zrange_count);
+        break;
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
+    }
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"s) Edit Selection status condition"<<endl<<"d) Edit the Dirn's mask"<<endl<<"x/y/z) Edit the range of locations in the x/y/z direction"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+
 bool edit(ActionStringConditionSelect& e){
   char c='p';
   bool changed=false;
@@ -387,13 +745,25 @@ bool edit(ActionStringConditionSelect& e){
       case 'p':
         cout<<e<<endl;
         break;
+      case 'c':
+        changed|=edit(e.change);
+        break;
+      case 't':
+        changed|=edit(e.select);
+        break;
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
-    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"c) Edit the change condition"<<endl<<"t) Edit the target selection status condition"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
   }
   return changed;
 }
+
+
 bool edit(ActionSetStringRoute& a){
+  cout<<"Not Implemented Yet"<<endl;
+  return false;
+  ///TODO IMPLEMENT
   char c='p';
   bool changed=false;
   while(c!='d'){
@@ -401,6 +771,7 @@ bool edit(ActionSetStringRoute& a){
       case 'p':
         cout<<a<<endl;
         break;
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
     cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
@@ -412,8 +783,73 @@ bool edit(ActionSetStringRoute& a){
                          p=SP<T>(new T());\
                          break;
 #define MAKEEDITCASE(T) case T::id:\
-                          changed!=edit((T&)*p);\
+                          changed|=edit((T&)*p);\
                           break;
+bool edit(SP<Condition>& p){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<p<<endl;
+        break;
+      case 'r':{
+        cout<<"choose a new condition"<<endl;
+        PRINTIDNAME(ConditionTrue)
+        PRINTIDNAME(ConditionOr)
+        PRINTIDNAME(ConditionAnd)
+        PRINTIDNAME(ConditionNot)
+        PRINTIDNAME(ConditionAfter)
+        PRINTIDNAME(ConditionBefore)
+        PRINTIDNAME(ConditionStringPattern)
+        int i;
+        bool done=false;
+        while(!done){
+          cout<<": ";
+          cin>>i;
+          while(cin.fail()){
+            cout<<"enter a valid number"<<endl<<": ";
+            cin.clear();
+            cin.ignore(100,'\n');
+            cin>>i;
+          }
+          done=true;
+          switch(i){
+            MAKEREPCASE(ConditionTrue)
+            MAKEREPCASE(ConditionOr)
+            MAKEREPCASE(ConditionAnd)
+            MAKEREPCASE(ConditionNot)
+            MAKEREPCASE(ConditionAfter)
+            MAKEREPCASE(ConditionBefore)
+            MAKEREPCASE(ConditionStringPattern)
+            default:
+              done=false;
+              cout<<"Unknown Condition"<<endl;
+          }
+        }
+        changed=true;
+        break;
+      }
+      case 'e':
+        switch(p->getid()){
+          //M AKEEDITCASE(ConditionTrue)
+          //M AKEEDITCASE(ConditionOr)
+          //M AKEEDITCASE(ConditionAnd)
+          //M AKEEDITCASE(ConditionNot)
+          //M AKEEDITCASE(ConditionAfter)
+          //M AKEEDITCASE(ConditionBefore)
+          //M AKEEDITCASE(ConditionStringPattern)
+          default:
+            cout<<"unknown condition can't edit"<<endl;
+        }
+        break;
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
+    }
+    cout<<"Please select an action to use on this Condition:"<<endl<<"p) Print"<<endl<<"r) Replace"<<endl<<"e) Edit"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
 bool edit(SP<Action>& p){
   char c='p';
   bool changed=false;
@@ -438,6 +874,12 @@ bool edit(SP<Action>& p){
         while(!done){
           cout<<": ";
           cin>>i;
+          while(cin.fail()){
+            cout<<"enter a valid number"<<endl<<": ";
+            cin.clear();
+            cin.ignore(100,'\n');
+            cin>>i;
+          }
           done=true;
           switch(i){
             MAKEREPCASE(ActionMulti)
@@ -472,22 +914,9 @@ bool edit(SP<Action>& p){
             cout<<"unknown action can't edit"<<endl;
         }
         break;
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
     cout<<"Please select an action to use on this Action:"<<endl<<"p) Print"<<endl<<"r) Replace"<<endl<<"e) Edit"<<endl<<"d) Done with this item"<<endl<<": ";
-    cin>>c;
-  }
-  return changed;
-}
-bool edit(SP<Condition>& p){
-  char c='p';
-  bool changed=false;
-  while(c!='d'){
-    switch(c){
-      case 'p':
-        cout<<p<<endl;
-        break;
-    }
-    cout<<"Please select an action to use on this Condition:"<<endl<<"p) Print"<<endl<<"r) Replace"<<endl<<"e) Edit"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
   }
   return changed;
@@ -512,6 +941,7 @@ bool edit(Event& e){
       case 'a':
         changed|=edit(e.action);
         break;
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
     cout<<"Please select an action to use on this Event:"<<endl<<"p) Print"<<endl<<"t) Change trigger"<<endl<<"c) Edit the condition"<<endl<<"a) Edit the action"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
@@ -532,8 +962,10 @@ bool edit(Script& s){
         int newlen=-1;
         c=' ';
         cin>>newlen;
-        while(newlen<0){
-          cout<<"must be positive"<<endl<<": ";
+        while(newlen<0||!cin.good()){
+          cout<<"must be positive integer"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
           cin>>newlen;
         }
         while(c!='y'&&c!='n'){
@@ -552,16 +984,23 @@ bool edit(Script& s){
         break;
       }
       case 'e':{
+        if(s.geteventcount()<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
         cout<<"which event do you wish to edit? ";
         int n;
         cin>>n;
-        while(n>=s.geteventcount()||n<0){
-          cout<<"no such element: ";
+        while(n<0 || n>=s.geteventcount() || cin.fail()){
+          cout<<"invalid index"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
           cin>>n;
         }
         changed|=edit(s.getevents()[n]);
         break;
       }
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
     cout<<"Please select an action to use on this Script:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
@@ -591,7 +1030,7 @@ void edit(){
             break;
         }
         cout<<"please enter the filename: ";
-        cin>>ws;
+        cin.ignore(100,'\n');
         cin.getline(fname,256);
         cout<<"opening "<<fname<<endl;
         ifstream is(fname);
@@ -620,7 +1059,7 @@ void edit(){
       case 's':{
         char* tmp=new char[256];
         cout<<"Current filename is "<<fname<<"please enter the filename or leave blank to use same name: ";
-        cin>>ws;
+	cin.ignore(100,'\n');
         cin.getline(tmp,256);
         if(strlen(tmp)!=0){
           delete[] fname;
@@ -645,7 +1084,7 @@ void edit(){
         break;
       case 'd':
         if(changed){
-          cout<<"The current script has unsaved changes. Are you sure you want to create a new one? (y/n) ";
+          cout<<"The current script has unsaved changes. Are you sure you want to exit? (y/n) ";
           cin>>c;
           while(c!='y' && c!='n'){
             cout<<"invalid response. ";
@@ -655,6 +1094,7 @@ void edit(){
             break;
         }
         return;
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
     cout<<"What would you like to do?"<<endl<<"p) Print the current Script"<<endl<<"l) Load a script from file"<<endl<<"n) Create a new empty script"<<endl<<"s) Save the current script"<<endl<<"e) Edit the current script"<<endl<<"d) Done with editing"<<endl<<": ";
     cin>>c;
@@ -662,23 +1102,6 @@ void edit(){
 }
 
 int main(){
-  Script s;
-  cout<<s<<endl;
-  ConditionOr* cor=new ConditionOr();
-  SP<Condition> test(cor);
-  cor->conditions=SPA<SP<Condition> >(2);
-  cor->count=2;
-  cor->conditions[0]=SP<Condition>(new ConditionAfter());
-  ConditionNot* cn=new ConditionNot();
-  cn->condition=SP<Condition>(new ConditionBefore());
-  cor->conditions[1]=SP<Condition>(cn);
-  cout<<test<<endl;
-  SPA<Event> c(1);
-  c[0].condition=test;
-  s=Script(1,c);
-  cout<<s<<endl;
-  cout<<"STARTING EDIT"<<endl;
-  cout<<edit(s);
   edit();
 }
 
