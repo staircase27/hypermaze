@@ -1,5 +1,6 @@
 #include "irrdisp.hh"
 #include "controller.hh"
+#include "script.hh"
 
 void MazeDisplay::init(Maze& m,NodeGen* ng,irr::vector3df center){
   for(set<Dirn>::iterator d=dirns.begin();d!=dirns.end();++d){
@@ -216,15 +217,38 @@ pair<StringPointer,bool> PuzzleDisplay::getStringPointer(irr::ISceneNode* node){
   return sd.getStringPointer(node);
 }
 
+void PuzzleDisplay::win(){
+  ScriptResponseWin r=sc.runWin(s);
+  if(r.stringChanged)
+    sd.update();
+  else if(r.stringSelectionChanged)
+    sd.updateActive();
+  if(r.messageCount>0)
+    ;//TODO show message
+  if(r.block)
+    return;
+  won=true;
+  if(c!=0)
+    c->onWin();//TODO use the nextlevel and win message
+}
+
 void PuzzleDisplay::stringUpdated(){
+  ScriptResponseMove r=sc.runMove(s);
+  if(r.messageCount>0)
+    ;//TODO show message
   sd.update();
-  if((!won) && s.hasWon() && c!=0){
-    won=true;
-    c->onWin();
-  }
+  if((!won) && (s.hasWon()||r.forceWin))
+    win();
 };
 void PuzzleDisplay::stringSelectionUpdated(){
+  ScriptResponseSelect r=sc.runSelect(s);
+  if(r.stringChanged)
+    sd.update();
+  if(r.messageCount>0)
+    ;//TODO show message
   sd.updateActive();
+  if((!won) && r.forceWin)
+    win();
 };
 void PuzzleDisplay::mazeUpdated(){
     md.clear();
@@ -235,6 +259,13 @@ void PuzzleDisplay::mazeUpdated(){
     for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
       slicer->first->setPosition(-con(to_vector(slicer->second))*(abs(to_vector(slicer->second).dotProduct(m.size))/2+2)*(md.wall+md.gap));
     won=false;
+    ScriptResponseStart r=sc.runStart(s);
+    if(r.stringChanged)
+      sd.update();
+    else if(r.stringSelectionChanged)
+      sd.updateActive();
+    if(r.messageCount>0)
+      ;//TODO show message
 };
 bool PuzzleDisplay::hideSide(Dirn side,bool out){
   return md.hideSide(side,out);

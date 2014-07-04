@@ -250,16 +250,18 @@ class Script{
     int eventcount;
     SPA<Event> events;
     SPA<int> times;
+    int now;
   public:
     Script():eventcount(0),events(),times(){};
     Script(int eventcount,const SPA<Event>& events):eventcount(eventcount),events(events),times(eventcount){};
     inline int getTime(int event) const{
       return times[event];
     }
-    ScriptResponseStart runStart(int time,String& s);
-    ScriptResponseWin runWin(int time,String& s);
-    ScriptResponseMove runMove(int time,String& s);
-    ScriptResponseSelect runSelect(int time,String& s);
+
+    ScriptResponseStart runStart(String& s);
+    ScriptResponseWin runWin(String& s);
+    ScriptResponseMove runMove(String& s);
+    ScriptResponseSelect runSelect(String& s);
     
     friend IOResult read(HypIStream&,Script&);
     friend bool write(HypOStream&,const Script&);

@@ -6,6 +6,7 @@
 #include <set>
 #include <list>
 #include "dirns.hh"
+#include "script.hh"
 
 #ifndef IRRDISP_HH_INC
 #define IRRDISP_HH_INC
@@ -113,6 +114,7 @@ class Controller;
 class PuzzleDisplay{
   public:
     Maze m;
+    Script sc;
     String s;
     StringPlay sp;
     Controller* c;
@@ -135,6 +137,8 @@ class PuzzleDisplay{
     const map<irr::ISceneNode*,Dirn>& getSlicers();
     
     pair<StringPointer,bool> getStringPointer(irr::ISceneNode* node);
+
+    void win();
 
     void stringUpdated();
     

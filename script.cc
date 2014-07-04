@@ -573,46 +573,46 @@ bool write(HypOStream& s,const Script& sc){
   return true;
 }
 
-ScriptResponseStart Script::runStart(int time,String& s){
+ScriptResponseStart Script::runStart(String& s){
   ScriptResponseStart r;
   for(int i=0;i<eventcount;++i){
     if(events[i].trigger&TRIGGER_START!=0)
-      if(events[i].condition->is(time,*this,s)){
+      if(events[i].condition->is(now,*this,s)){
         events[i].action->doStart(r,s);
-        times[i]=time;
+        times[i]=now;
       }
   }
   return r;
 }
-ScriptResponseWin Script::runWin(int time,String& s){
+ScriptResponseWin Script::runWin(String& s){
   ScriptResponseWin r;
   for(int i=0;i<eventcount;++i){
     if(events[i].trigger&TRIGGER_WIN!=0)
-      if(events[i].condition->is(time,*this,s)){
+      if(events[i].condition->is(now,*this,s)){
         events[i].action->doWin(r,s);
-        times[i]=time;
+        times[i]=now;
       }
   }
   return r;
 }
-ScriptResponseMove Script::runMove(int time,String& s){
+ScriptResponseMove Script::runMove(String& s){
   ScriptResponseMove r;
   for(int i=0;i<eventcount;++i){
     if(events[i].trigger&TRIGGER_MOVE!=0)
-      if(events[i].condition->is(time,*this,s)){
+      if(events[i].condition->is(now,*this,s)){
         events[i].action->doMove(r,s);
-        times[i]=time;
+        times[i]=now;
       }
   }
   return r;
 }
-ScriptResponseSelect Script::runSelect(int time,String& s){
+ScriptResponseSelect Script::runSelect(String& s){
   ScriptResponseSelect r;
   for(int i=0;i<eventcount;++i){
     if(events[i].trigger&TRIGGER_SELECT!=0)
-      if(events[i].condition->is(time,*this,s)){
+      if(events[i].condition->is(now,*this,s)){
         events[i].action->doSelect(r,s);
-        times[i]=time;
+        times[i]=now;
       }
   }
   return r;
