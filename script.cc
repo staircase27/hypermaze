@@ -2,6 +2,10 @@
 #include "script.hh"
 #include "scriptimpl.hh"
 
+#ifdef IOSTREAM
+#include <iostream>
+#endif
+
 template <class T>
 bool StringElementCondition::matches(T el){
   if((selectionCondition&2)==0&&(((selectionCondition&1)==1)!=el->selected))
@@ -562,6 +566,8 @@ IOResult read(HypIStream& s,Script& sc){
     }
   sc.events=es;
   sc.times=SPA<int>(n);
+  for(int i=0;i<n;++i)
+    sc.times[i]=INT_MAX;
   return r;
 }
 bool write(HypOStream& s,const Script& sc){
@@ -576,44 +582,52 @@ bool write(HypOStream& s,const Script& sc){
 ScriptResponseStart Script::runStart(String& s){
   ScriptResponseStart r;
   for(int i=0;i<eventcount;++i){
-    if(events[i].trigger&TRIGGER_START!=0)
+    if((events[i].trigger&TRIGGER_START)!=0){
       if(events[i].condition->is(now,*this,s)){
+        cout<<"start event triggered "<<i<<endl;
         events[i].action->doStart(r,s);
         times[i]=now;
       }
+    }
   }
   return r;
 }
 ScriptResponseWin Script::runWin(String& s){
   ScriptResponseWin r;
   for(int i=0;i<eventcount;++i){
-    if(events[i].trigger&TRIGGER_WIN!=0)
+    if((events[i].trigger&TRIGGER_WIN)!=0){
       if(events[i].condition->is(now,*this,s)){
+        cout<<"win event triggered "<<i<<endl;
         events[i].action->doWin(r,s);
         times[i]=now;
       }
+    }
   }
   return r;
 }
 ScriptResponseMove Script::runMove(String& s){
   ScriptResponseMove r;
   for(int i=0;i<eventcount;++i){
-    if(events[i].trigger&TRIGGER_MOVE!=0)
+    if((events[i].trigger&TRIGGER_MOVE)!=0){
       if(events[i].condition->is(now,*this,s)){
+        cout<<"move event triggered "<<i<<endl;
         events[i].action->doMove(r,s);
         times[i]=now;
       }
+    }
   }
   return r;
 }
 ScriptResponseSelect Script::runSelect(String& s){
   ScriptResponseSelect r;
   for(int i=0;i<eventcount;++i){
-    if(events[i].trigger&TRIGGER_SELECT!=0)
+    if((events[i].trigger&TRIGGER_SELECT)!=0){
       if(events[i].condition->is(now,*this,s)){
+        cout<<"select event triggered "<<i<<endl;
         events[i].action->doSelect(r,s);
         times[i]=now;
       }
+    }
   }
   return r;
 }

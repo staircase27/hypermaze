@@ -253,9 +253,16 @@ class Script{
     int now;
   public:
     Script():eventcount(0),events(),times(){};
-    Script(int eventcount,const SPA<Event>& events):eventcount(eventcount),events(events),times(eventcount){};
+    Script(int eventcount,const SPA<Event>& events):eventcount(eventcount),events(events),times(eventcount){
+      for(int i=0;i<eventcount;++i)
+        times[i]=INT_MAX;
+    };
     inline int getTime(int event) const{
       return times[event];
+    }
+    
+    void setnow(int t){
+      now=t;
     }
 
     ScriptResponseStart runStart(String& s);
@@ -276,6 +283,5 @@ class Script{
 
 IOResult read(HypIStream& s,Script& sc);
 bool write(HypOStream& s,const Script& sc);
-
 
 #endif

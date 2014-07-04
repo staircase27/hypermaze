@@ -2,6 +2,10 @@
 #include "controller.hh"
 #include "script.hh"
 
+#ifdef IOSTREAM
+#include <iostream>
+#endif
+
 void MazeDisplay::init(Maze& m,NodeGen* ng,irr::vector3df center){
   for(set<Dirn>::iterator d=dirns.begin();d!=dirns.end();++d){
     limits[*d].first.first=limits[*d].first.second=0;
@@ -224,17 +228,26 @@ void PuzzleDisplay::win(){
   else if(r.stringSelectionChanged)
     sd.updateActive();
   if(r.messageCount>0)
+#ifdef IOSTREAM
+    cout<<"onwin message"<<endl;
+#endif
     ;//TODO show message
   if(r.block)
     return;
   won=true;
-  if(c!=0)
+  if(c!=0){
+    cout<<"on win"<<endl;
+    cout<<r.nextLevel.a<<endl;
     c->onWin();//TODO use the nextlevel and win message
+  }
 }
 
 void PuzzleDisplay::stringUpdated(){
   ScriptResponseMove r=sc.runMove(s);
   if(r.messageCount>0)
+#ifdef IOSTREAM
+    cout<<"onmove message"<<endl;
+#endif
     ;//TODO show message
   sd.update();
   if((!won) && (s.hasWon()||r.forceWin))
@@ -245,6 +258,9 @@ void PuzzleDisplay::stringSelectionUpdated(){
   if(r.stringChanged)
     sd.update();
   if(r.messageCount>0)
+#ifdef IOSTREAM
+    cout<<"onselect message"<<endl;
+#endif
     ;//TODO show message
   sd.updateActive();
   if((!won) && r.forceWin)
@@ -265,6 +281,9 @@ void PuzzleDisplay::mazeUpdated(){
     else if(r.stringSelectionChanged)
       sd.updateActive();
     if(r.messageCount>0)
+#ifdef IOSTREAM
+    cout<<"onstart message"<<endl;
+#endif
       ;//TODO show message
 };
 bool PuzzleDisplay::hideSide(Dirn side,bool out){
