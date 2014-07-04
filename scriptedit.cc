@@ -110,7 +110,7 @@ ostream& operator<<(ostream& s,const StringElementCondition& b){
 }
 
 ostream& operator<<(ostream& s,Pair<PatternTag,StringElementCondition>& p){
-  s<<p.a.min<<"-"<<p.a.max<<"elements ";
+  s<<p.a.min<<"-"<<p.a.max<<" elements ";
   if(p.a.greedy)
     s<<"greedy ";
   return s<<"matching "<<p.b;
@@ -266,24 +266,6 @@ ostream& operator<<(ostream& s,const Script& e){
   return s<<"]";
 }
 
-/*
-bool edit(Event& e){
-  char c='p';
-  bool changed=false;
-  while(c!='d'){
-    switch(c){
-      case 'p':
-        cout<<e<<endl;
-        break;
-    }
-    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
-    cin>>c;
-  }
-  return changed;
-}
-*/
-
-
 bool edit(Range& r){
   cout<<"Enter the start and end seperated by spaces (* means no limit): ";
   while(true){
@@ -370,6 +352,347 @@ bool edit(SPA<Range>& r,int& num){
   return changed;
 }
 
+bool edit(StringElementCondition& e){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<e<<endl;
+        break;
+      case 's':
+        cout<<"what selection status condition do you want?"<<endl<<"0) Not selected"<<endl<<"1) Selected"<<endl<<"2) Don't care"<<endl<<": ";
+        cin>>e.selectionCondition;
+        while(cin.fail()){
+          cout<<"invalid input: ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>e.selectionCondition;
+        }
+        changed=true;
+        break;
+      case 'd':
+        cout<<"what dirns do you want?"<<endl<<": ";
+        cin>>e.dirnsCondition;
+        while(cin.fail()){
+          cout<<"invalid input: ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>e.dirnsCondition;
+        }
+        changed=true;
+        break;
+      case 'x':
+        changed|=edit(e.xrange,e.xrange_count);
+        break;
+      case 'y':
+        changed|=edit(e.yrange,e.yrange_count);
+        break;
+      case 'z':
+        changed|=edit(e.zrange,e.zrange_count);
+        break;
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
+    }
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"s) Edit Selection status condition"<<endl<<"d) Edit the Dirn's mask"<<endl<<"x/y/z) Edit the range of locations in the x/y/z direction"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+
+bool edit(PatternTag& r){
+  cout<<"Enter the min and max repeates seperated by spaces: ";
+  while(true){
+    cin>>r.min;
+    cin>>r.max;
+    if(!cin.fail())
+      break;
+    cin.clear();
+    cin.ignore(100,'\n');
+    cout<<"invalid input"<<endl<<": ";
+  }
+  cout<<"Is this pattern element greedy? (y/n): ";
+  char c;
+  cin>>c;
+  while(c!='n'&&c!='y'){
+    cout<<"enter y or n: ";
+    cin>>c;
+  }
+  r.greedy=(c=='y');
+  return true;
+}
+
+bool edit(SP<Condition>&);
+
+bool edit(ConditionTrue&){
+  cout<<"nothing to edit for a always true condition"<<endl;
+  return false;
+}
+
+bool edit(ConditionOr& a){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<a<<endl;
+        break;
+      case 'r':{
+        cout<<"currently there are "<<a.count<<" Conditions's"<<endl<<"how many would you like there to be? ";
+        int newlen=-1;
+        c=' ';
+        cin>>newlen;
+        while(newlen<0||!cin.good()){
+          cout<<"must be positive integer"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>newlen;
+        }
+        while(c!='y'&&c!='n'){
+          cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
+          cin>>c;
+        }
+        if(c=='n')
+          break;
+        if(newlen==a.count)
+          break;
+        SPA<SP<Condition> > newcondition(newlen);
+        for(int i=0;i<newlen&&i<a.count;++i)
+          newcondition[i]=a.conditions[i];
+        if(newlen>a.count)
+          for(int i=a.count;i<newlen;++i)
+            newcondition[i]=Condition::defaultvalue;
+        a.count=newlen;
+        a.conditions=newcondition;
+        changed=true;
+        break;
+      }
+      case 'e':{
+        if(a.count<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which condition do you wish to edit? ";
+        int n;
+        cin>>n;
+        while(n>=a.count||n<0){
+          cout<<"no such element: ";
+          cin>>n;
+        }
+        changed|=edit(a.conditions[n]);
+        break;
+      }
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
+    }
+    cout<<"Please select an action to use on this Or Condition:"<<endl<<"p) Print"<<endl<<"r) Resize action list"<<endl<<"e) Edit an Condition"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+
+bool edit(ConditionAnd& a){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<a<<endl;
+        break;
+      case 'r':{
+        cout<<"currently there are "<<a.count<<" Conditions's"<<endl<<"how many would you like there to be? ";
+        int newlen=-1;
+        c=' ';
+        cin>>newlen;
+        while(newlen<0||!cin.good()){
+          cout<<"must be positive integer"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>newlen;
+        }
+        while(c!='y'&&c!='n'){
+          cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
+          cin>>c;
+        }
+        if(c=='n')
+          break;
+        if(newlen==a.count)
+          break;
+        SPA<SP<Condition> > newcondition(newlen);
+        for(int i=0;i<newlen&&i<a.count;++i)
+          newcondition[i]=a.conditions[i];
+        if(newlen>a.count)
+          for(int i=a.count;i<newlen;++i)
+            newcondition[i]=Condition::defaultvalue;
+        a.count=newlen;
+        a.conditions=newcondition;
+        changed=true;
+        break;
+      }
+      case 'e':{
+        if(a.count<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which condition do you wish to edit? ";
+        int n;
+        cin>>n;
+        while(n>=a.count||n<0){
+          cout<<"no such element: ";
+          cin>>n;
+        }
+        changed|=edit(a.conditions[n]);
+        break;
+      }
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
+    }
+    cout<<"Please select an action to use on this And Condition:"<<endl<<"p) Print"<<endl<<"r) Resize action list"<<endl<<"e) Edit an Condition"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+
+bool edit(ConditionNot& e){
+  cout<<"editing the condition this is the inverse of"<<endl;
+  return edit(e.condition);
+}
+
+bool edit(ConditionAfter& e){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<e<<endl;
+        break;
+      case 'e':
+        cout<<"which event should this be after: ";
+        cin>>e.event;
+        while(e.event<0||cin.fail()){
+          cout<<"invalid input: ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>e.event;
+        }
+        changed=true;
+        break;
+      case 't':
+        cout<<"what minimum delay do you want?"<<endl<<": ";
+        cin>>e.delay;
+        while(e.delay<0||cin.fail()){
+          cout<<"invalid input: ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>e.delay;
+        }
+        changed=true;
+        break;
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
+    }
+    cout<<"Please select an action to use on this after condition:"<<endl<<"p) Print"<<endl<<"e) Edit the event to be after"<<endl<<"t) Edit the required delay"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+
+bool edit(ConditionBefore& e){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<e<<endl;
+        break;
+      case 'e':
+        cout<<"which event should this be before?: ";
+        cin>>e.event;
+        while(e.event<0||cin.fail()){
+          cout<<"invalid input: ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>e.event;
+        }
+        changed=true;
+        break;
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
+    }
+    cout<<"Please select an action to use on this before condition:"<<endl<<"p) Print"<<endl<<"e) Edit the event to be after"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
+
+bool edit(ConditionStringPattern& a){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<a<<endl;
+        break;
+      case 'r':{
+        cout<<"currently there are "<<a.sm.count<<" elements in the pattern"<<endl<<"how many would you like there to be? ";
+        int newlen=-1;
+        c=' ';
+        cin>>newlen;
+        while(newlen<0||!cin.good()){
+          cout<<"must be positive integer"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>newlen;
+        }
+        while(c!='y'&&c!='n'){
+          cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
+          cin>>c;
+        }
+        if(c=='n')
+          break;
+        if(newlen==a.sm.count)
+          break;
+        SPA<Pair<PatternTag,StringElementCondition> > newpattern(newlen);
+        for(int i=0;i<newlen&&i<a.sm.count;++i)
+          newpattern[i]=a.sm.pattern[i];
+        a.sm.count=newlen;
+        a.sm.pattern=newpattern;
+        changed=true;
+        break;
+      }
+      case 'e':{
+        if(a.sm.count<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which pattern element do you wish to edit? ";
+        int n;
+        cin>>n;
+        while(n>=a.sm.count||n<0){
+          cout<<"no such element: ";
+          cin>>n;
+        }
+        changed|=edit(a.sm.pattern[n].b);
+        break;
+      }
+      case 't':{
+        if(a.sm.count<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which pattern element's taf do you wish to edit? ";
+        int n;
+        cin>>n;
+        while(n>=a.sm.count||n<0){
+          cout<<"no such element: ";
+          cin>>n;
+        }
+        cout<<"editing tag for pattern element :"<<a.sm.pattern[n].b<<endl;
+        changed|=edit(a.sm.pattern[n].a);
+        break;
+      }
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
+    }
+    cout<<"Please select an action to use on this String pattern Condition:"<<endl<<"p) Print"<<endl<<"r) Resize pattern list"<<endl<<"e) Edit a pattern element"<<endl<<"t) Edit the tag for a pattern element"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+  }
+  return changed;
+}
 
 bool edit(SP<Action>&);
 
@@ -690,53 +1013,6 @@ bool edit(ActionForceWin& e){
   return false;
 }
 
-bool edit(StringElementCondition& e){
-  char c='p';
-  bool changed=false;
-  while(c!='d'){
-    switch(c){
-      case 'p':
-        cout<<e<<endl;
-        break;
-      case 's':
-        cout<<"what selection status condition do you want?"<<endl<<"0) Not selected"<<endl<<"1) Selected"<<endl<<"2) Don't care"<<endl<<": ";
-        cin>>e.selectionCondition;
-        while(cin.fail()){
-          cout<<"invalid input: ";
-          cin.clear();
-          cin.ignore(100,'\n');
-          cin>>e.selectionCondition;
-        }
-        changed=true;
-        break;
-      case 'd':
-        cout<<"what dirns do you want?"<<endl<<": ";
-        cin>>e.dirnsCondition;
-        while(cin.fail()){
-          cout<<"invalid input: ";
-          cin.clear();
-          cin.ignore(100,'\n');
-          cin>>e.dirnsCondition;
-        }
-        changed=true;
-        break;
-      case 'x':
-        changed|=edit(e.xrange,e.xrange_count);
-        break;
-      case 'y':
-        changed|=edit(e.yrange,e.yrange_count);
-        break;
-      case 'z':
-        changed|=edit(e.zrange,e.zrange_count);
-        break;
-      default: cout<<"invalid input \""<<c<<"\""<<endl;
-    }
-    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"s) Edit Selection status condition"<<endl<<"d) Edit the Dirn's mask"<<endl<<"x/y/z) Edit the range of locations in the x/y/z direction"<<endl<<"d) Done with this item"<<endl<<": ";
-    cin>>c;
-  }
-  return changed;
-}
-
 bool edit(ActionStringConditionSelect& e){
   char c='p';
   bool changed=false;
@@ -832,13 +1108,13 @@ bool edit(SP<Condition>& p){
       }
       case 'e':
         switch(p->getid()){
-          //M AKEEDITCASE(ConditionTrue)
-          //M AKEEDITCASE(ConditionOr)
-          //M AKEEDITCASE(ConditionAnd)
-          //M AKEEDITCASE(ConditionNot)
-          //M AKEEDITCASE(ConditionAfter)
-          //M AKEEDITCASE(ConditionBefore)
-          //M AKEEDITCASE(ConditionStringPattern)
+          MAKEEDITCASE(ConditionTrue)
+          MAKEEDITCASE(ConditionOr)
+          MAKEEDITCASE(ConditionAnd)
+          MAKEEDITCASE(ConditionNot)
+          MAKEEDITCASE(ConditionAfter)
+          MAKEEDITCASE(ConditionBefore)
+          MAKEEDITCASE(ConditionStringPattern)
           default:
             cout<<"unknown condition can't edit"<<endl;
         }
