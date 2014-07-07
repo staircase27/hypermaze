@@ -249,6 +249,7 @@ void PuzzleDisplay::stringUpdated(){
     cout<<"onmove message"<<endl;
 #endif
     ;//TODO show message
+  cout<<"move triggered"<<endl;
   sd.update();
   if((!won) && (s.hasWon()||r.forceWin))
     win();

@@ -255,7 +255,7 @@ class Script{
     Script():eventcount(0),events(),times(){};
     Script(int eventcount,const SPA<Event>& events):eventcount(eventcount),events(events),times(eventcount){
       for(int i=0;i<eventcount;++i)
-        times[i]=INT_MAX;
+        times[i]=-1;
     };
     inline int getTime(int event) const{
       return times[event];

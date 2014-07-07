@@ -345,7 +345,7 @@ bool write(HypOStream& s,const ConditionNot& c){
 }
 
 bool ConditionAfter::is(int time,const Script& script,const String& s){
-  return script.getTime(event)+delay<=time;
+  return script.getTime(event)!=-1 && script.getTime(event)+delay<=time;
 }
 IOResult read(HypIStream& s,ConditionAfter& c){
   IOResult r=read(s,c.event,0);
@@ -358,7 +358,7 @@ bool write(HypOStream& s,const ConditionAfter& c){
 }
 
 bool ConditionBefore::is(int time,const Script& script,const String& s){
-  return script.getTime(event)==0;
+  return script.getTime(event)==-1;
 }
 IOResult read(HypIStream& s,ConditionBefore& c){
   return read(s,c.event,0);
@@ -567,7 +567,7 @@ IOResult read(HypIStream& s,Script& sc){
   sc.events=es;
   sc.times=SPA<int>(n);
   for(int i=0;i<n;++i)
-    sc.times[i]=INT_MAX;
+    sc.times[i]=-1;
   return r;
 }
 bool write(HypOStream& s,const Script& sc){
