@@ -7,6 +7,7 @@
 #include <list>
 #include "dirns.hh"
 #include "script.hh"
+#include "sound.hh"
 
 #ifndef IRRDISP_HH_INC
 #define IRRDISP_HH_INC
@@ -118,6 +119,8 @@ class PuzzleDisplay{
     String s;
     StringPlay sp;
     Controller* c;
+    irr::IrrlichtDevice *device;
+    SoundManager *sm;
   private:
     NodeGen* ng;
     MazeDisplay md;
@@ -125,7 +128,7 @@ class PuzzleDisplay{
     map<irr::ISceneNode*,Dirn> slicers;
     bool won;
    public:
-    PuzzleDisplay(NodeGen* ng):m(Vector(5,5,5)),s(m),sp(s),ng(ng),md(m,ng),sd(s,ng),won(false){
+    PuzzleDisplay(NodeGen* ng):m(Vector(5,5,5)),sc(),s(m),sp(s),c(0),device(0),sm(0),ng(ng),md(m,ng),sd(s,ng),won(false){
       for(Dirn* d=allDirns;d!=allDirns+6;++d){
         irr::IMeshSceneNode* node = ng->makeUnitHandle(to_vector(*d).dotProduct(to_vector(s.targetDir)));
         node->setScale(irr::vector3df(1,1,1)*(md.wall+md.gap)/2);

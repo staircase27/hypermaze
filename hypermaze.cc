@@ -246,6 +246,8 @@ int main(int argc,char* argv[]){
     read(is,pd.sc);
   }
   pd.c=c;
+  pd.device=device;
+  pd.sm=sm;
 
   mic->kc.map.addMapping(irr::KEY_F1,KeyMap::A_CONF);
   {

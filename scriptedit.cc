@@ -253,7 +253,35 @@ ostream& operator<<(ostream& s,SP<Action> e){
 #undef MAKECASE
 
 ostream& operator<<(ostream& s,const Event& e){
-  return s<<"Event triggered on "<<e.trigger<<" if "<<e.condition<<" to do "<<e.action;
+  s<<"Event triggered on ";
+  bool hastrigger=false;
+  if((e.trigger & TRIGGER_START)!=0){
+    if(hastrigger)
+      s<<", ";
+    s<<"start";
+    hastrigger=true;
+  }
+  if((e.trigger & TRIGGER_WIN)!=0){
+    if(hastrigger)
+      s<<", ";
+    s<<"win";
+    hastrigger=true;
+  }
+  if((e.trigger & TRIGGER_MOVE)!=0){
+    if(hastrigger)
+      s<<", ";
+    s<<"move";
+    hastrigger=true;
+  }
+  if((e.trigger & TRIGGER_SELECT)!=0){
+    if(hastrigger)
+      s<<", ";
+    s<<"select";
+    hastrigger=true;
+  }
+  if(!hastrigger)
+    s<<"never";
+  return s<<" if "<<e.condition<<" to do "<<e.action;
 }
 
 ostream& operator<<(ostream& s,const Script& e){

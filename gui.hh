@@ -1,12 +1,10 @@
 #include "irrlicht.h"
-#include "irrdisp.hh"
-#include "maze.hh"
-#include "hypioimp.hh"
-#include "string.hh"
-#include "mazegen.hh"
 
 #ifndef GUI_HH_INC
 #define GUI_HH_INC
+class Maze;
+class PuzzleDisplay;
+
 using namespace std;
 
 namespace irr{
@@ -17,7 +15,7 @@ namespace irr{
   using namespace gui;
 };
 
-static const int MGUIET_EMPTY = irr::EGUIET_COUNT+1;
+static const int MGUIET_EMPTY = irr::EGUIET_COUNT+10;
 
 class CGUIEmptyElement : public irr::IGUIElement
 {
@@ -30,7 +28,7 @@ class CGUIEmptyElement : public irr::IGUIElement
     virtual const irr::c8* getTypeName() const   { return "empty"; }
 
     virtual bool isPointInside(const irr::position2d<irr::s32>& point) const { return false; }
-    
+
     virtual bool bringToFront(IGUIElement* element)
     {
       bool result = IGUIElement::bringToFront(element);
@@ -50,60 +48,18 @@ class BaseGui : irr::IEventReceiver{
 
     BaseGui():device(0){};
 
-    bool OnEvent(const irr::SEvent &event){
-      if(oldReceiver && event.EventType == irr::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
-        oldReceiver->OnEvent(event);
-      if(oldReceiver && event.EventType == irr::EET_MOUSE_INPUT_EVENT && (event.MouseInput.Event==irr::EMIE_LMOUSE_LEFT_UP || event.MouseInput.Event==irr::EMIE_RMOUSE_LEFT_UP || event.MouseInput.Event==irr::EMIE_MMOUSE_LEFT_UP))
-        oldReceiver->OnEvent(event);
-      return OnEventImpl(event);
-    };
+    bool OnEvent(const irr::SEvent &event);
     virtual bool OnEventImpl(const irr::SEvent &event)=0;
 
-    void apply(irr::IrrlichtDevice* _device){
-      if(device)
-        unapply();
-      device=_device;
-      oldReceiver=device->getEventReceiver();
-      device->setEventReceiver(this);
-    }
-    void unapply(){
-      if(device)
-        device->setEventReceiver(oldReceiver);
-      device=0;
-    };
+    void apply(irr::IrrlichtDevice* _device);
+    void unapply();
     
-    virtual void createGUI(){};
+    virtual void createGUI()=0;
     
-    virtual bool run(){};
+    virtual bool run()=0;
     
-    void main(irr::IrrlichtDevice* _device){
-      apply(_device);
-
-      irr::IVideoDriver* driver = device->getVideoDriver();
-      irr::ISceneManager* smgr = device->getSceneManager();
-      irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
-      
-      el=new CGUIEmptyElement(guienv,guienv->getRootGUIElement());
-      createGUI();
-
-      while(device->run()){
-        
-        if(!run())
-          break;
-        
-        driver->beginScene(true, true, irr::SColor(255,113,113,133));
-        smgr->drawAll();
-        guienv->drawAll();
-        driver->endScene();
-      }
-      
-      unapply();
-      guienv->removeFocus(guienv->getFocus());
-      el->remove();
-      el->drop();
-    }
+    void main(irr::IrrlichtDevice* _device);
 };
-
 
 class GenerateGui: BaseGui{
 
@@ -120,86 +76,11 @@ class GenerateGui: BaseGui{
   };
 
   protected:
-    virtual bool OnEventImpl(const irr::SEvent &event){
-      if(event.EventType == irr::EET_GUI_EVENT){
-        if(event.GUIEvent.EventType==irr::EGET_BUTTON_CLICKED){
-          if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
-            okClicked=true;
-            return true;
-          }else{
-            cancelClicked=true;
-            return true;
-          }
-        }
-        if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-          okClicked=true;
-          return true;
-        }
-      }
-      if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-        cancelClicked=true;
-        return true;
-      }
-      return false;
-    };
-
-
+    virtual bool OnEventImpl(const irr::SEvent &event);
+    virtual void createGUI();
+    virtual bool run();
   public:
-    bool generate(irr::IrrlichtDevice* _device,Maze& m){
-      this->m=&m;
-      main(_device);
-      return okClicked;
-    }
-    
-    virtual void createGUI(){
-      okClicked=cancelClicked=false;
-
-      irr::IVideoDriver* driver = device->getVideoDriver();
-      irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
-
-      irr::rect<irr::s32> rect=driver->getViewPort();
-      irr::position2d<irr::s32> center=rect.getCenter();
-      irr::dimension2d<irr::s32> size=rect.getSize();
-      size.Width=min(400,size.Width-10);
-
-      xSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32-10-32,
-          center.X+size.Width/2,center.Y-5-32-10),true,el);
-      xSize->setDecimalPlaces(0);
-      xSize->setRange(3,75);
-      xSize->setValue(m->size.X);
-      
-      ySize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,
-          center.X+size.Width/2,center.Y-5),true,el);
-      ySize->setDecimalPlaces(0);
-      ySize->setRange(3,75);
-      ySize->setValue(m->size.Y);
-      
-      zSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y+5,
-          center.X+size.Width/2,center.Y+5+32),true,el);
-      zSize->setDecimalPlaces(0);
-      zSize->setRange(3,75);
-      zSize->setValue(m->size.Z);
-
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5+32+10,center.X+size.Width/2-100,center.Y+5+32+10+32),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5+32+10,center.X+size.Width/2,center.Y+5+32+10+32),el,GUI_ID_OK_BUTTON,L"Generate");
-
-      guienv->setFocus(xSize->getEditBox());
-
-      device->setWindowCaption(L"Generate New Hyper Maze");
-
-    }
-    
-    
-    virtual bool run(){
-      if(cancelClicked)
-        return false;
-      if(okClicked){
-        (*m)=::generate<RandLimitMazeGenHalf<Hunter<RandOrderWalker<DiagonalWalker> > > >(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
-        return false;
-      }
-      return true;
-    }
-
+    bool generate(irr::IrrlichtDevice* _device,Maze& m);
 };
 
 class SaveGui: BaseGui{
@@ -217,75 +98,12 @@ class SaveGui: BaseGui{
   };
 
   protected:
-    virtual bool OnEventImpl(const irr::SEvent &event){
-      if(event.EventType == irr::EET_GUI_EVENT){
-        if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
-          if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
-            okClicked=true;
-            return true;
-          }else{
-            cancelClicked=true;
-            return true;
-          }
-        }
-      }
-      if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-        cancelClicked=true;
-        return true;
-      }
-      if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-        okClicked=true;
-        return true;
-      }
-      return false;
-    };
-
-
+    virtual bool OnEventImpl(const irr::SEvent &event);
+    virtual void createGUI();
+    bool run();
   public:
-    bool save(irr::IrrlichtDevice* _device,Maze& m){
-      this->m=&m;
-      main(_device);
-      return okClicked;
-    }
-    
-    virtual void createGUI(){
-      okClicked=cancelClicked=false;
-
-      irr::IVideoDriver* driver = device->getVideoDriver();
-      irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
-
-      irr::rect<irr::s32> rect=driver->getViewPort();
-      irr::position2d<irr::s32> center=rect.getCenter();
-      irr::dimension2d<irr::s32> size=rect.getSize();
-      size.Width=min(400,size.Width-10);
-
-      fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,center.X+size.Width/2,center.Y-5),true,el);
-
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5,center.X+size.Width/2-100,center.Y+5+32),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5,center.X+size.Width/2,center.Y+5+32),el,GUI_ID_OK_BUTTON,L"Save");
-
-      guienv->setFocus(fileField);
-
-      device->setWindowCaption(L"Save Hyper Maze");
-
-    }
-    
-    bool run(){
-      if(cancelClicked)
-        return false;
-      if(okClicked){
-        irr::IWriteFile* out=device->getFileSystem()->createAndWriteFile(fileField->getText());
-        if(!out)
-          return true;
-        IrrHypOStream os(out);
-        out->drop();
-        write(os,*m);        
-        return false;
-      } 
-      return true;
-    }
+    bool save(irr::IrrlichtDevice* _device,Maze& m);
 };
-
 
 class OpenGui: BaseGui{
 
@@ -302,72 +120,35 @@ class OpenGui: BaseGui{
   };
 
   protected:
-    virtual bool OnEventImpl(const irr::SEvent &event){
-      if(event.EventType == irr::EET_GUI_EVENT){
-        if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
-          if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
-            okClicked=true;
-            return true;
-          }else{
-            cancelClicked=true;
-            return true;
-          }
-        }
-      }
-      if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-        cancelClicked=true;
-        return true;
-      }
-      if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-        okClicked=true;
-        return true;
-      }
-      return false;
-    };
-
-
+    virtual bool OnEventImpl(const irr::SEvent &event);
+    void createGUI();
+    bool run();
   public:
-    bool open(irr::IrrlichtDevice* _device,Maze& m){
-      this->m=&m;
-      main(_device);
-      return okClicked;
-    }
-    
-    void createGUI(){
-      okClicked=cancelClicked=false;
+    bool open(irr::IrrlichtDevice* _device,Maze& m);
+};
 
-      irr::IVideoDriver* driver = device->getVideoDriver();
-      irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+class WinGui: BaseGui{
 
-      irr::rect<irr::s32> rect=driver->getViewPort();
-      irr::position2d<irr::s32> center=rect.getCenter();
-      irr::dimension2d<irr::s32> size=rect.getSize();
-      size.Width=min(400,size.Width-10);
+  bool okClicked,generateClicked,loadClicked, saveClicked;
 
-      fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,center.X+size.Width/2,center.Y-5),true,el);
+  PuzzleDisplay* pd;
 
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5,center.X+size.Width/2-100,center.Y+5+32),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5,center.X+size.Width/2,center.Y+5+32),el,GUI_ID_OK_BUTTON,L"Open");
+  irr::u32 keyblock;
 
-      guienv->setFocus(fileField);
+  enum
+  {
+    GUI_ID_OK_BUTTON=201,
+    GUI_ID_GENERATE_BUTTON,
+    GUI_ID_LOAD_BUTTON,
+    GUI_ID_SAVE_BUTTON
+  };
 
-      device->setWindowCaption(L"Open Hyper Maze");
-    }
-    
-    bool run(){
-      if(cancelClicked)
-        return false;
-      if(okClicked){
-        irr::IReadFile* in=device->getFileSystem()->createAndOpenFile(fileField->getText());
-        if(!in)
-          return true;
-        IrrHypIStream is(in);
-        in->drop();
-        read(is,*m);
-        return false;
-      }
-      return true;
-    }
+  protected:
+    virtual bool OnEventImpl(const irr::SEvent &event);
+    void createGUI();
+    bool run();
+  public:
+    bool won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd);
 };
 
 #endif

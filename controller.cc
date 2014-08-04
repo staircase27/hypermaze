@@ -81,13 +81,6 @@
       }
     };
     
-    bool KeyboardController::onWin(){
-      WinGui wg;
-      sm->playEffect(SoundManager::SE_WIN);
-      wg.won(device,pd);
-    }
-
-
   void MouseSlicerController::run(irr::u32 now){
     if(slice){
       irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);

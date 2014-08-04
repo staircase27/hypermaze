@@ -1,6 +1,7 @@
 #include "irrdisp.hh"
 #include "controller.hh"
 #include "script.hh"
+#include "gui.hh"
 
 #ifdef IOSTREAM
 #include <iostream>
@@ -235,10 +236,13 @@ void PuzzleDisplay::win(){
   if(r.block)
     return;
   won=true;
-  if(c!=0){
-    cout<<"on win"<<endl;
-    cout<<r.nextLevel.a<<endl;
-    c->onWin();//TODO use the nextlevel and win message
+  cout<<"on win"<<endl;
+  cout<<r.nextLevel.a<<endl;
+  if(sm)
+    sm->playEffect(SoundManager::SE_WIN);
+  if(device){
+    WinGui wg;
+    wg.won(device,*this);
   }
 }
 

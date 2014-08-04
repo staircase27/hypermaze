@@ -24,7 +24,6 @@ class Controller: public irr::IEventReceiver{
   public:
     virtual void run(irr::u32 now)=0;
     virtual bool OnEvent(const irr::SEvent& event)=0;
-    virtual bool onWin(){};
     Controller(PuzzleDisplay& pd):pd(pd){};
 };
 
@@ -43,8 +42,6 @@ class KeyboardController:public Controller{
     
     virtual void run(irr::u32 now);
     
-    virtual bool onWin();
-
     KeyboardController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),device(device),sm(sm){
       for (irr::u32 i=0; i<KeyMap::A_COUNT; ++i){
         actionTriggered[i] = false;
@@ -128,10 +125,6 @@ class MultiInterfaceController:public Controller{
       mdc.run(now);
       mssc.run(now);
     }
-    virtual bool onWin(){
-      return kc.onWin()||msc.onWin()||mdc.onWin()||mssc.onWin();
-    }
-
 };
 
 

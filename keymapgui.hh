@@ -154,7 +154,7 @@ irr::stringw toString(const irr::EKEY_CODE& k){
 }
 
 
-irr::stringw toString(KeySpec ks){
+inline irr::stringw toString(KeySpec ks){
   irr::stringw s;
   if(ks.chr==0 && (ks.key==irr::KEY_KEY_CODES_COUNT || ks.key==0))
     return L"None";
