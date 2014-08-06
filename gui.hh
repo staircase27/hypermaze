@@ -1,9 +1,11 @@
 #include "irrlicht.h"
+#include "script.hh"
 
 #ifndef GUI_HH_INC
 #define GUI_HH_INC
 class Maze;
 class PuzzleDisplay;
+
 
 using namespace std;
 
@@ -151,4 +153,24 @@ class WinGui: BaseGui{
     bool won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd);
 };
 
+class MessageGui: BaseGui{
+
+    Message m;
+    
+  bool okClicked;
+
+  enum
+  {
+    GUI_ID_OK_BUTTON=201,
+  };
+
+  protected:
+    virtual bool OnEventImpl(const irr::SEvent &event);
+    void createGUI();
+    bool run();
+  public:
+    bool message(irr::IrrlichtDevice* _device,const Message& m);
+};
+
 #endif
+

@@ -228,11 +228,9 @@ void PuzzleDisplay::win(){
     sd.update();
   else if(r.stringSelectionChanged)
     sd.updateActive();
-  if(r.messageCount>0)
-#ifdef IOSTREAM
-    cout<<"onwin message"<<endl;
-#endif
-    ;//TODO show message
+  MessageGui g;
+  for(int i=0;i<r.messageCount;++i)
+      g.message(device,r.messages[i]);
   if(r.block)
     return;
   won=true;
@@ -248,11 +246,9 @@ void PuzzleDisplay::win(){
 
 void PuzzleDisplay::stringUpdated(){
   ScriptResponseMove r=sc.runMove(s);
-  if(r.messageCount>0)
-#ifdef IOSTREAM
-    cout<<"onmove message"<<endl;
-#endif
-    ;//TODO show message
+  MessageGui g;
+  for(int i=0;i<r.messageCount;++i)
+      g.message(device,r.messages[i]);
   cout<<"move triggered"<<endl;
   sd.update();
   if((!won) && (s.hasWon()||r.forceWin))
@@ -262,11 +258,9 @@ void PuzzleDisplay::stringSelectionUpdated(){
   ScriptResponseSelect r=sc.runSelect(s);
   if(r.stringChanged)
     sd.update();
-  if(r.messageCount>0)
-#ifdef IOSTREAM
-    cout<<"onselect message"<<endl;
-#endif
-    ;//TODO show message
+  MessageGui g;
+  for(int i=0;i<r.messageCount;++i)
+      g.message(device,r.messages[i]);
   sd.updateActive();
   if((!won) && r.forceWin)
     win();
@@ -285,11 +279,9 @@ void PuzzleDisplay::mazeUpdated(){
       sd.update();
     else if(r.stringSelectionChanged)
       sd.updateActive();
-    if(r.messageCount>0)
-#ifdef IOSTREAM
-    cout<<"onstart message"<<endl;
-#endif
-      ;//TODO show message
+  MessageGui g;
+  for(int i=0;i<r.messageCount;++i)
+      g.message(device,r.messages[i]);
 };
 bool PuzzleDisplay::hideSide(Dirn side,bool out){
   return md.hideSide(side,out);

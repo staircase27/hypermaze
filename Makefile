@@ -24,6 +24,7 @@ test.o: test.cc maze.hh dirns.hh vector.hh string.hh mazegen.hh hypio.hh
 run-test: test
 	./test
 
+scriptedit: CPPOPTS+= -DIOSTREAM
 scriptedit: scriptedit.o script.o hypio.o
 
 run-scriptedit: scriptedit

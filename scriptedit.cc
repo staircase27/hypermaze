@@ -1,4 +1,3 @@
-#define IOSTREAM
 #include "script.hh"
 #include "scriptimpl.hh"
 #include "hypioimp.hh"

@@ -46,7 +46,8 @@ void GUIFormattedText::setText( const wchar_t* text){
     (*Children.begin())->remove();
   }
   paragraphs.clear();
-  addText(text);
+  if(text)
+    addText(text);
 }
 
 int GUIFormattedText::addText(const wchar_t* text,int i){

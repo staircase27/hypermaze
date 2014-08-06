@@ -15,6 +15,30 @@ namespace irr{
   using namespace gui;
 };
 
+
+
+GUIFormattedText* makeElementFromMessage(irr::IGUIEnvironment* guienv,irr::IGUIElement* el,irr::rect<irr::s32> bounds, const Message& m){
+  GUIFormattedText* text=new GUIFormattedText(0,guienv,el,0,bounds,true,true);
+  text->setOverrideFont(0,guienv->getFont("irrlicht/fonts/Scada26B.xml"));
+  text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
+  int buflen=0;
+  wchar_t* buf=0;
+  for(int i=0;i<m.count;++i){
+      int len=strlen(m.paragraphs[i].b);
+      if(buflen<len){
+          buf=new wchar_t[len+1];
+          buflen=len;
+      }
+      for(int j=0;j<len;++j){
+          buf[j]=(wchar_t)m.paragraphs[i].b[j];
+      }
+      buf[len]=0;
+      text->addText(buf);
+      //use m.paragraphs[i].a to set the formatting eventually
+  }
+  return text;
+}
+
 bool BaseGui::OnEvent(const irr::SEvent &event){
   if(oldReceiver && event.EventType == irr::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
 	oldReceiver->OnEvent(event);
@@ -365,3 +389,43 @@ bool WinGui::run(){
   return true;
 }
 
+bool MessageGui::OnEventImpl(const irr::SEvent &event){
+  if(event.EventType == irr::EET_GUI_EVENT && event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED)
+    if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
+      okClicked=true;
+      return true;
+  }
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+	okClicked=true;
+	return true;
+  }
+  return false;
+};
+bool MessageGui::message(irr::IrrlichtDevice* _device,const Message& m){
+  this->m=m;
+  main(_device);
+  return okClicked;
+}
+void MessageGui::createGUI(){
+  okClicked=false;
+
+  irr::IVideoDriver* driver = device->getVideoDriver();
+  irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+
+  irr::rect<irr::s32> rect=driver->getViewPort();
+  irr::position2d<irr::s32> center=rect.getCenter();
+  irr::dimension2d<irr::s32> size=rect.getSize();
+  size.Width=min(400,size.Width-10);
+  
+  makeElementFromMessage(guienv,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),m);
+
+  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5,center.X+size.Width/2,center.Y+5+32),el,GUI_ID_OK_BUTTON,L"Ok"));
+
+  device->setWindowCaption(L"Hyper Maze Message");
+}
+bool MessageGui::run(){
+  if(okClicked){
+    return false;
+  }
+  return true;
+}
