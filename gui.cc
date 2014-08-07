@@ -110,8 +110,8 @@ bool GenerateGui::OnEventImpl(const irr::SEvent &event){
   }
   return false;
 };
-bool GenerateGui::generate(irr::IrrlichtDevice* _device,Maze& m){
-  this->m=&m;
+bool GenerateGui::generate(irr::IrrlichtDevice* _device,PuzzleDisplay& pd){
+  this->pd=&pd;
   main(_device);
   return okClicked;
 }
@@ -130,19 +130,19 @@ void GenerateGui::createGUI(){
 	  center.X+size.Width/2,center.Y-5-32-10),true,el);
   xSize->setDecimalPlaces(0);
   xSize->setRange(3,75);
-  xSize->setValue(m->size.X);
+  xSize->setValue(pd->m.size.X);
 
   ySize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,
 	  center.X+size.Width/2,center.Y-5),true,el);
   ySize->setDecimalPlaces(0);
   ySize->setRange(3,75);
-  ySize->setValue(m->size.Y);
+  ySize->setValue(pd->m.size.Y);
 
   zSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y+5,
 	  center.X+size.Width/2,center.Y+5+32),true,el);
   zSize->setDecimalPlaces(0);
   zSize->setRange(3,75);
-  zSize->setValue(m->size.Z);
+  zSize->setValue(pd->m.size.Z);
 
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5+32+10,center.X+size.Width/2-100,center.Y+5+32+10+32),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5+32+10,center.X+size.Width/2,center.Y+5+32+10+32),el,GUI_ID_OK_BUTTON,L"Generate");
@@ -156,7 +156,8 @@ bool GenerateGui::run(){
   if(cancelClicked)
 	return false;
   if(okClicked){
-	(*m)=::generate<RandLimitMazeGenHalf<Hunter<RandOrderWalker<DiagonalWalker> > > >(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
+  pd->m=::generate<RandLimitMazeGenHalf<Hunter<RandOrderWalker<DiagonalWalker> > > >(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
+  pd->sc=Script();
 	return false;
   }
   return true;
@@ -184,8 +185,8 @@ bool SaveGui::OnEventImpl(const irr::SEvent &event){
   }
   return false;
 };
-bool SaveGui::save(irr::IrrlichtDevice* _device,Maze& m){
-  this->m=&m;
+bool SaveGui::save(irr::IrrlichtDevice* _device,PuzzleDisplay& pd){
+  this->pd=&pd;
   main(_device);
   return okClicked;
 }
@@ -219,7 +220,9 @@ bool SaveGui::run(){
 	  return true;
 	IrrHypOStream os(out);
 	out->drop();
-	write(os,*m);
+	write(os,pd->m);
+	os.setNextSpace("\n\n");
+	write(os,pd->sc);
 	return false;
   }
       return true;
@@ -248,8 +251,8 @@ bool OpenGui::OnEventImpl(const irr::SEvent &event){
   }
   return false;
 };
-bool OpenGui::open(irr::IrrlichtDevice* _device,Maze& m){
-  this->m=&m;
+bool OpenGui::open(irr::IrrlichtDevice* _device,PuzzleDisplay& pd){
+  this->pd=&pd;
   main(_device);
   return okClicked;
 }
@@ -282,11 +285,13 @@ bool OpenGui::run(){
 	  return true;
 	IrrHypIStream is(in);
 	in->drop();
-	read(is,*m);
+	read(is,pd->m);
+	pd->sc=Script();
+	read(is,pd->sc);
 	return false;
   }
   return true;
-    }
+}
 
 bool WinGui::OnEventImpl(const irr::SEvent &event){
   if(event.EventType == irr::EET_GUI_EVENT){
@@ -363,7 +368,7 @@ bool WinGui::run(){
   if(saveClicked){
 	el->setVisible(false);
 	SaveGui sg;
-	sg.save(device,pd->m);
+	sg.save(device,*pd);
 	el->setVisible(true);
 	saveClicked=false;
 	keyblock=device->getTimer()->getTime()+500;
@@ -371,7 +376,7 @@ bool WinGui::run(){
   if(loadClicked){
 	el->setVisible(false);
 	OpenGui og;
-	if(og.open(device,pd->m)){
+	if(og.open(device,*pd)){
 	  pd->mazeUpdated();
 	  return false;
 	}
@@ -382,7 +387,7 @@ bool WinGui::run(){
   if(generateClicked){
 	el->setVisible(false);
 	GenerateGui gg;
-	if(gg.generate(device,pd->m)){
+	if(gg.generate(device,*pd)){
 	  pd->mazeUpdated();
 	  return false;
 	}

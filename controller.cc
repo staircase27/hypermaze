@@ -57,21 +57,21 @@
 
       if(isTriggered(KeyMap::A_GENERATE)&&actionTime[KeyMap::A_GENERATE]<now){
         GenerateGui gg;
-        if(gg.generate(device,pd.m)){
+        if(gg.generate(device,pd)){
           pd.mazeUpdated();
         }
         actionTime[KeyMap::A_GENERATE]=now+1*DELAY;
       }
       if(isTriggered(KeyMap::A_LOAD)&&actionTime[KeyMap::A_LOAD]<now){
         OpenGui og;
-        if(og.open(device,pd.m)){
+        if(og.open(device,pd)){
           pd.mazeUpdated();
         }
         actionTime[KeyMap::A_GENERATE]=now+1*DELAY;
       }
       if(isTriggered(KeyMap::A_SAVE)&&actionTime[KeyMap::A_SAVE]<now){
         SaveGui sg;
-        sg.save(device,pd.m);
+        sg.save(device,pd);
         actionTime[KeyMap::A_SAVE]=now+1*DELAY;
       }
       if(isTriggered(KeyMap::A_CONF)&&actionTime[KeyMap::A_CONF]<now){

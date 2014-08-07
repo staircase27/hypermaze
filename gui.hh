@@ -68,7 +68,8 @@ class GenerateGui: BaseGui{
   bool okClicked;
   bool cancelClicked;
 
-  Maze* m;
+  PuzzleDisplay* pd;
+  
   irr::gui::IGUISpinBox *xSize, *ySize, *zSize;
 
   enum
@@ -82,7 +83,7 @@ class GenerateGui: BaseGui{
     virtual void createGUI();
     virtual bool run();
   public:
-    bool generate(irr::IrrlichtDevice* _device,Maze& m);
+    bool generate(irr::IrrlichtDevice* _device,PuzzleDisplay& pd);
 };
 
 class SaveGui: BaseGui{
@@ -90,7 +91,8 @@ class SaveGui: BaseGui{
   bool okClicked;
   bool cancelClicked;
 
-  Maze* m;
+  PuzzleDisplay* pd;
+
   irr::IGUIEditBox * fileField;
 
   enum
@@ -104,7 +106,7 @@ class SaveGui: BaseGui{
     virtual void createGUI();
     bool run();
   public:
-    bool save(irr::IrrlichtDevice* _device,Maze& m);
+    bool save(irr::IrrlichtDevice* _device,PuzzleDisplay& pd);
 };
 
 class OpenGui: BaseGui{
@@ -112,7 +114,8 @@ class OpenGui: BaseGui{
   bool okClicked;
   bool cancelClicked;
 
-  Maze* m;
+  PuzzleDisplay* pd;
+  
   irr::IGUIEditBox * fileField;
   
   enum
@@ -126,7 +129,7 @@ class OpenGui: BaseGui{
     void createGUI();
     bool run();
   public:
-    bool open(irr::IrrlichtDevice* _device,Maze& m);
+    bool open(irr::IrrlichtDevice* _device,PuzzleDisplay& pd);
 };
 
 class WinGui: BaseGui{
