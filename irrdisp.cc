@@ -240,7 +240,7 @@ void PuzzleDisplay::win(){
     sm->playEffect(SoundManager::SE_WIN);
   if(device){
     WinGui wg;
-    wg.won(device,*this);
+    wg.won(device,*this,r.winMessage);
   }
 }
 

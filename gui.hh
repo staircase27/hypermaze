@@ -134,6 +134,8 @@ class WinGui: BaseGui{
   bool okClicked,generateClicked,loadClicked, saveClicked;
 
   PuzzleDisplay* pd;
+  
+  Message m;
 
   irr::u32 keyblock;
 
@@ -150,7 +152,7 @@ class WinGui: BaseGui{
     void createGUI();
     bool run();
   public:
-    bool won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd);
+    bool won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd,const Message& m);
 };
 
 class MessageGui: BaseGui{

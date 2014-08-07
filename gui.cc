@@ -15,12 +15,7 @@ namespace irr{
   using namespace gui;
 };
 
-
-
-GUIFormattedText* makeElementFromMessage(irr::IGUIEnvironment* guienv,irr::IGUIElement* el,irr::rect<irr::s32> bounds, const Message& m){
-  GUIFormattedText* text=new GUIFormattedText(0,guienv,el,0,bounds,true,true);
-  text->setOverrideFont(0,guienv->getFont("irrlicht/fonts/Scada26B.xml"));
-  text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
+void addMessageToElement(GUIFormattedText* text,const Message& m){
   int buflen=0;
   wchar_t* buf=0;
   for(int i=0;i<m.count;++i){
@@ -36,6 +31,13 @@ GUIFormattedText* makeElementFromMessage(irr::IGUIEnvironment* guienv,irr::IGUIE
       text->addText(buf);
       //use m.paragraphs[i].a to set the formatting eventually
   }
+}
+
+GUIFormattedText* makeElementFromMessage(irr::IGUIEnvironment* guienv,irr::IGUIElement* el,irr::rect<irr::s32> bounds, const Message& m){
+  GUIFormattedText* text=new GUIFormattedText(0,guienv,el,0,bounds,true,true);
+  text->setOverrideFont(0,guienv->getFont("irrlicht/fonts/Scada26B.xml"));
+  text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
+  addMessageToElement(text,m);
   return text;
 }
 
@@ -320,8 +322,9 @@ bool WinGui::OnEventImpl(const irr::SEvent &event){
 };
 
 
-bool WinGui::won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd){
+bool WinGui::won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd,const Message& m){
   this->pd=&pd;
+  this->m=m;
   main(_device);
   return true;
 }
@@ -342,6 +345,7 @@ void WinGui::createGUI(){
   GUIFormattedText* text=new GUIFormattedText(L"Congratulations!",guienv,el,0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true);
   text->setOverrideFont(0,guienv->getFont("irrlicht/fonts/Scada26B.xml"));
   text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
+  addMessageToElement(text,m);
   text->addText(L"\nWhat would you like to do now?");
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32-32-10,center.X+size.Width/2,center.Y+size.Height/2-32-10),el,GUI_ID_SAVE_BUTTON,L"Save Maze");
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_LOAD_BUTTON,L"Load a Maze");
@@ -416,10 +420,11 @@ void MessageGui::createGUI(){
   irr::position2d<irr::s32> center=rect.getCenter();
   irr::dimension2d<irr::s32> size=rect.getSize();
   size.Width=min(400,size.Width-10);
+  size.Height=min(600,size.Height-10);
   
-  makeElementFromMessage(guienv,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),m);
+  makeElementFromMessage(guienv,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),m);
 
-  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5,center.X+size.Width/2,center.Y+5+32),el,GUI_ID_OK_BUTTON,L"Ok"));
+  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Ok"));
 
   device->setWindowCaption(L"Hyper Maze Message");
 }
