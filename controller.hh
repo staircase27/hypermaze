@@ -53,7 +53,7 @@ class KeyboardController:public Controller{
 
 class MouseSlicerController: public Controller{
   irr::ISceneCollisionManager* collMan;
-  irr::ISceneNode* slice;
+  SP<Dirn> slice;
   int sliced;
   irr::vector3df sliceStart;
   irr::position2d<irr::s32> mousePos;
@@ -64,7 +64,8 @@ class MouseSlicerController: public Controller{
 
     virtual bool OnEvent(const irr::SEvent& event);
     
-    MouseSlicerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),slice(0),mousePos(0,0){};
+    MouseSlicerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):
+        Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),slice(),mousePos(0,0){};
 };
 
 
@@ -102,7 +103,8 @@ class MouseStringSelectorController: public Controller{
     
     virtual bool OnEvent(const irr::SEvent& event);
   
-    MouseStringSelectorController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),sp(pd.s.end(),false){};
+    MouseStringSelectorController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):
+        Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),sp(pd.s.end(),false){};
 };
   
 

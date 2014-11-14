@@ -82,16 +82,16 @@
     };
     
   void MouseSlicerController::run(irr::u32 now){
-    if(slice){
+    if(!slice.isnull()){
       irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
-      irr::vector3df dir=con(to_vector(pd.getSlicers().find(slice)->second));
+      irr::vector3df dir=con(to_vector(*slice));
       irr::vector3df ldir=ray.getVector();
       irr::f32 d=(sliceStart-ray.start).dotProduct(dir*ldir.getLengthSQ()-ldir*dir.dotProduct(ldir))/(dir.dotProduct(ldir)*dir.dotProduct(ldir)-dir.getLengthSQ()*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap)*2-sliced;
-      while(d>1&&pd.hideSide(pd.getSlicers().find(slice)->second,false)){
+      while(d>1&&pd.hideSide(*slice,false)){
         d--;
         sliced++;
       }
-      while(d<-1&&pd.hideSide(pd.getSlicers().find(slice)->second,true)){
+      while(d<-1&&pd.hideSide(*slice,true)){
         d++;
         sliced--;
       }
@@ -108,30 +108,30 @@
           {
             mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
             irr::triangle3df tmp;
-            slice=collMan-> getSceneNodeAndCollisionPointFromRay(
+            irr::ISceneNode* slicenode=collMan-> getSceneNodeAndCollisionPointFromRay(
                 collMan->getRayFromScreenCoordinates(mousePos),sliceStart,tmp);
-            if(pd.getSlicers().find(slice)!=pd.getSlicers().end()){
+            slice=pd.getSlicerDirn(slicenode);
+            if(!slice.isnull()){
               sliced=0;
               return true;
             }else{
-              slice=0;
               return false;
             }
           }
         case irr::EMIE_LMOUSE_LEFT_UP:
-          if(slice!=0){
-            slice=0;
+          if(!slice.isnull()){
+            slice=SP<Dirn>();
             return true;
           }else
             return false;
         case irr::EMIE_LMOUSE_DOUBLE_CLICK:
-          if(slice!=0){
-            while(pd.hideSide(pd.getSlicers().find(slice)->second,true)){};
+          if(!slice.isnull()){
+            while(pd.hideSide(*slice,true)){};
             return true;
           }else
             return false;
         case irr::EMIE_MOUSE_MOVED:
-          if(slice!=0){
+          if(!slice.isnull()){
             mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
             return true;
           }

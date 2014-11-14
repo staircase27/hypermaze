@@ -228,26 +228,16 @@ int main(int argc,char* argv[]){
 
   MyNodeGen* ng=new MyNodeGen(smgr,driver->getTexture("irrlicht/wall.png"),driver->getTexture("irrlicht/string.png"),driver->getTexture("irrlicht/activeString.png"),driver->getTexture("irrlicht/handle.png"));
 
-  PuzzleDisplay pd(ng);
-  
   SoundManager* sm=createSoundManager();
   sm->setMusicSource(new IrrlichtMusicSource(device->getFileSystem()));
   sm->setMusicLoader(new IrrlichtMusicLoader(device->getFileSystem()));
   sm->startMusic();
 
+  PuzzleDisplay pd(ng,device,sm);
+  
   MultiInterfaceController *mic=new MultiInterfaceController(pd,device,sm);
   Controller* c=mic;
   device->setEventReceiver(c);
-  irr::IReadFile* in=device->getFileSystem()->createAndOpenFile("levels/test5.hms");
-  if(in){
-    cout<<"script loading"<<endl;
-    IrrHypIStream is(in);
-    in->drop();
-    read(is,pd.sc);
-  }
-  pd.c=c;
-  pd.device=device;
-  pd.sm=sm;
 
   mic->kc.map.addMapping(irr::KEY_F1,KeyMap::A_CONF);
   {

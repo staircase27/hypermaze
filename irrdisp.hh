@@ -118,17 +118,16 @@ class PuzzleDisplay{
     Script sc;
     String s;
     StringPlay sp;
-    Controller* c;
-    irr::IrrlichtDevice *device;
-    SoundManager *sm;
   private:
     NodeGen* ng;
     MazeDisplay md;
     StringDisplay sd;
     map<irr::ISceneNode*,Dirn> slicers;
     bool won;
+    SoundManager *sm;
+    irr::IrrlichtDevice *device;
    public:
-    PuzzleDisplay(NodeGen* ng):m(Vector(5,5,5)),sc(),s(m),sp(s),c(0),device(0),sm(0),ng(ng),md(m,ng),sd(s,ng),won(false){
+    PuzzleDisplay(NodeGen* ng,irr::IrrlichtDevice* device,SoundManager* sm):m(Vector(5,5,5)),sc(),s(m),sp(s),device(device),sm(sm),ng(ng),md(m,ng),sd(s,ng),won(false){
       for(Dirn* d=allDirns;d!=allDirns+6;++d){
         irr::IMeshSceneNode* node = ng->makeUnitHandle(to_vector(*d).dotProduct(to_vector(s.targetDir)));
         node->setScale(irr::vector3df(1,1,1)*(md.wall+md.gap)/2);
@@ -137,7 +136,7 @@ class PuzzleDisplay{
       }
     };
 
-    const map<irr::ISceneNode*,Dirn>& getSlicers();
+    SP<Dirn> getSlicerDirn(irr::ISceneNode* slicer);
     
     pair<StringPointer,bool> getStringPointer(irr::ISceneNode* node);
 

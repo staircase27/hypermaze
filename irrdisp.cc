@@ -214,8 +214,13 @@ pair<StringPointer,bool> StringDisplay::getStringPointer(irr::ISceneNode* node){
 }
 
 
-const map<irr::ISceneNode*,Dirn>& PuzzleDisplay::getSlicers(){
-  return slicers;
+SP<Dirn> PuzzleDisplay::getSlicerDirn(irr::ISceneNode* slicer){
+    map<irr::ISceneNode*,Dirn>::iterator it=slicers.find(slicer);
+    if(it==slicers.end()){
+        return SP<Dirn>();
+    }else{
+        return SP<Dirn>(new Dirn(it->second));
+    }
 }
 
 pair<StringPointer,bool> PuzzleDisplay::getStringPointer(irr::ISceneNode* node){
