@@ -186,21 +186,39 @@
             }else
               break;
             /*/
-            irr::f32 largest=0.9999;
-            irr::f32 reallargest=0.9999;
+            Dirn dir;
+            irr::f32 smallest=10000000;
+            irr::f32 realsmallest=10000000;
             for(Dirn *d=allDirns;d!=allDirns+6;++d){
-              int steps=round(()/()/(MazeDisplay::wall+MazeDisplay::gap)/)
-              weight=(ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
-              if(weight.dotProduct(con(to_vector(*d)))>largest){
-                if(weight.dotProduct(con(to_vector(*d)))>reallargest)
-                  reallargest=weight.dotProduct(con(to_vector(*d)));
+              irr::f32 steps=
+                  (ldir.getLengthSQ()*con(to_vector(*d)).dotProduct(startPoint-ray.start)-ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(startPoint-ray.start))/
+                  (ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(con(to_vector(*d)))-ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
+              cout<<"testing "<<*d<<" "<<steps<<endl;
+              if(steps<=0)
+                  continue;
+              irr::f32 screendist=mousePos.getDistanceFromSQ(collMan->getScreenCoordinatesFrom3DPosition(startPoint+steps*con(to_vector(*d))));
+              cout<<"dist "<<*d<<" "<<screendist<<endl;
+              if(screendist<smallest){
+                if(screendist<realsmallest)
+                  realsmallest=screendist;
                 if(pd.sp.canMove(*d)){
-                  largest=weight.dotProduct(con(to_vector(*d)));
+                  smallest=screendist;
                   dir=*d;
                 }
               }
             }
-            break;
+            cout<<"best is "<<dir<<" "<<smallest<<endl;
+            if(smallest>10000000){
+              if(realsmallest<10000000)
+                sm->playEffect(SoundManager::SE_BLOCK);
+              break;
+            }
+            if(pd.sp.tryMove(dir)){
+              pd.stringUpdated();
+              currdir=dir;
+              dist+=1;
+            }else
+              break;
             //*/
           }else{
             irr::f32 weight=con(to_vector(currdir)).dotProduct(
