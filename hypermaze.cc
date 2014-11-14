@@ -235,16 +235,8 @@ int main(int argc,char* argv[]){
 
   PuzzleDisplay pd(ng,device,sm);
   
-  MultiInterfaceController *mic=new MultiInterfaceController(pd,device,sm);
-  Controller* c=mic;
+  Controller* c=new MultiInterfaceController(pd,device,sm);
   device->setEventReceiver(c);
-
-  mic->kc.map.addMapping(irr::KEY_F1,KeyMap::A_CONF);
-  {
-    irr::IReadFile* in=device->getFileSystem()->createAndOpenFile("hypermaze.keymap.conf");
-    mic->kc.map.load(in);
-    in->drop();
-  }
 
   while(device->run())
   {
@@ -262,7 +254,7 @@ int main(int argc,char* argv[]){
     driver->endScene();
   }
   delete ng;
-  delete mic;
+  delete c;
   delete sm->getMusicSource();
   delete sm->getMusicLoader();
   delete sm;

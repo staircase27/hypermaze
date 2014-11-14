@@ -25,6 +25,7 @@ class Controller: public irr::IEventReceiver{
     virtual void run(irr::u32 now)=0;
     virtual bool OnEvent(const irr::SEvent& event)=0;
     Controller(PuzzleDisplay& pd):pd(pd){};
+    virtual ~Controller(){};
 };
 
 class KeyboardController:public Controller{
@@ -47,6 +48,10 @@ class KeyboardController:public Controller{
         actionTriggered[i] = false;
         actionTime[i] = 0;
       }
+      map.addMapping(irr::KEY_F1,KeyMap::A_CONF);
+      irr::IReadFile* in=device->getFileSystem()->createAndOpenFile("hypermaze.keymap.conf");
+      map.load(in);
+      in->drop();
     };
 };
 
@@ -87,7 +92,6 @@ class MouseStringDraggerController: public Controller{
     MouseStringDraggerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),mousePos(0,0),sm(sm){};
 };
 
-
 class MouseStringSelectorController: public Controller{
   irr::ISceneCollisionManager* collMan;
   irr::position2d<irr::s32> mousePos;
@@ -106,26 +110,27 @@ class MouseStringSelectorController: public Controller{
     MouseStringSelectorController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):
         Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),sp(pd.s.end(),false){};
 };
-  
 
 class MultiInterfaceController:public Controller{
   public:
-    KeyboardController kc;
-    MouseSlicerController msc;
-    MouseStringDraggerController mdc;
-    MouseStringSelectorController mssc;
+    Controller* kc;
+    Controller* msc;
+    Controller* mdc;
+    Controller* mssc;
 
-    MultiInterfaceController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),kc(pd,device,sm),msc(pd,device,sm),mdc(pd,device,sm),mssc(pd,device,sm){};
+    MultiInterfaceController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):
+        Controller(pd),kc(new KeyboardController(pd,device,sm)),msc(new MouseSlicerController(pd,device,sm)),
+        mdc(new MouseStringDraggerController(pd,device,sm)),mssc(new MouseStringSelectorController(pd,device,sm)){};
 
     virtual bool OnEvent(const irr::SEvent& event){
-      return kc.OnEvent(event)||msc.OnEvent(event)||mdc.OnEvent(event)||mssc.OnEvent(event);
+      return kc->OnEvent(event)||msc->OnEvent(event)||mdc->OnEvent(event)||mssc->OnEvent(event);
     }
 
     virtual void run(irr::u32 now){
-      kc.run(now);
-      msc.run(now);
-      mdc.run(now);
-      mssc.run(now);
+      kc->run(now);
+      msc->run(now);
+      mdc->run(now);
+      mssc->run(now);
     }
 };
 
