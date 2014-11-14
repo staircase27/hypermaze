@@ -34,7 +34,7 @@
       for(const pair<KeyMap::Action,pair<Dirn,bool> >* it=KeyMap::sliceActions;it!=KeyMap::sliceActions+12;++it){
         if(isTriggered(it->first)&&actionTime[it->first]<now){
           pd.hideSide(it->second.first,it->second.second);
-          actionTime[it->first]=now+1*DELAY;
+          actionTime[it->first]=now+1*DELAY;  
         }
       }
       for(const pair<KeyMap::Action,pair<bool,bool> >* it=KeyMap::slideActions;it!=KeyMap::slideActions+4;++it){
@@ -146,6 +146,7 @@
         irr::vector3df ldir=ray.getVector();
         while(true){
           if(dist==0){
+            /*
             irr::vector3df weight;
             weight=(ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
             if(ldir.Y*ldir.Y+ldir.Z*ldir.Z>0.1*ldir.getLengthSQ())
@@ -184,6 +185,23 @@
               dist+=1;
             }else
               break;
+            /*/
+            irr::f32 largest=0.9999;
+            irr::f32 reallargest=0.9999;
+            for(Dirn *d=allDirns;d!=allDirns+6;++d){
+              int steps=round(()/()/(MazeDisplay::wall+MazeDisplay::gap)/)
+              weight=(ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
+              if(weight.dotProduct(con(to_vector(*d)))>largest){
+                if(weight.dotProduct(con(to_vector(*d)))>reallargest)
+                  reallargest=weight.dotProduct(con(to_vector(*d)));
+                if(pd.sp.canMove(*d)){
+                  largest=weight.dotProduct(con(to_vector(*d)));
+                  dir=*d;
+                }
+              }
+            }
+            break;
+            //*/
           }else{
             irr::f32 weight=con(to_vector(currdir)).dotProduct(
                 (ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap))/
