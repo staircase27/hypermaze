@@ -194,7 +194,7 @@
                   (ldir.getLengthSQ()*con(to_vector(*d)).dotProduct(startPoint-ray.start)-ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(startPoint-ray.start))/
                   (ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(con(to_vector(*d)))-ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
               cout<<"testing "<<*d<<" "<<steps<<endl;
-              if(steps<=0)
+              if(steps<=0.8)
                   continue;
               irr::f32 screendist=mousePos.getDistanceFromSQ(collMan->getScreenCoordinatesFrom3DPosition(startPoint+steps*con(to_vector(*d))));
               cout<<"dist "<<*d<<" "<<screendist<<endl;
@@ -208,7 +208,8 @@
               }
             }
             cout<<"best is "<<dir<<" "<<smallest<<endl;
-            if(smallest>10000000){
+            cout<<"real best is "<<dir<<" "<<smallest<<endl;
+            if(smallest>=10000000){
               if(realsmallest<10000000)
                 sm->playEffect(SoundManager::SE_BLOCK);
               break;
