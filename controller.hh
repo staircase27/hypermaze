@@ -92,6 +92,25 @@ class MouseStringDraggerController: public Controller{
     MouseStringDraggerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),mousePos(0,0),sm(sm){};
 };
 
+class MouseStringDraggerController2: public Controller{
+  irr::ISceneCollisionManager* collMan;
+  irr::ISceneNode* string;
+  irr::vector3df startPoint;
+  irr::position2d<irr::s32> mousePos;
+  int alloweddirns;
+  int dist;
+  Dirn currdir;
+  SoundManager* sm;
+
+
+  public:
+    virtual void run(irr::u32 now);
+
+    virtual bool OnEvent(const irr::SEvent& event);
+
+    MouseStringDraggerController2(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),mousePos(0,0),sm(sm){};
+};
+
 class MouseStringSelectorController: public Controller{
   irr::ISceneCollisionManager* collMan;
   irr::position2d<irr::s32> mousePos;
@@ -120,7 +139,7 @@ class MultiInterfaceController:public Controller{
 
     MultiInterfaceController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,SoundManager* sm):
         Controller(pd),kc(new KeyboardController(pd,device,sm)),msc(new MouseSlicerController(pd,device,sm)),
-        mdc(new MouseStringDraggerController(pd,device,sm)),mssc(new MouseStringSelectorController(pd,device,sm)){};
+        mdc(new MouseStringDraggerController2(pd,device,sm)),mssc(new MouseStringSelectorController(pd,device,sm)){};
 
     virtual bool OnEvent(const irr::SEvent& event){
       return kc->OnEvent(event)||msc->OnEvent(event)||mdc->OnEvent(event)||mssc->OnEvent(event);

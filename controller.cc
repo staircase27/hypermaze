@@ -288,7 +288,118 @@
       return false;
     }
 
+    void MouseStringDraggerController2::run(irr::u32 now){
+      if(string!=0){
+        irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
+        irr::vector3df ldir=ray.getVector();
+        if(dist==0){
+          alloweddirns=0;
+          for(Dirn *d=allDirns;d!=allDirns+6;++d)
+            if(pd.sp.canMove(*d))
+              alloweddirns|=to_mask(*d);
+          cout<<"alloweddirns "<<hex<<alloweddirns<<dec<<endl;
+        }
+        Dirn dir;
+        int beststeps=0;
+        irr::f32 smallest=10000000;
+        irr::f32 realsmallest=10000000;
+        for(Dirn *d=allDirns;d!=allDirns+6;++d){
+          irr::f32 steps=
+              (ldir.getLengthSQ()*con(to_vector(*d)).dotProduct(startPoint-ray.start)-ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(startPoint-ray.start))/
+              (ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(con(to_vector(*d)))-ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
+          cout<<"testing "<<*d<<" "<<steps<<endl;
+          if(steps<=0.8)
+              continue;
+          irr::f32 screendist=mousePos.getDistanceFromSQ(collMan->getScreenCoordinatesFrom3DPosition(startPoint+steps*con(to_vector(*d))));
+          cout<<"dist "<<*d<<" "<<screendist<<endl;
+          if(screendist<smallest){
+            if(screendist<realsmallest)
+              realsmallest=screendist;
+            if((alloweddirns&to_mask(*d))!=0){
+              beststeps=(int)(steps+0.2);
+              smallest=screendist;
+              dir=*d;
+            }
+          }
+        }
+        cout<<"best is "<<dir<<" "<<smallest<<endl;
+        cout<<"real best is "<<dir<<" "<<smallest<<endl;
+        if(dist==0 || currdir==dir){
+          if(dist<beststeps){
+            if(pd.sp.tryMove(dir)){
+              pd.stringUpdated();
+              currdir=dir;
+              dist+=1;
+            }else{
+              sm->playEffect(SoundManager::SE_BLOCK);
+            }
+          }else if(dist>beststeps){
+            if(pd.sp.tryMove(opposite(dir))){
+              pd.stringUpdated();
+              currdir=dir;
+              dist-=1;
+            }else{
+              sm->playEffect(SoundManager::SE_BLOCK);
+            }
+          }
+        }else{
+          if(pd.sp.tryMove(opposite(currdir))){
+            pd.stringUpdated();
+            dist-=1;
+          }else{
+            sm->playEffect(SoundManager::SE_BLOCK);
+          }
+        }
+      }
+    };
 
+    bool MouseStringDraggerController2::OnEvent(const irr::SEvent& event)
+    {
+      if (event.EventType != irr::EET_MOUSE_INPUT_EVENT)
+        return false;
+
+      switch(event.MouseInput.Event){
+        case irr::EMIE_LMOUSE_PRESSED_DOWN:
+          {
+            mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
+            irr::triangle3df tmp;
+            string=collMan-> getSceneNodeAndCollisionPointFromRay(
+                collMan->getRayFromScreenCoordinates(mousePos),startPoint,tmp);
+            pair<StringPointer,bool> sp=pd.getStringPointer(string);
+            bool selected=false;
+            if(sp.first!=pd.s.end()){
+              selected=sp.first->selected;
+            }
+            if(sp.second && ! selected){
+              if(sp.first!=pd.s.begin()){
+                --sp.first;
+                selected|=sp.first->selected;
+              }
+            }
+            if(selected){
+              dist=0;
+              return true;
+            }else{
+              string=0;
+              return false;
+            }
+          }
+        case irr::EMIE_LMOUSE_LEFT_UP:
+          if(string!=0){
+            string=0;
+            return true;
+          }else
+            return false;
+        case irr::EMIE_MOUSE_MOVED:
+          if(string!=0){
+            mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
+            return true;
+          }
+          break;
+      }
+      return false;
+    }
+    
     void MouseStringSelectorController::run(irr::u32 now){
       if(string){
         irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
