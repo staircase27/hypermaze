@@ -245,17 +245,17 @@ void PuzzleDisplay::win(){
     sm->playEffect(SoundManager::SE_WIN);
   if(device){
     WinGui wg;
-    wg.won(device,*this,r.winMessage);
+    wg.won(device,*this,r.winMessage,r.nextLevel);
   }
 }
 
 void PuzzleDisplay::stringUpdated(){
   ScriptResponseMove r=sc.runMove(s);
+  sd.update();
   MessageGui g;
   for(int i=0;i<r.messageCount;++i)
       g.message(device,r.messages[i]);
   cout<<"move triggered"<<endl;
-  sd.update();
   if((!won) && (s.hasWon()||r.forceWin))
     win();
 };
@@ -263,10 +263,11 @@ void PuzzleDisplay::stringSelectionUpdated(){
   ScriptResponseSelect r=sc.runSelect(s);
   if(r.stringChanged)
     sd.update();
+  else
+    sd.updateActive();
   MessageGui g;
   for(int i=0;i<r.messageCount;++i)
       g.message(device,r.messages[i]);
-  sd.updateActive();
   if((!won) && r.forceWin)
     win();
 };

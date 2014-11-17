@@ -303,6 +303,9 @@ bool WinGui::OnEventImpl(const irr::SEvent &event){
 		case GUI_ID_GENERATE_BUTTON:
 		  generateClicked=true;
 		  return true;
+		case GUI_ID_NEXT_BUTTON:
+		  nextClicked=true;
+		  return true;
 		case GUI_ID_LOAD_BUTTON:
 		  loadClicked=true;
 		  return true;
@@ -327,15 +330,16 @@ bool WinGui::OnEventImpl(const irr::SEvent &event){
 };
 
 
-bool WinGui::won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd,const Message& m){
+bool WinGui::won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd,const Message& m, Pair<SPA<const char> > nextLevel){
   this->pd=&pd;
   this->m=m;
+  this->nextLevel=nextLevel;
   main(_device);
   return true;
 }
 
 void WinGui::createGUI(){
-  okClicked=generateClicked=loadClicked=saveClicked=false;
+  okClicked=nextClicked=generateClicked=loadClicked=saveClicked=false;
   keyblock=0;
 
   irr::IVideoDriver* driver = device->getVideoDriver();
@@ -352,12 +356,21 @@ void WinGui::createGUI(){
   text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
   addMessageToElement(text,m);
   text->addText(L"\nWhat would you like to do now?");
+  irr::IGUIButton* def=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-320,center.Y+size.Height/2-32-32-10,center.X+size.Width/2-130,center.Y+size.Height/2-32-10),el,GUI_ID_OK_BUTTON,L"Back to Current Maze");
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32-32-10,center.X+size.Width/2,center.Y+size.Height/2-32-10),el,GUI_ID_SAVE_BUTTON,L"Save Maze");
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_LOAD_BUTTON,L"Load a Maze");
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-300,center.Y+size.Height/2-32,center.X+size.Width/2-130,center.Y+size.Height/2),el,GUI_ID_GENERATE_BUTTON,L"Generate New Maze");
-  irr::IGUIButton* back=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-500,center.Y+size.Height/2-32,center.X+size.Width/2-310,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Back to Current Maze");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-320,center.Y+size.Height/2-32,center.X+size.Width/2-130,center.Y+size.Height/2),el,GUI_ID_GENERATE_BUTTON,L"Generate New Maze");
+  if(!nextLevel.a.isnull()){
+    irr::stringw label(L"Next Level");
+    if(!nextLevel.b.isnull()){
+      label.append(L": ");
+      label.append(irr::stringw(&*nextLevel.b));
+    }
+    def=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-600,center.Y+size.Height/2-32,center.X+size.Width/2-330,center.Y+size.Height/2),el,GUI_ID_NEXT_BUTTON,label.c_str());
+    def->setToolTipText(irr::stringw(&*nextLevel.a).c_str());
+  }
 
-  guienv->setFocus(back);
+  guienv->setFocus(def);
 
   device->setWindowCaption(L"Hyper Maze Help");
 }
@@ -365,6 +378,19 @@ bool WinGui::run(){
   if(okClicked){
 	return false;
   }
+  if(nextClicked){
+    nextClicked=false;
+    irr::IReadFile* in=device->getFileSystem()->createAndOpenFile(&*nextLevel.a);
+    if(!in)
+      return true;
+    IrrHypIStream is(in);
+    in->drop();
+    read(is,pd->m);
+    pd->sc=Script();
+    read(is,pd->sc);
+    return false;
+  }
+
   if(saveClicked){
 	el->setVisible(false);
 	SaveGui sg;

@@ -134,11 +134,12 @@ class OpenGui: BaseGui{
 
 class WinGui: BaseGui{
 
-  bool okClicked,generateClicked,loadClicked, saveClicked;
+  bool okClicked,nextClicked,generateClicked,loadClicked, saveClicked;
 
   PuzzleDisplay* pd;
   
   Message m;
+  Pair<SPA<const char> > nextLevel;
 
   irr::u32 keyblock;
 
@@ -147,7 +148,8 @@ class WinGui: BaseGui{
     GUI_ID_OK_BUTTON=201,
     GUI_ID_GENERATE_BUTTON,
     GUI_ID_LOAD_BUTTON,
-    GUI_ID_SAVE_BUTTON
+    GUI_ID_SAVE_BUTTON,
+    GUI_ID_NEXT_BUTTON
   };
 
   protected:
@@ -155,7 +157,9 @@ class WinGui: BaseGui{
     void createGUI();
     bool run();
   public:
-    bool won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd,const Message& m);
+    bool won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd,const Message& m, Pair<SPA<const char> > nextLevel);
+    
+    WinGui():pd(0),m(),nextLevel(){}
 };
 
 class MessageGui: BaseGui{
@@ -175,6 +179,8 @@ class MessageGui: BaseGui{
     bool run();
   public:
     bool message(irr::IrrlichtDevice* _device,const Message& m);
+
+    MessageGui():m(){}
 };
 
 #endif
