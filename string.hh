@@ -178,12 +178,17 @@ class String{
 
 class StringPlay{
   String& s;
-
+  int score;
+ 
   public:
-    StringPlay(String& s):s(s){};
+    StringPlay(String& s):s(s),score(0){};
   
     String& getString(){
       return s;
+    }
+    
+    int getScore(){
+      return score;
     }
     
     bool slide(bool moveEnd,bool out){
@@ -264,6 +269,8 @@ class StringPlay{
             }
           }
           it->pos+=to_vector(d);
+          if(it->d!=d && it->d!=opposite(d))
+              score+=1;
         }else if(lastselected){
           if(it==s.route.end()){
             s.endPos+=to_vector(d);
