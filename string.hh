@@ -1,6 +1,9 @@
 #include "maze.hh"
 #include "dirns.hh"
 #include <list>
+
+
+#include "vector.hh"
 #ifdef IOSTREAM
 #include <istream>
 #endif
@@ -247,7 +250,7 @@ class StringPlay{
   LimitedStack<HistoryElement> undohistory;
   
   public:
-    StringPlay(String& s):s(s),score(0),undohistory(20){};
+    StringPlay(String& s):s(s),score(0),undohistory(10+2*s.maze.size.dotProduct(Vector(1,1,1))){};
   
     String& getString(){
       return s;
@@ -307,6 +310,14 @@ class StringPlay{
         if(d==UP && it->pos.Y>=s.maze.size.Y-1)
           return false;
         if(d==DOWN && it->pos.Y<=1)
+          return false;
+        if(d==LEFT && it->pos.X>=s.maze.size.X+5)
+          return false;
+        if(d==RIGHT && it->pos.X<=-5)
+          return false;
+        if(d==FORWARD && it->pos.Z>=s.maze.size.Z+5)
+          return false;
+        if(d==BACK && it->pos.Z<=-5)
           return false;
         if(it->d!=d && it->d!=opposite(d)){
           Vector wall=it->pos+to_shift_vector(it->d)+to_shift_vector(d);

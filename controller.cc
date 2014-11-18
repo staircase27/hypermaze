@@ -342,7 +342,7 @@
               sm->playEffect(SoundManager::SE_BLOCK);
             }
           }else if(dist>beststeps){
-            if(pd.sp.tryMove(opposite(dir))){
+            if(pd.sp.undo()){
               pd.stringUpdated();
               currdir=dir;
               dist-=1;
@@ -351,7 +351,7 @@
             }
           }
         }else{
-          if(pd.sp.tryMove(opposite(currdir))){
+          if(pd.sp.undo()){
             pd.stringUpdated();
             dist-=1;
           }else{
