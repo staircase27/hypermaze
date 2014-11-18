@@ -226,11 +226,25 @@ class LimitedStack{
     }
 };
 
+struct HistoryElement{
+  int length;
+  SPA<unsigned char> selected;
+  bool isselected(int i){
+    return (selected[i/CHAR_BIT]&(1<<(i%CHAR_BIT)))!=0;
+  }
+  Dirn d;
+  list<Dirn> startcollapsed;
+  list<Dirn> endcollapsed;
+  HistoryElement(int length,SPA<unsigned char> selected,Dirn d,list<Dirn> startcollapsed,list<Dirn> endcollapsed):
+      length(length),selected(selected),d(d),startcollapsed(startcollapsed),endcollapsed(endcollapsed){};
+  HistoryElement():length(0),selected(),d(),startcollapsed(),endcollapsed(){};
+};
+
 class StringPlay{
   String& s;
   int score;
 
-  LimitedStack<pair<pair<int,SPA<bool> >,Dirn> > undohistory;
+  LimitedStack<HistoryElement> undohistory;
   
   public:
     StringPlay(String& s):s(s),score(0),undohistory(20){};
@@ -284,7 +298,7 @@ class StringPlay{
     
     bool canMove(Dirn d){
       bool any=false;
-      if((d==s.stringDir||d==opposite(s.stringDir))&&(s.route.front().selected||s.route.back().selected))
+      if((d==opposite(s.stringDir)&&s.route.front().selected)||(d==s.stringDir&&s.route.back().selected))
         return false;
       for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
         if(!it->selected)
@@ -309,11 +323,20 @@ class StringPlay{
     bool undo(){
       if(undohistory.empty())
         return false;
-      pair<pair<int,SPA<bool> >,Dirn> el=undohistory.popTop();
-      SPA<bool> sit(el.first.second);
-      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++sit)
-        it->selected=*sit;
-      doMove(opposite(el.second),true);
+      HistoryElement el=undohistory.popTop();
+      for(list<Dirn>::iterator it=el.startcollapsed.begin();it!=el.startcollapsed.end();++it){
+        cout<<"adding at front "<<*it<<" from "<<s.route.front().pos-to_vector(*it)<<" to "<<s.route.front().pos<<endl;
+        s.route.push_front(StringElement(s.route.front().pos-to_vector(*it),*it,false));
+      }
+      for(list<Dirn>::iterator it=el.endcollapsed.begin();it!=el.endcollapsed.end();++it){
+        cout<<"adding at end "<<*it<<" from "<<s.endPos<<" to "<<s.endPos+to_vector(*it)<<endl;
+        s.route.push_back(StringElement(s.endPos,*it,false));
+        s.endPos+=to_vector(*it);
+      }
+      int i=0;
+      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++i)
+        it->selected=el.isselected(i);
+      doMove(opposite(el.d),true);
       return true;
     }
     
@@ -358,15 +381,33 @@ class StringPlay{
       }
       
       if(lastselected)
-        s.endPos+=to_vector(d);
+        if(d==s.stringDir||d==opposite(s.stringDir))
+          s.route.insert(s.route.end(),StringElement(s.endPos+to_vector(d),opposite(d),false));
+        else
+          s.endPos+=to_vector(d);
       if(!undo){
         score+=movescore;
         cout<<"length of string is "<<length<<endl;
-        SPA<bool> selection(length);
-        SPA<bool> sit(selection);
-        for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++sit)
-          *sit=it->selected;
-        undohistory.pushTop(pair<pair<int,SPA<bool> >,Dirn>(pair<int,SPA<bool> >(length,selection),d));
+        SPA<unsigned char> selection((length+CHAR_BIT-1)/CHAR_BIT);
+        int i=0;
+        for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++i)
+          if(it->selected)
+            selection[i/CHAR_BIT]|=(1<<(i%CHAR_BIT));
+        cout<<"test "<<hex<<(unsigned int)selection[0]<<dec<<endl;
+        list<Dirn> startcollapsed;
+        while(s.route.front().d!=s.stringDir){
+          cout<<"removing start slide "<<s.route.front().d<<" from "<<s.route.front().pos<<" to "<<s.route.front().pos+to_vector(s.route.front().d)<<endl;
+          startcollapsed.push_back(s.route.front().d);
+          s.route.pop_front();
+        }
+        list<Dirn> endcollapsed;
+        while(s.route.back().d!=s.stringDir){
+          cout<<"removing end slide "<<s.route.back().d<<" from "<<s.route.back().pos<<" to "<<s.endPos<<endl;
+          endcollapsed.push_back(s.route.back().d);
+          s.endPos=s.route.back().pos;
+          s.route.pop_back();
+        }
+        undohistory.pushTop(HistoryElement(length,selection,d,startcollapsed,endcollapsed));
       }else
         score-=movescore;
     }
