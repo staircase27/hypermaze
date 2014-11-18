@@ -48,10 +48,12 @@ class KeyboardController:public Controller{
         actionTriggered[i] = false;
         actionTime[i] = 0;
       }
-      map.addMapping(irr::KEY_F1,KeyMap::A_CONF);
       irr::IReadFile* in=device->getFileSystem()->createAndOpenFile("hypermaze.keymap.conf");
       map.load(in);
       in->drop();
+      KeySpec help=map.getKeySpec(KeyMap::A_CONF);
+      if(help.chr==0&&help.key==irr::KEY_KEY_CODES_COUNT)
+        map.addMapping(KeySpec(irr::KEY_F1),KeyMap::A_CONF);
     };
 };
 

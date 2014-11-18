@@ -176,12 +176,64 @@ class String{
     #endif
 };
 
+template <class T>
+class LimitedStack{
+  private:
+    SPA<T> start;
+    SPA<T> end;
+    SPA<T> top;
+    SPA<T> bottom;
+  
+  public:
+      
+    LimitedStack(int len):start(len),end(start+len-1),top(start),bottom(start){};
+    
+    bool empty(){
+      return top==bottom;
+    }
+    
+    inline const T& getTop(){
+      return *top;
+    }
+      
+    const T& popTop(){
+      const T& tmp=*top;
+      if(top==start)
+        top=end;
+      else
+        --top;
+      return tmp;
+    }
+
+    void pushTop(const T& el){
+      if(top==end){
+        top=start;
+        if(top==bottom)
+          ++bottom;
+      }else{
+        ++top;
+        if(top==bottom)
+          if(bottom==end)
+             bottom=top;
+          else
+             ++bottom;
+      }
+      *top=el;
+    }
+    
+    void clear(){
+      top=bottom=start;
+    }
+};
+
 class StringPlay{
   String& s;
   int score;
- 
+
+  LimitedStack<pair<pair<int,SPA<bool> >,Dirn> > undohistory;
+  
   public:
-    StringPlay(String& s):s(s),score(0){};
+    StringPlay(String& s):s(s),score(0),undohistory(20){};
   
     String& getString(){
       return s;
@@ -254,42 +306,69 @@ class StringPlay{
       return any;
     }
     
-    void doMove(Dirn d){
+    bool undo(){
+      if(undohistory.empty())
+        return false;
+      pair<pair<int,SPA<bool> >,Dirn> el=undohistory.popTop();
+      SPA<bool> sit(el.first.second);
+      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++sit)
+        it->selected=*sit;
+      doMove(opposite(el.second),true);
+      return true;
+    }
+    
+    void doMove(Dirn d,bool undo=false){
+      int length=0;
+      int movescore=0;
       bool lastselected=false;
       for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
+        ++length;
         if(it->selected){
           if(!lastselected){
             if(it!=s.route.begin()){
               list<StringElement>::iterator nit=it;
               --nit;
-              if(nit->d==opposite(d))
+              if(nit->d==opposite(d)){
                 s.route.erase(nit);
-              else
+                --length;
+              }else{
                 s.route.insert(it,StringElement(it->pos,d,false));
-            }
+                ++length;
+              }
+            }else if(d==s.stringDir||d==opposite(s.stringDir))
+              s.route.insert(it,StringElement(it->pos,d,false));
           }
           it->pos+=to_vector(d);
           if(it->d!=d && it->d!=opposite(d))
-              score+=1;
+              movescore+=1;
         }else if(lastselected){
-          if(it==s.route.end()){
-            s.endPos+=to_vector(d);
-          }else{
-            if(it->d==d){
-              it=s.route.erase(it);
-              if(it==s.route.end()){
-                lastselected=false;
-                break;
-              }
-            }else{
-              s.route.insert(it,StringElement(it->pos+to_vector(d),opposite(d),false));
+          if(it->d==d){
+            it=s.route.erase(it);
+            --length;
+            if(it==s.route.end()){
+              lastselected=false;
+              break;
             }
+          }else{
+            s.route.insert(it,StringElement(it->pos+to_vector(d),opposite(d),false));
+            ++length;
           }
         }
         lastselected=it->selected;
       }
+      
       if(lastselected)
         s.endPos+=to_vector(d);
+      if(!undo){
+        score+=movescore;
+        cout<<"length of string is "<<length<<endl;
+        SPA<bool> selection(length);
+        SPA<bool> sit(selection);
+        for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++sit)
+          *sit=it->selected;
+        undohistory.pushTop(pair<pair<int,SPA<bool> >,Dirn>(pair<int,SPA<bool> >(length,selection),d));
+      }else
+        score-=movescore;
     }
     
     bool tryMove(Dirn d){

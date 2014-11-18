@@ -54,6 +54,14 @@
             sm->playEffect(SoundManager::SE_BLOCK);
         }
       }
+      
+      if(isTriggered(KeyMap::A_UNDO)&&actionTime[KeyMap::A_UNDO]<now){
+        if(pd.sp.undo()){
+          pd.stringUpdated();
+          actionTime[KeyMap::A_UNDO]=now+1*DELAY;
+        }else
+          sm->playEffect(SoundManager::SE_BLOCK);
+      }
 
       if(isTriggered(KeyMap::A_GENERATE)&&actionTime[KeyMap::A_GENERATE]<now){
         GenerateGui gg;

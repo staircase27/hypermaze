@@ -53,5 +53,6 @@ const pair<KeyMap::Action,const wchar_t*> KeyMap::actionNames[A_COUNT-1]={
       pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_FORWARD_IN,L"A_SLICE_FORWARD_IN"),
       pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_FORWARD_OUT,L"A_SLICE_FORWARD_OUT"),
       pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_BACK_IN,L"A_SLICE_BACK_IN"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_BACK_OUT,L"A_SLICE_BACK_OUT")};
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_BACK_OUT,L"A_SLICE_BACK_OUT"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_UNDO,L"A_UNDO")};
       
