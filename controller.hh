@@ -31,7 +31,7 @@ class Controller: public irr::IEventReceiver{
 class KeyboardController:public Controller{
   bool actionTriggered[KeyMap::A_COUNT];
   irr::u32 actionTime[KeyMap::A_COUNT];
-  static const irr::u32 DELAY=500;
+  static const irr::u32 DELAY=400;
   irr::IrrlichtDevice* device;
   SoundManager* sm;
 

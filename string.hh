@@ -248,9 +248,10 @@ class StringPlay{
   int score;
 
   LimitedStack<HistoryElement> undohistory;
+  bool inextendedmove;
   
   public:
-    StringPlay(String& s):s(s),score(0),undohistory(10+2*s.maze.size.dotProduct(Vector(1,1,1))){};
+    StringPlay(String& s):s(s),score(0),undohistory(10+2*s.maze.size.dotProduct(Vector(1,1,1))),inextendedmove(false){};
   
     String& getString(){
       return s;
@@ -258,6 +259,15 @@ class StringPlay{
     
     int getScore(){
       return score;
+    }
+    
+    void startExtendedMove(){
+      inextendedmove=true;
+    }
+    
+    void externalEditHappened(){
+      inextendedmove=false;
+      undohistory.clear();
     }
     
     bool slide(bool moveEnd,bool out){
@@ -292,10 +302,12 @@ class StringPlay{
           it->selected=false;
         }
       }
+      inextendedmove=false;
       return true;
     }
     
     void setSelected(StringPointer p,bool selected){
+      inextendedmove=false;
       p.el->selected=selected;
     }
     
@@ -331,7 +343,10 @@ class StringPlay{
       return any;
     }
     
-    bool undo(){
+    bool undo(bool extendedmove=false){
+      if(extendedmove && !inextendedmove)
+        return false;
+      inextendedmove=extendedmove;
       if(undohistory.empty())
         return false;
       HistoryElement el=undohistory.popTop();
@@ -351,7 +366,8 @@ class StringPlay{
       return true;
     }
     
-    void doMove(Dirn d,bool undo=false){
+  private:
+    void doMove(Dirn d,bool undo){
       int length=0;
       int movescore=0;
       bool lastselected=false;
@@ -422,10 +438,13 @@ class StringPlay{
       }else
         score-=movescore;
     }
-    
-    bool tryMove(Dirn d){
+  public:
+    bool tryMove(Dirn d,bool extendedmove=false){
+      if(extendedmove && !inextendedmove)
+        return false;
+      inextendedmove=extendedmove;
       if(canMove(d)){
-        doMove(d);
+        doMove(d,false);
         return true;
       }else{
         return false;
