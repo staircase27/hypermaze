@@ -1,7 +1,6 @@
 #include "irrlicht.h"
 #include "dirns.hh"
 #include <map>
-#include "irrio.hh"
 
 #ifndef KEYMAP_HH_INC
 #define KEYMAP_HH_INC
@@ -50,9 +49,7 @@ struct KeySpec{
 };
 
 
-
-
-class KeyMap:private InputParser{
+class KeyMap{
   public:
     enum Action{
       A_NONE=0,
@@ -112,8 +109,8 @@ class KeyMap:private InputParser{
       return revMap;
     }
     
-  protected:
-    virtual Used parse(char* data,irr::u32 length,bool eof){
+  private:
+    virtual irr::u32 doparse(char* data,irr::u32 length){
       irr::u32 totalused=0;
       char* start=data;
       char* end=data+length;
@@ -121,38 +118,38 @@ class KeyMap:private InputParser{
       while(true){
         KeySpec ks;
         while(irr::isspace(*data)){++data;}
-        if(data>=end) return Used(totalused,false);
+        if(data>=end) return totalused;
         
         data+=mbtowc0(&ks.chr,data,end-data);
-        if(data>=end) return Used(totalused,false);
+        if(data>=end) return totalused;
         
         while(irr::isspace(*data)){++data;}
-        if(data>=end) return Used(totalused,false);
+        if(data>=end) return totalused;
         
         ks.key=(irr::EKEY_CODE)irr::strtol10(data,&tmp);
         data+=tmp-data;
-        if(data>=end) return Used(totalused,false);
+        if(data>=end) return totalused;
         
         while(irr::isspace(*data)){++data;}
-        if(data>=end) return Used(totalused,false);
+        if(data>=end) return totalused;
         
         ks.shift=(bool)irr::strtol10(data,&tmp);
         data+=tmp-data;
-        if(data>=end) return Used(totalused,false);
+        if(data>=end) return totalused;
         
         while(irr::isspace(*data)){++data;}
-        if(data>=end) return Used(totalused,false);
+        if(data>=end) return totalused;
         
         ks.control=(bool)irr::strtol10(data,&tmp);
         data+=tmp-data;
-        if(data>=end) return Used(totalused,false);
+        if(data>=end) return totalused;
         
         while(irr::isspace(*data)){++data;}
-        if(data>=end) return Used(totalused,false);
+        if(data>=end) return totalused;
         
         KeyMap::Action a=(KeyMap::Action)irr::strtol10(data,&tmp);
         data+=tmp-data;
-        if(data>=end) return Used(totalused,false);
+        if(data>=end) return totalused;
         
         this->addMapping(ks,a);
         totalused=data-start;
@@ -186,8 +183,31 @@ class KeyMap:private InputParser{
       out->write(str.c_str(),str.size());
     }
     
+
     void load(irr::IReadFile* in){
-      ::parse(in,this);
+      irr::u32 len=256;
+      char *buf=new char[len+1];
+      irr::u32 avail=0;
+      irr::u32 used=0;
+      while(true){
+        if(used!=0){
+          memmove(buf,buf+used,avail-used);
+          avail-=used;
+        }else if(avail==len){
+          len*=2;
+          char* tmp=new char[len+1];
+          memcpy(tmp,buf,avail);
+          delete[] buf;
+          buf=tmp;
+        }
+        irr::s32 read=in->read(buf+avail,len-avail);
+        avail+=read;
+        buf[avail]='\0';
+        used=this->doparse(buf,avail);
+        if(read==0)
+          break;
+      }
+      delete [] buf;
     }
 };
 
