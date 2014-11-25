@@ -12,9 +12,10 @@ For more explanations run the puzzle or see http://www.astrolog.org/labyrnth/hyp
 
 This currently only is setup for me to compile. It's setup to compile on linux or windows and to produce 3 programs.
 The three programs are:
-*hypermaze - the actual puzzle and the default program to build
-*scriptedit - a scripteditor for making scripted levels
-*test - a test program that is the starting block for making a level file generator
+
+* hypermaze - the actual puzzle and the default program to build
+* scriptedit - a scripteditor for making scripted levels
+*  test - a test program that is the starting block for making a level file generator
 
 There is currently an issue that you can't compile all three in the same tree as they make with different compile time options
 
