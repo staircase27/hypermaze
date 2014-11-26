@@ -192,7 +192,7 @@ int main(int argc,char* argv[]){
   }
 
   {
-    device->getGUIEnvironment()->getSkin()->setFont(device->getGUIEnvironment()->getFont("irrlicht/fonts/Scada16r.xml"));
+    device->getGUIEnvironment()->getSkin()->setFont(device->getGUIEnvironment()->getFont("irrlicht/fonts/Scada/Scada16.xml"));
     irr::SColor c=device->getGUIEnvironment()->getSkin()->getColor(irr::EGDC_3D_HIGH_LIGHT);
     c.setAlpha(170);
     device->getGUIEnvironment()->getSkin()->setColor(irr::EGDC_3D_HIGH_LIGHT,c);

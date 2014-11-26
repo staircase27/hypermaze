@@ -40,19 +40,19 @@ run-hypermaze: hypermaze
 	./hypermaze
 
 hypermaze.o: hypermaze.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
- iMyCamera.hh keymap.hh controller.hh irrio.hh script.hh scriptimpl.hh SmartPointer.hh hypio.hh
+ iMyCamera.hh keymap.hh controller.hh script.hh scriptimpl.hh SmartPointer.hh hypio.hh
 
 controller.o: controller.cc controller.hh string.hh maze.hh dirns.hh \
- vector.hh keymap.hh irrdisp.hh gui.hh mazegen.hh helpgui.hh keymapgui.hh GUIFormattedText.hh  irrio.hh SmartPointer.hh hypio.hh hypioimp.hh
+ vector.hh keymap.hh irrdisp.hh gui.hh mazegen.hh helpgui.hh keymapgui.hh GUIFormattedText.hh SmartPointer.hh hypio.hh hypioimp.hh
 
 irrdisp.o: irrdisp.cc irrdisp.hh maze.hh dirns.hh vector.hh string.hh \
- controller.hh keymap.hh irrio.hh SmartPointer.hh hypio.hh
+ controller.hh keymap.hh SmartPointer.hh hypio.hh
 
 maze.o: maze.cc maze.hh dirns.hh vector.hh SmartPointer.hh hypio.hh
 
 gui.o: gui.cc gui.hh irrdisp.hh maze.hh hypioimp.hh mazegen.hh
 
-keymap.o: keymap.cc keymap.hh dirns.hh vector.hh irrio.hh
+keymap.o: keymap.cc keymap.hh dirns.hh vector.hh 
 
 iMyCamera.o: iMyCamera.cpp iMyCamera.hh
 

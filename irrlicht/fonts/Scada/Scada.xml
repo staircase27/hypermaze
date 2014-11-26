@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<fontfamily name="Scada">
+	<member name="Scada12" size="12" bold="false" italic="false" />
+	<member name="Scada12B" size="12" bold="true" italic="false" />
+	<member name="Scada12BI" size="12" bold="true" italic="true" />
+	<member name="Scada12I" size="12" bold="false" italic="true" />
+
+	<member name="Scada16" size="16" bold="false" italic="false" />
+	<member name="Scada16B" size="16" bold="true" italic="false" />
+	<member name="Scada16BI" size="16" bold="true" italic="true" />
+	<member name="Scada16I" size="16" bold="false" italic="true" />
+
+	<member name="Scada20" size="20" bold="false" italic="false" />
+	<member name="Scada20B" size="20" bold="true" italic="false" />
+	<member name="Scada20BI" size="20" bold="true" italic="true" />
+	<member name="Scada20I" size="20" bold="false" italic="true" />
+
+	<member name="Scada24" size="24" bold="false" italic="false" />
+	<member name="Scada24B" size="24" bold="true" italic="false" />
+	<member name="Scada24BI" size="24" bold="true" italic="true" />
+	<member name="Scada24I" size="24" bold="false" italic="true" />
+
+	<member name="Scada28" size="28" bold="false" italic="false" />
+	<member name="Scada28B" size="28" bold="true" italic="false" />
+	<member name="Scada28BI" size="28" bold="true" italic="true" />
+	<member name="Scada28I" size="28" bold="false" italic="true" />
+</fontfamily>

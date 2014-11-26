@@ -35,7 +35,7 @@ void addMessageToElement(GUIFormattedText* text,const Message& m){
 
 GUIFormattedText* makeElementFromMessage(irr::IGUIEnvironment* guienv,irr::IGUIElement* el,irr::rect<irr::s32> bounds, const Message& m){
   GUIFormattedText* text=new GUIFormattedText(0,guienv,el,0,bounds,true,true);
-  text->setOverrideFont(0,guienv->getFont("irrlicht/fonts/Scada26B.xml"));
+  text->setOverrideFont(0,guienv->getFont("irrlicht/fonts/Scada/Scada24B.xml"));
   text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
   addMessageToElement(text,m);
   return text;
@@ -352,7 +352,7 @@ void WinGui::createGUI(){
   size.Height=min(600,size.Height-10);
 
   GUIFormattedText* text=new GUIFormattedText(L"Congratulations!",guienv,el,0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true);
-  text->setOverrideFont(0,guienv->getFont("irrlicht/fonts/Scada26B.xml"));
+  text->setOverrideFont(0,guienv->getFont("irrlicht/fonts/Scada/Scada24B.xml"));
   text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
   addMessageToElement(text,m);
   text->addText(L"\nWhat would you like to do now?");
