@@ -9,6 +9,7 @@
 #include <map>
 #include "script.hh"
 #include "SmartPointer.hh"
+#include "fonts.hh"
 
 #ifdef IOSTREAM
 #include <iostream>
