@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<fontfamily name="Scada">
+<fontfamily>
 	<member name="Scada12" size="12" bold="false" italic="false" />
 	<member name="Scada12B" size="12" bold="true" italic="false" />
 	<member name="Scada12BI" size="12" bold="true" italic="true" />

@@ -12,6 +12,8 @@
 
 namespace irr{
   using namespace core;
+  using namespace io;
+  using namespace gui;
 }
 
 class FontFamily;
@@ -20,68 +22,54 @@ class FontManager;
 class FontSet{
   public:
     virtual FontFamily* resolve(FontManager&)=0;
-    virtual ~FontSet()=0;
+    virtual ~FontSet(){};
 };
 
 class FontFamily: public FontSet{
   private:
-    irr::map<int,irr::gui::IGUIFont*> regularfonts;
-    irr::map<int,irr::gui::IGUIFont*> boldfonts;
-    irr::map<int,irr::gui::IGUIFont*> italicfonts;
-    irr::map<int,irr::gui::IGUIFont*> bolditalicfonts;
+    irr::map<int,irr::path> regularfonts;
+    irr::map<int,irr::path> boldfonts;
+    irr::map<int,irr::path> italicfonts;
+    irr::map<int,irr::path> bolditalicfonts;
     
-    inline irr::map<int,irr::gui::IGUIFont*>& getfonts(bool bold,bool italic){
-      if(bold)
-        if(italic)
-          return bolditalicfonts;
-        else
-          return boldfonts;
-      else
-        if(italic)
-          return italicfonts;
-        else
-          return regularfonts;
-    }
+    irr::map<int,irr::path>& getfonts(bool bold,bool italic);
   
   public:
     FontFamily* resolve(FontManager&){
       return this;
     }
-    irr::gui::IGUIFont* getFont(int size,bool bold=false,bool italic=false){
-      irr::map<int,irr::gui::IGUIFont*>& fonts=getfonts(bold,italic);
-      irr::map<int,irr::gui::IGUIFont*>::Node n=fonts.getRoot();
-      while()
-      return 0;
-    }
+    irr::path getFontName(int size,bool bold=false,bool italic=false);
+    
+    bool addFont(irr::path fontname,int size,bool bold=false,bool italic=false);
     
     ~FontFamily(){};
 };
 
-class VirtualFontSet{
+class VirtualFontSet:public FontSet{
   private:
-    irr::stringw realname;
+    irr::stringc realname;
   public:
-    VirtualFontSet(irr::stringw name){
-      
-    }
-    
+    VirtualFontSet(irr::stringc name):realname(name){}
     FontFamily* resolve(FontManager& m);
     ~VirtualFontSet(){}
 };
 
 class FontManager {
   private:
-    irr::map<irr::stringw,FontSet*> fonts;
+    irr::IFileSystem* fs;
+    irr::IGUIEnvironment* gui;
+   
+    irr::map<irr::stringc,FontSet*> fonts;
 
-    void load(irr::stringw font);
+    void load(irr::stringc font);
 
   public:
-    FontManager(){};
+    FontManager(irr::IFileSystem* fs,irr::IGUIEnvironment* gui):fs(fs),gui(gui){fs->grab();gui->grab();};
     ~FontManager();
     
 
-    inline FontFamily* getFontFamily(irr::stringw font){
-      irr::map<irr::stringw,FontSet*>::Node* n=fonts.find(font);
+    inline FontFamily* getFontFamily(irr::stringc font){
+      irr::map<irr::stringc,FontSet*>::Node* n=fonts.find(font);
       if(n==0){
         load(font);
         n=fonts.find(font);
@@ -91,9 +79,15 @@ class FontManager {
       else
         return n->getValue()->resolve(*this);
     }
-    
-  
 
+    inline irr::IGUIFont* getFont(irr::stringc font,int size,bool bold=false,bool italic=false){
+      FontFamily* f=getFontFamily(font);
+      if(f==0)
+        return 0;
+      return gui->getFont(f->getFontName(size,bold,italic));
+    }
+
+    
 };
 
 #endif	/* FONTMANAGER_HH */
