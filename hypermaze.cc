@@ -253,6 +253,9 @@ int main(int argc,char* argv[]){
     driver->beginScene(true, true, irr::SColor(255,100,101,140));
 
     smgr->drawAll();
+    
+    device->setWindowCaption(irr::stringw(pd.sp.getScore()).c_str());
+    
     driver->endScene();
   }
   delete ng;

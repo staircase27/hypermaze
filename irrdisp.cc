@@ -233,6 +233,8 @@ void PuzzleDisplay::win(){
     sd.update();
   else if(r.stringSelectionChanged)
     sd.updateActive();
+  if(r.stringChanged||r.stringSelectionChanged)
+    sp.externalEditHappened();
   MessageGui g;
   for(int i=0;i<r.messageCount;++i)
       g.message(device,fm,r.messages[i]);
@@ -252,6 +254,8 @@ void PuzzleDisplay::win(){
 void PuzzleDisplay::stringUpdated(){
   ScriptResponseMove r=sc.runMove(s);
   sd.update();
+  if(r.stringChanged||r.stringSelectionChanged)
+    sp.externalEditHappened();
   MessageGui g;
   for(int i=0;i<r.messageCount;++i)
       g.message(device,fm,r.messages[i]);
@@ -265,6 +269,8 @@ void PuzzleDisplay::stringSelectionUpdated(){
     sd.update();
   else
     sd.updateActive();
+  if(r.stringChanged||r.stringSelectionChanged)
+    sp.externalEditHappened();
   MessageGui g;
   for(int i=0;i<r.messageCount;++i)
       g.message(device,fm,r.messages[i]);

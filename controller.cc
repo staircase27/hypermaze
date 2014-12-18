@@ -54,6 +54,14 @@
             sm->playEffect(SoundManager::SE_BLOCK);
         }
       }
+      
+      if(isTriggered(KeyMap::A_UNDO)&&actionTime[KeyMap::A_UNDO]<now){
+        if(pd.sp.undo()){
+          pd.stringUpdated();
+          actionTime[KeyMap::A_UNDO]=now+1*DELAY;
+        }else
+          sm->playEffect(SoundManager::SE_BLOCK);
+      }
 
       if(isTriggered(KeyMap::A_GENERATE)&&actionTime[KeyMap::A_GENERATE]<now){
         GenerateGui gg;
@@ -193,11 +201,11 @@
               irr::f32 steps=
                   (ldir.getLengthSQ()*con(to_vector(*d)).dotProduct(startPoint-ray.start)-ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(startPoint-ray.start))/
                   (ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(con(to_vector(*d)))-ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
-              cout<<"testing "<<*d<<" "<<steps<<endl;
+//              cout<<"testing "<<*d<<" "<<steps<<endl;
               if(steps<=0.8)
                   continue;
               irr::f32 screendist=mousePos.getDistanceFromSQ(collMan->getScreenCoordinatesFrom3DPosition(startPoint+steps*con(to_vector(*d))));
-              cout<<"dist "<<*d<<" "<<screendist<<endl;
+//              cout<<"dist "<<*d<<" "<<screendist<<endl;
               if(screendist<smallest){
                 if(screendist<realsmallest)
                   realsmallest=screendist;
@@ -207,8 +215,8 @@
                 }
               }
             }
-            cout<<"best is "<<dir<<" "<<smallest<<endl;
-            cout<<"real best is "<<dir<<" "<<smallest<<endl;
+//            cout<<"best is "<<dir<<" "<<smallest<<endl;
+//            cout<<"real best is "<<dir<<" "<<smallest<<endl;
             if(smallest>=10000000){
               if(realsmallest<10000000)
                 sm->playEffect(SoundManager::SE_BLOCK);
@@ -297,7 +305,7 @@
           for(Dirn *d=allDirns;d!=allDirns+6;++d)
             if(pd.sp.canMove(*d))
               alloweddirns|=to_mask(*d);
-          cout<<"alloweddirns "<<hex<<alloweddirns<<dec<<endl;
+          pd.sp.startExtendedMove();
         }
         Dirn dir;
         int beststeps=0;
@@ -307,11 +315,9 @@
           irr::f32 steps=
               (ldir.getLengthSQ()*con(to_vector(*d)).dotProduct(startPoint-ray.start)-ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(startPoint-ray.start))/
               (ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(con(to_vector(*d)))-ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
-          cout<<"testing "<<*d<<" "<<steps<<endl;
           if(steps<=0.8)
               continue;
           irr::f32 screendist=mousePos.getDistanceFromSQ(collMan->getScreenCoordinatesFrom3DPosition(startPoint+steps*con(to_vector(*d))));
-          cout<<"dist "<<*d<<" "<<screendist<<endl;
           if(screendist<smallest){
             if(screendist<realsmallest)
               realsmallest=screendist;
@@ -322,11 +328,9 @@
             }
           }
         }
-        cout<<"best is "<<dir<<" "<<smallest<<endl;
-        cout<<"real best is "<<dir<<" "<<smallest<<endl;
         if(dist==0 || currdir==dir){
           if(dist<beststeps){
-            if(pd.sp.tryMove(dir)){
+            if(pd.sp.tryMove(dir,true)){
               pd.stringUpdated();
               currdir=dir;
               dist+=1;
@@ -334,7 +338,7 @@
               sm->playEffect(SoundManager::SE_BLOCK);
             }
           }else if(dist>beststeps){
-            if(pd.sp.tryMove(opposite(dir))){
+            if(pd.sp.undo(true)){
               pd.stringUpdated();
               currdir=dir;
               dist-=1;
@@ -343,7 +347,7 @@
             }
           }
         }else{
-          if(pd.sp.tryMove(opposite(currdir))){
+          if(pd.sp.undo(true)){
             pd.stringUpdated();
             dist-=1;
           }else{

@@ -1,6 +1,9 @@
 #include "maze.hh"
 #include "dirns.hh"
 #include <list>
+
+
+#include "vector.hh"
 #ifdef IOSTREAM
 #include <istream>
 #endif
@@ -176,14 +179,95 @@ class String{
     #endif
 };
 
+template <class T>
+class LimitedStack{
+  private:
+    SPA<T> start;
+    SPA<T> end;
+    SPA<T> top;
+    SPA<T> bottom;
+  
+  public:
+      
+    LimitedStack(int len):start(len),end(start+len-1),top(start),bottom(start){};
+    
+    bool empty(){
+      return top==bottom;
+    }
+    
+    inline const T& getTop(){
+      return *top;
+    }
+      
+    const T& popTop(){
+      const T& tmp=*top;
+      if(top==start)
+        top=end;
+      else
+        --top;
+      return tmp;
+    }
+
+    void pushTop(const T& el){
+      if(top==end){
+        top=start;
+        if(top==bottom)
+          ++bottom;
+      }else{
+        ++top;
+        if(top==bottom)
+          if(bottom==end)
+             bottom=top;
+          else
+             ++bottom;
+      }
+      *top=el;
+    }
+    
+    void clear(){
+      top=bottom=start;
+    }
+};
+
+struct HistoryElement{
+  int length;
+  SPA<unsigned char> selected;
+  bool isselected(int i){
+    return (selected[i/CHAR_BIT]&(1<<(i%CHAR_BIT)))!=0;
+  }
+  Dirn d;
+  list<Dirn> startcollapsed;
+  list<Dirn> endcollapsed;
+  HistoryElement(int length,SPA<unsigned char> selected,Dirn d,list<Dirn> startcollapsed,list<Dirn> endcollapsed):
+      length(length),selected(selected),d(d),startcollapsed(startcollapsed),endcollapsed(endcollapsed){};
+  HistoryElement():length(0),selected(),d(),startcollapsed(),endcollapsed(){};
+};
+
 class StringPlay{
   String& s;
+  int score;
 
+  LimitedStack<HistoryElement> undohistory;
+  bool inextendedmove;
+  
   public:
-    StringPlay(String& s):s(s){};
+    StringPlay(String& s):s(s),score(0),undohistory(10+2*s.maze.size.dotProduct(Vector(1,1,1))),inextendedmove(false){};
   
     String& getString(){
       return s;
+    }
+    
+    int getScore(){
+      return score;
+    }
+    
+    void startExtendedMove(){
+      inextendedmove=true;
+    }
+    
+    void externalEditHappened(){
+      inextendedmove=false;
+      undohistory.clear();
     }
     
     bool slide(bool moveEnd,bool out){
@@ -218,16 +302,18 @@ class StringPlay{
           it->selected=false;
         }
       }
+      inextendedmove=false;
       return true;
     }
     
     void setSelected(StringPointer p,bool selected){
+      inextendedmove=false;
       p.el->selected=selected;
     }
     
     bool canMove(Dirn d){
       bool any=false;
-      if((d==s.stringDir||d==opposite(s.stringDir))&&(s.route.front().selected||s.route.back().selected))
+      if((d==opposite(s.stringDir)&&s.route.front().selected)||(d==s.stringDir&&s.route.back().selected))
         return false;
       for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
         if(!it->selected)
@@ -236,6 +322,14 @@ class StringPlay{
         if(d==UP && it->pos.Y>=s.maze.size.Y-1)
           return false;
         if(d==DOWN && it->pos.Y<=1)
+          return false;
+        if(d==LEFT && it->pos.X>=s.maze.size.X+5)
+          return false;
+        if(d==RIGHT && it->pos.X<=-5)
+          return false;
+        if(d==FORWARD && it->pos.Z>=s.maze.size.Z+5)
+          return false;
+        if(d==BACK && it->pos.Z<=-5)
           return false;
         if(it->d!=d && it->d!=opposite(d)){
           Vector wall=it->pos+to_shift_vector(it->d)+to_shift_vector(d);
@@ -249,45 +343,108 @@ class StringPlay{
       return any;
     }
     
-    void doMove(Dirn d){
+    bool undo(bool extendedmove=false){
+      if(extendedmove && !inextendedmove)
+        return false;
+      inextendedmove=extendedmove;
+      if(undohistory.empty())
+        return false;
+      HistoryElement el=undohistory.popTop();
+      for(list<Dirn>::iterator it=el.startcollapsed.begin();it!=el.startcollapsed.end();++it){
+        cout<<"adding at front "<<*it<<" from "<<s.route.front().pos-to_vector(*it)<<" to "<<s.route.front().pos<<endl;
+        s.route.push_front(StringElement(s.route.front().pos-to_vector(*it),*it,false));
+      }
+      for(list<Dirn>::iterator it=el.endcollapsed.begin();it!=el.endcollapsed.end();++it){
+        cout<<"adding at end "<<*it<<" from "<<s.endPos<<" to "<<s.endPos+to_vector(*it)<<endl;
+        s.route.push_back(StringElement(s.endPos,*it,false));
+        s.endPos+=to_vector(*it);
+      }
+      int i=0;
+      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++i)
+        it->selected=el.isselected(i);
+      doMove(opposite(el.d),true);
+      return true;
+    }
+    
+  private:
+    void doMove(Dirn d,bool undo){
+      int length=0;
+      int movescore=0;
       bool lastselected=false;
       for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
+        ++length;
         if(it->selected){
           if(!lastselected){
             if(it!=s.route.begin()){
               list<StringElement>::iterator nit=it;
               --nit;
-              if(nit->d==opposite(d))
+              if(nit->d==opposite(d)){
                 s.route.erase(nit);
-              else
+                --length;
+              }else{
                 s.route.insert(it,StringElement(it->pos,d,false));
-            }
+                ++length;
+              }
+            }else if(d==s.stringDir||d==opposite(s.stringDir))
+              s.route.insert(it,StringElement(it->pos,d,false));
           }
           it->pos+=to_vector(d);
+          if(it->d!=d && it->d!=opposite(d))
+              movescore+=1;
         }else if(lastselected){
-          if(it==s.route.end()){
-            s.endPos+=to_vector(d);
-          }else{
-            if(it->d==d){
-              it=s.route.erase(it);
-              if(it==s.route.end()){
-                lastselected=false;
-                break;
-              }
-            }else{
-              s.route.insert(it,StringElement(it->pos+to_vector(d),opposite(d),false));
+          if(it->d==d){
+            it=s.route.erase(it);
+            --length;
+            if(it==s.route.end()){
+              lastselected=false;
+              break;
             }
+          }else{
+            s.route.insert(it,StringElement(it->pos+to_vector(d),opposite(d),false));
+            ++length;
           }
         }
         lastselected=it->selected;
       }
+      
       if(lastselected)
-        s.endPos+=to_vector(d);
+        if(d==s.stringDir||d==opposite(s.stringDir))
+          s.route.insert(s.route.end(),StringElement(s.endPos+to_vector(d),opposite(d),false));
+        else
+          s.endPos+=to_vector(d);
+      if(!undo){
+        score+=movescore;
+        cout<<"length of string is "<<length<<endl;
+        SPA<unsigned char> selection((length+CHAR_BIT-1)/CHAR_BIT);
+        int i=0;
+        for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++i)
+          if(it->selected)
+            selection[i/CHAR_BIT]|=(1<<(i%CHAR_BIT));
+        cout<<"test "<<hex<<(unsigned int)selection[0]<<dec<<endl;
+        list<Dirn> startcollapsed;
+        while(s.route.front().d!=s.stringDir){
+          cout<<"removing start slide "<<s.route.front().d<<" from "<<s.route.front().pos<<" to "<<s.route.front().pos+to_vector(s.route.front().d)<<endl;
+          startcollapsed.push_back(s.route.front().d);
+          s.route.pop_front();
+        }
+        list<Dirn> endcollapsed;
+        while(s.route.back().d!=s.stringDir){
+          cout<<"removing end slide "<<s.route.back().d<<" from "<<s.route.back().pos<<" to "<<s.endPos<<endl;
+          endcollapsed.push_back(s.route.back().d);
+          s.endPos=s.route.back().pos;
+          s.route.pop_back();
+        }
+        undohistory.pushTop(HistoryElement(length,selection,d,startcollapsed,endcollapsed));
+      }else
+        score-=movescore;
     }
-    
-    bool tryMove(Dirn d){
+  public:
+    bool tryMove(Dirn d,bool extendedmove=false){
+      if(extendedmove && !inextendedmove)
+        return false;
+      inextendedmove=extendedmove;
       if(canMove(d)){
-        doMove(d);
+        doMove(d,false);
         return true;
       }else{
         return false;
