@@ -192,10 +192,9 @@ int main(int argc,char* argv[]){
     fs->addFileArchive(fs->getFileDir(argv[0])+"/",false,false,irr::EFAT_FOLDER);
   }
 
+  FontManager fm(device->getFileSystem(),device->getGUIEnvironment());
   {
-    FontManager man(device->getFileSystem(),device->getGUIEnvironment());
-    
-    device->getGUIEnvironment()->getSkin()->setFont(man.getFont("Scada",16));
+    device->getGUIEnvironment()->getSkin()->setFont(fm.getFont(16));
     irr::SColor c=device->getGUIEnvironment()->getSkin()->getColor(irr::EGDC_3D_HIGH_LIGHT);
     c.setAlpha(170);
     device->getGUIEnvironment()->getSkin()->setColor(irr::EGDC_3D_HIGH_LIGHT,c);
@@ -236,9 +235,9 @@ int main(int argc,char* argv[]){
   sm->setMusicLoader(new IrrlichtMusicLoader(device->getFileSystem()));
   sm->startMusic();
 
-  PuzzleDisplay pd(ng,device,sm);
+  PuzzleDisplay pd(ng,device,&fm,sm);
   
-  Controller* c=new MultiInterfaceController(pd,device,sm);
+  Controller* c=new MultiInterfaceController(pd,device,&fm,sm);
   device->setEventReceiver(c);
 
   while(device->run())

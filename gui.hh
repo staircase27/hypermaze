@@ -1,5 +1,6 @@
 #include "irrlicht.h"
 #include "script.hh"
+#include "fonts.hh"
 
 #ifndef GUI_HH_INC
 #define GUI_HH_INC
@@ -45,10 +46,11 @@ class CGUIEmptyElement : public irr::IGUIElement
 class BaseGui : irr::IEventReceiver{
   protected:
     irr::IrrlichtDevice* device;
+    FontManager* fm;
     irr::IEventReceiver* oldReceiver;
     CGUIEmptyElement* el;
 
-    BaseGui():device(0){};
+    BaseGui():device(0),fm(0){};
 
     bool OnEvent(const irr::SEvent &event);
     virtual bool OnEventImpl(const irr::SEvent &event)=0;
@@ -60,7 +62,7 @@ class BaseGui : irr::IEventReceiver{
     
     virtual bool run()=0;
     
-    void main(irr::IrrlichtDevice* _device);
+    void main(irr::IrrlichtDevice* _device,FontManager* _fm);
 };
 
 class GenerateGui: BaseGui{
@@ -83,7 +85,7 @@ class GenerateGui: BaseGui{
     virtual void createGUI();
     virtual bool run();
   public:
-    bool generate(irr::IrrlichtDevice* _device,PuzzleDisplay& pd);
+    bool generate(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd);
 };
 
 class SaveGui: BaseGui{
@@ -106,7 +108,7 @@ class SaveGui: BaseGui{
     virtual void createGUI();
     bool run();
   public:
-    bool save(irr::IrrlichtDevice* _device,PuzzleDisplay& pd);
+    bool save(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd);
 };
 
 class OpenGui: BaseGui{
@@ -129,7 +131,7 @@ class OpenGui: BaseGui{
     void createGUI();
     bool run();
   public:
-    bool open(irr::IrrlichtDevice* _device,PuzzleDisplay& pd);
+    bool open(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd);
 };
 
 class WinGui: BaseGui{
@@ -157,7 +159,7 @@ class WinGui: BaseGui{
     void createGUI();
     bool run();
   public:
-    bool won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd,const Message& m, Pair<SPA<const char> > nextLevel);
+    bool won(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd,const Message& m, Pair<SPA<const char> > nextLevel);
     
     WinGui():pd(0),m(),nextLevel(){}
 };
@@ -178,7 +180,7 @@ class MessageGui: BaseGui{
     void createGUI();
     bool run();
   public:
-    bool message(irr::IrrlichtDevice* _device,const Message& m);
+    bool message(irr::IrrlichtDevice* _device,FontManager* _fm,const Message& m);
 
     MessageGui():m(){}
 };

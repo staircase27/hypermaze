@@ -80,6 +80,9 @@ class FontManager {
         return n->getValue()->resolve(*this);
     }
 
+    inline irr::IGUIFont* getFont(int size,bool bold=false,bool italic=false){
+      return getFont("default",size,bold,italic);
+    }
     inline irr::IGUIFont* getFont(irr::stringc font,int size,bool bold=false,bool italic=false){
       FontFamily* f=getFontFamily(font);
       if(f==0)

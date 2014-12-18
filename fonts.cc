@@ -94,7 +94,6 @@ void FontManager::load(irr::stringc font){
         f->addFont(fontpath,size,bold,italic);
       }else if(f==0 && !wcscmp(L"alias",xml->getNodeName())){
         fonts.set(font,new VirtualFontSet(xml->getAttributeValueSafe(L"target")));
-        
         break;
       }
     }    

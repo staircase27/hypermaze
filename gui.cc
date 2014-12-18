@@ -15,7 +15,7 @@ namespace irr{
   using namespace gui;
 };
 
-void addMessageToElement(GUIFormattedText* text,const Message& m){
+void addMessageToElement(GUIFormattedText* text,FontManager* fm,const Message& m){
   int buflen=0;
   wchar_t* buf=0;
   for(int i=0;i<m.count;++i){
@@ -28,16 +28,82 @@ void addMessageToElement(GUIFormattedText* text,const Message& m){
           buf[j]=(wchar_t)m.paragraphs[i].b[j];
       }
       buf[len]=0;
-      text->addText(buf);
-      //use m.paragraphs[i].a to set the formatting eventually
+      int ti=text->addText(buf);
+      if(strlen(m.paragraphs[i].a)>0){
+        //format is: size:B?I?:colour:font name
+        int size=0;
+        SPA<const char> end=m.paragraphs[i].a;
+        while(*end!=0&&*end!=':'){
+          if('0'<=*end&&*end<='9'){
+            size*=10;
+            size+=*end-'0';
+          }
+          ++end;
+        }
+        bool bold=false;
+        bool italic=false;
+        if(*end!=0)
+          ++end;
+        while(*end!=0&&*end!=':'){
+          if(*end=='b'||*end=='B')
+            bold=true;
+          else if(*end=='i'||*end=='I')
+            italic=true;
+          ++end;
+        }
+        if(*end!=0)
+          ++end;
+        if(*end!=0&&*end!=':'){
+          int len=0;
+          int colour=0;
+          //read colour
+          while(*end!=0&&*end!=':'){
+            if(('0'<=*end&&*end<='9')||('A'<=*end&&*end<='F')){
+              ++len;
+              colour*=16;
+              if('0'<=*end&&*end<='9')
+                colour+=*end-'0';
+              else
+                colour+=*end-'A'+10;
+            }
+            ++end;
+          }
+          if(len>0){
+            if(len<=2){
+              if(len==1)
+                colour==(colour&0xf) | ((colour&0xf)<<4);
+              colour==(colour&0xff) | ((colour&0xff)<<8) | ((colour&0xff)<<16) | 0xff000000;
+            }else{
+              if(len<=4){
+                colour=(colour&0xf) | ((colour&0xf)<<4) | ((colour&0xf0)<<4) | ((colour&0xf0)<<8)  |
+                       ((colour&0xf00)<<8) | ((colour&0xf00)<<12)  | ((colour&0xf000)<<12);
+                len+=3;
+              }
+              if(len<=6){
+                colour|=0xff000000;
+              }else if(len==7){
+                colour|=((colour&0x0f000000)<<4);
+              }
+            }
+            text->setOverrideColor(ti,irr::SColor(colour));
+          }
+        }
+        if(*end==0){
+          text->setOverrideFont(ti,fm->getFont(size,bold,italic));
+        }else{
+          //read font name and use
+          irr::stringc font(&*end);
+          text->setOverrideFont(ti,fm->getFont(font,size,bold,italic));
+        }
+        //use m.paragraphs[i].a to set the formatting using fonts from fm
+      }
   }
 }
 
-GUIFormattedText* makeElementFromMessage(irr::IGUIEnvironment* guienv,irr::IGUIElement* el,irr::rect<irr::s32> bounds, const Message& m){
+GUIFormattedText* makeElementFromMessage(irr::IGUIEnvironment* guienv,FontManager* fm,irr::IGUIElement* el,irr::rect<irr::s32> bounds, const Message& m){
   GUIFormattedText* text=new GUIFormattedText(0,guienv,el,0,bounds,true,true);
-  text->setOverrideFont(0,guienv->getFont("irrlicht/fonts/Scada/Scada24B.xml"));
   text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
-  addMessageToElement(text,m);
+  addMessageToElement(text,fm,m);
   return text;
 }
 
@@ -60,8 +126,9 @@ void BaseGui::unapply(){
 	device->setEventReceiver(oldReceiver);
   device=0;
 };
-void BaseGui::main(irr::IrrlichtDevice* _device){
+void BaseGui::main(irr::IrrlichtDevice* _device,FontManager* _fm){
   apply(_device);
+  fm=_fm;
 
   irr::IVideoDriver* driver = device->getVideoDriver();
   irr::ISceneManager* smgr = device->getSceneManager();
@@ -110,9 +177,9 @@ bool GenerateGui::OnEventImpl(const irr::SEvent &event){
   }
   return false;
 };
-bool GenerateGui::generate(irr::IrrlichtDevice* _device,PuzzleDisplay& pd){
+bool GenerateGui::generate(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd){
   this->pd=&pd;
-  main(_device);
+  main(_device,_fm);
   return okClicked;
 }
 void GenerateGui::createGUI(){
@@ -185,9 +252,9 @@ bool SaveGui::OnEventImpl(const irr::SEvent &event){
   }
   return false;
 };
-bool SaveGui::save(irr::IrrlichtDevice* _device,PuzzleDisplay& pd){
+bool SaveGui::save(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd){
   this->pd=&pd;
-  main(_device);
+  main(_device,_fm);
   return okClicked;
 }
 void SaveGui::createGUI(){
@@ -251,9 +318,9 @@ bool OpenGui::OnEventImpl(const irr::SEvent &event){
   }
   return false;
 };
-bool OpenGui::open(irr::IrrlichtDevice* _device,PuzzleDisplay& pd){
+bool OpenGui::open(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd){
   this->pd=&pd;
-  main(_device);
+  main(_device,_fm);
   return okClicked;
 }
 void OpenGui::createGUI(){
@@ -330,11 +397,11 @@ bool WinGui::OnEventImpl(const irr::SEvent &event){
 };
 
 
-bool WinGui::won(irr::IrrlichtDevice* _device,PuzzleDisplay& pd,const Message& m, Pair<SPA<const char> > nextLevel){
+bool WinGui::won(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd,const Message& m, Pair<SPA<const char> > nextLevel){
   this->pd=&pd;
   this->m=m;
   this->nextLevel=nextLevel;
-  main(_device);
+  main(_device,_fm);
   return true;
 }
 
@@ -352,9 +419,9 @@ void WinGui::createGUI(){
   size.Height=min(600,size.Height-10);
 
   GUIFormattedText* text=new GUIFormattedText(L"Congratulations!",guienv,el,0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true);
-  text->setOverrideFont(0,guienv->getFont("irrlicht/fonts/Scada/Scada24B.xml"));
+  text->setOverrideFont(0,fm->getFont(24,true));
   text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
-  addMessageToElement(text,m);
+  addMessageToElement(text,fm,m);
   text->addText(L"\nWhat would you like to do now?");
   irr::IGUIButton* def=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-320,center.Y+size.Height/2-32-32-10,center.X+size.Width/2-130,center.Y+size.Height/2-32-10),el,GUI_ID_OK_BUTTON,L"Back to Current Maze");
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32-32-10,center.X+size.Width/2,center.Y+size.Height/2-32-10),el,GUI_ID_SAVE_BUTTON,L"Save Maze");
@@ -394,7 +461,7 @@ bool WinGui::run(){
   if(saveClicked){
 	el->setVisible(false);
 	SaveGui sg;
-	sg.save(device,*pd);
+	sg.save(device,fm,*pd);
 	el->setVisible(true);
 	saveClicked=false;
 	keyblock=device->getTimer()->getTime()+500;
@@ -402,7 +469,7 @@ bool WinGui::run(){
   if(loadClicked){
 	el->setVisible(false);
 	OpenGui og;
-	if(og.open(device,*pd)){
+	if(og.open(device,fm,*pd)){
 	  pd->mazeUpdated();
 	  return false;
 	}
@@ -413,7 +480,7 @@ bool WinGui::run(){
   if(generateClicked){
 	el->setVisible(false);
 	GenerateGui gg;
-	if(gg.generate(device,*pd)){
+	if(gg.generate(device,fm,*pd)){
 	  pd->mazeUpdated();
 	  return false;
 	}
@@ -436,9 +503,9 @@ bool MessageGui::OnEventImpl(const irr::SEvent &event){
   }
   return false;
 };
-bool MessageGui::message(irr::IrrlichtDevice* _device,const Message& m){
+bool MessageGui::message(irr::IrrlichtDevice* _device,FontManager* _fm,const Message& m){
   this->m=m;
-  main(_device);
+  main(_device,_fm);
   return okClicked;
 }
 void MessageGui::createGUI(){
@@ -453,7 +520,7 @@ void MessageGui::createGUI(){
   size.Width=min(400,size.Width-10);
   size.Height=min(600,size.Height-10);
   
-  makeElementFromMessage(guienv,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),m);
+  makeElementFromMessage(guienv,fm,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),m);
 
   guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Ok"));
 

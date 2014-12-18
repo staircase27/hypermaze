@@ -235,7 +235,7 @@ void PuzzleDisplay::win(){
     sd.updateActive();
   MessageGui g;
   for(int i=0;i<r.messageCount;++i)
-      g.message(device,r.messages[i]);
+      g.message(device,fm,r.messages[i]);
   if(r.block)
     return;
   won=true;
@@ -245,7 +245,7 @@ void PuzzleDisplay::win(){
     sm->playEffect(SoundManager::SE_WIN);
   if(device){
     WinGui wg;
-    wg.won(device,*this,r.winMessage,r.nextLevel);
+    wg.won(device,fm,*this,r.winMessage,r.nextLevel);
   }
 }
 
@@ -254,7 +254,7 @@ void PuzzleDisplay::stringUpdated(){
   sd.update();
   MessageGui g;
   for(int i=0;i<r.messageCount;++i)
-      g.message(device,r.messages[i]);
+      g.message(device,fm,r.messages[i]);
   cout<<"move triggered"<<endl;
   if((!won) && (s.hasWon()||r.forceWin))
     win();
@@ -267,7 +267,7 @@ void PuzzleDisplay::stringSelectionUpdated(){
     sd.updateActive();
   MessageGui g;
   for(int i=0;i<r.messageCount;++i)
-      g.message(device,r.messages[i]);
+      g.message(device,fm,r.messages[i]);
   if((!won) && r.forceWin)
     win();
 };
@@ -287,7 +287,7 @@ void PuzzleDisplay::mazeUpdated(){
       sd.updateActive();
   MessageGui g;
   for(int i=0;i<r.messageCount;++i)
-      g.message(device,r.messages[i]);
+      g.message(device,fm,r.messages[i]);
 };
 bool PuzzleDisplay::hideSide(Dirn side,bool out){
   return md.hideSide(side,out);

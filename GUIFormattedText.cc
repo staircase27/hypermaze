@@ -133,6 +133,29 @@ irr::IGUIFont* GUIFormattedText::getDefaultActiveFont(){
     return skin->getFont();
   return 0;
 }
+
+void GUIFormattedText::setOverrideColor (int i,irr::SColor color){
+  if(i<0 || i>=paragraphs.size())
+    return;
+  irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin()+i;
+  (*it)->setOverrideColor(color);
+}
+  
+void GUIFormattedText::enableOverrideColor (int i,bool enable){
+  if(i<0 || i>=paragraphs.size())
+    return;
+  irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin()+i;
+  (*it)->enableOverrideColor(enable);
+
+}
+
+irr::SColor GUIFormattedText::getOverrideColor (int i) const{
+  if(i<0 || i>=paragraphs.size())
+    return irr::SColor(101,255,255,255);
+  irr::list<irr::IGUIStaticText*>::ConstIterator it=paragraphs.begin()+i;
+  return (*it)->getOverrideColor();
+}
+
      
 void GUIFormattedText::setTextAlignment(int i,irr::EGUI_ALIGNMENT horizontal, irr::EGUI_ALIGNMENT vertical){
   if(i<0 || i>=paragraphs.size())

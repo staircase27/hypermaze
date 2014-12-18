@@ -60,13 +60,19 @@ class GUIFormattedText: irr::IGUIElement{
     virtual irr::IGUIFont* getActiveFont(int i=-1);
 
     virtual irr::IGUIFont* getDefaultActiveFont();
+    
+    virtual void setOverrideColor (int i,irr::SColor color);
+    
+    virtual void enableOverrideColor (int i,bool enable);
+    
+    virtual irr::SColor getOverrideColor (int i) const;
       
     virtual void setTextAlignment(int i,irr::EGUI_ALIGNMENT horizontal, irr::EGUI_ALIGNMENT vertical);
 
     virtual void setDefaultTextAlignment(irr::EGUI_ALIGNMENT horizontal, irr::EGUI_ALIGNMENT vertical);
 
     virtual void setAllTextAlignment(irr::EGUI_ALIGNMENT horizontal, irr::EGUI_ALIGNMENT vertical);
-
+    
     virtual void setDrawBackground(bool draw);
 
     virtual void setDrawBorder(bool draw);

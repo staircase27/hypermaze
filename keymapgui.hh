@@ -235,10 +235,10 @@ class KeyMapGui: BaseGui{
 
 
   public:
-    bool edit(irr::IrrlichtDevice* _device,KeyMap& _km){
+    bool edit(irr::IrrlichtDevice* _device,FontManager* _fm,KeyMap& _km){
       km=_km;
       kmp=&_km;
-      main(_device);
+      main(_device,_fm);
       return okClicked;
     }
     
