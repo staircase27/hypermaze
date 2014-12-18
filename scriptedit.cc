@@ -1,6 +1,7 @@
 #include "script.hh"
 #include "scriptimpl.hh"
 #include "hypioimp.hh"
+#include "maze.hh"
 #include <iostream>
 #include <fstream>
 
@@ -1313,6 +1314,7 @@ bool edit(Script& s){
 
 void edit(){
   char c='p';
+  Maze m(Vector(0,0,0));
   Script s;
   bool changed;
   char* fname=new char[256];
@@ -1342,6 +1344,7 @@ void edit(){
           break;
         }
         CPPHypIStream ihs(is);
+        read(ihs,m);
         read(ihs,s);
         cout<<"new script loaded: "<<s<<endl;
         break;
@@ -1357,6 +1360,7 @@ void edit(){
           if(c=='n')
             break;
         }
+        m=Maze(Vector(0,0,0));
         s=Script();
         break;
       case 's':{
@@ -1377,6 +1381,8 @@ void edit(){
           break;
         }
         CPPHypOStream ohs(os);
+        write(ohs,m);
+        ohs.setNextSpace("\n");
         write(ohs,s);
         cout<<"script saved"<<endl;
         changed=false;

@@ -25,12 +25,12 @@ run-test: test
 	./test
 
 scriptedit: CPPOPTS+= -DIOSTREAM
-scriptedit: scriptedit.o script.o hypio.o
+scriptedit: scriptedit.o script.o hypio.o maze.o
 
 run-scriptedit: scriptedit
 	./scriptedit
 
-scriptedit.o: scriptedit.cc scriptimpl.hh script.hh hypio.hh
+scriptedit.o: scriptedit.cc scriptimpl.hh script.hh hypio.hh maze.hh
 
 hypermaze: CPPOPTS+= -DIRRLICHT -DOPENAL -DIOSTREAM
 hypermaze: CPPLIBS+= $(IRRLIBS) -lopenal -lalut
