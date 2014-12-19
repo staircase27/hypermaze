@@ -33,8 +33,8 @@ run-scriptedit: scriptedit
 scriptedit.o: scriptedit.cc scriptimpl.hh script.hh hypio.hh maze.hh
 
 hypermaze: CPPOPTS+= -DIRRLICHT -DOPENAL -DIOSTREAM
-hypermaze: CPPLIBS+= $(IRRLIBS) -lopenal -lalut
-hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o hypio.o maze.o keymap.o GUIFormattedText.o sound.o script.o gui.o fonts.o
+hypermaze: CPPLIBS+= $(IRRLIBS) -lopenal -lalut -lcurl
+hypermaze: hypermaze.o iMyCamera.o controller.o irrdisp.o hypio.o maze.o keymap.o GUIFormattedText.o sound.o script.o gui.o fonts.o irrcurl.o
 
 run-hypermaze: hypermaze
 	./hypermaze

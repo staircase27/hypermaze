@@ -31,7 +31,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 }
  
  
-irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,char* url){
+irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,const char* url){
   CURL *curl_handle;
  
   struct MemoryStruct chunk;
@@ -80,3 +80,17 @@ irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,char* url){
   return file;
 }
 
+irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const char* url){
+  if(!url)
+    return 0;
+  const char* c=url;
+  bool isurl=false;
+  while((!isurl)&&*c!=0&&*c!='/'&&*c!='\\'){
+    if(*c==':' && *(c+1)=='/' && *(c+2)=='/')
+      isurl=true;
+  }
+  if(isurl)
+    return createAndOpenURL(fs,url);
+  else
+    return fs->createAndOpenFile(url);
+}
