@@ -69,7 +69,10 @@ inline bool parsebool(const wchar_t* str){
 
 void FontManager::load(irr::stringc font){
   irr::path path("irrlicht/fonts/");
-  path.append(font).append("/").append(font).append(".xml");
+  path.append(font);
+  path.append("/");
+  path.append(font);
+  path.append(".xml");
 #ifdef IOSTREAM
   cout<<"loading font: "<<font.c_str()<<" from "<<path.c_str()<<endl;
 #endif
@@ -90,7 +93,10 @@ void FontManager::load(irr::stringc font){
         bool italic=parsebool(xml->getAttributeValueSafe(L"italic"));
         int size=xml->getAttributeValueAsInt(L"size");
         irr::path fontpath("irrlicht/fonts/");
-        fontpath.append(font).append("/").append(xml->getAttributeValueSafe(L"name")).append(".xml");
+        fontpath.append(font);
+        fontpath.append("/");
+        fontpath.append(xml->getAttributeValueSafe(L"name"));
+        fontpath.append(".xml");
         f->addFont(fontpath,size,bold,italic);
       }else if(f==0 && !wcscmp(L"alias",xml->getNodeName())){
         fonts.set(font,new VirtualFontSet(xml->getAttributeValueSafe(L"target")));
