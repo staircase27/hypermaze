@@ -1,9 +1,10 @@
 #ifdef IOSTREAM
 #include <iostream>
+using namespace std;
 #endif
+
 #ifndef VECTOR_HH_INC
 #define VECTOR_HH_INC
-using namespace std;
 
 #ifdef IRRLICHT
   #include "irrlicht.h"
