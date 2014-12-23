@@ -1,4 +1,4 @@
-#include "hypio.hh"
+#include "bufhypio.hh"
 #include <cstring>
 
 #ifndef MEMORYHYPIOIMP_HH_INC

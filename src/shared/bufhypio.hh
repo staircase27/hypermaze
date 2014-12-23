@@ -1,5 +1,4 @@
-#include "hypio.hh"
-#include <cstring>
+#include "../core/hypio.hh"
 
 #ifndef BUFHYPIOIMP_HH_INC
 #define BUFHYPIOIMP_HH_INC

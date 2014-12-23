@@ -103,9 +103,9 @@ IOResult read(HypIStream& s,SPA<char const>& str,const bool& quote);
 class HypOStream{
   const char* defaultspace;///<The default whitespace to seperate writes with
   const char* nextspace;///<The whitespace to use to seperate the next write from the last one
-  const char* quotechars;///<The characters to try to use as quote characters
   bool atstart;///<flag for if we are at the start of outputting and therefore don't need to output whitespace
   protected:
+    static const char* quotechars;///<The characters to try to use as quote characters
     ///constructor that sets the whitespace to a single space
     HypOStream():defaultspace(" "),nextspace(" "),atstart(true){}
     

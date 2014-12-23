@@ -1,4 +1,4 @@
-#include "hypio.hh"
+#include "../core/hypio.hh"
 #include <cstring>
 
 #ifdef IOSTREAM

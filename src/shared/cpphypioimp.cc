@@ -79,3 +79,4 @@ bool CPPHypOStream::write(const char*& str,const bool& quote){
     os<<*d;
   return os.good();  
 }
+#endif

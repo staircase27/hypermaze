@@ -10,3 +10,13 @@
 irrlicht/music
 doc/doxygen/*/
 .directory
+build
+configure
+Makefile
+compile
+install-sh
+depcomp
+aclocal.m4
+autom4te.cache
+Makefile.in
+missing

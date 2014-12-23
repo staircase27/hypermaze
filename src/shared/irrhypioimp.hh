@@ -1,4 +1,3 @@
-#include "hypio.hh"
 #include "bufhypio.hh"
 #ifdef IRRLICHT
 #include "irrlicht.h"

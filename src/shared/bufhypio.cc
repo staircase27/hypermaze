@@ -3,7 +3,8 @@
  * @brief Implementation of hypio.hh
  */
 #include "bufhypio.hh"
-//#include <cstdlib>
+#include <cstdlib>
+#include <cstring>
 
 BufHypIStream::BufHypIStream():len(255),buf(new char[len+1]),start(0),end(0),eof(false){}
 

@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include "maze.hh"
-#include "string.hh"
-#include "mazegen.hh"
+#include "../core/maze.hh"
+#include "../core/string.hh"
+#include "../core/mazegen.hh"
 #include <cstdlib>
 #include <ctime>
 
@@ -56,7 +56,7 @@ int main(){
   StringPlay l(s);
   cout<<s<<endl;
   cout<<l.canMove(DOWN)<<endl;
-  l.doMove(DOWN);
+  cout<<l.tryMove(DOWN)<<endl;
   cout<<s<<endl;  
   cout<<l.canMove(FORWARD)<<endl;
   cout<<l<<endl;
