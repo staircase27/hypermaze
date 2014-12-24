@@ -1,6 +1,6 @@
 #include "irrlicht.h"
-#include "script.hh"
-#include "fonts.hh"
+#include "../core/script.hh"
+#include "../irrshared/fonts.hh"
 
 #ifndef GUI_HH_INC
 #define GUI_HH_INC

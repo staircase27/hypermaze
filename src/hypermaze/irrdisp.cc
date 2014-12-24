@@ -1,6 +1,6 @@
 #include "irrdisp.hh"
 #include "controller.hh"
-#include "script.hh"
+#include "../core/script.hh"
 #include "gui.hh"
 
 #ifdef IOSTREAM

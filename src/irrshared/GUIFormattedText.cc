@@ -1,6 +1,4 @@
 #include "GUIFormattedText.hh"
-using namespace std;
-
 GUIFormattedText::GUIFormattedText(const wchar_t* text, irr::IGUIEnvironment* environment,
         irr::IGUIElement* parent, irr::s32 id, const irr::rect<irr::s32>& rectangle,
         bool background, bool border):

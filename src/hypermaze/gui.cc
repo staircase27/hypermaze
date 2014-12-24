@@ -1,9 +1,9 @@
 #include "gui.hh"
 #include "irrdisp.hh"
-#include "maze.hh"
-#include "hypioimp.hh"
-#include "mazegen.hh"
-#include "GUIFormattedText.hh"
+#include "../core/maze.hh"
+#include "../shared/irrhypioimp.hh"
+#include "../core/mazegen.hh"
+#include "../irrshared/GUIFormattedText.hh"
 
 using namespace std;
 

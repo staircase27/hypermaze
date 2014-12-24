@@ -1,14 +1,14 @@
 #include "irrlicht.h"
-#include "maze.hh"
-#include "string.hh"
+#include "../core/maze.hh"
+#include "../core/string.hh"
 #include <map>
 #include <vector>
 #include <set>
 #include <list>
-#include "dirns.hh"
-#include "script.hh"
-#include "sound.hh"
-#include "fonts.hh"
+#include "../core/dirns.hh"
+#include "../core/script.hh"
+#include "../shared/sound.hh"
+#include "../irrshared/fonts.hh"
 
 #ifndef IRRDISP_HH_INC
 #define IRRDISP_HH_INC

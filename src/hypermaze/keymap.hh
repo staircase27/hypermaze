@@ -1,5 +1,5 @@
 #include "irrlicht.h"
-#include "dirns.hh"
+#include "../core/dirns.hh"
 #include <map>
 
 #ifndef KEYMAP_HH_INC

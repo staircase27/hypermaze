@@ -1,22 +1,19 @@
 #include "irrlicht.h"
 #include "irrdisp.hh"
-#include "vector.hh"
-#include "iMyCamera.hh"
-#include "dirns.hh"
+#include "../core/vector.hh"
+#include "../irrshared/iMyCamera.hh"
+#include "../core/dirns.hh"
 #include "keymap.hh"
 #include "controller.hh"
-#include "sound.hh"
+#include "../shared/sound.hh"
 #include <map>
-#include "script.hh"
-#include "SmartPointer.hh"
-#include "fonts.hh"
+#include "../core/script.hh"
+#include "../core/SmartPointer.hh"
+#include "../irrshared/fonts.hh"
 
 #ifdef IOSTREAM
 #include <iostream>
 #endif
-
-#include "hypioimp.hh"
-#include "scriptimpl.hh"
 
 using namespace std;
 

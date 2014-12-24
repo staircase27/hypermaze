@@ -1,9 +1,9 @@
 #include "irrlicht.h"
-#include "string.hh"
+#include "../core/string.hh"
 #include "keymap.hh"
 #include "irrdisp.hh"
-#include "sound.hh"
-#include "fonts.hh"
+#include "../shared/sound.hh"
+#include "../irrshared/fonts.hh"
 
 #ifndef CONTROLLER_HH_INC
 #define CONTROLLER_HH_INC

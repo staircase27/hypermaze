@@ -1,7 +1,7 @@
 #include "irrlicht.h"
 #include "gui.hh"
 #include "keymapgui.hh"
-#include "GUIFormattedText.hh"
+#include "../irrshared/GUIFormattedText.hh"
 
 using namespace std;
 
