@@ -5,7 +5,9 @@
 *.layout
 # Ignore the dll on windows
 *.dll
-.obj
+.objs
+*.depend
+hypermaze.exe
 # don't backup the music
 irrlicht/music
 doc/doxygen/*/

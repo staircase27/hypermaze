@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="hypermaze" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="hypermaze" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="C:\Users\Simon Armstrong\irrlicht-1.7.3\bin\Win32-gcc" />
+				<Option object_output="C:\Users\Simon Armstrong\hypermaze\hypermaze\.objs" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DIRRLICHT -DIOSTREAM" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="hypermaze" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="C:\Users\Simon Armstrong\irrlicht-1.7.3\bin\Win32-gcc" />
+				<Option object_output="C:\Users\Simon Armstrong\hypermaze\hypermaze\\.objs" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-DIRRLICHT -DIOSTREAM" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="C:\Users\Simon Armstrong\irrlicht-1.7.3\include" />
+		</Compiler>
+		<Linker>
+			<Add library="Irrlicht" />
+			<Add library="opengl32" />
+			<Add library="glu32" />
+			<Add library="gdi32" />
+			<Add directory="C:\Users\Simon Armstrong\irrlicht-1.7.3\lib\Win32-gcc" />
+		</Linker>
+		<Unit filename="hypermaze.keymap.conf" />
+		<Unit filename="irrlicht\activeString.png" />
+		<Unit filename="irrlicht\darkfield2.svg" />
+		<Unit filename="irrlicht\dfg.mtl" />
+		<Unit filename="irrlicht\dfg.obj" />
+		<Unit filename="irrlicht\dfg.png" />
+		<Unit filename="irrlicht\dfg.wings" />
+		<Unit filename="irrlicht\dfg.xcf" />
+		<Unit filename="irrlicht\fonts\Scada\OFL.txt" />
+		<Unit filename="irrlicht\fonts\Scada\Scada.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada12.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada120.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada12B.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada12B0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada12BI.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada12BI0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada12I.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada12I0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada16.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada160.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada16B.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada16B0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada16BI.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada16BI0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada16I.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada16I0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada20.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada200.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada20B.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada20B0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada20BI.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada20BI0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada20I.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada20I0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada24.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada240.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada24B.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada24B0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada24BI.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada24BI0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada24I.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada24I0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada28.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada280.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada28B.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada28B0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada28BI.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada28BI0.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada28BI1.png" />
+		<Unit filename="irrlicht\fonts\Scada\Scada28I.xml" />
+		<Unit filename="irrlicht\fonts\Scada\Scada28I0.png" />
+		<Unit filename="irrlicht\fonts\default\default.xml" />
+		<Unit filename="irrlicht\ground.png" />
+		<Unit filename="irrlicht\ground.xcf" />
+		<Unit filename="irrlicht\handle.png" />
+		<Unit filename="irrlicht\octahedron.obj" />
+		<Unit filename="irrlicht\sky.png" />
+		<Unit filename="irrlicht\sounds\HypermazeSuccessTrumpet2.wav" />
+		<Unit filename="irrlicht\sounds\HypermazeSuccessTrumpet2_16PCM.wav" />
+		<Unit filename="irrlicht\sounds\thud.wav" />
+		<Unit filename="irrlicht\string.png" />
+		<Unit filename="irrlicht\wall.png" />
+		<Unit filename="irrlicht\worldsky.mtl" />
+		<Unit filename="irrlicht\worldsky.obj" />
+		<Unit filename="irrlicht\worldsky.wings" />
+		<Unit filename="levels\blank.hml" />
+		<Unit filename="levels\blankscripted.hml" />
+		<Unit filename="levels\fulltest.hml" />
+		<Unit filename="levels\mes.hms" />
+		<Unit filename="levels\test.hms" />
+		<Unit filename="levels\test1.hms" />
+		<Unit filename="levels\test2.hms" />
+		<Unit filename="levels\test3.hms" />
+		<Unit filename="levels\test4.hms" />
+		<Unit filename="levels\test5.hms" />
+		<Unit filename="levels\test6.hms" />
+		<Unit filename="levels\test7.hms" />
+		<Unit filename="src\core\SmartPointer.hh" />
+		<Unit filename="src\core\dirns.hh" />
+		<Unit filename="src\core\hypio.cc" />
+		<Unit filename="src\core\hypio.hh" />
+		<Unit filename="src\core\maze.cc" />
+		<Unit filename="src\core\maze.hh" />
+		<Unit filename="src\core\mazegen.hh" />
+		<Unit filename="src\core\script.cc" />
+		<Unit filename="src\core\script.hh" />
+		<Unit filename="src\core\scriptimpl.hh" />
+		<Unit filename="src\core\string.hh" />
+		<Unit filename="src\core\vector.hh" />
+		<Unit filename="src\hypermaze\controller.cc" />
+		<Unit filename="src\hypermaze\controller.hh" />
+		<Unit filename="src\hypermaze\gui.cc" />
+		<Unit filename="src\hypermaze\gui.hh" />
+		<Unit filename="src\hypermaze\helpgui.hh" />
+		<Unit filename="src\hypermaze\hypermaze.cc" />
+		<Unit filename="src\hypermaze\irrdisp.cc" />
+		<Unit filename="src\hypermaze\irrdisp.hh" />
+		<Unit filename="src\hypermaze\keymap.cc" />
+		<Unit filename="src\hypermaze\keymap.hh" />
+		<Unit filename="src\hypermaze\keymapgui.hh" />
+		<Unit filename="src\irrshared\GUIFormattedText.cc" />
+		<Unit filename="src\irrshared\GUIFormattedText.hh" />
+		<Unit filename="src\irrshared\fonts.cc" />
+		<Unit filename="src\irrshared\fonts.hh" />
+		<Unit filename="src\irrshared\iMyCamera.cpp" />
+		<Unit filename="src\irrshared\iMyCamera.hh" />
+		<Unit filename="src\irrshared\irrcurl.cc" />
+		<Unit filename="src\irrshared\irrcurl.hh" />
+		<Unit filename="src\shared\bufhypio.cc" />
+		<Unit filename="src\shared\bufhypio.hh" />
+		<Unit filename="src\shared\irrhypioimp.cc" />
+		<Unit filename="src\shared\irrhypioimp.hh" />
+		<Unit filename="src\shared\sound.cc" />
+		<Unit filename="src\shared\sound.hh" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
