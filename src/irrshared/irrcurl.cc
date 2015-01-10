@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <iostream>
+using namespace std;
+
 #ifdef USE_CURL
 #include <curl/curl.h>
 
@@ -16,6 +19,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+  cout<<"write callback "<<mem->size<<" "<<realsize<<endl;
 
   mem->memory = (char*)realloc(mem->memory, mem->size + realsize + 1);
   if (mem->memory == NULL) {
@@ -31,7 +35,10 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   return realsize;
 }
 
-
+irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,const wchar_t* url){
+  irr::core::stringc urlc(url);
+  return createAndOpenURL(fs,urlc.c_str());
+}
 irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,const char* url){
   CURL *curl_handle;
 
@@ -64,14 +71,16 @@ irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,const char* url){
   /* cleanup curl stuff */
   curl_easy_cleanup(curl_handle);
 
-  irr::io::IReadFile* file;
+  irr::io::IReadFile* file=0;
 
   if(chunk.memory){
-    char* data=new char[chunk.size];
+    if(chunk.size>0){
+      char* data=new char[chunk.size];
 
-    memcpy(data, chunk.memory, chunk.size);
+      memcpy(data, chunk.memory, chunk.size);
 
-    file=fs->createMemoryReadFile(data,chunk.size,url,true);
+      file=fs->createMemoryReadFile(data,chunk.size,url,true);
+    }
 
     free(chunk.memory);
   }
@@ -81,19 +90,30 @@ irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,const char* url){
   return file;
 }
 #else
+irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,const wchar_t* url){
+  return 0;
+}
 irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,const char* url){
   return 0;
 }
 #endif
 
 irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const char* url){
+  irr::core::stringw urlw(url);
+  return createAndOpen(fs,urlw.c_str());
+}
+
+irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const wchar_t* url){
+  cout<<"Hi "<<url<<endl;
   if(!url)
     return 0;
-  const char* c=url;
+  const wchar_t* c=url;
   bool isurl=false;
-  while((!isurl)&&*c!=0&&*c!='/'&&*c!='\\'){
-    if(*c==':' && *(c+1)=='/' && *(c+2)=='/')
+  while((!isurl)&&*c!=0&&*c!=L'/'&&*c!=L'\\'){
+    cout<<"char is "<<*c<<endl;
+    if(*c==L':' && *(c+1)==L'/' && *(c+2)==L'/')
       isurl=true;
+    ++c;
   }
   if(isurl)
     return createAndOpenURL(fs,url);

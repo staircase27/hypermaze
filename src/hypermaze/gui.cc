@@ -4,6 +4,7 @@
 #include "../shared/irrhypioimp.hh"
 #include "../core/mazegen.hh"
 #include "../irrshared/GUIFormattedText.hh"
+#include "../irrshared/irrcurl.hh"
 
 using namespace std;
 
@@ -347,7 +348,7 @@ bool OpenGui::run(){
   if(cancelClicked)
 	return false;
   if(okClicked){
-	irr::IReadFile* in=device->getFileSystem()->createAndOpenFile(fileField->getText());
+	irr::IReadFile* in=createAndOpen(device->getFileSystem(),fileField->getText());
 	if(!in)
 	  return true;
 	IrrHypIStream is(in);
@@ -447,7 +448,7 @@ bool WinGui::run(){
   }
   if(nextClicked){
     nextClicked=false;
-    irr::IReadFile* in=device->getFileSystem()->createAndOpenFile(&*nextLevel.a);
+    irr::IReadFile* in=createAndOpen(device->getFileSystem(),&*nextLevel.a);
     if(!in)
       return true;
     IrrHypIStream is(in);
@@ -519,7 +520,7 @@ void MessageGui::createGUI(){
   irr::dimension2d<irr::s32> size=rect.getSize();
   size.Width=min(400,size.Width-10);
   size.Height=min(600,size.Height-10);
-  
+
   makeElementFromMessage(guienv,fm,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),m);
 
   guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Ok"));
