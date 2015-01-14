@@ -584,7 +584,6 @@ ScriptResponseStart Script::runStart(String& s){
   for(int i=0;i<eventcount;++i){
     if((events[i].trigger&TRIGGER_START)!=0){
       if(events[i].condition->is(now,*this,s)){
-        cout<<"start event triggered "<<i<<endl;
         events[i].action->doStart(r,s);
         times[i]=now;
       }
@@ -597,7 +596,6 @@ ScriptResponseWin Script::runWin(String& s){
   for(int i=0;i<eventcount;++i){
     if((events[i].trigger&TRIGGER_WIN)!=0){
       if(events[i].condition->is(now,*this,s)){
-        cout<<"win event triggered "<<i<<endl;
         events[i].action->doWin(r,s);
         times[i]=now;
       }
@@ -610,7 +608,6 @@ ScriptResponseMove Script::runMove(String& s){
   for(int i=0;i<eventcount;++i){
     if((events[i].trigger&TRIGGER_MOVE)!=0){
       if(events[i].condition->is(now,*this,s)){
-        cout<<"move event triggered "<<i<<endl;
         events[i].action->doMove(r,s);
         times[i]=now;
       }
@@ -623,7 +620,6 @@ ScriptResponseSelect Script::runSelect(String& s){
   for(int i=0;i<eventcount;++i){
     if((events[i].trigger&TRIGGER_SELECT)!=0){
       if(events[i].condition->is(now,*this,s)){
-        cout<<"select event triggered "<<i<<endl;
         events[i].action->doSelect(r,s);
         times[i]=now;
       }

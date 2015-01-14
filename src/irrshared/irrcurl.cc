@@ -3,9 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <iostream>
-using namespace std;
-
 #ifdef USE_CURL
 #include <curl/curl.h>
 
@@ -19,13 +16,13 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
-  cout<<"write callback "<<mem->size<<" "<<realsize<<endl;
 
   mem->memory = (char*)realloc(mem->memory, mem->size + realsize + 1);
   if (mem->memory == NULL) {
     /* out of memory! */
-    printf("not enough memory (realloc returned NULL)\n");
-    exit(EXIT_FAILURE);
+   mem-> memory=0;
+   mem->size=0;
+   return 0;
   }
 
   memcpy(&(mem->memory[mem->size]), contents, realsize);
@@ -104,13 +101,11 @@ irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const char* url){
 }
 
 irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const wchar_t* url){
-  cout<<"Hi "<<url<<endl;
   if(!url)
     return 0;
   const wchar_t* c=url;
   bool isurl=false;
   while((!isurl)&&*c!=0&&*c!=L'/'&&*c!=L'\\'){
-    cout<<"char is "<<*c<<endl;
     if(*c==L':' && *(c+1)==L'/' && *(c+2)==L'/')
       isurl=true;
     ++c;

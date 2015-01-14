@@ -343,29 +343,6 @@ class StringPlay{
       return any;
     }
     
-    bool undo(bool extendedmove=false){
-      if(extendedmove && !inextendedmove)
-        return false;
-      inextendedmove=extendedmove;
-      if(undohistory.empty())
-        return false;
-      HistoryElement el=undohistory.popTop();
-      for(list<Dirn>::iterator it=el.startcollapsed.begin();it!=el.startcollapsed.end();++it){
-        cout<<"adding at front "<<*it<<" from "<<s.route.front().pos-to_vector(*it)<<" to "<<s.route.front().pos<<endl;
-        s.route.push_front(StringElement(s.route.front().pos-to_vector(*it),*it,false));
-      }
-      for(list<Dirn>::iterator it=el.endcollapsed.begin();it!=el.endcollapsed.end();++it){
-        cout<<"adding at end "<<*it<<" from "<<s.endPos<<" to "<<s.endPos+to_vector(*it)<<endl;
-        s.route.push_back(StringElement(s.endPos,*it,false));
-        s.endPos+=to_vector(*it);
-      }
-      int i=0;
-      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++i)
-        it->selected=el.isselected(i);
-      doMove(opposite(el.d),true);
-      return true;
-    }
-    
   private:
     void doMove(Dirn d,bool undo){
       int length=0;
@@ -414,22 +391,18 @@ class StringPlay{
           s.endPos+=to_vector(d);
       if(!undo){
         score+=movescore;
-        cout<<"length of string is "<<length<<endl;
         SPA<unsigned char> selection((length+CHAR_BIT-1)/CHAR_BIT);
         int i=0;
         for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++i)
           if(it->selected)
             selection[i/CHAR_BIT]|=(1<<(i%CHAR_BIT));
-        cout<<"test "<<hex<<(unsigned int)selection[0]<<dec<<endl;
         list<Dirn> startcollapsed;
         while(s.route.front().d!=s.stringDir){
-          cout<<"removing start slide "<<s.route.front().d<<" from "<<s.route.front().pos<<" to "<<s.route.front().pos+to_vector(s.route.front().d)<<endl;
           startcollapsed.push_back(s.route.front().d);
           s.route.pop_front();
         }
         list<Dirn> endcollapsed;
         while(s.route.back().d!=s.stringDir){
-          cout<<"removing end slide "<<s.route.back().d<<" from "<<s.route.back().pos<<" to "<<s.endPos<<endl;
           endcollapsed.push_back(s.route.back().d);
           s.endPos=s.route.back().pos;
           s.route.pop_back();
@@ -438,7 +411,29 @@ class StringPlay{
       }else
         score-=movescore;
     }
+
   public:
+    bool undo(bool extendedmove=false){
+      if(extendedmove && !inextendedmove)
+        return false;
+      inextendedmove=extendedmove;
+      if(undohistory.empty())
+        return false;
+      HistoryElement el=undohistory.popTop();
+      for(list<Dirn>::iterator it=el.startcollapsed.begin();it!=el.startcollapsed.end();++it){
+        s.route.push_front(StringElement(s.route.front().pos-to_vector(*it),*it,false));
+      }
+      for(list<Dirn>::iterator it=el.endcollapsed.begin();it!=el.endcollapsed.end();++it){
+        s.route.push_back(StringElement(s.endPos,*it,false));
+        s.endPos+=to_vector(*it);
+      }
+      int i=0;
+      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++i)
+        it->selected=el.isselected(i);
+      doMove(opposite(el.d),true);
+      return true;
+    }
+    
     bool tryMove(Dirn d,bool extendedmove=false){
       if(extendedmove && !inextendedmove)
         return false;

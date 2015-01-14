@@ -241,8 +241,6 @@ void PuzzleDisplay::win(){
   if(r.block)
     return;
   won=true;
-  cout<<"on win"<<endl;
-  cout<<r.nextLevel.a<<endl;
   if(sm)
     sm->playEffect(SoundManager::SE_WIN);
   if(device){
@@ -259,7 +257,6 @@ void PuzzleDisplay::stringUpdated(){
   MessageGui g;
   for(int i=0;i<r.messageCount;++i)
       g.message(device,fm,r.messages[i]);
-  cout<<"move triggered"<<endl;
   if((!won) && (s.hasWon()||r.forceWin))
     win();
 };
