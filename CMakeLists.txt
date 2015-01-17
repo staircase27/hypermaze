@@ -46,16 +46,20 @@ set(hypermaze_SRCS
 
 add_executable(hypermaze ${hypermaze_SRCS})
 
-if(WIN32 OR APPLE)
-   message(STATUS "On windows or mac so using all in one directory setup")
+if(WIN32)
+   message(STATUS "On windows so using all in one directory setup")
    
    set(BINDIR ".")
    
    set(DATADIR ".")
    
-   set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS DATADIR="")
+   set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS WIN32)
    
-else(WIN32 OR APPLE)
+elseif(APPLE)
+  message(FATAL_ERROR "I don't have a mac and so haven't setup the code locations\
+ for macs. If you have a mac and know where things are normally installed please contact me.")
+
+else(WIN32) # on unix like as not windows or apple
 
    message(STATUS "On linux so using linux setup")
    
@@ -65,65 +69,53 @@ else(WIN32 OR APPLE)
 
    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM>)
 
-   set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS DATADIR="../share/hypermaze")
+   set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS UNIX DATADIR="${CMAKE_INSTALL_PREFIX}/bin")
 
-endif(WIN32 OR APPLE)
+endif(WIN32)
 
-set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM>)
+set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM> $<$<CONFIG:Debug>:DEBUG>)
 
 install(TARGETS hypermaze RUNTIME DESTINATION ${BINDIR})
 
 install(DIRECTORY levels irrlicht DESTINATION ${DATADIR})
 
-set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS IRRLICHT)
+add_custom_target(run ${CMAKE_COMMAND} -E env HYPERMAZE_DATA_DIR=${CMAKE_SOURCE_DIR}/ $<TARGET_FILE:hypermaze> DEPENDS hypermaze VERBATIM)
 
-find_package(Irrlicht REQUIRED)
+function(hypermaze_find_package package foundvar libsvar includesvar defn)
 
-target_include_directories(hypermaze PUBLIC ${IRRLICHT_INCLUDE_DIRS})
+  find_package(${package} ${ARGV5})
 
-target_link_libraries(hypermaze ${IRRLICHT_LIBRARIES})
+  if(${foundvar})
 
-if(WIN32)
+    target_link_libraries(hypermaze ${${libsvar}})
 
-  install(FILES ${IRRLICHT_LIBRARIES} DESTINATION ${BINDIR})
+    target_include_directories(hypermaze PUBLIC ${${includesvar}})
 
-endif(WIN32)
+    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS ${defn})
 
-find_package(OpenAL)
+    if(WIN32)
 
-if(OPENAL_FOUND)
+      install(FILES ${${libsvar}} DESTINATION ${BINDIR})
 
-        target_link_libraries(hypermaze ${OPENAL_LIBRARY} alut)
-
-        target_include_directories(hypermaze PUBLIC ${OPENAL_INCLUDE_DIR})
-
-        set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS OPENAL)
-
-        if(WIN32)
-
-                install(FILES ${OPENAL_LIBRARY} DESTINATION ${BINDIR})
-
-        endif(WIN32)
-
-endif(OPENAL_FOUND)
-
-find_package(CURL)
-
-if(CURL_FOUND)
-
-        target_link_libraries(hypermaze ${CURL_LIBRARIES})
-
-        set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS USE_CURL)
-
-        target_include_directories(hypermaze PUBLIC ${CURL_INCLUDE_DIRS})
+      foreach(lib ${${libsvar}})
+      
+        message(STATUS "adding command to copy ${lib} before running $<TARGET_FILE_DIR:hypermaze>")
+        add_custom_command(TARGET run PRE_BUILD COMMAND ${CMAKE_COMMAND} -E echo ${lib} $<TARGET_FILE_DIR:hypermaze> VERBATIM)
+        add_custom_command(TARGET run PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${lib} $<TARGET_FILE_DIR:hypermaze> VERBATIM)
         
-        if(WIN32)
+      endforeach()
 
-                install(FILES ${CURL_LIBRARIES} DESTINATION ${BINDIR})
+    endif(WIN32)
 
-        endif(WIN32)
+  endif(${foundvar})
 
-endif(CURL_FOUND)
+endfunction()
+
+hypermaze_find_package(Irrlicht IRRLICHT_FOUND IRRLICHT_LIBRARIES IRRLICHT_INCLUDE_DIRS IRRLICHT REQUIRED)
+
+hypermaze_find_package(OpenAL OPENAL_FOUND OPENAL_LIBRARY OPENAL_INCLUDE_DIR OPENAL)
+
+hypermaze_find_package(CURL CURL_FOUND CURL_LIBRARIES CURL_INCLUDE_DIR USE_CURL)
 
 ########### next target ###############
 
@@ -166,23 +158,3 @@ set(levelgen_SRCS
     src/shared/cpphypioimp.hh)
 
 add_executable(levelgen EXCLUDE_FROM_ALL ${levelgen_SRCS})
-
-
-########### install files ###############
-
-
-
-#original Makefile.am contents follow:
-
-#bin_PROGRAMS = hypermaze scriptedit test
-#
-#hypermaze_SOURCES = src/shared/irrhypioimp.cc src/shared/irrhypioimp.hh src/shared/bufhypio.cc src/shared/bufhypio.hh src/core/string.hh src/core/maze.hh src/core/script.hh src/core/dirns.hh src/core/maze.cc src/core/mazegen.hh src/core/SmartPointer.hh src/core/hypio.cc src/core/hypio.hh src/core/script.cc src/core/vector.hh src/core/scriptimpl.hh src/irrshared/GUIFormattedText.cc src/irrshared/GUIFormattedText.hh src/irrshared/fonts.hh src/irrshared/fonts.cc src/irrshared/irrcurl.cc src/irrshared/irrcurl.hh  src/irrshared/iMyCamera.cpp src/irrshared/iMyCamera.hh src/hypermaze/gui.cc src/hypermaze/helpgui.hh src/hypermaze/controller.hh src/hypermaze/keymap.hh src/shared/sound.hh src/shared/sound.cc src/hypermaze/hypermaze.cc src/hypermaze/irrdisp.hh src/hypermaze/irrdisp.cc src/hypermaze/keymapgui.hh src/hypermaze/gui.hh src/hypermaze/controller.cc src/hypermaze/keymap.cc
-#hypermaze_CPPFLAGS = -DIRRLICHT -DOPENAL -DIOSTREAM -isystem/usr/include/irrlicht/
-#hypermaze_LDFLAGS = -lIrrlicht -lopenal -lalut -lcurl
-#
-#scriptedit_SOURCES = src/scriptedit/scriptedit.cc src/core/string.hh src/core/maze.hh src/core/script.hh src/core/dirns.hh src/core/maze.cc src/core/mazegen.hh src/core/SmartPointer.hh src/core/hypio.cc src/core/hypio.hh src/core/script.cc src/core/vector.hh src/core/scriptimpl.hh src/shared/cpphypioimp.cc src/shared/cpphypioimp.hh
-#scriptedit_CPPFLAGS = -DIOSTREAM
-#
-#test_SOURCES = src/test/test.cc src/core/string.hh src/core/maze.hh src/core/script.hh src/core/dirns.hh src/core/maze.cc src/core/mazegen.hh src/core/SmartPointer.hh src/core/hypio.cc src/core/hypio.hh src/core/script.cc src/core/vector.hh src/core/scriptimpl.hh src/shared/cpphypioimp.cc src/shared/cpphypioimp.hh
-#test_CPPFLAGS = -DIOSTREAM
-#

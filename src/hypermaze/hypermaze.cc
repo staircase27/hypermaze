@@ -15,6 +15,10 @@
 #include <iostream>
 #endif
 
+#ifdef WIN32
+#include "windows.h"
+#endif
+
 using namespace std;
 
 namespace irr{
@@ -34,7 +38,7 @@ class MyNodeGen:public NodeGen{
   public:
     MyNodeGen(irr::ISceneManager* smgr,irr::ITexture* wall,irr::ITexture* string,irr::ITexture* activeString,irr::ITexture* handle):
         smgr(smgr),wall(wall),string(string),activeString(activeString),handle(handle){};
-    
+
     virtual irr::IMeshSceneNode* makeUnitWall(bool isNode){
       irr::IMeshSceneNode* node = smgr->addCubeSceneNode(1);
       node->setMaterialTexture( 0, wall);
@@ -68,7 +72,7 @@ class MyNodeGen:public NodeGen{
       else
         node->setMaterialTexture(0,string);
     }
-    
+
     virtual irr::IMeshSceneNode* makeUnitHandle(int isForward){
       irr::IMeshSceneNode* node = smgr->addSphereSceneNode(1);
       node->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
@@ -171,7 +175,7 @@ class IrrlichtMusicLoader: public MusicLoader{
     virtual ~IrrlichtMusicLoader(){
       fs->drop();
     }
-    
+
 };
 
 int main(int argc,char* argv[]){
@@ -183,10 +187,28 @@ int main(int argc,char* argv[]){
     return 1;
 
   device->setResizable(true);
-  
+
   {
     irr::IFileSystem* fs=device->getFileSystem();
-    fs->addFileArchive(fs->getFileDir(argv[0])+"/",false,false,irr::EFAT_FOLDER);
+    char* envpath=getenv("HYPERMAZE_DATA_DIR");
+    if(envpath){
+      fs->addFileArchive(envpath,false,false,irr::EFAT_FOLDER);
+    }else{
+      #ifdef UNIX
+        fs->addFileArchive(DATADIR,false,false,irr::EFAT_FOLDER);
+      #else
+        #ifdef WIN32
+          #ifdef _IRR_WCHAR_FILESYSTEM
+            wchar_t* defpath=new char[MAX_PATH];
+            GetModuleFileNameW(NULL,defpath,MAX_PATH-1);
+          #else
+            char* defpath=new char[MAX_PATH];
+            GetModuleFileName(NULL,defpath,MAX_PATH-1);
+          #endif
+          fs->addFileArchive(fs->getFileDir(defpath)+"/",false,false,irr::EFAT_FOLDER);
+        #endif
+      #endif
+    }
   }
 
   FontManager fm(device->getFileSystem(),device->getGUIEnvironment());
@@ -200,7 +222,7 @@ int main(int argc,char* argv[]){
   device->setWindowCaption(L"Hyper Maze! - Irrlicht");
   irr::IVideoDriver* driver = device->getVideoDriver();
   irr::ISceneManager* smgr = device->getSceneManager();
-  
+
   {
     irr::IAnimatedMesh* mesh = smgr->getMesh("irrlicht/worldsky.obj");
     if (!mesh)
@@ -212,7 +234,7 @@ int main(int argc,char* argv[]){
     sky->setScale(irr::vector3df(1,1,1)*1000);
     sky->setPosition(irr::vector3df(0,-300,0));
     sky->setMaterialFlag(irr::EMF_LIGHTING, false);
-    
+
     sky->getMaterial(0).setTexture( 0, driver->getTexture("irrlicht/ground.png"));
     sky->getMaterial(1).setTexture( 0, driver->getTexture("irrlicht/sky.png"));
   }
@@ -233,7 +255,7 @@ int main(int argc,char* argv[]){
   sm->startMusic();
 
   PuzzleDisplay pd(ng,device,&fm,sm);
-  
+
   Controller* c=new MultiInterfaceController(pd,device,&fm,sm);
   device->setEventReceiver(c);
 
@@ -244,15 +266,15 @@ int main(int argc,char* argv[]){
     pd.sc.setnow(now);
 
     c->run(now);
-    
+
     sm->run();
 
     driver->beginScene(true, true, irr::SColor(255,100,101,140));
 
     smgr->drawAll();
-    
+
     device->setWindowCaption(irr::stringw(pd.sp.getScore()).c_str());
-    
+
     driver->endScene();
   }
   delete ng;
