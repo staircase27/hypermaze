@@ -341,7 +341,7 @@ bool edit(SPA<Range>& r,int& num){
           cin.ignore(100,'\n');
           cin>>newlen;
         }
-        while(c!='y'&&c!='n'){
+        while(c&&c!='y'&&c!='n'){
           cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
           cin>>c;
         }
@@ -376,6 +376,8 @@ bool edit(SPA<Range>& r,int& num){
     }
     cout<<"Please select an action to use on this list of ranges:"<<endl<<"p) Print"<<endl<<"r) Resize list of ranges"<<endl<<"e) Edit a range"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -423,6 +425,8 @@ bool edit(StringElementCondition& e){
     }
     cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"s) Edit Selection status condition"<<endl<<"d) Edit the Dirn's mask"<<endl<<"x/y/z) Edit the range of locations in the x/y/z direction"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -441,7 +445,7 @@ bool edit(PatternTag& r){
   cout<<"Is this pattern element greedy? (y/n): ";
   char c;
   cin>>c;
-  while(c!='n'&&c!='y'){
+  while(c&&c!='n'&&c!='y'){
     cout<<"enter y or n: ";
     cin>>c;
   }
@@ -475,7 +479,7 @@ bool edit(ConditionOr& a){
           cin.ignore(100,'\n');
           cin>>newlen;
         }
-        while(c!='y'&&c!='n'){
+        while(c&&c!='y'&&c!='n'){
           cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
           cin>>c;
         }
@@ -513,6 +517,8 @@ bool edit(ConditionOr& a){
     }
     cout<<"Please select an action to use on this Or Condition:"<<endl<<"p) Print"<<endl<<"r) Resize action list"<<endl<<"e) Edit an Condition"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -536,7 +542,7 @@ bool edit(ConditionAnd& a){
           cin.ignore(100,'\n');
           cin>>newlen;
         }
-        while(c!='y'&&c!='n'){
+        while(c&&c!='y'&&c!='n'){
           cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
           cin>>c;
         }
@@ -574,6 +580,8 @@ bool edit(ConditionAnd& a){
     }
     cout<<"Please select an action to use on this And Condition:"<<endl<<"p) Print"<<endl<<"r) Resize action list"<<endl<<"e) Edit an Condition"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -617,6 +625,8 @@ bool edit(ConditionAfter& e){
     }
     cout<<"Please select an action to use on this after condition:"<<endl<<"p) Print"<<endl<<"e) Edit the event to be after"<<endl<<"t) Edit the required delay"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -644,6 +654,8 @@ bool edit(ConditionBefore& e){
     }
     cout<<"Please select an action to use on this before condition:"<<endl<<"p) Print"<<endl<<"e) Edit the event to be after"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -667,7 +679,7 @@ bool edit(ConditionStringPattern& a){
           cin.ignore(100,'\n');
           cin>>newlen;
         }
-        while(c!='y'&&c!='n'){
+        while(c&&c!='y'&&c!='n'){
           cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
           cin>>c;
         }
@@ -718,6 +730,8 @@ bool edit(ConditionStringPattern& a){
     }
     cout<<"Please select an action to use on this String pattern Condition:"<<endl<<"p) Print"<<endl<<"r) Resize pattern list"<<endl<<"e) Edit a pattern element"<<endl<<"t) Edit the tag for a pattern element"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -743,7 +757,7 @@ bool edit(ActionMulti& a){
           cin.ignore(100,'\n');
           cin>>newlen;
         }
-        while(c!='y'&&c!='n'){
+        while(c&&c!='y'&&c!='n'){
           cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
           cin>>c;
         }
@@ -781,6 +795,8 @@ bool edit(ActionMulti& a){
     }
     cout<<"Please select an action to use on this Multi Action:"<<endl<<"p) Print"<<endl<<"r) Resize action list"<<endl<<"e) Edit an Action"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -808,7 +824,7 @@ bool edit(ActionMessage& e){
           cin.ignore(100,'\n');
           cin>>newlen;
         }
-        while(c!='y'&&c!='n'){
+        while(c&&c!='y'&&c!='n'){
           cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
           cin>>c;
         }
@@ -886,6 +902,8 @@ bool edit(ActionMessage& e){
     }
     cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize the message"<<endl<<"t) Edit a paragraph tag"<<endl<<"e) Edit a paragraph text"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -912,7 +930,7 @@ bool edit(ActionWinMessage& e){
           cin.ignore(100,'\n');
           cin>>newlen;
         }
-        while(c!='y'&&c!='n'){
+        while(c&&c!='y'&&c!='n'){
           cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
           cin>>c;
         }
@@ -990,6 +1008,8 @@ bool edit(ActionWinMessage& e){
     }
     cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize the message"<<endl<<"t) Edit a paragraph tag"<<endl<<"e) Edit a paragraph text"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -1033,6 +1053,8 @@ bool edit(ActionWinNextLevel& e){
     }
     cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"u) Change the path/url"<<endl<<"n) Change the name to show"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -1059,6 +1081,8 @@ bool edit(ActionStringConditionSelect& e){
     }
     cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"c) Edit the change condition"<<endl<<"t) Edit the target selection status condition"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -1079,6 +1103,8 @@ bool edit(ActionSetStringRoute& a){
     }
     cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -1151,6 +1177,8 @@ bool edit(SP<Condition>& p){
     }
     cout<<"Please select an action to use on this Condition:"<<endl<<"p) Print"<<endl<<"r) Replace"<<endl<<"e) Edit"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -1222,6 +1250,8 @@ bool edit(SP<Action>& p){
     }
     cout<<"Please select an action to use on this Action:"<<endl<<"p) Print"<<endl<<"r) Replace"<<endl<<"e) Edit"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -1249,6 +1279,8 @@ bool edit(Event& e){
     }
     cout<<"Please select an action to use on this Event:"<<endl<<"p) Print"<<endl<<"t) Change trigger"<<endl<<"c) Edit the condition"<<endl<<"a) Edit the action"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -1272,7 +1304,7 @@ bool edit(Script& s){
           cin.ignore(100,'\n');
           cin>>newlen;
         }
-        while(c!='y'&&c!='n'){
+        while(c&&c!='y'&&c!='n'){
           cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
           cin>>c;
         }
@@ -1308,6 +1340,8 @@ bool edit(Script& s){
     }
     cout<<"Please select an action to use on this Script:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
+    if(cin.eof())
+      break;
   }
   return changed;
 }
@@ -1327,7 +1361,7 @@ void edit(){
         if(changed){
           cout<<"The current script has unsaved changes. Are you sure you want to load a new one? (y/n) ";
           cin>>c;
-          while(c!='y' && c!='n'){
+          while(c&&c!='y' && c!='n'){
             cout<<"invalid response. ";
             cin>>c;
           }
@@ -1354,7 +1388,7 @@ void edit(){
         if(changed){
           cout<<"The current script has unsaved changes. Are you sure you want to create a new one? (y/n) ";
           cin>>c;
-          while(c!='y' && c!='n'){
+          while(c&&c!='y' && c!='n'){
             cout<<"invalid response. ";
             cin>>c;
           }
@@ -1396,7 +1430,7 @@ void edit(){
         if(changed){
           cout<<"The current script has unsaved changes. Are you sure you want to exit? (y/n) ";
           cin>>c;
-          while(c!='y' && c!='n'){
+          while(c&&c!='y' && c!='n'){
             cout<<"invalid response. ";
             cin>>c;
           }
@@ -1408,11 +1442,11 @@ void edit(){
     }
     cout<<"What would you like to do?"<<endl<<"p) Print the current Script"<<endl<<"l) Load a script from file"<<endl<<"n) Create a new empty script"<<endl<<"s) Save the current script"<<endl<<"e) Edit the current script"<<endl<<"d) Done with editing"<<endl<<": ";
     cin>>c;
-  }      
+    if(cin.eof())
+      break;
+  }
 }
 
 int main(){
   edit();
 }
-
-

@@ -81,6 +81,14 @@ install(DIRECTORY levels irrlicht DESTINATION ${DATADIR})
 
 add_custom_target(run ${CMAKE_COMMAND} -E env HYPERMAZE_DATA_DIR=${CMAKE_SOURCE_DIR}/ $<TARGET_FILE:hypermaze> DEPENDS hypermaze VERBATIM)
 
+if(WIN32)
+
+  add_custom_target(pre-run ${CMAKE_COMMAND} -E echo "Copying Libraries")
+
+  add_dependencies(run pre-run)
+
+endif(WIN32)
+
 function(hypermaze_find_package package foundvar libsvar includesvar defn)
 
   find_package(${package} ${ARGV5})
@@ -99,9 +107,7 @@ function(hypermaze_find_package package foundvar libsvar includesvar defn)
 
       foreach(lib ${${libsvar}})
       
-        message(STATUS "adding command to copy ${lib} before running $<TARGET_FILE_DIR:hypermaze>")
-        add_custom_command(TARGET run PRE_BUILD COMMAND ${CMAKE_COMMAND} -E echo ${lib} $<TARGET_FILE_DIR:hypermaze> VERBATIM)
-        add_custom_command(TARGET run PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${lib} $<TARGET_FILE_DIR:hypermaze> VERBATIM)
+        add_custom_command(TARGET pre-run PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${lib} $<TARGET_FILE_DIR:hypermaze> VERBATIM)
         
       endforeach()
 
@@ -138,6 +144,10 @@ set(scriptedit_SRCS
 
 add_executable(scriptedit EXCLUDE_FROM_ALL ${scriptedit_SRCS})
 
+set_property(TARGET scriptedit APPEND PROPERTY COMPILE_DEFINITIONS IOSTREAM)
+
+add_custom_target(run-scriptedit $<TARGET_FILE:scriptedit> DEPENDS scriptedit VERBATIM)
+
 ########### next target ###############
 
 set(levelgen_SRCS
@@ -158,3 +168,10 @@ set(levelgen_SRCS
     src/shared/cpphypioimp.hh)
 
 add_executable(levelgen EXCLUDE_FROM_ALL ${levelgen_SRCS})
+
+set_property(TARGET levelgen APPEND PROPERTY COMPILE_DEFINITIONS IOSTREAM)
+
+add_custom_target(run-levelgen $<TARGET_FILE:levelgen> DEPENDS levelgen VERBATIM)
+########### really compile all ###############
+
+add_custom_target(all-full DEPENDS hypermaze scriptedit levelgen)
