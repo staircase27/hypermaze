@@ -79,7 +79,7 @@ install(TARGETS hypermaze RUNTIME DESTINATION ${BINDIR})
 
 install(DIRECTORY levels irrlicht DESTINATION ${DATADIR})
 
-add_custom_target(run ${CMAKE_COMMAND} -E env HYPERMAZE_DATA_DIR=${CMAKE_SOURCE_DIR}/ $<TARGET_FILE:hypermaze> DEPENDS hypermaze VERBATIM)
+add_custom_target(run ${CMAKE_COMMAND} -Daddtoenv=HYPERMAZE_DATA_DIR -DHYPERMAZE_DATA_DIR=${CMAKE_SOURCE_DIR}/ -Dprog=$<TARGET_FILE:hypermaze> -P ${CMAKE_SOURCE_DIR}/runprog.cmake DEPENDS hypermaze VERBATIM)
 
 if(WIN32)
 
@@ -118,6 +118,8 @@ function(hypermaze_find_package package foundvar libsvar includesvar defn)
 endfunction()
 
 hypermaze_find_package(Irrlicht IRRLICHT_FOUND IRRLICHT_LIBRARIES IRRLICHT_INCLUDE_DIRS IRRLICHT REQUIRED)
+
+hypermaze_find_package(ALUT ALUT_FOUND ALUT_LIBRARIES ALUT_INCLUDE_DIR ALUT)
 
 hypermaze_find_package(OpenAL OPENAL_FOUND OPENAL_LIBRARY OPENAL_INCLUDE_DIR OPENAL)
 
