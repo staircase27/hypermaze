@@ -79,7 +79,7 @@ install(TARGETS hypermaze RUNTIME DESTINATION ${BINDIR})
 
 install(DIRECTORY levels irrlicht DESTINATION ${DATADIR})
 
-add_custom_target(run ${CMAKE_COMMAND} -Daddtoenv=HYPERMAZE_DATA_DIR -DHYPERMAZE_DATA_DIR=${CMAKE_SOURCE_DIR}/ -Dprog=$<TARGET_FILE:hypermaze> -P ${CMAKE_SOURCE_DIR}/runprog.cmake DEPENDS hypermaze VERBATIM)
+add_custom_target(run ${CMAKE_COMMAND} -Daddtoenv=HYPERMAZE_DATA_DIR -DHYPERMAZE_DATA_DIR=${CMAKE_SOURCE_DIR}/ -Dprog=$<TARGET_FILE:hypermaze> -P ${CMAKE_SOURCE_DIR}/cmake/runprog.cmake DEPENDS hypermaze VERBATIM)
 
 if(WIN32)
 
