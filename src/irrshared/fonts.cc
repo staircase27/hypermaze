@@ -1,7 +1,7 @@
-/* 
+/*
  * File:   FontManager.cc
  * Author: armstrong
- * 
+ *
  * Created on December 5, 2014, 10:14 AM
  */
 
@@ -11,6 +11,11 @@
 #include <iostream>
 using namespace std;
 #endif
+
+#ifdef IRRFONTFIX
+const char* font_prefix=0;
+#endif
+
 
 irr::map<int,irr::path>& FontFamily::getfonts(bool bold,bool italic){
   if(bold)
@@ -92,7 +97,12 @@ void FontManager::load(irr::stringc font){
         bool bold=parsebool(xml->getAttributeValueSafe(L"bold"));
         bool italic=parsebool(xml->getAttributeValueSafe(L"italic"));
         int size=xml->getAttributeValueAsInt(L"size");
+        #ifdef IRRFONTFIX
+        irr::path fontpath(font_prefix);
+        fontpath.append("/irrlicht/fonts/");
+        #else
         irr::path fontpath("irrlicht/fonts/");
+        #endif
         fontpath.append(font);
         fontpath.append("/");
         fontpath.append(xml->getAttributeValueSafe(L"name"));
@@ -102,7 +112,7 @@ void FontManager::load(irr::stringc font){
         fonts.set(font,new VirtualFontSet(xml->getAttributeValueSafe(L"target")));
         break;
       }
-    }    
+    }
   }
   xml->drop();
 }
@@ -114,3 +124,23 @@ FontManager::~FontManager(){
     gui->drop();
   }
 }
+inline FontFamily* FontManager::getFontFamily(irr::stringc font){
+  irr::map<irr::stringc,FontSet*>::Node* n=fonts.find(font);
+  if(n==0){
+    load(font);
+    n=fonts.find(font);
+  }
+  if(n==0 || n->getValue()==0)
+    return 0;
+  else
+    return n->getValue()->resolve(*this);
+}
+irr::IGUIFont* FontManager::getFont(irr::stringc font,int size,bool bold,bool italic){
+  FontFamily* f=getFontFamily(font);
+  if(f==0)
+    return 0;
+  irr::IGUIFont* irrfont=gui->getFont(f->getFontName(size,bold,italic));
+  return irrfont;
+}
+
+

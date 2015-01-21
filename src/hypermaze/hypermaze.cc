@@ -193,9 +193,15 @@ int main(int argc,char* argv[]){
     char* envpath=getenv("HYPERMAZE_DATA_DIR");
     if(envpath){
       fs->addFileArchive(envpath,false,false,irr::EFAT_FOLDER);
+      #ifdef IRRFONTFIX
+      font_prefix=envpath;
+      #endif
     }else{
       #ifdef UNIX
         fs->addFileArchive(DATADIR,false,false,irr::EFAT_FOLDER);
+      #ifdef IRRFONTFIX
+      font_prefix=DATADIR;
+      #endif
       #else
         #ifdef WIN32
           #ifdef _IRR_WCHAR_FILESYSTEM
@@ -205,10 +211,22 @@ int main(int argc,char* argv[]){
             char* defpath=new char[MAX_PATH];
             GetModuleFileName(NULL,defpath,MAX_PATH-1);
           #endif
+          #ifdef IRRFONTFIX
+          int len=fs->getFileDir(defpath).size();
+          char* tmp=new char[len+2];
+          memcpy(tmp,fs->getFileDir(defpath).c_str(),len);
+          tmp[len]='/';
+          tmp[len+1]='\0';
+          font_prefix=tmp;
+          cout<<"defpath: "<<defpath<<endl<<fs->getFileDir(defpath).c_str()<<endl<<(fs->getFileDir(defpath)+"/").c_str()<<endl;
+          cout<<font_prefix<<endl;
+          #endif
           fs->addFileArchive(fs->getFileDir(defpath)+"/",false,false,irr::EFAT_FOLDER);
         #endif
       #endif
     }
+    printf(font_prefix);
+    printf("\n\n");
   }
 
   FontManager fm(device->getFileSystem(),device->getGUIEnvironment());
