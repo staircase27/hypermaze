@@ -177,3 +177,31 @@ add_custom_target(run-levelgen $<TARGET_FILE:levelgen> DEPENDS levelgen VERBATIM
 ########### really compile all ###############
 
 add_custom_target(all-full DEPENDS hypermaze scriptedit levelgen)
+
+########### cpack ###############
+
+INCLUDE(InstallRequiredSystemLibraries)
+
+set(CPACK_PACKAGE_DESCRIPTION "Hypermaze puzzle game")
+
+set(CPACK_PACKAGE_VENDOR "staircase")
+
+set(CPACK_PACKAGE_CONTACT "staircase@darkfeldgames.net")
+
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+
+set(CPACK_PACKAGE_VERSION_MINOR "1")
+
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+
+set(CPACK_DEBIAN_PACKAGE_SECTION "Games")
+
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "Irrlicht")
+
+set(CPACK_SET_DESTDIR ON)
+
+set(CPACK_GENERATOR "DEB" "RPM" "TGZ" "STGZ" "ZIP" "NSIS")
+
+include(CPack)
