@@ -3,7 +3,6 @@
 #include "../core/vector.hh"
 #include "../irrshared/iMyCamera.hh"
 #include "../core/dirns.hh"
-#include "keymap.hh"
 #include "controller.hh"
 #include "../shared/sound.hh"
 #include <map>

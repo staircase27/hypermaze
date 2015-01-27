@@ -48,13 +48,15 @@ add_executable(hypermaze ${hypermaze_SRCS})
 
 if(WIN32)
    message(STATUS "On windows so using all in one directory setup")
-   
+
    set(BINDIR ".")
-   
+
    set(DATADIR ".")
-   
+
    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS WIN32)
-   
+
+   set(CPACK_SET_DESTDIR OFF)
+
 elseif(APPLE)
   message(FATAL_ERROR "I don't have a mac and so haven't setup the code locations\
  for macs. If you have a mac and know where things are normally installed please contact me.")
@@ -62,9 +64,9 @@ elseif(APPLE)
 else(WIN32) # on unix like as not windows or apple
 
    message(STATUS "On linux so using linux setup")
-   
+
    set(BINDIR "bin")
-   
+
    set(DATADIR "share/hypermaze")
 
    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM>)
@@ -106,9 +108,9 @@ function(hypermaze_find_package package foundvar libsvar includesvar defn)
       install(FILES ${${libsvar}} DESTINATION ${BINDIR})
 
       foreach(lib ${${libsvar}})
-      
+
         add_custom_command(TARGET pre-run PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${lib} $<TARGET_FILE_DIR:hypermaze> VERBATIM)
-        
+
       endforeach()
 
     endif(WIN32)
@@ -200,8 +202,6 @@ set(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "Irrlicht")
 
-set(CPACK_SET_DESTDIR ON)
-
-set(CPACK_GENERATOR "DEB" "RPM" "TGZ" "STGZ" "ZIP" "NSIS")
+set(CPACK_SOURCE_IGNORE_FILES /\\\\.git/;;/build/;.*~$;/\\\\..*)
 
 include(CPack)

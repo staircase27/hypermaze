@@ -42,17 +42,19 @@ class KeyboardController:public Controller{
 
     virtual bool OnEvent(const irr::SEvent& event);
     virtual bool isTriggered(KeyMap::Action a);
-    
+
     virtual void run(irr::u32 now);
-    
+
     KeyboardController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,FontManager* fm,SoundManager* sm):Controller(pd),device(device),fm(fm),sm(sm){
       for (irr::u32 i=0; i<KeyMap::A_COUNT; ++i){
         actionTriggered[i] = false;
         actionTime[i] = 0;
       }
       irr::IReadFile* in=device->getFileSystem()->createAndOpenFile("hypermaze.keymap.conf");
-      map.load(in);
-      in->drop();
+      if(in){
+        map.load(in);
+        in->drop();
+      }
       KeySpec help=map.getKeySpec(KeyMap::A_CONF);
       if(help.chr==0&&help.key==irr::KEY_KEY_CODES_COUNT)
         map.addMapping(KeySpec(irr::KEY_F1),KeyMap::A_CONF);
@@ -72,7 +74,7 @@ class MouseSlicerController: public Controller{
    virtual void run(irr::u32 now);
 
     virtual bool OnEvent(const irr::SEvent& event);
-    
+
     MouseSlicerController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,FontManager*,SoundManager* sm):
         Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),slice(),mousePos(0,0){};
 };
@@ -123,13 +125,13 @@ class MouseStringSelectorController: public Controller{
   pair<StringPointer,bool> sp;
   bool selected;
   int moved;
-  
+
   public:
-  
+
     virtual void run(irr::u32 now);
-    
+
     virtual bool OnEvent(const irr::SEvent& event);
-  
+
     MouseStringSelectorController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,FontManager*,SoundManager* sm):
         Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),sp(pd.s.end(),false){};
 };
