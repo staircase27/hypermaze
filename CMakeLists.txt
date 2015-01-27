@@ -55,8 +55,6 @@ if(WIN32)
 
    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS WIN32)
 
-   set(CPACK_SET_DESTDIR OFF)
-
 elseif(APPLE)
   message(FATAL_ERROR "I don't have a mac and so haven't setup the code locations\
  for macs. If you have a mac and know where things are normally installed please contact me.")
@@ -72,6 +70,8 @@ else(WIN32) # on unix like as not windows or apple
    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM>)
 
    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS UNIX DATADIR="${CMAKE_INSTALL_PREFIX}/bin")
+   
+   set(CPACK_SET_DESTDIR ON)
 
 endif(WIN32)
 
@@ -202,6 +202,6 @@ set(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "Irrlicht")
 
-set(CPACK_SOURCE_IGNORE_FILES /\\\\.git/;;/build/;.*~$;/\\\\..*)
+set(CPACK_SOURCE_IGNORE_FILES /\\\\.git/;;/build/;.*~$;/\\\\..*;/doc/doxygen/.+/)
 
 include(CPack)
