@@ -9,13 +9,10 @@
 #include "../core/script.hh"
 #include "../core/SmartPointer.hh"
 #include "../irrshared/fonts.hh"
+#include "../irrshared/platformcompat.hh"
 
 #ifdef IOSTREAM
 #include <iostream>
-#endif
-
-#ifdef WIN32
-#include "windows.h"
 #endif
 
 using namespace std;
@@ -189,43 +186,27 @@ int main(int argc,char* argv[]){
 
   {
     irr::IFileSystem* fs=device->getFileSystem();
-    char* envpath=getenv("HYPERMAZE_DATA_DIR");
-    if(envpath){
-      fs->addFileArchive(envpath,false,false,irr::EFAT_FOLDER);
+    const irr::fschar_t* path=
+    #ifdef __IRR_WCHAR_FILESYSTEM
+	 _wgetenv("HYPERMAZE_DATA_DIR");
+    #else
+         getenv("HYPERMAZE_DATA_DIR");
+    #endif
+    if(!path)
+      path=getDataPath();
+    if(path){
+      fs->addFileArchive(path,false,false,irr::EFAT_FOLDER);
       #ifdef IRRFONTFIX
-      font_prefix=envpath;
-      #endif
-    }else{
-      #ifdef UNIX
-        fs->addFileArchive(DATADIR,false,false,irr::EFAT_FOLDER);
-      #ifdef IRRFONTFIX
-      font_prefix=DATADIR;
-      #endif
-      #else
-        #ifdef WIN32
-          #ifdef _IRR_WCHAR_FILESYSTEM
-            wchar_t* defpath=new char[MAX_PATH];
-            GetModuleFileNameW(NULL,defpath,MAX_PATH-1);
-          #else
-            char* defpath=new char[MAX_PATH];
-            GetModuleFileName(NULL,defpath,MAX_PATH-1);
-          #endif
-          #ifdef IRRFONTFIX
-          int len=fs->getFileDir(defpath).size();
-          char* tmp=new char[len+2];
-          memcpy(tmp,fs->getFileDir(defpath).c_str(),len);
-          tmp[len]='/';
-          tmp[len+1]='\0';
-          font_prefix=tmp;
-          cout<<"defpath: "<<defpath<<endl<<fs->getFileDir(defpath).c_str()<<endl<<(fs->getFileDir(defpath)+"/").c_str()<<endl;
-          cout<<font_prefix<<endl;
-          #endif
-          fs->addFileArchive(fs->getFileDir(defpath)+"/",false,false,irr::EFAT_FOLDER);
+        #ifdef _IRR_WCHAR_FILESYSTEM
+          int len=wcslen(path);
+        #else
+          int len=strlen(path);
         #endif
+        irr::fschar_t* tmp=new irr::fschar_t[len+1];
+        memcpy(tmp,path,(len+1)*sizeof(irr::fschar_t));
+        font_prefix=tmp;
       #endif
     }
-    printf(font_prefix);
-    printf("\n\n");
   }
 
   FontManager fm(device->getFileSystem(),device->getGUIEnvironment());

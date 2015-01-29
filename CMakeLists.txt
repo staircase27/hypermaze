@@ -30,6 +30,8 @@ set(hypermaze_SRCS
     src/irrshared/irrcurl.hh
     src/irrshared/iMyCamera.cpp
     src/irrshared/iMyCamera.hh
+    src/irrshared/platformcompat.hh
+    src/irrshared/platformcompat.cc
     src/hypermaze/gui.cc
     src/hypermaze/helpgui.hh
     src/hypermaze/controller.hh
