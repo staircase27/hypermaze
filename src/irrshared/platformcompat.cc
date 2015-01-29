@@ -1,7 +1,10 @@
 #include "platformcompat.hh"
 #ifdef WIN32
-#include "windows.hh"
-#include "shlobj.h"
+#define WINVER 0x0601
+#define _WIN32_WINNT 0x0601
+#define _WIN32_IE 0x0601
+#include "windows.h"
+#include "Shlobj.h"
 #endif
 
 
@@ -27,18 +30,17 @@ const irr::fschar_t* getDataPath(){
       delete[] path;
       irr::fschar_t* path=new irr::fschar_t[MAX_PATH];
       #ifdef _IRR_WCHAR_FILESYSTEM
-        GetModuleFileNameW(NULL,path,MAX_PATH-1);
+        int len=GetModuleFileNameW(NULL,path,MAX_PATH-1);
       #else
-        GetModuleFileName(NULL,path,MAX_PATH-1);
+        int len=GetModuleFileName(NULL,path,MAX_PATH-1);
       #endif
-      irr::path exedir=fs->getFileDir(path);
-      int len=exedir.size();
-      delete[] path;
-      path=new irr::fschar_t[len+2];
-      memcpy(tmp,exedir.c_str(),len*sizeof(irr::fschar_t));
-      path[len]=IRRSLIT('/');
-      path[len+1]=IRRSLIT('\0');
-      return path
+      irr::fschar_t* end=path+len-1;
+      while(*end!=IRRSLIT('/') && *end!=IRRSLIT('\\') && end!=path) --end;
+      if(end!=path){
+        ++end;
+        *end=IRRSLIT('\0');
+      }
+      return path;
     #endif
   #endif
 }
@@ -67,22 +69,43 @@ const irr::fschar_t* getUserConfigPath(){
   #else
   #ifdef WIN32
     delete[] path;
-    path=0;
-    wchar_t* winpath=0;
-    if (SHGetKnownFolderPath(FOLDERID_RoamingAppData,0,0,winpath)){
-      #ifdef _IRR_WCHAR_FILESYSTEM
-        int len=wcslen(path);
-        path=new irr::fschar_t[len+11]
-        memcpy(path,winpath,len);
-        memcpy(path+len,L"/hypermaze/",11);
-      #else
-        int len=WideCharToMultiByte(CP_OEMCP,0,winpath,-1,0)-1;
-        path=new irr::fschar_t[len+11];
-        WideCharToMultiByte(CP_OEMCP,0,winpath,-1,path);
-        memcpy(path+len,"/hypermaze/",11);
-      #endif
-      CoTaskMemFree(winpath);
+    #ifdef WIN32_USE_KNOWNFOLDER
+      path=0;
+      wchar_t* winpath=0;
+      if (SHGetKnownFolderPath(FOLDERID_RoamingAppData,0,0,winpath)){
+        #ifdef _IRR_WCHAR_FILESYSTEM
+          int len=wcslen(path);
+          path=new irr::fschar_t[len+11]
+          memcpy(path,winpath,len);
+          memcpy(path+len,L"/hypermaze/",11);
+        #else
+          int len=WideCharToMultiByte(CP_OEMCP,0,winpath,-1,0,0,00)-1;
+          path=new irr::fschar_t[len+11];
+          WideCharToMultiByte(CP_OEMCP,0,winpath,-1,path,len+1,0,0);
+          memcpy(path+len,"/hypermaze/",11);
+        #endif
+        CoTaskMemFree(winpath);
     }
+    #else
+      path=new irr::fschar_t[MAX_PATH+12];
+      #ifdef _IRR_WCHAR_FILESYSTEM
+        if(!SHGetFolderPathW(0,CSIDL_APPDATA,0,SHGFP_TYPE_CURRENT,path)){
+          delete[] path;
+          path=0;
+        }else{
+          int len=wcslen(path);
+          memcpy(path+len,"\\hypermaze\\",12*sizeof(irr::fschar_t));
+        }
+      #else
+        if(!SHGetFolderPathA(0,CSIDL_APPDATA,0,SHGFP_TYPE_CURRENT,path)){
+          delete[] path;
+          path=0;
+        }else{
+          int len=strlen(path);
+          memcpy(path+len,"\\hypermaze\\",12);
+        }
+      #endif
+    #endif
     return path;
   #endif
   #endif
@@ -94,6 +117,6 @@ const irr::fschar_t* getSystemConfigPath(){
 const irr::fschar_t* getDefaultConfigPath(){
   return "/config/";
 }
-  
-  
+
+
 
