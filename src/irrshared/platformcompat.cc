@@ -6,6 +6,8 @@
 #include "windows.h"
 #include "Shlobj.h"
 #include "direct.h"
+#else
+#include "sys/stat.h"
 #endif
 
 #ifdef _IRR_WCHAR_FILESYSTEM
