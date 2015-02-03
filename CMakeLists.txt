@@ -81,7 +81,7 @@ set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Deb
 
 install(TARGETS hypermaze RUNTIME DESTINATION ${BINDIR})
 
-install(DIRECTORY levels irrlicht DESTINATION ${DATADIR})
+install(DIRECTORY levels irrlicht config DESTINATION ${DATADIR})
 
 add_custom_target(run ${CMAKE_COMMAND} -Daddtoenv=HYPERMAZE_DATA_DIR -DHYPERMAZE_DATA_DIR=${CMAKE_SOURCE_DIR}/ -Dprog=$<TARGET_FILE:hypermaze> -P ${CMAKE_SOURCE_DIR}/cmake/runprog.cmake DEPENDS hypermaze VERBATIM)
 

@@ -5,17 +5,15 @@
 #define _WIN32_IE 0x0601
 #include "windows.h"
 #include "Shlobj.h"
+#include "direct.h"
 #endif
-
-
-
 
 #ifdef _IRR_WCHAR_FILESYSTEM
 #define IRRFSSLEN wcslen
-#define IRRSLIT(a) a
+#define IRRSLIT(a) L##a
 #else
 #define IRRFSSLEN strlen
-#define IRRSLIT(a) L##a
+#define IRRSLIT(a) a
 #endif
 
 
@@ -65,6 +63,8 @@ const irr::fschar_t* getUserConfigPath(){
         memcpy(configpath+len,"/.config/hypermaze/",20);
       }
     }
+    if(configpath)
+      mkdir(configpath, 0700);
     return configpath;
   #else
   #ifdef WIN32
@@ -89,7 +89,7 @@ const irr::fschar_t* getUserConfigPath(){
     #else
       path=new irr::fschar_t[MAX_PATH+12];
       #ifdef _IRR_WCHAR_FILESYSTEM
-        if(!SHGetFolderPathW(0,CSIDL_APPDATA,0,SHGFP_TYPE_CURRENT,path)){
+        if(SHGetFolderPathW(0,CSIDL_APPDATA,0,SHGFP_TYPE_CURRENT,path)!=S_OK){
           delete[] path;
           path=0;
         }else{
@@ -97,7 +97,7 @@ const irr::fschar_t* getUserConfigPath(){
           memcpy(path+len,"\\hypermaze\\",12*sizeof(irr::fschar_t));
         }
       #else
-        if(!SHGetFolderPathA(0,CSIDL_APPDATA,0,SHGFP_TYPE_CURRENT,path)){
+        if(SHGetFolderPathA(0,CSIDL_APPDATA,0,SHGFP_TYPE_CURRENT,path)!=S_OK){
           delete[] path;
           path=0;
         }else{
@@ -106,6 +106,12 @@ const irr::fschar_t* getUserConfigPath(){
         }
       #endif
     #endif
+    if(path)
+      #ifdef _IRR_WCHAR_FILESYSTEM
+        _wmkdir(path);
+      #else
+        _mkdir(path);
+      #endif
     return path;
   #endif
   #endif
@@ -115,7 +121,7 @@ const irr::fschar_t* getSystemConfigPath(){
   return 0;
 }
 const irr::fschar_t* getDefaultConfigPath(){
-  return "/config/";
+  return IRRSLIT("config/");
 }
 
 

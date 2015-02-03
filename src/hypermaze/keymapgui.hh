@@ -176,10 +176,10 @@ class KeyMapGui: BaseGui{
 
   bool okClicked;
   bool cancelClicked;
-  
+
   irr::IGUITable *table;
   int editing;
-  
+
   enum
   {
     GUI_ID_OK_BUTTON=201,
@@ -225,7 +225,7 @@ class KeyMapGui: BaseGui{
               table->setCellText(i,1,toString(km.getKeySpec(old)).c_str());
           }
           table->setCellText(editing,1,toString(km.getKeySpec(KeyMap::actionNames[editing].first)).c_str());
-         
+
           editing=-1;
           return true;
         }
@@ -241,20 +241,20 @@ class KeyMapGui: BaseGui{
       main(_device,_fm);
       return okClicked;
     }
-    
+
     void createGUI(){
       editing=-1;
       okClicked=cancelClicked=false;
-      
+
       irr::IVideoDriver* driver = device->getVideoDriver();
       irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
-      
+
       irr::rect<irr::s32> rect=driver->getViewPort();
       irr::position2d<irr::s32> center=rect.getCenter();
       irr::dimension2d<irr::s32> size=rect.getSize();
       size.Width=min(600,size.Width-10);
       size.Height=min(600,size.Height-10);
-      
+
       table = guienv->addTable(irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),el,-1,true);
       table->addColumn(L"Action",0);
       table->addColumn(L"Key",1);
@@ -267,24 +267,21 @@ class KeyMapGui: BaseGui{
         table->setCellText(i,0,KeyMap::actionNames[i].second);
         table->setCellText(i,1,toString(km.getKeySpec(KeyMap::actionNames[i].first)).c_str());
       }
-      
+
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+size.Height/2-32,center.X+size.Width/2-100,center.Y+size.Height/2),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
       guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Apply");
-      
+
       guienv->setFocus(table);
-        
+
       device->setWindowCaption(L"Configure Hyper Maze");
-      
+
     }
     bool run(){
       if(cancelClicked)
         return false;
       if(okClicked){
         *kmp=km;
-        irr::IWriteFile* out=device->getFileSystem()->createAndWriteFile("hypermaze.keymap.conf");
-        km.save(out);
-        out->drop();
-        return false;
+        return !km.save(device->getFileSystem());
       }
       return true;
     }

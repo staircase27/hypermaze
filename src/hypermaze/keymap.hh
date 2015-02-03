@@ -1,5 +1,7 @@
 #include "irrlicht.h"
+#include "../irrshared/platformcompat.hh"
 #include "../core/dirns.hh"
+#include <iostream>
 #include <map>
 
 #ifndef KEYMAP_HH_INC
@@ -31,7 +33,7 @@ struct KeySpec{
   KeySpec():chr(0),key(irr::KEY_KEY_CODES_COUNT),shift(false),control(false){};
   KeySpec(wchar_t chr,bool shift=false,bool control=false):chr(chr),shift(shift),control(control),key(irr::KEY_KEY_CODES_COUNT){};
   KeySpec(irr::EKEY_CODE key,bool shift=false,bool control=false):key(key),shift(shift),control(control),chr(0){};
-  
+
   inline bool operator<(const KeySpec& o) const{
     if(chr<o.chr)
       return true;
@@ -68,7 +70,7 @@ class KeyMap{
       A_GENERATE,A_LOAD,
       A_SAVE,A_CONF,
       A_COUNT};
-      
+
     static const pair<Action,pair<Dirn,bool> > sliceActions[12];
     static const pair<Action,pair<bool,bool> > slideActions[4];
     static const pair<Action,Dirn> moveActions[6];
@@ -109,7 +111,7 @@ class KeyMap{
     const map<Action,KeySpec> getRevMap(){
       return revMap;
     }
-    
+
   private:
     virtual irr::u32 doparse(char* data,irr::u32 length){
       irr::u32 totalused=0;
@@ -120,45 +122,55 @@ class KeyMap{
         KeySpec ks;
         while(irr::isspace(*data)){++data;}
         if(data>=end) return totalused;
-        
+
         data+=mbtowc0(&ks.chr,data,end-data);
         if(data>=end) return totalused;
-        
+
         while(irr::isspace(*data)){++data;}
         if(data>=end) return totalused;
-        
+
         ks.key=(irr::EKEY_CODE)irr::strtol10(data,&tmp);
         data+=tmp-data;
         if(data>=end) return totalused;
-        
+
         while(irr::isspace(*data)){++data;}
         if(data>=end) return totalused;
-        
+
         ks.shift=(bool)irr::strtol10(data,&tmp);
         data+=tmp-data;
         if(data>=end) return totalused;
-        
+
         while(irr::isspace(*data)){++data;}
         if(data>=end) return totalused;
-        
+
         ks.control=(bool)irr::strtol10(data,&tmp);
         data+=tmp-data;
         if(data>=end) return totalused;
-        
+
         while(irr::isspace(*data)){++data;}
         if(data>=end) return totalused;
-        
+
         KeyMap::Action a=(KeyMap::Action)irr::strtol10(data,&tmp);
         data+=tmp-data;
         if(data>=end) return totalused;
-        
+
         this->addMapping(ks,a);
         totalused=data-start;
       }
     }
-    
+
   public:
-    
+
+    bool save(irr::io::IFileSystem* fs){
+      irr::io::IWriteFile* f=fs->createAndWriteFile(irr::path(getUserConfigPath())+"keymap.conf");
+      cout<<"writing keymap to "<<(irr::path(getUserConfigPath())+"keymap.conf").c_str()<<" "<<f<<endl;
+      if(!f)
+        return false;
+      save(f);
+      f->drop();
+      return true;
+    }
+
     void save(irr::IWriteFile* out){
       irr::stringc str;
       char*tmp=new char[MB_CUR_MAX];
@@ -183,7 +195,23 @@ class KeyMap{
       }
       out->write(str.c_str(),str.size());
     }
-    
+
+    bool load(irr::io::IFileSystem* fs){
+      irr::IReadFile* f=fs->createAndOpenFile(irr::path(getUserConfigPath())+"keymap.conf");
+      if(!f){
+        const irr::fschar_t* dir=getSystemConfigPath();
+        if(dir)
+          f=fs->createAndOpenFile(irr::path(dir)+"keymap.conf");
+      }
+      if(!f)
+        f=fs->createAndOpenFile(irr::path(getDefaultConfigPath())+"keymap.conf");
+      if(!f)
+        return false;
+      load(f);
+      f->drop();
+      return true;
+    }
+
 
     void load(irr::IReadFile* in){
       irr::u32 len=256;
