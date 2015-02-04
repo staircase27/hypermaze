@@ -121,15 +121,7 @@ const irr::fschar_t* getUserConfigPath(){
 
 const irr::fschar_t* getSystemConfigPath(){
   #ifdef UNIX
-    const irr::fschar_t* basedir=IRRSLIT(SYSTEMDATADIR);
-    if(homedir){
-      int len=IRRFSSLEN(homedir);
-      delete[] path;
-      path=configpath=new irr::fschar_t[len+12];
-      memcpy(configpath,homedir,len);
-      memcpy(configpath+len,"/hypermaze/",12);
-    }
-    return configpath;
+    return IRRSLIT(SYSTEMCONFDIR);
   #else
   #ifdef WIN32
     delete[] path;
