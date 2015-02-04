@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
+include(CheckCXXSourceCompiles)
+
 ########### next target ###############
 
 set(hypermaze_SRCS
@@ -128,6 +130,29 @@ hypermaze_find_package(ALUT ALUT_FOUND ALUT_LIBRARIES ALUT_INCLUDE_DIR ALUT)
 hypermaze_find_package(OpenAL OPENAL_FOUND OPENAL_LIBRARY OPENAL_INCLUDE_DIR OPENAL)
 
 hypermaze_find_package(CURL CURL_FOUND CURL_LIBRARIES CURL_INCLUDE_DIR USE_CURL)
+
+if(WIN32)
+  CHECK_CXX_SOURCE_COMPILES( "
+#define WINVER 0x0601
+#define _WIN32_WINNT 0x0601
+#define _WIN32_IE 0x0601
+#include \"windows.h\"
+#include \"Shlobj.h\"
+int main(){
+  wchar_t* winpath=0;
+  SHGetKnownFolderPath(FOLDERID_ProgramData,0,0,winpath);
+  CoTaskMemFree(winpath);
+  SHGetKnownFolderPath(FOLDERID_RoamingAppData,0,0,winpath);
+  CoTaskMemFree(winpath);
+  return 0;
+}
+" HAVE_WIN_KNOWN_FOLDERS )
+  if(HAVE_WIN_KNOWN_FOLDERS)
+    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS WIN32_USE_KNOWNFOLDER)
+  endif(HAVE_WIN_KNOWN_FOLDERS)
+endif(WIN32)
+
+
 
 ########### next target ###############
 

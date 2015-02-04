@@ -79,7 +79,7 @@ const irr::fschar_t* getUserConfigPath(){
           int len=wcslen(path);
           path=new irr::fschar_t[len+11]
           memcpy(path,winpath,len);
-          memcpy(path+len,L"/hypermaze/",11);
+          memcpy(path+len,L"/hypermaze/",11*sizeof(irr::fschar_t));
         #else
           int len=WideCharToMultiByte(CP_OEMCP,0,winpath,-1,0,0,00)-1;
           path=new irr::fschar_t[len+11];
@@ -120,7 +120,59 @@ const irr::fschar_t* getUserConfigPath(){
 }
 
 const irr::fschar_t* getSystemConfigPath(){
-  return 0;
+  #ifdef UNIX
+    const irr::fschar_t* basedir=IRRSLIT(SYSTEMDATADIR);
+    if(homedir){
+      int len=IRRFSSLEN(homedir);
+      delete[] path;
+      path=configpath=new irr::fschar_t[len+12];
+      memcpy(configpath,homedir,len);
+      memcpy(configpath+len,"/hypermaze/",12);
+    }
+    return configpath;
+  #else
+  #ifdef WIN32
+    delete[] path;
+    #ifdef WIN32_USE_KNOWNFOLDER
+      path=0;
+      wchar_t* winpath=0;
+      if (SHGetKnownFolderPath(FOLDERID_ProgramData,0,0,winpath)){
+        #ifdef _IRR_WCHAR_FILESYSTEM
+          int len=wcslen(path);
+          path=new irr::fschar_t[len+12]
+          memcpy(path,winpath,len);
+          memcpy(path+len,L"/hypermaze/",12*sizeof(irr::fschar_t));
+        #else
+          int len=WideCharToMultiByte(CP_OEMCP,0,winpath,-1,0,0,00)-1;
+          path=new irr::fschar_t[len+12];
+          WideCharToMultiByte(CP_OEMCP,0,winpath,-1,path,len+1,0,0);
+          memcpy(path+len,"/hypermaze/",12);
+        #endif
+        CoTaskMemFree(winpath);
+    }
+    #else
+      path=new irr::fschar_t[MAX_PATH+12];
+      #ifdef _IRR_WCHAR_FILESYSTEM
+        if(SHGetFolderPathW(0,CSIDL_COMMON_APPDATA,0,SHGFP_TYPE_CURRENT,path)!=S_OK){
+          delete[] path;
+          path=0;
+        }else{
+          int len=wcslen(path);
+          memcpy(path+len,"\\hypermaze\\",12*sizeof(irr::fschar_t));
+        }
+      #else
+        if(SHGetFolderPathA(0,CSIDL_COMMON_APPDATA,0,SHGFP_TYPE_CURRENT,path)!=S_OK){
+          delete[] path;
+          path=0;
+        }else{
+          int len=strlen(path);
+          memcpy(path+len,"\\hypermaze\\",12);
+        }
+      #endif
+    #endif
+    return path;
+  #endif
+  #endif
 }
 const irr::fschar_t* getDefaultConfigPath(){
   return IRRSLIT("config/");
