@@ -8,15 +8,6 @@
 #ifndef CONTROLLER_HH_INC
 #define CONTROLLER_HH_INC
 
-namespace irr{
-  using namespace core;
-  using namespace scene;
-  using namespace io;
-  using namespace video;
-};
-
-using namespace std;
-
 class PuzzleDisplay;
 
 class Controller: public irr::IEventReceiver{
@@ -59,11 +50,11 @@ class KeyboardController:public Controller{
 
 
 class MouseSlicerController: public Controller{
-  irr::ISceneCollisionManager* collMan;
+  irr::scene::ISceneCollisionManager* collMan;
   SP<Dirn> slice;
   int sliced;
-  irr::vector3df sliceStart;
-  irr::position2d<irr::s32> mousePos;
+  irr::core::vector3df sliceStart;
+  irr::core::position2d<irr::s32> mousePos;
 
 
   public:
@@ -77,10 +68,10 @@ class MouseSlicerController: public Controller{
 
 
 class MouseStringDraggerController: public Controller{
-  irr::ISceneCollisionManager* collMan;
-  irr::ISceneNode* string;
-  irr::vector3df startPoint;
-  irr::position2d<irr::s32> mousePos;
+  irr::scene::ISceneCollisionManager* collMan;
+  irr::scene::ISceneNode* string;
+  irr::core::vector3df startPoint;
+  irr::core::position2d<irr::s32> mousePos;
   int dist;
   Dirn currdir;
   SoundManager* sm;
@@ -95,10 +86,10 @@ class MouseStringDraggerController: public Controller{
 };
 
 class MouseStringDraggerController2: public Controller{
-  irr::ISceneCollisionManager* collMan;
-  irr::ISceneNode* string;
-  irr::vector3df startPoint;
-  irr::position2d<irr::s32> mousePos;
+  irr::scene::ISceneCollisionManager* collMan;
+  irr::scene::ISceneNode* string;
+  irr::core::vector3df startPoint;
+  irr::core::position2d<irr::s32> mousePos;
   int alloweddirns;
   int dist;
   Dirn currdir;
@@ -114,11 +105,11 @@ class MouseStringDraggerController2: public Controller{
 };
 
 class MouseStringSelectorController: public Controller{
-  irr::ISceneCollisionManager* collMan;
-  irr::position2d<irr::s32> mousePos;
-  irr::vector3df startPoint;
-  irr::ISceneNode* string;
-  pair<StringPointer,bool> sp;
+  irr::scene::ISceneCollisionManager* collMan;
+  irr::core::position2d<irr::s32> mousePos;
+  irr::core::vector3df startPoint;
+  irr::scene::ISceneNode* string;
+  std::pair<StringPointer,bool> sp;
   bool selected;
   int moved;
 

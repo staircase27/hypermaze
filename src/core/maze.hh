@@ -25,26 +25,26 @@ class Maze
     Maze(Vector size);
     Maze(Maze& m);
     Maze(const Maze& m);
-    
+
     ~Maze();
-    
+
     Maze& operator=(const Maze& m);
-    
+
     inline void makeThisACopy(){
       (*this)=Maze((const Maze)(*this));
     }
-    
+
     Point operator [](Vector p);
     ConstPoint operator [](Vector p) const;
-    
+
     #ifdef IOSTREAM
-    friend ostream& operator<<(ostream&,const Maze&);
-    friend istream& operator>>(istream&,Maze&);
+    friend std::ostream& operator<<(std::ostream&,const Maze&);
+    friend std::istream& operator>>(std::istream&,Maze&);
     #endif
-    
+
     friend IOResult read(HypIStream&,Maze& m);
     friend bool write(HypOStream& s,const Maze& m);
-    
+
 };
 
 IOResult read(HypIStream&,Maze&);
@@ -84,33 +84,33 @@ class ConstPoint{
 };
 
 #ifdef IOSTREAM
-inline ostream& operator<<(ostream& o,const Maze& m){
-  o<<m.size.X<<" "<<m.size.Y<<" "<<m.size.Z<<hex<<endl;
+inline std::ostream& operator<<(std::ostream& o,const Maze& m){
+  o<<m.size.X<<" "<<m.size.Y<<" "<<m.size.Z<<std::hex<<std::endl;
   SPA<int> p=m.maze;
   for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i,++p){
     o<<*p<<" ";
     #ifdef DEBUG
     if((i+1)%m.size.X==0)
-      o<<endl;
+      o<<std::endl;
     if((i+1)%(m.size.X*m.size.Y)==0)
-      o<<endl;
+      o<<std::endl;
     #endif
   }
-  o<<dec<<endl;
+  o<<std::dec<<std::endl;
   return o;
 }
 
-inline istream& operator>>(istream& o,Maze& m){
-  o>>m.size.X>>m.size.Y>>m.size.Z>>hex;
+inline std::istream& operator>>(std::istream& o,Maze& m){
+  o>>m.size.X>>m.size.Y>>m.size.Z>>std::hex;
   m=Maze(m.size);
   SPA<int> p=m.maze;
   for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i,++p){
     o>>*p;
   }
-  return o>>dec;
+  return o>>std::dec;
 }
 
-void prettyPrint(ostream& o,Maze m,int w=150);
+void prettyPrint(std::ostream& o,Maze m,int w=150);
 #endif
 
 #endif

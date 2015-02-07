@@ -1,6 +1,5 @@
 #ifdef IOSTREAM
 #include <iostream>
-using namespace std;
 #endif
 
 #ifndef VECTOR_HH_INC
@@ -52,7 +51,7 @@ inline bool inCube(Vector p,Vector start,Vector end){
 }
 
 #ifdef IOSTREAM
-inline ostream& operator<<(ostream& o,Vector v){
+inline std::ostream& operator<<(std::ostream& o,Vector v){
   return o<<"<Vector: "<<v.X<<","<<v.Y<<","<<v.Z<<">";
 }
 #endif

@@ -2,7 +2,10 @@
 #define DIRNS_HH_INC
 
 #include "vector.hh"
-using namespace std;
+
+#ifdef IOSTREAM
+#include <iostream>
+#endif
 
 
 enum Dirn{
@@ -107,7 +110,7 @@ inline Dirn perpendicular(Dirn d,Dirn e){
   }
 }
 #ifdef IOSTREAM
-inline ostream& operator<<(ostream& o,Dirn d){
+inline std::ostream& operator<<(std::ostream& o,Dirn d){
   return o<<"<Dirn "<<(int)d<<": "<<to_vector(d)<<">";
 }
 #endif

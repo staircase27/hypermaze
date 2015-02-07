@@ -7,6 +7,12 @@
 #include <iostream>
 #endif
 
+using namespace std;
+namespace irr{
+  using namespace core;
+  using namespace scene;
+}
+
 void MazeDisplay::init(Maze& m,NodeGen* ng,irr::vector3df center){
   for(set<Dirn>::iterator d=dirns.begin();d!=dirns.end();++d){
     limits[*d].first.first=limits[*d].first.second=0;
@@ -110,14 +116,14 @@ void StringDisplay::update(){
   int i=0;
   list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
   StringPointer sit=s.begin();
-  
+
   startEnd->setPosition(position+con(s.getStart())*(MazeDisplay::wall+MazeDisplay::gap)
       -con(to_vector(s.stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
   startEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s.stringDir))));
   endEnd->setPosition(position+con(s.getEnd())*(MazeDisplay::wall+MazeDisplay::gap)
       +con(to_vector(s.stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
   endEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s.stringDir))));
-  
+
   while(sit!=s.end()){
 
     if(nit==nodes.end()){
@@ -196,7 +202,7 @@ pair<StringPointer,bool> StringDisplay::getStringPointer(irr::ISceneNode* node){
   int i=node->getID()-STRING_ID;
   if(i<0)
     return pair<StringPointer,bool>(s.end(),false);
-  
+
   StringPointer sit=s.begin();
   while(sit!=s.end()){
     if(i==0)

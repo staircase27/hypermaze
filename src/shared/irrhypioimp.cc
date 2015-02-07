@@ -3,6 +3,11 @@
  * @brief Implementation of hypio.hh
  */
 #include "irrhypioimp.hh"
+#include <cstring>
+using namespace std;
+namespace irr{
+  using namespace io;
+}
 
 #ifdef IRRLICHT
 IrrHypIStream::IrrHypIStream(irr::IReadFile* f):f(f){f->grab();}

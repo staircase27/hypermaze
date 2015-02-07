@@ -10,7 +10,6 @@
 #include <iostream>
 #endif
 #include <cstring>
-using namespace std;
 
 ///A Smart pointer class
 /**
@@ -51,10 +50,10 @@ class SP{
      */
     template <class U>
     explicit SP<T>(const SP<U>& op):p((T*)op.p),c(op.c){++*c;}
-    
+
     template <class U>
     friend class SP;
-    
+
     ///Destructor for pointer
     /**
      * Destroys the pointer and updates the reference count. If this is the last pointer then delete the
@@ -66,7 +65,7 @@ class SP{
         delete c;
       }
     }
-    
+
     ///Assignment operator
     /**
      * Updates the reference count for the current data and deletes if needed and then replaces with
@@ -84,10 +83,10 @@ class SP{
       p=op.p;
       c=op.c;
       ++*c;
-      
+
       return *this;
     }
-    
+
     ///Type Cast Assignment operator
     /**
      * Updates the reference count for the current data and deletes if needed and then replaces with
@@ -106,11 +105,11 @@ class SP{
       p=(T*)op.p;
       c=op.c;
       ++*c;
-      
+
       return *this;
     }
 
-    ///Dereference the pointer 
+    ///Dereference the pointer
     /**
      * @return a reference to the element we point to
      */
@@ -118,14 +117,14 @@ class SP{
       return *p;
     }
 
-    ///Dereference the pointer to a member 
+    ///Dereference the pointer to a member
     /**
      * @return A pointer that can be used to access the member requested
      */
     T* operator-> () const{
       return p;
     }
-    
+
     ///Compare this pointer to another pointer
     /**
      * Returns true if the other pointer points to the same memory location as this pointer
@@ -135,7 +134,7 @@ class SP{
     const bool operator==(const  SP<T>& op)const{
       return p==op.p;
     }
-    
+
     ///Check if this is a null pointer
     /**
      * @return true if this is a null pointer
@@ -146,7 +145,7 @@ class SP{
 
     #ifdef IOSTREAM
     template<class U>
-    friend ostream& operator<<(ostream&,const SP<U>&);
+    friend std::ostream& operator<<(std::ostream&,const SP<U>&);
     #endif
 
 };
@@ -171,7 +170,7 @@ class SPA{
     T* p;///< The data pointer
     T* h;///< The head of the array
     int* c;///< The reference count
-    
+
   public:
     ///Construct a new smart pointer pointing to null
     SPA<T>():c(new int(1)),p(0),h(0){};
@@ -180,7 +179,7 @@ class SPA{
      * this will point to the first element in the new array
      * (explicit to stop this being used as a cast from an integer as that doesn't make sence)
      * @param len the number of elements for the new array to contain
-     */ 
+     */
     explicit SPA<T>(const int& len):c(new int(1)),p(new T[len]()),h(p){};
     ///Copy Constructor
     /**
@@ -201,7 +200,7 @@ class SPA{
 
     template <class U>
     friend class SPA;
-    
+
     ///Destructor for pointer
     /**
      * Destroys the pointer and updates the reference count. If this is the last pointer then delete the
@@ -213,7 +212,7 @@ class SPA{
         delete c;
       }
     }
-    
+
     ///Assignment operator
     /**
      * Updates the reference count for the current data and deletes if needed and then replaces with
@@ -235,7 +234,7 @@ class SPA{
       return *this;
     }
 
-    ///Dereference the pointer 
+    ///Dereference the pointer
     /**
      * @return a reference to the element we point to
      */
@@ -243,7 +242,7 @@ class SPA{
       return *p;
     }
 
-    ///Dereference the pointer to a member 
+    ///Dereference the pointer to a member
     /**
      * @return A pointer that can be used to access the member requested
      */
@@ -398,16 +397,16 @@ class SPA{
     const bool isnull() const{
       return p==0;
     }
-    
+
     operator SPA<const T>(){
       return SPA<const T>(*this);
     }
 
     #ifdef IOSTREAM
     template<class U>
-    friend ostream& operator<<(ostream&,const SPA<U>&);
+    friend std::ostream& operator<<(std::ostream&,const SPA<U>&);
     #endif
-    
+
     friend size_t strlen(const SPA<const char>);
     template<class U> friend void memcopy(SPA<U>,SPA<const U>,size_t);
     template<class U> friend void memcopy(U*,SPA<const U>,size_t);
@@ -415,7 +414,7 @@ class SPA{
 };
 
 inline size_t strlen(const SPA<const char> s){
-   return strlen(s.p);
+   return std::strlen(s.p);
 }
 
 template<class T> inline void memcopy(SPA<T> dest,SPA<T> src,size_t num){
@@ -438,14 +437,14 @@ inline void memcopy(SPA<T> dest,const T* src,size_t num){
 }
 template<class T>
 inline void memcopy(T* dest,const T* src,size_t num){
-  memcpy(dest,src,num*sizeof(T));
+  std::memcpy(dest,src,num*sizeof(T));
 }
 
 
 #ifdef IOSTREAM
 
 template <class T>
-ostream& operator<<(ostream& o,const SP<T>& p){
+std::ostream& operator<<(std::ostream& o,const SP<T>& p){
 #ifdef DEBUGPOINTER
   return o<<"<SP: "<<p.p<<" ("<<*p.c<<")>";
 #else
@@ -453,7 +452,7 @@ ostream& operator<<(ostream& o,const SP<T>& p){
 #endif
 }
 template <class T>
-ostream& operator<<(ostream& o,const SPA<T>& p){
+std::ostream& operator<<(std::ostream& o,const SPA<T>& p){
 #ifdef DEBUGPOINTER
   return o<<"<SPA: "<<p.p<<" from "<<(void*)p.h<<" ("<<*p.c<<")>";
 #else

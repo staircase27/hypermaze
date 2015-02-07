@@ -1,6 +1,8 @@
 #include "maze.hh"
 #include <cstring>
 
+using namespace std;
+
 Point Maze::operator [](Vector p){
   return Point(size,maze+(p.X+size.X*(p.Y+size.Y*p.Z)));
 };
@@ -41,7 +43,7 @@ Maze& Maze::operator=(const Maze& m){
 }
 
 #ifdef IOSTREAM
-void prettyPrint(ostream& o,Maze m,int w){
+void prettyPrint(std::ostream& o,Maze m,int w){
   w/=(m.size.X*4+2);
   o<<m.size.X<<" "<<m.size.Y<<" "<<m.size.Z<<" :"<<w<<endl;
   for(int Z=0;Z<m.size.Z;Z+=w){

@@ -1,15 +1,13 @@
-#include "maze.hh"
+#include "vector.hh"
 #include "dirns.hh"
+#include "maze.hh"
 #include <list>
 
-
-#include "vector.hh"
 #ifdef IOSTREAM
 #include <istream>
 #endif
 #ifndef STRING_HH_INC
 #define STRING_HH_INC
-using namespace std;
 
 class StringPlay;
 class StringEdit;
@@ -22,16 +20,16 @@ struct StringElement{
 };
 class StringPointer{
   private:
-    list<StringElement>::iterator el;
+    std::list<StringElement>::iterator el;
   public:
-    
+
     const StringElement& operator *()const{
       return *el;
     }
     const StringElement* operator ->() const{
       return el.operator->();
     }
-    
+
     StringPointer& operator++(){
       ++el;
       return *this;
@@ -40,36 +38,36 @@ class StringPointer{
       --el;
       return *this;
     }
-    
+
     bool operator!=(const StringPointer& other) const{
       return el!=other.el;
     }
     bool operator==(const StringPointer& other) const{
       return el==other.el;
     }
-    
+
     StringPointer& operator=(StringPointer other){
       el=other.el;
       return *this;
     }
-    
-    StringPointer(list<StringElement>::iterator el):el(el){};
-    
+
+    StringPointer(std::list<StringElement>::iterator el):el(el){};
+
     friend class StringPlay;
     friend class StringEdit;
 };
 class ConstStringPointer{
   private:
-    list<StringElement>::const_iterator el;
+    std::list<StringElement>::const_iterator el;
   public:
-    
+
     const StringElement& operator *()const{
       return *el;
     }
     const StringElement* operator ->()const{
       return el.operator->();
     }
-    
+
     ConstStringPointer& operator++(){
       ++el;
       return *this;
@@ -78,41 +76,41 @@ class ConstStringPointer{
       --el;
       return *this;
     }
-    
+
     bool operator!=(const ConstStringPointer& other) const{
       return el!=other.el;
     }
     bool operator==(const ConstStringPointer& other) const{
       return el==other.el;
     }
-    
+
     ConstStringPointer& operator=(const ConstStringPointer& other){
       el=other.el;
       return *this;
     }
-    
-    ConstStringPointer(list<StringElement>::const_iterator el):el(el){};
+
+    ConstStringPointer(std::list<StringElement>::const_iterator el):el(el){};
 };
 
 #ifdef IOSTREAM
-inline ostream& operator<<(ostream& o,const StringElement& e){
+inline std::ostream& operator<<(std::ostream& o,const StringElement& e){
   return o<<"<StringElement "<<e.pos<<" "<<e.d<<" "<<e.selected<<">";
 }
-inline ostream& operator<<(ostream& o,const StringPointer& e){
+inline std::ostream& operator<<(std::ostream& o,const StringPointer& e){
   return o<<"<Pointer to "<<*e<<">";
 }
-inline ostream& operator<<(ostream& o,const ConstStringPointer& e){
+inline std::ostream& operator<<(std::ostream& o,const ConstStringPointer& e){
   return o<<"<Pointer to "<<*e<<">";
 }
 #endif
 class String{
-    list<StringElement> route;
+    std::list<StringElement> route;
     Vector endPos;
   public:
     Maze maze;
     const Dirn stringDir;
     const Dirn targetDir;
-  
+
     String(Maze m):maze(m),endPos(0,0,0),route(),stringDir(LEFT),targetDir(FORWARD){
       Vector start=m.size.dotProduct(to_shift_vector(stringDir))*to_shift_vector(stringDir)+
           m.size.dotProduct(to_shift_vector(targetDir))*to_shift_vector(targetDir)+
@@ -124,18 +122,18 @@ class String{
       }
       endPos=pos;
     };
-    
+
     const Vector& getStart() const{
       return route.front().pos;
     }
     const Vector& getEnd() const{
       return endPos;
     }
-    
-    const list<StringElement>& getRoute() const{
+
+    const std::list<StringElement>& getRoute() const{
       return route;
     }
-    
+
     StringPointer begin(){
       return StringPointer(route.begin());
     }
@@ -148,34 +146,34 @@ class String{
     ConstStringPointer end() const{
       return ConstStringPointer(route.end());
     }
-    
+
     int length() const{
       return route.size();
     }
-    
+
     bool hasWon() const{
       Vector d=to_vector(targetDir);
       int t=maze.size.dotProduct(-to_shift_vector(opposite(targetDir)));
       if(endPos.dotProduct(d)<t)
         return false;
-      for(list<StringElement>::const_iterator it=route.begin();it!=route.end();++it)
+      for(std::list<StringElement>::const_iterator it=route.begin();it!=route.end();++it)
         if(it->pos.dotProduct(d)<t)
           return false;
       return true;
     }
-    
+
     String& operator=(const String& o){
       endPos=o.endPos;
       route=o.route;
       maze=o.maze;
       return *this;
     }
-    
+
     friend class StringPlay;
     friend class StringEdit;
     #ifdef IOSTREAM
-    friend ostream& operator <<(ostream& o,String s);
-    friend ostream& operator <<(ostream& o,StringPlay s);
+    friend std::ostream& operator <<(std::ostream& o,String s);
+    friend std::ostream& operator <<(std::ostream& o,StringPlay s);
     #endif
 };
 
@@ -186,19 +184,19 @@ class LimitedStack{
     SPA<T> end;
     SPA<T> top;
     SPA<T> bottom;
-  
+
   public:
-      
+
     LimitedStack(int len):start(len),end(start+len-1),top(start),bottom(start){};
-    
+
     bool empty(){
       return top==bottom;
     }
-    
+
     inline const T& getTop(){
       return *top;
     }
-      
+
     const T& popTop(){
       const T& tmp=*top;
       if(top==start)
@@ -223,7 +221,7 @@ class LimitedStack{
       }
       *top=el;
     }
-    
+
     void clear(){
       top=bottom=start;
     }
@@ -236,9 +234,9 @@ struct HistoryElement{
     return (selected[i/CHAR_BIT]&(1<<(i%CHAR_BIT)))!=0;
   }
   Dirn d;
-  list<Dirn> startcollapsed;
-  list<Dirn> endcollapsed;
-  HistoryElement(int length,SPA<unsigned char> selected,Dirn d,list<Dirn> startcollapsed,list<Dirn> endcollapsed):
+  std::list<Dirn> startcollapsed;
+  std::list<Dirn> endcollapsed;
+  HistoryElement(int length,SPA<unsigned char> selected,Dirn d,std::list<Dirn> startcollapsed,std::list<Dirn> endcollapsed):
       length(length),selected(selected),d(d),startcollapsed(startcollapsed),endcollapsed(endcollapsed){};
   HistoryElement():length(0),selected(),d(),startcollapsed(),endcollapsed(){};
 };
@@ -249,30 +247,30 @@ class StringPlay{
 
   LimitedStack<HistoryElement> undohistory;
   bool inextendedmove;
-  
+
   public:
     StringPlay(String& s):s(s),score(0),undohistory(10+2*s.maze.size.dotProduct(Vector(1,1,1))),inextendedmove(false){};
-  
+
     String& getString(){
       return s;
     }
-    
+
     int getScore(){
       return score;
     }
-    
+
     void startExtendedMove(){
       inextendedmove=true;
     }
-    
+
     void externalEditHappened(){
       inextendedmove=false;
       undohistory.clear();
     }
-    
+
     bool slide(bool moveEnd,bool out){
       if(moveEnd){
-        list<StringElement>::reverse_iterator it;
+        std::list<StringElement>::reverse_iterator it;
         for(it=s.route.rbegin();it!=s.route.rend();++it)
           if(it->selected)
             break;
@@ -287,7 +285,7 @@ class StringPlay{
           it->selected=false;
         }
       }else{
-        list<StringElement>::iterator it;
+        std::list<StringElement>::iterator it;
         for(it=s.route.begin();it!=s.route.end();++it)
           if(it->selected)
             break;
@@ -305,17 +303,17 @@ class StringPlay{
       inextendedmove=false;
       return true;
     }
-    
+
     void setSelected(StringPointer p,bool selected){
       inextendedmove=false;
       p.el->selected=selected;
     }
-    
+
     bool canMove(Dirn d){
       bool any=false;
       if((d==opposite(s.stringDir)&&s.route.front().selected)||(d==s.stringDir&&s.route.back().selected))
         return false;
-      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
+      for(std::list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
         if(!it->selected)
           continue;
         any=true;
@@ -342,18 +340,18 @@ class StringPlay{
       }
       return any;
     }
-    
+
   private:
     void doMove(Dirn d,bool undo){
       int length=0;
       int movescore=0;
       bool lastselected=false;
-      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
+      for(std::list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it){
         ++length;
         if(it->selected){
           if(!lastselected){
             if(it!=s.route.begin()){
-              list<StringElement>::iterator nit=it;
+              std::list<StringElement>::iterator nit=it;
               --nit;
               if(nit->d==opposite(d)){
                 s.route.erase(nit);
@@ -383,7 +381,7 @@ class StringPlay{
         }
         lastselected=it->selected;
       }
-      
+
       if(lastselected)
         if(d==s.stringDir||d==opposite(s.stringDir))
           s.route.insert(s.route.end(),StringElement(s.endPos+to_vector(d),opposite(d),false));
@@ -393,15 +391,15 @@ class StringPlay{
         score+=movescore;
         SPA<unsigned char> selection((length+CHAR_BIT-1)/CHAR_BIT);
         int i=0;
-        for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++i)
+        for(std::list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++i)
           if(it->selected)
             selection[i/CHAR_BIT]|=(1<<(i%CHAR_BIT));
-        list<Dirn> startcollapsed;
+        std::list<Dirn> startcollapsed;
         while(s.route.front().d!=s.stringDir){
           startcollapsed.push_back(s.route.front().d);
           s.route.pop_front();
         }
-        list<Dirn> endcollapsed;
+        std::list<Dirn> endcollapsed;
         while(s.route.back().d!=s.stringDir){
           endcollapsed.push_back(s.route.back().d);
           s.endPos=s.route.back().pos;
@@ -420,20 +418,20 @@ class StringPlay{
       if(undohistory.empty())
         return false;
       HistoryElement el=undohistory.popTop();
-      for(list<Dirn>::iterator it=el.startcollapsed.begin();it!=el.startcollapsed.end();++it){
+      for(std::list<Dirn>::iterator it=el.startcollapsed.begin();it!=el.startcollapsed.end();++it){
         s.route.push_front(StringElement(s.route.front().pos-to_vector(*it),*it,false));
       }
-      for(list<Dirn>::iterator it=el.endcollapsed.begin();it!=el.endcollapsed.end();++it){
+      for(std::list<Dirn>::iterator it=el.endcollapsed.begin();it!=el.endcollapsed.end();++it){
         s.route.push_back(StringElement(s.endPos,*it,false));
         s.endPos+=to_vector(*it);
       }
       int i=0;
-      for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++i)
+      for(std::list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it,++i)
         it->selected=el.isselected(i);
       doMove(opposite(el.d),true);
       return true;
     }
-    
+
     bool tryMove(Dirn d,bool extendedmove=false){
       if(extendedmove && !inextendedmove)
         return false;
@@ -446,7 +444,7 @@ class StringPlay{
       }
     }
     #ifdef IOSTREAM
-    friend ostream& operator <<(ostream& o,StringPlay s);
+    friend std::ostream& operator <<(std::ostream& o,StringPlay s);
     #endif
 
     StringPlay& operator=(const StringPlay& o){
@@ -461,7 +459,7 @@ class StringEdit{
 
   public:
     StringEdit(String& s):s(s){};
-  
+
     String& getString(){
       return s;
     }
@@ -470,7 +468,7 @@ class StringEdit{
       p.el->selected=selected;
     }
     void setStringSegment(StringPointer sp,StringPointer ep,int count,SPA<Dirn> newRoute){
-      list<StringElement>::iterator it=sp.el;
+      std::list<StringElement>::iterator it=sp.el;
       Vector pos=it->pos;
       bool endSel=true;
       if(ep!=s.end())
@@ -512,7 +510,7 @@ class StringEdit{
       //delete any spares
       while(it!=ep.el)
 	      it=s.route.erase(it);
-      
+
       //slide the rest of the string across to line up
       for(it=ep.el;it!=s.route.end();++it){
         it->pos=pos;
@@ -523,18 +521,18 @@ class StringEdit{
 };
 
 #ifdef IOSTREAM
-inline ostream& operator<<(ostream& o,String s){
+inline std::ostream& operator<<(std::ostream& o,String s){
   o<<"<String ";
-  for(list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it)
-    cout<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";
-  return cout<<s.endPos<<">";
+  for(std::list<StringElement>::iterator it=s.route.begin();it!=s.route.end();++it)
+    o<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";
+  return o<<s.endPos<<">";
 }
 
-inline ostream& operator<<(ostream& o,StringPlay s){
+inline std::ostream& operator<<(std::ostream& o,StringPlay s){
   o<<"<StringPlay ";
-  for(list<StringElement>::iterator it=s.s.route.begin();it!=s.s.route.end();++it)
-    cout<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";
-  return cout<<s.s.endPos<<">";
+  for(std::list<StringElement>::iterator it=s.s.route.begin();it!=s.s.route.end();++it)
+    o<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";
+  return o<<s.s.endPos<<">";
 }
 #endif
 

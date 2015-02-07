@@ -7,6 +7,12 @@
 
 #include "fonts.hh"
 
+namespace irr{
+  using namespace core;
+  using namespace io;
+  using namespace gui;
+}
+
 #ifdef IOSTREAM
 #include <iostream>
 using namespace std;

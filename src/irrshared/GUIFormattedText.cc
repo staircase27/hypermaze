@@ -1,4 +1,9 @@
 #include "GUIFormattedText.hh"
+namespace irr{
+  using namespace gui;
+  using namespace core;
+}
+
 GUIFormattedText::GUIFormattedText(const wchar_t* text, irr::IGUIEnvironment* environment,
         irr::IGUIElement* parent, irr::s32 id, const irr::rect<irr::s32>& rectangle,
         bool background, bool border):
@@ -13,7 +18,7 @@ GUIFormattedText::~GUIFormattedText(){
   if(defaultOverrideFont)
     defaultOverrideFont->drop();
 }
-    
+
 void GUIFormattedText::draw(){
   irr::IGUISkin* skin = Environment->getSkin();
   if(layoutNeeded)
@@ -34,10 +39,10 @@ void GUIFormattedText::draw(){
       skin->draw3DSunkenPane(this, skin->getColor(bgCol), false, background, AbsoluteRect, &AbsoluteClippingRect);
     }
   }
-  
+
   IGUIElement::draw();
 }
-    
+
 void GUIFormattedText::setText( const wchar_t* text){
   // delete all children
   while(Children.begin()!=Children.end()){
@@ -68,7 +73,7 @@ int GUIFormattedText::addText(const wchar_t* text,int i){
   layoutNeeded=true;
   return i;
 }
-    
+
 void GUIFormattedText::removeText(int i){
   if(i<0 || i>=paragraphs.size())
     return;
@@ -77,7 +82,7 @@ void GUIFormattedText::removeText(int i){
   paragraphs.erase(it);
   layoutNeeded=true;
 }
-    
+
 void GUIFormattedText::setOverrideFont(int i,irr::IGUIFont* font){
   if(i<0 || i>=paragraphs.size())
     return;
@@ -85,7 +90,7 @@ void GUIFormattedText::setOverrideFont(int i,irr::IGUIFont* font){
   (*it)->setOverrideFont(font);
   layoutNeeded=true;
 }
-    
+
 void GUIFormattedText::setDefaultOverrideFont(irr::IGUIFont * font){
   if(defaultOverrideFont)
     defaultOverrideFont->drop();
@@ -101,18 +106,18 @@ void GUIFormattedText::setAllOverrideFont(irr::IGUIFont * font){
     (*it)->setOverrideFont(font);
   layoutNeeded=true;
 }
-    
+
 irr::IGUIFont* GUIFormattedText::getOverrideFont(int i){
   if(i<0 || i>=paragraphs.size())
     return 0;
   irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin()+i;
   return (*it)->getOverrideFont();
 }
-    
+
 irr::IGUIFont* GUIFormattedText::getDefaultOverrideFont(){
   return defaultOverrideFont;
 }
-    
+
 irr::IGUIFont* GUIFormattedText::getActiveFont(int i){
   irr::IGUIFont* font=getOverrideFont(i);
   if ( font )
@@ -121,7 +126,7 @@ irr::IGUIFont* GUIFormattedText::getActiveFont(int i){
   if (skin)
     return skin->getFont();
   return 0;
-} 
+}
 
 irr::IGUIFont* GUIFormattedText::getDefaultActiveFont(){
   if ( defaultOverrideFont )
@@ -132,13 +137,13 @@ irr::IGUIFont* GUIFormattedText::getDefaultActiveFont(){
   return 0;
 }
 
-void GUIFormattedText::setOverrideColor (int i,irr::SColor color){
+void GUIFormattedText::setOverrideColor (int i,irr::video::SColor color){
   if(i<0 || i>=paragraphs.size())
     return;
   irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin()+i;
   (*it)->setOverrideColor(color);
 }
-  
+
 void GUIFormattedText::enableOverrideColor (int i,bool enable){
   if(i<0 || i>=paragraphs.size())
     return;
@@ -147,14 +152,14 @@ void GUIFormattedText::enableOverrideColor (int i,bool enable){
 
 }
 
-irr::SColor GUIFormattedText::getOverrideColor (int i) const{
+irr::video::SColor GUIFormattedText::getOverrideColor (int i) const{
   if(i<0 || i>=paragraphs.size())
-    return irr::SColor(101,255,255,255);
+    return irr::video::SColor(101,255,255,255);
   irr::list<irr::IGUIStaticText*>::ConstIterator it=paragraphs.begin()+i;
   return (*it)->getOverrideColor();
 }
 
-     
+
 void GUIFormattedText::setTextAlignment(int i,irr::EGUI_ALIGNMENT horizontal, irr::EGUI_ALIGNMENT vertical){
   if(i<0 || i>=paragraphs.size())
     return;

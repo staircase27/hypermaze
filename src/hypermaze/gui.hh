@@ -7,30 +7,20 @@
 class Maze;
 class PuzzleDisplay;
 
+static const int MGUIET_EMPTY = irr::gui::EGUIET_COUNT+10;
 
-using namespace std;
-
-namespace irr{
-  using namespace core;
-  using namespace scene;
-  using namespace io;
-  using namespace video;
-  using namespace gui;
-};
-
-static const int MGUIET_EMPTY = irr::EGUIET_COUNT+10;
-
-class CGUIEmptyElement : public irr::IGUIElement
+class CGUIEmptyElement : public irr::gui::IGUIElement
 {
   public:
-    CGUIEmptyElement(irr::IGUIEnvironment* environment, irr::IGUIElement* parent)
-        :irr::IGUIElement((irr::EGUI_ELEMENT_TYPE)MGUIET_EMPTY, environment, parent, -1, irr::rect<irr::s32>(0,0,100000,10000)) {}
+    CGUIEmptyElement(irr::gui::IGUIEnvironment* environment, irr::gui::IGUIElement* parent)
+        :irr::gui::IGUIElement((irr::gui::EGUI_ELEMENT_TYPE)MGUIET_EMPTY, environment, parent,
+                                -1, irr::core::rect<irr::s32>(0,0,100000,10000)) {}
 
-    irr::IGUIEnvironment* GetEnvironment() { return Environment; }
+    irr::gui::IGUIEnvironment* GetEnvironment() { return Environment; }
 
     virtual const irr::c8* getTypeName() const   { return "empty"; }
 
-    virtual bool isPointInside(const irr::position2d<irr::s32>& point) const { return false; }
+    virtual bool isPointInside(const irr::core::position2d<irr::s32>& point) const { return false; }
 
     virtual bool bringToFront(IGUIElement* element)
     {
@@ -57,11 +47,11 @@ class BaseGui : irr::IEventReceiver{
 
     void apply(irr::IrrlichtDevice* _device);
     void unapply();
-    
+
     virtual void createGUI()=0;
-    
+
     virtual bool run()=0;
-    
+
     void main(irr::IrrlichtDevice* _device,FontManager* _fm);
 };
 
@@ -71,7 +61,7 @@ class GenerateGui: BaseGui{
   bool cancelClicked;
 
   PuzzleDisplay* pd;
-  
+
   irr::gui::IGUISpinBox *xSize, *ySize, *zSize;
 
   enum
@@ -95,7 +85,7 @@ class SaveGui: BaseGui{
 
   PuzzleDisplay* pd;
 
-  irr::IGUIEditBox * fileField;
+  irr::gui::IGUIEditBox * fileField;
 
   enum
   {
@@ -117,9 +107,9 @@ class OpenGui: BaseGui{
   bool cancelClicked;
 
   PuzzleDisplay* pd;
-  
-  irr::IGUIEditBox * fileField;
-  
+
+  irr::gui::IGUIEditBox * fileField;
+
   enum
   {
     GUI_ID_OK_BUTTON=201,
@@ -139,7 +129,7 @@ class WinGui: BaseGui{
   bool okClicked,nextClicked,generateClicked,loadClicked, saveClicked;
 
   PuzzleDisplay* pd;
-  
+
   Message m;
   Pair<SPA<const char> > nextLevel;
 
@@ -160,14 +150,14 @@ class WinGui: BaseGui{
     bool run();
   public:
     bool won(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd,const Message& m, Pair<SPA<const char> > nextLevel);
-    
+
     WinGui():pd(0),m(),nextLevel(){}
 };
 
 class MessageGui: BaseGui{
 
     Message m;
-    
+
   bool okClicked;
 
   enum

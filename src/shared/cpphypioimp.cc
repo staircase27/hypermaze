@@ -3,6 +3,7 @@
  * @brief Implementation of hypio.hh
  */
 #include "cpphypioimp.hh"
+using namespace std;
 
 #ifdef IOSTREAM
 
@@ -77,6 +78,6 @@ bool CPPHypOStream::write(const char*& str,const bool& quote){
   os<<str;
   if(quote)
     os<<*d;
-  return os.good();  
+  return os.good();
 }
 #endif

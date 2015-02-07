@@ -4,8 +4,6 @@
 #include <set>
 #include <cstdlib>
 
-using namespace std;
-
 #ifndef MAZEGEN_HH_INC
 #define MAZEGEN_HH_INC
 
@@ -14,7 +12,7 @@ class Walker{
     Maze& m;
   public:
     Walker(Maze& m):m(m){};
-    
+
     virtual ~Walker(){};
 
     virtual void init(){};
@@ -122,14 +120,14 @@ class Hunter{
 
       for(p=huntStart;p!=huntEnd;w->moveVector(p,down)){
         if(*m[p]==0){
-          set<Dirn> available;
+          std::set<Dirn> available;
           for(int i=0;i<6;i++){
             Dirn d=from_id(i);
             if(inCube(p+to_vector(d),Vector(0,0,0),m.size)&&((*m[p+to_vector(d)]&mask)!=0))
               available.insert(d);
           }
           if(!available.empty()){
-            set<Dirn>::iterator dirn = available.begin();
+            std::set<Dirn>::iterator dirn = available.begin();
             advance(dirn, rand() % available.size());
             *m[p]|=to_mask(*dirn)|mask;
             *m[p+to_vector(*dirn)]|=to_mask(opposite(*dirn));
@@ -175,7 +173,7 @@ class MazeGenHalf{
     bool walk(){
       if(p.X<0)
         return false;
-      set<Dirn> available;
+      std::set<Dirn> available;
       for(int i=0;i<6;i++){
         Dirn d=from_id(i);
         if(inCube(p+to_vector(d),Vector(0,0,0),m.size)&&*m[p+to_vector(d)]==0)
@@ -183,10 +181,10 @@ class MazeGenHalf{
       }
       if(available.empty())
         return false;
-      set<Dirn>::iterator dirn = available.begin();
+      std::set<Dirn>::iterator dirn = available.begin();
       advance(dirn, rand() % available.size());
       #ifdef DEBUG
-      cout<<"    walk in "<<*dirn<<" to "<<p+to_vector(*dirn)<<endl;
+      std::cout<<"    walk in "<<*dirn<<" to "<<p+to_vector(*dirn)<<std::endl;
       #endif
       *m[p]|=to_mask(*dirn);
       p=p+to_vector(*dirn);
@@ -203,15 +201,15 @@ class MazeGenHalf{
       if(p.X==-2)
         init();
       #ifdef DEBUG
-      cout<<"step "<<mask<<endl;
+      std::cout<<"step "<<mask<<std::endl;
       #endif
       if(forceHunt()||!walk()){
         #ifdef DEBUG
-        cout<<"hunting"<<endl;
+        std::cout<<"hunting"<<std::endl;
         #endif
         if(!h->hunt()){
           #ifdef DEBUG
-          cout<<"hunting failed"<<endl;
+          std::cout<<"hunting failed"<<std::endl;
           #endif
           return true;
         }
@@ -359,19 +357,19 @@ class RandLimitMazeGenHalf: public MazeGenHalf<H>{
 template <class MGH>
 Maze generate(Vector size){
   #ifdef DEBUG
-  cout<<"gen"<<endl;
+  std::cout<<"gen"<<std::endl;
   #endif
   Maze m(size);
   MGH* down=new MGH(m,true);
   MGH* up=new MGH(m,false);
   #ifdef DEBUG
-  cout<<true<<" state "<<down->p<<" "<<down->h->huntStart<<" "<<down->h->huntEnd<<endl;
-  cout<<false<<" state "<<up->p<<" "<<up->h->huntStart<<" "<<up->h->huntEnd<<endl;
+  std::cout<<true<<" state "<<down->p<<" "<<down->h->huntStart<<" "<<down->h->huntEnd<<std::endl;
+  std::cout<<false<<" state "<<up->p<<" "<<up->h->huntStart<<" "<<up->h->huntEnd<<std::endl;
   #endif
   while(!(down->doStep()&up->doStep())){
     #ifdef DEBUG
-    cout<<true<<" state "<<down->p<<" "<<down->h->huntStart<<" "<<down->h->huntEnd<<endl;
-    cout<<false<<" state "<<up->p<<" "<<up->h->huntStart<<" "<<up->h->huntEnd<<endl;
+    std::cout<<true<<" state "<<down->p<<" "<<down->h->huntStart<<" "<<down->h->huntEnd<<std::endl;
+    std::cout<<false<<" state "<<up->p<<" "<<up->h->huntStart<<" "<<up->h->huntEnd<<std::endl;
     #endif
   };
   delete up;
@@ -380,7 +378,7 @@ Maze generate(Vector size){
 };
 
 void solve(Maze& m){
-  set<Dirn> dirns;
+  std::set<Dirn> dirns;
   dirns.insert(UP);
   dirns.insert(DOWN);
   dirns.insert(LEFT);
@@ -391,7 +389,7 @@ void solve(Maze& m){
   for(int z=0;z<m.size.Z;++z)
     for(int y=m.size.Y-1;y>=0;--y)
         for(int x=m.size.X-1;x>=0;--x)
-          for(set<Dirn>::iterator d=dirns.begin();d!=dirns.end();++d)
+          for(std::set<Dirn>::iterator d=dirns.begin();d!=dirns.end();++d)
             if(inCube(Vector(x,y,z)+to_vector(*d),Vector(0,0,0),m.size)&&(*m[Vector(x,y,z)]&mask)==(*m[Vector(x,y,z)+to_vector(*d)]&mask))
               *m[Vector(x,y,z)]|=to_mask(*d);
 }

@@ -2,17 +2,7 @@
 #include "keymap.hh"
 #include "irrlicht.h"
 
-using namespace std;
-
-namespace irr{
-  using namespace core;
-  using namespace scene;
-  using namespace io;
-  using namespace video;
-  using namespace gui;
-};
-
-irr::stringw toString(const irr::EKEY_CODE& k){
+irr::core::stringw toString(const irr::EKEY_CODE& k){
   switch(k){
     case irr::KEY_BACK: return L"BACKSPACE key";
     case irr::KEY_TAB: return L"TAB key";
@@ -146,7 +136,7 @@ irr::stringw toString(const irr::EKEY_CODE& k){
     case irr::KEY_OEM_CLEAR: return L"Clear key";
     default:
       {
-        irr::stringw tmp(L"{key ");
+        irr::core::stringw tmp(L"{key ");
         tmp+=((int)k);
         return tmp+=L"}";
       }
@@ -154,8 +144,8 @@ irr::stringw toString(const irr::EKEY_CODE& k){
 }
 
 
-inline irr::stringw toString(KeySpec ks){
-  irr::stringw s;
+inline irr::core::stringw toString(KeySpec ks){
+  irr::core::stringw s;
   if(ks.chr==0 && (ks.key==irr::KEY_KEY_CODES_COUNT || ks.key==0))
     return L"None";
   if(ks.control)
@@ -177,7 +167,7 @@ class KeyMapGui: BaseGui{
   bool okClicked;
   bool cancelClicked;
 
-  irr::IGUITable *table;
+  irr::gui::IGUITable *table;
   int editing;
 
   enum
@@ -198,7 +188,7 @@ class KeyMapGui: BaseGui{
             return true;
           }
         }
-        if(event.GUIEvent.EventType==irr::EGET_TABLE_SELECTED_AGAIN){
+        if(event.GUIEvent.EventType==irr::gui::EGET_TABLE_SELECTED_AGAIN){
           if(editing>=0)
             table->setCellText(editing,1,toString(km.getKeySpec(KeyMap::actionNames[editing].first)));
           editing=table->getSelected();
@@ -246,30 +236,30 @@ class KeyMapGui: BaseGui{
       editing=-1;
       okClicked=cancelClicked=false;
 
-      irr::IVideoDriver* driver = device->getVideoDriver();
-      irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+      irr::video::IVideoDriver* driver = device->getVideoDriver();
+      irr::gui::IGUIEnvironment *guienv = device->getGUIEnvironment();
 
-      irr::rect<irr::s32> rect=driver->getViewPort();
-      irr::position2d<irr::s32> center=rect.getCenter();
-      irr::dimension2d<irr::s32> size=rect.getSize();
-      size.Width=min(600,size.Width-10);
-      size.Height=min(600,size.Height-10);
+      irr::core::rect<irr::s32> rect=driver->getViewPort();
+      irr::core::position2d<irr::s32> center=rect.getCenter();
+      irr::core::dimension2d<irr::s32> size=rect.getSize();
+      size.Width=std::min(600,size.Width-10);
+      size.Height=std::min(600,size.Height-10);
 
-      table = guienv->addTable(irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),el,-1,true);
+      table = guienv->addTable(irr::core::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),el,-1,true);
       table->addColumn(L"Action",0);
       table->addColumn(L"Key",1);
       table->setColumnWidth(0,size.Width/2-10);
       table->setColumnWidth(1,size.Width/2-10);
-      table->setColumnOrdering(0,irr::EGCO_NONE);
-      table->setColumnOrdering(1,irr::EGCO_NONE);
+      table->setColumnOrdering(0,irr::gui::EGCO_NONE);
+      table->setColumnOrdering(1,irr::gui::EGCO_NONE);
       for(int i=0;i<KeyMap::A_COUNT-1;++i){
         table->addRow(i);
         table->setCellText(i,0,KeyMap::actionNames[i].second);
         table->setCellText(i,1,toString(km.getKeySpec(KeyMap::actionNames[i].first)).c_str());
       }
 
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+size.Height/2-32,center.X+size.Width/2-100,center.Y+size.Height/2),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
-      guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Apply");
+      guienv->addButton(irr::core::rect<irr::s32>(center.X+size.Width/2-210,center.Y+size.Height/2-32,center.X+size.Width/2-100,center.Y+size.Height/2),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
+      guienv->addButton(irr::core::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Apply");
 
       guienv->setFocus(table);
 

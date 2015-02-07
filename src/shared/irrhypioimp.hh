@@ -1,22 +1,15 @@
 #include "bufhypio.hh"
 #ifdef IRRLICHT
 #include "irrlicht.h"
-namespace irr{
-  using namespace core;
-  using namespace scene;
-  using namespace io;
-  using namespace video;
-};
-#include <cstring>
 
 #ifndef IRRHYPIOIMP_HH_INC
 #define IRRHYPIOIMP_HH_INC
 
 class IrrHypIStream: public BufHypIStream{
-  irr::IReadFile* f;
+  irr::io::IReadFile* f;
 
   public:
-    IrrHypIStream(irr::IReadFile*);
+    IrrHypIStream(irr::io::IReadFile*);
     ~IrrHypIStream();
 
   protected:
@@ -24,15 +17,15 @@ class IrrHypIStream: public BufHypIStream{
 };
 
 class IrrHypOStream: public BufHypOStream{
-  irr::IWriteFile* f;
-  
+  irr::io::IWriteFile* f;
+
   public:
-    IrrHypOStream(irr::IWriteFile*);
+    IrrHypOStream(irr::io::IWriteFile*);
     virtual ~IrrHypOStream();
-    
+
   protected:
     bool writeToSink();
-    
+
 };
 #endif
 #endif

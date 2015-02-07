@@ -7,23 +7,6 @@
 #ifndef KEYMAP_HH_INC
 #define KEYMAP_HH_INC
 
-inline int mbtowc0( wchar_t * pwc, const char * pmb, size_t max ){
-  if(*pmb==0){
-    *pwc=0;
-    return 1;
-  }else
-    return mbtowc(pwc,pmb,max);
-}
-
-namespace irr{
-  using namespace core;
-  using namespace scene;
-  using namespace io;
-  using namespace video;
-};
-
-using namespace std;
-
 struct KeySpec{
   wchar_t chr;
   irr::EKEY_CODE key;
@@ -71,173 +54,53 @@ class KeyMap{
       A_SAVE,A_CONF,
       A_COUNT};
 
-    static const pair<Action,pair<Dirn,bool> > sliceActions[12];
-    static const pair<Action,pair<bool,bool> > slideActions[4];
-    static const pair<Action,Dirn> moveActions[6];
-    static const pair<Action,const wchar_t*> actionNames[A_COUNT-1];
+    static const std::pair<Action,std::pair<Dirn,bool> > sliceActions[12];
+    static const std::pair<Action,std::pair<bool,bool> > slideActions[4];
+    static const std::pair<Action,Dirn> moveActions[6];
+    static const std::pair<Action,const wchar_t*> actionNames[A_COUNT-1];
   private:
-    map<KeySpec,Action> keyMap;
-    map<Action,KeySpec> revMap;
+    std::map<KeySpec,Action> keyMap;
+    std::map<Action,KeySpec> revMap;
   public:
-    pair<KeySpec,Action> addMapping(KeySpec key,Action a){
-      pair<KeySpec,Action> old(revMap[a],keyMap[key]);
+    inline std::pair<KeySpec,Action> addMapping(KeySpec key,Action a){
+      std::pair<KeySpec,Action> old(revMap[a],keyMap[key]);
       keyMap.erase(old.first);
       revMap.erase(old.second);
       keyMap[key]=a;
       revMap[a]=key;
       return old;
     }
-    Action getAction(KeySpec key){
+    inline Action getAction(KeySpec key){
       return keyMap[key];
     }
-    KeySpec getKeySpec(Action a){
+    inline KeySpec getKeySpec(Action a){
       return revMap[a];
     }
-    Action removeMapping(KeySpec key){
+    inline Action removeMapping(KeySpec key){
       Action old=keyMap[key];
       keyMap.erase(key);
       revMap.erase(old);
       return old;
     }
-    KeySpec removeMapping(Action a){
+    inline KeySpec removeMapping(Action a){
       KeySpec old(revMap[a]);
       revMap.erase(a);
       keyMap.erase(old);
       return old;
     }
-    const map<KeySpec,Action> getKeyMap(){
+    inline const std::map<KeySpec,Action> getKeyMap() const{
       return keyMap;
     }
-    const map<Action,KeySpec> getRevMap(){
+    inline const std::map<Action,KeySpec> getRevMap() const{
       return revMap;
     }
 
   private:
-    virtual irr::u32 doparse(char* data,irr::u32 length){
-      irr::u32 totalused=0;
-      char* start=data;
-      char* end=data+length;
-      const char* tmp;
-      while(true){
-        KeySpec ks;
-        while(irr::isspace(*data)){++data;}
-        if(data>=end) return totalused;
-
-        data+=mbtowc0(&ks.chr,data,end-data);
-        if(data>=end) return totalused;
-
-        while(irr::isspace(*data)){++data;}
-        if(data>=end) return totalused;
-
-        ks.key=(irr::EKEY_CODE)irr::strtol10(data,&tmp);
-        data+=tmp-data;
-        if(data>=end) return totalused;
-
-        while(irr::isspace(*data)){++data;}
-        if(data>=end) return totalused;
-
-        ks.shift=(bool)irr::strtol10(data,&tmp);
-        data+=tmp-data;
-        if(data>=end) return totalused;
-
-        while(irr::isspace(*data)){++data;}
-        if(data>=end) return totalused;
-
-        ks.control=(bool)irr::strtol10(data,&tmp);
-        data+=tmp-data;
-        if(data>=end) return totalused;
-
-        while(irr::isspace(*data)){++data;}
-        if(data>=end) return totalused;
-
-        KeyMap::Action a=(KeyMap::Action)irr::strtol10(data,&tmp);
-        data+=tmp-data;
-        if(data>=end) return totalused;
-
-        this->addMapping(ks,a);
-        totalused=data-start;
-      }
-    }
+    irr::u32 doparse(char* data,irr::u32 length);
 
   public:
-
-    bool save(irr::io::IFileSystem* fs){
-      irr::io::IWriteFile* f=fs->createAndWriteFile(irr::path(getUserConfigPath())+"keymap.conf");
-      cout<<"writing keymap to "<<(irr::path(getUserConfigPath())+"keymap.conf").c_str()<<" "<<f<<endl;
-      if(!f)
-        return false;
-      save(f);
-      f->drop();
-      return true;
-    }
-
-    void save(irr::IWriteFile* out){
-      irr::stringc str;
-      char*tmp=new char[MB_CUR_MAX];
-      for(map<KeySpec,KeyMap::Action>::const_iterator it=keyMap.begin();it!=keyMap.end();++it){
-        if(it->second==A_NONE)
-          continue;
-        int len=wctomb(tmp,it->first.chr);
-        str+=irr::stringc(tmp,len);
-        str+=" ";
-        str+=it->first.key;
-        str+=" ";
-        str+=it->first.shift;
-        str+=" ";
-        str+=it->first.control;
-        str+=" ";
-        str+=it->second;
-        str+="\n";
-        if(str.size()>256){
-          out->write(str.c_str(),str.size());
-          str=irr::stringc();
-        }
-      }
-      out->write(str.c_str(),str.size());
-    }
-
-    bool load(irr::io::IFileSystem* fs){
-      irr::IReadFile* f=fs->createAndOpenFile(irr::path(getUserConfigPath())+"keymap.conf");
-      if(!f){
-        const irr::fschar_t* dir=getSystemConfigPath();
-        if(dir)
-          f=fs->createAndOpenFile(irr::path(dir)+"keymap.conf");
-      }
-      if(!f)
-        f=fs->createAndOpenFile(irr::path(getDefaultConfigPath())+"keymap.conf");
-      if(!f)
-        return false;
-      load(f);
-      f->drop();
-      return true;
-    }
-
-
-    void load(irr::IReadFile* in){
-      irr::u32 len=256;
-      char *buf=new char[len+1];
-      irr::u32 avail=0;
-      irr::u32 used=0;
-      while(true){
-        if(used!=0){
-          memmove(buf,buf+used,avail-used);
-          avail-=used;
-        }else if(avail==len){
-          len*=2;
-          char* tmp=new char[len+1];
-          memcpy(tmp,buf,avail);
-          delete[] buf;
-          buf=tmp;
-        }
-        irr::s32 read=in->read(buf+avail,len-avail);
-        avail+=read;
-        buf[avail]='\0';
-        used=this->doparse(buf,avail);
-        if(read==0)
-          break;
-      }
-      delete [] buf;
-    }
+    bool load(irr::io::IFileSystem* fs);
+    bool save(irr::io::IFileSystem* fs);
 };
 
 #endif

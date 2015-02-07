@@ -6,8 +6,6 @@
 #include "../irrshared/GUIFormattedText.hh"
 #include "../irrshared/irrcurl.hh"
 
-using namespace std;
-
 namespace irr{
   using namespace core;
   using namespace scene;
@@ -15,6 +13,7 @@ namespace irr{
   using namespace video;
   using namespace gui;
 };
+using namespace std;
 
 void addMessageToElement(GUIFormattedText* text,FontManager* fm,const Message& m){
   int buflen=0;

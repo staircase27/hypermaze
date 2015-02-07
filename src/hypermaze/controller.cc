@@ -3,6 +3,11 @@
 #include "gui.hh"
 #include "helpgui.hh"
 
+namespace irr{
+  using namespace core;
+  using namespace scene;
+}
+
     bool KeyboardController::OnEvent(const irr::SEvent& event)
     {
       // Remember whether each key is down or up
@@ -31,13 +36,13 @@
     }
 
     void KeyboardController::run(irr::u32 now){
-      for(const pair<KeyMap::Action,pair<Dirn,bool> >* it=KeyMap::sliceActions;it!=KeyMap::sliceActions+12;++it){
+      for(const std::pair<KeyMap::Action,std::pair<Dirn,bool> >* it=KeyMap::sliceActions;it!=KeyMap::sliceActions+12;++it){
         if(isTriggered(it->first)&&actionTime[it->first]<now){
           pd.hideSide(it->second.first,it->second.second);
-          actionTime[it->first]=now+1*DELAY;  
+          actionTime[it->first]=now+1*DELAY;
         }
       }
-      for(const pair<KeyMap::Action,pair<bool,bool> >* it=KeyMap::slideActions;it!=KeyMap::slideActions+4;++it){
+      for(const std::pair<KeyMap::Action,std::pair<bool,bool> >* it=KeyMap::slideActions;it!=KeyMap::slideActions+4;++it){
         if(isTriggered(it->first)&&actionTime[it->first]<now){
           if(pd.sp.slide(it->second.first,it->second.second)){
             pd.stringSelectionUpdated();
@@ -45,7 +50,7 @@
           }
         }
       }
-      for(const pair<KeyMap::Action,Dirn>* it=KeyMap::moveActions;it!=KeyMap::moveActions+6;++it){
+      for(const std::pair<KeyMap::Action,Dirn>* it=KeyMap::moveActions;it!=KeyMap::moveActions+6;++it){
         if(isTriggered(it->first)&&actionTime[it->first]<now){
           if(pd.sp.tryMove(it->second)){
             pd.stringUpdated();
@@ -54,7 +59,7 @@
             sm->playEffect(SoundManager::SE_BLOCK);
         }
       }
-      
+
       if(isTriggered(KeyMap::A_UNDO)&&actionTime[KeyMap::A_UNDO]<now){
         if(pd.sp.undo()){
           pd.stringUpdated();
@@ -88,7 +93,7 @@
         actionTime[KeyMap::A_CONF]=now+1*DELAY;
       }
     };
-    
+
   void MouseSlicerController::run(irr::u32 now){
     if(!slice.isnull()){
       irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
@@ -261,7 +266,7 @@
             irr::triangle3df tmp;
             string=collMan-> getSceneNodeAndCollisionPointFromRay(
                 collMan->getRayFromScreenCoordinates(mousePos),startPoint,tmp);
-            pair<StringPointer,bool> sp=pd.getStringPointer(string);
+            std::pair<StringPointer,bool> sp=pd.getStringPointer(string);
             bool selected=false;
             if(sp.first!=pd.s.end()){
               selected=sp.first->selected;
@@ -369,7 +374,7 @@
             irr::triangle3df tmp;
             string=collMan-> getSceneNodeAndCollisionPointFromRay(
                 collMan->getRayFromScreenCoordinates(mousePos),startPoint,tmp);
-            pair<StringPointer,bool> sp=pd.getStringPointer(string);
+            std::pair<StringPointer,bool> sp=pd.getStringPointer(string);
             bool selected=false;
             if(sp.first!=pd.s.end()){
               selected=sp.first->selected;
@@ -403,7 +408,7 @@
       }
       return false;
     }
-    
+
     void MouseStringSelectorController::run(irr::u32 now){
       if(string){
         irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
@@ -411,7 +416,7 @@
         irr::f32 weight=con(to_vector(LEFT)).dotProduct(
             (ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap))/
             (ldir.getLengthSQ()-ldir.dotProduct(con(to_vector(LEFT)))*ldir.dotProduct(con(to_vector(LEFT))))-moved;
-        
+
         while(weight>1){
           if(sp.first!=pd.s.end()){
             if(moved<0)
@@ -444,7 +449,7 @@
         }
       }
     }
-    
+
     bool MouseStringSelectorController::OnEvent(const irr::SEvent& event){
       if (event.EventType != irr::EET_MOUSE_INPUT_EVENT)
         return false;
@@ -458,7 +463,7 @@
             irr::vector3df tmp2;
             irr::ISceneNode* node=collMan-> getSceneNodeAndCollisionPointFromRay(
                 collMan->getRayFromScreenCoordinates(mousePos),tmp2,tmp);
-            pair<StringPointer,bool> sp=pd.getStringPointer(node);
+            std::pair<StringPointer,bool> sp=pd.getStringPointer(node);
             if(sp.second||sp.first!=pd.s.end()){
               bool selected=false;
               if(sp.first!=pd.s.end()){
@@ -484,7 +489,7 @@
             irr::triangle3df tmp;
             irr::ISceneNode* node=collMan-> getSceneNodeAndCollisionPointFromRay(
                 collMan->getRayFromScreenCoordinates(mousePos),startPoint,tmp);
-            pair<StringPointer,bool> sp=pd.getStringPointer(node);
+            std::pair<StringPointer,bool> sp=pd.getStringPointer(node);
             if(sp.second||sp.first!=pd.s.end()){
               bool selected=false;
               if(sp.first!=pd.s.end()){
@@ -527,4 +532,4 @@
       }
       return false;
     }
-  
+
