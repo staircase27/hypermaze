@@ -1,7 +1,7 @@
-#include "controller.hh"
-#include "irrdisp.hh"
 #include "gui.hh"
 #include "helpgui.hh"
+#include "controller.hh"
+#include "irrdisp.hh"
 
 namespace irr{
   using namespace core;

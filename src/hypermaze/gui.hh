@@ -53,6 +53,31 @@ class BaseGui : irr::IEventReceiver{
     virtual bool run()=0;
 
     void main(irr::IrrlichtDevice* _device,FontManager* _fm);
+    
+    virtual ~BaseGui(){};
+};
+
+class ErrorGui: BaseGui{
+   
+  Message detail;
+  irr::core::stringw msg;
+
+  bool okClicked;
+
+  enum
+  {
+    GUI_ID_OK_BUTTON=201,
+  };
+
+  protected:
+    virtual bool OnEventImpl(const irr::SEvent &event);
+    void createGUI();
+    bool run();
+  public:
+    bool error(irr::IrrlichtDevice* _device,FontManager* _fm,const irr::core::stringw msg,irr::core::stringc detail);
+    bool error(irr::IrrlichtDevice* _device,FontManager* _fm,const irr::core::stringw msg,const Message& detail);
+
+    ErrorGui():msg(),detail(){}
 };
 
 class GenerateGui: BaseGui{
@@ -156,7 +181,7 @@ class WinGui: BaseGui{
 
 class MessageGui: BaseGui{
 
-    Message m;
+  Message m;
 
   bool okClicked;
 

@@ -35,6 +35,7 @@ set(hypermaze_SRCS
     src/irrshared/platformcompat.hh
     src/irrshared/platformcompat.cc
     src/hypermaze/gui.cc
+    src/hypermaze/helpgui.cc
     src/hypermaze/helpgui.hh
     src/hypermaze/controller.hh
     src/hypermaze/keymap.hh
@@ -44,6 +45,7 @@ set(hypermaze_SRCS
     src/hypermaze/irrdisp.hh
     src/hypermaze/irrdisp.cc
     src/hypermaze/keymapgui.hh
+    src/hypermaze/keymapgui.cc
     src/hypermaze/gui.hh
     src/hypermaze/controller.cc
     src/hypermaze/keymap.cc)

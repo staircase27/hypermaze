@@ -154,6 +154,71 @@ void BaseGui::main(irr::IrrlichtDevice* _device,FontManager* _fm){
   el->drop();
 }
 
+bool ErrorGui::OnEventImpl(const irr::SEvent &event){
+  if(event.EventType == irr::EET_GUI_EVENT && event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED)
+    if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
+      okClicked=true;
+      return true;
+  }
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+	okClicked=true;
+	return true;
+  }
+  return false;
+};
+bool ErrorGui::error(irr::IrrlichtDevice* _device,FontManager* _fm,const irr::core::stringw msg,irr::core::stringc detail){
+  Message m;
+  m.paragraphs=SPA<Pair<SPA<const char> > >(1);
+  SPA<char> tmp(1);
+  tmp[0]='\0';
+  m.paragraphs[0].a=tmp;
+  tmp=SPA<char>(detail.size()+1);
+  memcopy(tmp,detail.c_str(),detail.size()+1);
+  m.paragraphs[0].b=tmp;
+  m.count=1;
+  return this->error(_device,_fm,msg,m);
+}
+bool ErrorGui::error(irr::IrrlichtDevice* _device,FontManager* _fm,const irr::core::stringw msg,const Message& detail){
+  this->msg=msg;
+  this->detail=detail;
+  main(_device,_fm);
+  return okClicked;
+}
+void ErrorGui::createGUI(){
+  okClicked=false;
+
+  irr::IVideoDriver* driver = device->getVideoDriver();
+  irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+
+  irr::rect<irr::s32> rect=driver->getViewPort();
+  irr::position2d<irr::s32> center=rect.getCenter();
+  irr::dimension2d<irr::s32> size=rect.getSize();
+  size.Width=min(400,size.Width-10);
+  size.Height=min(600,size.Height-10);
+  
+  irr::video::ITexture* tex = device->getVideoDriver()->getTexture("irrlicht/error.png");
+  irr::dimension2d<irr::u32> imsize;
+  if(tex!=0){
+    imsize=tex->getSize();
+    guienv->addImage(tex,irr::core::position2d<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2),true,el,-1,L"Error");
+  }
+  
+  GUIFormattedText* text=new GUIFormattedText(msg.c_str(),guienv,el,0,irr::core::rect<irr::s32>(center.X-size.Width/2+imsize.Width+10,center.Y-size.Height/2,center.X+size.Width/2,center.Y-size.Height/2+imsize.Height),true,true);
+  text->setOverrideFont(0,fm->getFont(24,true));
+  text->setAllTextAlignment(irr::gui::EGUIA_CENTER,irr::gui::EGUIA_CENTER);
+  
+  makeElementFromMessage(guienv,fm,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+imsize.Height+10,center.X+size.Width/2,center.Y+size.Height/2-10-32),this->detail);
+
+  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Ok"));
+
+  device->setWindowCaption(L"Hyper Maze Message");
+}
+bool ErrorGui::run(){
+  if(okClicked){
+    return false;
+  }
+  return true;
+}
 
 bool GenerateGui::OnEventImpl(const irr::SEvent &event){
   if(event.EventType == irr::EET_GUI_EVENT){
@@ -283,8 +348,14 @@ bool SaveGui::run(){
 	return false;
   if(okClicked){
 	irr::IWriteFile* out=device->getFileSystem()->createAndWriteFile(fileField->getText());
-	if(!out)
+	if(!out){
+          okClicked=false;
+          el->setVisible(false);
+          ErrorGui eg;
+          eg.error(device,fm,L"Error Opening File","File can't be opened for writing.");
+          el->setVisible(true);
 	  return true;
+        }
 	IrrHypOStream os(out);
 	out->drop();
 	write(os,pd->m);
@@ -348,7 +419,17 @@ bool OpenGui::run(){
 	return false;
   if(okClicked){
 	irr::IReadFile* in=createAndOpen(device->getFileSystem(),fileField->getText());
-	if(!in)
+	if(!in){
+          okClicked=false;
+          el->setVisible(false);
+          ErrorGui eg;
+          if(device->getFileSystem()->existFile(fileField->getText()))
+            eg.error(device,fm,L"Error Opening File","File exists but can't be opened.");
+          else
+            eg.error(device,fm,L"Error Opening File","File doesn't exist.");
+          el->setVisible(true);
+	  return true;
+        }
 	  return true;
 	IrrHypIStream is(in);
 	in->drop();

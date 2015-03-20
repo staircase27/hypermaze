@@ -417,10 +417,12 @@ inline size_t strlen(const SPA<const char> s){
    return std::strlen(s.p);
 }
 
-template<class T> inline void memcopy(SPA<T> dest,SPA<T> src,size_t num){
+template<class T>
+inline void memcopy(SPA<T> dest,SPA<T> src,size_t num){
   memcopy(dest,SPA<const T>(src),num);
 }
-template<class T> inline void memcopy(T* dest,SPA<T> src,size_t num){
+template<class T>
+inline void memcopy(T* dest,SPA<T> src,size_t num){
   memcopy(dest,SPA<const T>(src),num);
 }
 template<class T>
@@ -434,6 +436,10 @@ inline void memcopy(T* dest,SPA<const T> src,size_t num){
 template<class T>
 inline void memcopy(SPA<T> dest,const T* src,size_t num){
   memcopy(dest.p,src,num);
+}
+template<class T>
+inline void memcopy(SPA<T> dest,T* src,size_t num){
+  memcopy(dest,(const T*)src,num);
 }
 template<class T>
 inline void memcopy(T* dest,const T* src,size_t num){
