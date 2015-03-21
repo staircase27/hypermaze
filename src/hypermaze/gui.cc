@@ -195,18 +195,18 @@ void ErrorGui::createGUI(){
   irr::dimension2d<irr::s32> size=rect.getSize();
   size.Width=min(400,size.Width-10);
   size.Height=min(600,size.Height-10);
-  
+
   irr::video::ITexture* tex = device->getVideoDriver()->getTexture("irrlicht/error.png");
   irr::dimension2d<irr::u32> imsize;
   if(tex!=0){
     imsize=tex->getSize();
     guienv->addImage(tex,irr::core::position2d<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2),true,el,-1,L"Error");
   }
-  
+
   GUIFormattedText* text=new GUIFormattedText(msg.c_str(),guienv,el,0,irr::core::rect<irr::s32>(center.X-size.Width/2+imsize.Width+10,center.Y-size.Height/2,center.X+size.Width/2,center.Y-size.Height/2+imsize.Height),true,true);
   text->setOverrideFont(0,fm->getFont(24,true));
   text->setAllTextAlignment(irr::gui::EGUIA_CENTER,irr::gui::EGUIA_CENTER);
-  
+
   makeElementFromMessage(guienv,fm,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+imsize.Height+10,center.X+size.Width/2,center.Y+size.Height/2-10-32),this->detail);
 
   guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Ok"));
@@ -349,18 +349,27 @@ bool SaveGui::run(){
   if(okClicked){
 	irr::IWriteFile* out=device->getFileSystem()->createAndWriteFile(fileField->getText());
 	if(!out){
-          okClicked=false;
-          el->setVisible(false);
-          ErrorGui eg;
-          eg.error(device,fm,L"Error Opening File","File can't be opened for writing.");
-          el->setVisible(true);
+    okClicked=false;
+    el->setVisible(false);
+    ErrorGui eg;
+    eg.error(device,fm,L"Error Opening File","File can't be opened for writing.");
+    el->setVisible(true);
+    device->getGUIEnvironment()->setFocus(fileField);
 	  return true;
-        }
+  }
 	IrrHypOStream os(out);
 	out->drop();
-	write(os,pd->m);
+	bool status=write(os,pd->m);
 	os.setNextSpace("\n\n");
-	write(os,pd->sc);
+	status&=write(os,pd->sc);
+	if(!status){
+    okClicked=false;
+    el->setVisible(false);
+    ErrorGui eg;
+    eg.error(device,fm,L"Error writing maze to file","There was an error while writing to the file. Only some of the data for the maze may be written. Please try again.");
+    el->setVisible(true);
+	  return true;
+	}
 	return false;
   }
       return true;
@@ -428,15 +437,21 @@ bool OpenGui::run(){
           else
             eg.error(device,fm,L"Error Opening File","File doesn't exist.");
           el->setVisible(true);
+          device->getGUIEnvironment()->setFocus(fileField);
 	  return true;
         }
-	  return true;
 	IrrHypIStream is(in);
 	in->drop();
-	read(is,pd->m);
-	pd->sc=Script();
-	read(is,pd->sc);
-	return false;
+	bool status = read(is,pd->m).ok;
+	pd->sc=Script();// reset it to blank as a default
+	status &= read(is,pd->sc).ok;
+	if(!status){
+          el->setVisible(false);
+          ErrorGui eg;
+          eg.error(device,fm,L"Error Reading File","The level may have been loaded but it may have errors. If it not correct please try again or get a new copy of the level.");
+          el->setVisible(true);
+  }
+  return false;
   }
   return true;
 }

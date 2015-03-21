@@ -187,11 +187,11 @@ bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > ma
 			  matches[level].end=SP<POINTER>(new POINTER(p));
       //see if we can match the next group
       match|=matchStep(s,p,matches,level+1,groups,cb);
-      
+
       //if we have a match and we don't have a call back then return match (true)
       if(match && cb==0)
         return true;
-      
+
       if(pt.greedy){
         //stepping back. don't need to check if valid as was checked while searching forward]
         --i;--p;
@@ -554,7 +554,10 @@ IOResult read(HypIStream& s,Script& sc){
   int n=0;
   IOResult r=read(s,n,0);
   if(!r.ok){
-    return r;
+    if(r.eof) // we treat the case of a level with no script data at all as a valid level.
+      return IOResult(true,true);
+    else
+      return IOResult(false,false);
   }
   sc.eventcount=n;
   SPA<Event> es(n);
