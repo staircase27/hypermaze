@@ -13,6 +13,7 @@ set(hypermaze_SRCS
     src/shared/bufhypio.cc
     src/shared/bufhypio.hh
     src/core/string.hh
+    src/core/string.cc
     src/core/maze.hh
     src/core/script.hh
     src/core/dirns.hh
@@ -74,7 +75,7 @@ else(WIN32) # on unix like as not windows or apple
    set(DATADIR "share/hypermaze")
 
    string(REGEX MATCH "^/usr(/|$)" INSTALL_IN_USR "${CMAKE_INSTALL_PREFIX}")
- 
+
    if(INSTALL_IN_USR)
      set(SYSTEMCONFIGDIR "/etc/hypermaze/")
    else(INSTALL_IN_USR)
@@ -84,7 +85,7 @@ else(WIN32) # on unix like as not windows or apple
    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM>)
 
    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS UNIX DATADIR="${CMAKE_INSTALL_PREFIX}/${DATADIR}" SYSTEMCONFDIR="${SYSTEMCONFDIR}")
-   
+
    set(CPACK_SET_DESTDIR ON)
 
 endif(WIN32)
@@ -169,6 +170,7 @@ endif(WIN32)
 set(scriptedit_SRCS
     src/scriptedit/scriptedit.cc
     src/core/string.hh
+    src/core/string.cc
     src/core/maze.hh
     src/core/script.hh
     src/core/dirns.hh
@@ -194,6 +196,7 @@ add_custom_target(run-scriptedit $<TARGET_FILE:scriptedit> DEPENDS scriptedit VE
 set(levelgen_SRCS
     src/test/test.cc
     src/core/string.hh
+    src/core/string.cc
     src/core/maze.hh
     src/core/script.hh
     src/core/dirns.hh

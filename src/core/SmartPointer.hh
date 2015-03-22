@@ -11,6 +11,7 @@
 #endif
 #include <cstring>
 
+
 ///A Smart pointer class
 /**
  * This class provides a basic smart pointer class that reference
