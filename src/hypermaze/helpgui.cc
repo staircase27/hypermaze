@@ -35,6 +35,7 @@ bool HelpGui::help(irr::IrrlichtDevice* _device,FontManager* _fm,KeyMap& km){
 
 void HelpGui::createGUI(){
   okClicked=keyMapClicked=false;
+  keyblock=0;
 
   irr::video::IVideoDriver* driver = device->getVideoDriver();
   irr::gui::IGUIEnvironment *guienv = device->getGUIEnvironment();
@@ -49,6 +50,8 @@ void HelpGui::createGUI(){
   text->setOverrideFont(0,fm->getFont(24,true));
   text->setAllTextAlignment(irr::gui::EGUIA_CENTER,irr::gui::EGUIA_CENTER);
   text->addText(L"\nBend, Stretch and Move the String through the maze to get it to the far side of the hyper maze.\n Either click and drag on the controls or use the keyboard controls set below.\n\n\nGame written by Staircase in association with Dark Field Games. http://www.darkfieldgames.com/\nThis game is released open source under the ***** licence. Feel free to edit and change as you like. If you make any improvements or new ideas please send them me them and I may include them in the next release (and thank you below)");
+  text->drop();
+
   guienv->addButton(irr::core::rect<irr::s32>(center.X-75,center.Y+size.Height/2-32-32-10,center.X+75,center.Y+size.Height/2-32-10),el,GUI_ID_KEY_MAP_BUTTON,L"Edit Key Map");
   irr::gui::IGUIButton* ok=guienv->addButton(irr::core::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"OK");
 
