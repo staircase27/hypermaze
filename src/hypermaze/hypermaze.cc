@@ -217,7 +217,7 @@ int main(int argc,char* argv[]){
     device->getGUIEnvironment()->getSkin()->setColor(irr::EGDC_3D_HIGH_LIGHT,c);
   }
 
-  device->setWindowCaption(L"Hyper Maze! - Irrlicht");
+  device->setWindowCaption(L"Hyper Maze");
   irr::IVideoDriver* driver = device->getVideoDriver();
   irr::ISceneManager* smgr = device->getSceneManager();
 
@@ -271,7 +271,7 @@ int main(int argc,char* argv[]){
 
     smgr->drawAll();
 
-    device->setWindowCaption(irr::stringw(pd.sp.getScore()).c_str());
+    device->setWindowCaption((irr::stringw(L"Hyper Maze: ")+=pd.sp.getScore()).c_str());
 
     driver->endScene();
   }

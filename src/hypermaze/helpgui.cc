@@ -54,7 +54,7 @@ void HelpGui::createGUI(){
 
   guienv->setFocus(ok);
 
-  device->setWindowCaption(L"Hyper Maze Help");
+  device->setWindowCaption(L"Hyper Maze: Help");
 }
 
 bool HelpGui::run(){

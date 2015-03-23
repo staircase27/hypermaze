@@ -245,7 +245,7 @@ void KeyMapGui::createGUI(){
 
   guienv->setFocus(table);
 
-  device->setWindowCaption(L"Configure Hyper Maze");
+  device->setWindowCaption(L"Hyper Maze: Configure");
 
 }
 bool KeyMapGui::run(){
