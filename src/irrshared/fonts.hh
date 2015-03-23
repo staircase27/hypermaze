@@ -66,7 +66,7 @@ class FontManager {
     void load(irr::core::stringc font);
 
   public:
-    FontManager(irr::io::IFileSystem* fs,irr::gui::IGUIEnvironment* gui):fs(fs),gui(gui){fs->grab();gui->grab();};
+    FontManager(irr::io::IFileSystem* fs,irr::gui::IGUIEnvironment* gui);
     ~FontManager();
 
 

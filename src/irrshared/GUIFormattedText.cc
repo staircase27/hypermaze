@@ -15,8 +15,14 @@ GUIFormattedText::GUIFormattedText(const wchar_t* text, irr::IGUIEnvironment* en
 }
 
 GUIFormattedText::~GUIFormattedText(){
+  while(Children.begin()!=Children.end()){
+    (*Children.begin())->remove();
+  }
+  paragraphs.clear();
   if(defaultOverrideFont)
     defaultOverrideFont->drop();
+  if(lastLayoutSkinFont)
+    lastLayoutSkinFont->drop();
 }
 
 void GUIFormattedText::draw(){
@@ -207,7 +213,9 @@ void GUIFormattedText::layout(){
   }
   layoutNeeded=false;
   irr::IGUISkin* skin = Environment->getSkin();
-  if (skin)
+  if (skin){
     lastLayoutSkinFont=skin->getFont();
+    lastLayoutSkinFont->grab();
+  }
 }
 

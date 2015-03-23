@@ -75,9 +75,21 @@ FontFamily* VirtualFontSet::resolve(FontManager& m){
 }
 
 inline bool parsebool(const wchar_t* str){
-  return wcscmp(L"",str)&&wcscmp(L"0",str)&&wcscmp(L"false",str);
+  return wcscmp(L"",str)!=0&&wcscmp(L"0",str)!=0&&wcscmp(L"false",str)!=0;
 }
 
+FontManager::FontManager(irr::io::IFileSystem* fs,irr::gui::IGUIEnvironment* gui):fs(fs),gui(gui){
+  fs->grab();gui->grab();
+}
+
+FontManager::~FontManager(){
+  for(irr::map<irr::stringc,FontSet*>::Iterator it=fonts.getIterator();
+          !it.atEnd();it++)
+    delete it->getValue();
+  fs->drop();
+  gui->drop();
+}
+  
 void FontManager::load(irr::stringc font){
   irr::path path("irrlicht/fonts/");
   path.append(font);
@@ -121,14 +133,6 @@ void FontManager::load(irr::stringc font){
     }
   }
   xml->drop();
-}
-FontManager::~FontManager(){
-  for(irr::map<irr::stringc,FontSet*>::Iterator it=fonts.getIterator();
-          !it.atEnd();it++){
-    delete it->getValue();
-    fs->drop();
-    gui->drop();
-  }
 }
 inline FontFamily* FontManager::getFontFamily(irr::stringc font){
   irr::map<irr::stringc,FontSet*>::Node* n=fonts.find(font);

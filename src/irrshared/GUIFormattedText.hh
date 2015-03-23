@@ -5,7 +5,7 @@
 
 #define EGUIET_FORMATTED_TEXT ((irr::gui::EGUI_ELEMENT_TYPE)(irr::gui::EGUIET_COUNT+10))
 
-class GUIFormattedText: irr::gui::IGUIElement{
+class GUIFormattedText:public irr::gui::IGUIElement{
 
   protected:
 

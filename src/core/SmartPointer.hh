@@ -222,9 +222,9 @@ class SPA{
      * @return a reference to this pointer
      */
     SPA<T>& operator=(const SPA<T>& op){
-      ++*op.c;//claim op's data before freeing own in case they are part of the same array
       if(p==op.p && h==op.h && c==op.c)//if they are identical then do nothing
         return *this;
+      ++*op.c;//claim op's data before freeing own in case they are part of the same array
       if(--*c==0){
         delete[] h;
         delete c;
@@ -449,6 +449,7 @@ inline void memcopy(T* dest,const T* src,size_t num){
 
 
 #ifdef IOSTREAM
+#define DEBUGPOINTER
 
 template <class T>
 std::ostream& operator<<(std::ostream& o,const SP<T>& p){

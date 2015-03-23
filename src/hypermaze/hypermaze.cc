@@ -160,6 +160,7 @@ class IrrlichtMusicLoader: public MusicLoader{
           extra*=2;
         }
       }
+      f->drop();
       return data;
     }
     virtual void finished(void* data,int length){
@@ -281,6 +282,10 @@ int main(int argc,char* argv[]){
   delete sm->getMusicLoader();
   delete sm;
   device->drop();
+  #ifdef IRRFONTFIX
+  delete[] font_prefix;
+  #endif
+  
 
   return 0;
 }
