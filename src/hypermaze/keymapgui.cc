@@ -260,3 +260,4 @@ bool KeyMapGui::run(){
 KeyMapGui::~KeyMapGui(){
   delete kmtmp;
 }
+

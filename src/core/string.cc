@@ -22,10 +22,75 @@ bool String::hasWon() const{
   return true;
 }
 
-template <class T>class LimitedStack{  private:    SPA<T> start;    SPA<T> end;    SPA<T> top;    SPA<T> bottom;  public:    LimitedStack(int len):start(len),end(start+len-1),top(start),bottom(start){};    bool empty(){      return top==bottom;    }    inline const T& getTop(){      return *top;    }    const T& popTop(){      const T& tmp=*top;      if(top==start)        top=end;      else        --top;      return tmp;    }    void pushTop(const T& el){      if(top==end){        top=start;        if(top==bottom)          ++bottom;      }else{        ++top;        if(top==bottom)          if(bottom==end)             bottom=top;          else             ++bottom;      }      *top=el;    }    void clear(){      top=bottom=start;    }};struct HistoryElement{  int length;  SPA<unsigned char> selected;  bool isselected(int i){    return (selected[i/CHAR_BIT]&(1<<(i%CHAR_BIT)))!=0;  }  Dirn d;  std::list<Dirn> startcollapsed;  std::list<Dirn> endcollapsed;  HistoryElement(int length,SPA<unsigned char> selected,Dirn d,std::list<Dirn> startcollapsed,std::list<Dirn> endcollapsed):      length(length),selected(selected),d(d),startcollapsed(startcollapsed),endcollapsed(endcollapsed){};  HistoryElement():length(0),selected(),d(),startcollapsed(),endcollapsed(){};};
+template <class T>
+class LimitedStack{
+  private:
+    SPA<T> start;
+    SPA<T> end;
+    SPA<T> top;
+    SPA<T> bottom;
+
+  public:
+
+    LimitedStack(int len):start(len),end(start+len-1),top(start),bottom(start){};
+
+    bool empty(){
+      return top==bottom;
+    }
+
+    inline const T& getTop(){
+      return *top;
+    }
+
+    const T& popTop(){
+      const T& tmp=*top;
+      if(top==start)
+        top=end;
+      else
+        --top;
+      return tmp;
+    }
+
+    void pushTop(const T& el){
+      if(top==end){
+        top=start;
+        if(top==bottom)
+          ++bottom;
+      }else{
+        ++top;
+        if(top==bottom)
+          if(bottom==end)
+             bottom=top;
+          else
+             ++bottom;
+      }
+      *top=el;
+    }
+
+    void clear(){
+      top=bottom=start;
+    }
+};
+
+struct HistoryElement{
+  int length;
+  SPA<unsigned char> selected;
+  bool isselected(int i){
+    return (selected[i/CHAR_BIT]&(1<<(i%CHAR_BIT)))!=0;
+  }
+  Dirn d;
+  std::list<Dirn> startcollapsed;
+  std::list<Dirn> endcollapsed;
+  HistoryElement(int length,SPA<unsigned char> selected,Dirn d,std::list<Dirn> startcollapsed,std::list<Dirn> endcollapsed):
+      length(length),selected(selected),d(d),startcollapsed(startcollapsed),endcollapsed(endcollapsed){};
+  HistoryElement():length(0),selected(),d(),startcollapsed(),endcollapsed(){};
+};
 StringPlay::StringPlay(String& s):s(s),score(0),undohistory(new LimitedStack<HistoryElement>(10+2*s.maze.size.dotProduct(Vector(1,1,1)))),inextendedmove(false){};
 
-void StringPlay::externalEditHappened(){  inextendedmove=false;  undohistory->clear();}
+void StringPlay::externalEditHappened(){
+  inextendedmove=false;
+  undohistory->clear();
+}
 bool StringPlay::slide(bool moveEnd,bool out){
   if(moveEnd){
     std::list<StringElement>::reverse_iterator it;
@@ -197,9 +262,13 @@ bool StringPlay::tryMove(Dirn d,bool extendedmove){
 
 StringPlay::StringPlay(const StringPlay& o):s(o.s),score(o.score),undohistory(new LimitedStack<HistoryElement>(*(o.undohistory))),inextendedmove(o.inextendedmove){};
 
-StringPlay& StringPlay::operator=(const StringPlay& o){  s=o.s;  score=o.score;
-  *undohistory = *(o.undohistory);  return *this;}
-StringPlay::~StringPlay(){delete undohistory; };
+StringPlay& StringPlay::operator=(const StringPlay& o){
+  s=o.s;
+  score=o.score;
+  *undohistory = *(o.undohistory);
+  return *this;
+}
+StringPlay::~StringPlay(){delete undohistory; };
 void StringEdit::setStringSegment(StringPointer sp,StringPointer ep,int count,SPA<Dirn> newRoute){
   std::list<StringElement>::iterator it=sp.el;
   Vector pos=it->pos;
