@@ -21,23 +21,23 @@ class Walker{
       return Vector(0,0,0);
     }
     virtual Vector getEnd(){
-      return Vector(m.size.X-1,m.size.Y-1,m.size.Z-1);
+      return Vector(m.size().X-1,m.size().Y-1,m.size().Z-1);
     }
 
     virtual void moveVector(Vector& v,bool forward){
       v.Z+=forward?-1:1;
-      if(v.Z==m.size.Z){
+      if(v.Z==m.size().Z){
         v.Z=0;
         v.X++;
-        if(v.X==m.size.X){
+        if(v.X==m.size().X){
           v.X=0;
           v.Y++;
         }
       }else if(v.Z<0){
-        v.Z=m.size.Z-1;
+        v.Z=m.size().Z-1;
         v.X--;
         if(v.X<0){
-          v.X=m.size.X-1;
+          v.X=m.size().X-1;
           v.Y--;
         }
       }
@@ -77,7 +77,7 @@ class DiagonalWalker:public Walker{
             }
           }
         }
-      }while(!inCube(v,Vector(0,0,0),m.size));
+      }while(!inCube(v,Vector(0,0,0),m.size()));
     }
   template <class MGH>
   friend Maze generate(Vector size);
@@ -123,7 +123,7 @@ class Hunter{
           std::set<Dirn> available;
           for(int i=0;i<6;i++){
             Dirn d=from_id(i);
-            if(inCube(p+to_vector(d),Vector(0,0,0),m.size)&&((*m[p+to_vector(d)]&mask)!=0))
+            if(inCube(p+to_vector(d),Vector(0,0,0),m.size())&&((*m[p+to_vector(d)]&mask)!=0))
               available.insert(d);
           }
           if(!available.empty()){
@@ -157,12 +157,12 @@ class MazeGenHalf{
       if(down)
         mask=mask<<1;
       if(down){
-        for(int x=0;x<m.size.X;++x)
-          for(int z=0;z<m.size.Z;++z)
-            *m[Vector(x,m.size.Y-1,z)]|=mask;
+        for(int x=0;x<m.size().X;++x)
+          for(int z=0;z<m.size().Z;++z)
+            *m[Vector(x,m.size().Y-1,z)]|=mask;
       }else{
-        for(int x=0;x<m.size.X;++x)
-          for(int z=0;z<m.size.Z;++z)
+        for(int x=0;x<m.size().X;++x)
+          for(int z=0;z<m.size().Z;++z)
             *m[Vector(x,0,z)]|=mask;
       }
     };
@@ -176,7 +176,7 @@ class MazeGenHalf{
       std::set<Dirn> available;
       for(int i=0;i<6;i++){
         Dirn d=from_id(i);
-        if(inCube(p+to_vector(d),Vector(0,0,0),m.size)&&*m[p+to_vector(d)]==0)
+        if(inCube(p+to_vector(d),Vector(0,0,0),m.size())&&*m[p+to_vector(d)]==0)
           available.insert(d);
       }
       if(available.empty())
@@ -235,29 +235,29 @@ class ReorderWalker:public Walker{
       if(v.X%2==0)
         v.X=v.X/2;
       else
-        v.X=m.size.X-(v.X+1)/2;
+        v.X=m.size().X-(v.X+1)/2;
       if(v.Y%2==0)
         v.Y=v.Y/2;
       else
-        v.Y=m.size.Y-(v.Y+1)/2;
+        v.Y=m.size().Y-(v.Y+1)/2;
       if(v.Z%2==0)
         v.Z=v.Z/2;
       else
-        v.Z=m.size.Z-(v.Z+1)/2;
+        v.Z=m.size().Z-(v.Z+1)/2;
     }
     virtual void invtranslate(Vector& v){
-      if(2*v.X<m.size.X)
+      if(2*v.X<m.size().X)
         v.X=2*v.X;
       else
-        v.X=2*(m.size.X-v.X)-1;
-      if(2*v.Y<m.size.Y)
+        v.X=2*(m.size().X-v.X)-1;
+      if(2*v.Y<m.size().Y)
         v.Y=2*v.Y;
       else
-        v.Y=2*(m.size.Y-v.Y)-1;
-      if(2*v.Z<m.size.Z)
+        v.Y=2*(m.size().Y-v.Y)-1;
+      if(2*v.Z<m.size().Z)
         v.Z=2*v.Z;
       else
-        v.Z=2*(m.size.Z-v.Z)-1;
+        v.Z=2*(m.size().Z-v.Z)-1;
     }
     virtual Vector getEnd(){
       Vector end(w->getEnd());
@@ -323,9 +323,9 @@ class RandOrderWalker:public ReorderWalker<W>{
     }
   public:
     RandOrderWalker(Maze& m):ReorderWalker<W>(m){
-      makeTrans(m.size.X,xtrans,xinvtrans);
-      makeTrans(m.size.Y,ytrans,yinvtrans);
-      makeTrans(m.size.Z,ztrans,zinvtrans);
+      makeTrans(m.size().X,xtrans,xinvtrans);
+      makeTrans(m.size().Y,ytrans,yinvtrans);
+      makeTrans(m.size().Z,ztrans,zinvtrans);
     };
     ~RandOrderWalker(){
       delete[] xtrans;
@@ -386,11 +386,11 @@ void solve(Maze& m){
   dirns.insert(FORWARD);
   dirns.insert(BACK);
   int mask=(1|(1<<1))<<10;
-  for(int z=0;z<m.size.Z;++z)
-    for(int y=m.size.Y-1;y>=0;--y)
-        for(int x=m.size.X-1;x>=0;--x)
+  for(int z=0;z<m.size().Z;++z)
+    for(int y=m.size().Y-1;y>=0;--y)
+        for(int x=m.size().X-1;x>=0;--x)
           for(std::set<Dirn>::iterator d=dirns.begin();d!=dirns.end();++d)
-            if(inCube(Vector(x,y,z)+to_vector(*d),Vector(0,0,0),m.size)&&(*m[Vector(x,y,z)]&mask)==(*m[Vector(x,y,z)+to_vector(*d)]&mask))
+            if(inCube(Vector(x,y,z)+to_vector(*d),Vector(0,0,0),m.size())&&(*m[Vector(x,y,z)]&mask)==(*m[Vector(x,y,z)+to_vector(*d)]&mask))
               *m[Vector(x,y,z)]|=to_mask(*d);
 }
 #endif

@@ -18,19 +18,19 @@ void MazeDisplay::init(Maze& m,NodeGen* ng,irr::vector3df center){
     limits[*d].first.first=limits[*d].first.second=0;
     limits[*d].second.first=*d;
     limits[*d].second.second=true;
-    limits[opposite(*d)].first.first=limits[opposite(*d)].first.second=2*(m.size.dotProduct(to_vector(*d))-1);
+    limits[opposite(*d)].first.first=limits[opposite(*d)].first.second=2*(m.size().dotProduct(to_vector(*d))-1);
     limits[opposite(*d)].second.first=*d;
     limits[opposite(*d)].second.second=false;
 
     nodes[*d]=new vector<vector<VisibleCounter*>*>(
-        2*m.size.dotProduct(to_vector(*d))-1,(vector<VisibleCounter*>*)NULL);
+        2*m.size().dotProduct(to_vector(*d))-1,(vector<VisibleCounter*>*)NULL);
   }
 
-  irr::vector3df position=center-(wall+gap)*con(m.size-Vector(1,1,1))/2;
+  irr::vector3df position=center-(wall+gap)*con(m.size()-Vector(1,1,1))/2;
 
-  for(int x=0;x<m.size.X;++x)
-    for(int y=0;y<m.size.Y;++y)
-      for(int z=0;z<m.size.Z;++z){
+  for(int x=0;x<m.size().X;++x)
+    for(int y=0;y<m.size().Y;++y)
+      for(int z=0;z<m.size().Z;++z){
         Vector pos(x,y,z);
         irr::IMeshSceneNode* node = ng->makeUnitWall(true);
         node->grab();
@@ -111,7 +111,7 @@ bool MazeDisplay::hideSide(Dirn side,bool out){
   return true;
 }
 void StringDisplay::update(){
-  irr::vector3df position=center-(MazeDisplay::wall+MazeDisplay::gap)*con(s.maze.size)/2;
+  irr::vector3df position=center-(MazeDisplay::wall+MazeDisplay::gap)*con(s.maze.size())/2;
   bool active=false;
   int i=0;
   list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
@@ -287,7 +287,7 @@ void PuzzleDisplay::mazeUpdated(){
     sp=StringPlay(s);
     sd.setString(s);
     for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
-      slicer->first->setPosition(-con(to_vector(slicer->second))*(abs(to_vector(slicer->second).dotProduct(m.size))/2+2)*(md.wall+md.gap));
+      slicer->first->setPosition(-con(to_vector(slicer->second))*(abs(to_vector(slicer->second).dotProduct(m.size()))/2+2)*(md.wall+md.gap));
     won=false;
     ScriptResponseStart r=sc.runStart(s);
     if(r.stringChanged)

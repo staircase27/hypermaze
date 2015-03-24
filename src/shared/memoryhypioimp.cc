@@ -1,6 +1,6 @@
 /**
- * @file hypio.cc
- * @brief Implementation of hypio.hh
+ * @file memoryhypioimp.cc
+ * @brief Implementation of memoryhypioimp.hh
  */
 #include "memoryhypioimp.hh"
 #include <cstdlib>

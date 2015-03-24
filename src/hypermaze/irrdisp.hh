@@ -124,7 +124,7 @@ class PuzzleDisplay{
       for(Dirn* d=allDirns;d!=allDirns+6;++d){
         irr::scene::IMeshSceneNode* node = ng->makeUnitHandle(to_vector(*d).dotProduct(to_vector(s.targetDir)));
         node->setScale(irr::core::vector3df(1,1,1)*(md.wall+md.gap)/2);
-        node->setPosition(-con(to_vector(*d))*(abs(to_vector(*d).dotProduct(m.size))/2+2)*(md.wall+md.gap));
+        node->setPosition(-con(to_vector(*d))*(abs(to_vector(*d).dotProduct(m.size()))/2+2)*(md.wall+md.gap));
         slicers[node]=*d;
       }
     };

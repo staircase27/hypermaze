@@ -1,6 +1,6 @@
 /**
- * @file hypio.cc
- * @brief Implementation of hypio.hh
+ * @file cpphypioimp.cc
+ * @brief Implementation of cpphypioimp.hh
  */
 #include "cpphypioimp.hh"
 using namespace std;

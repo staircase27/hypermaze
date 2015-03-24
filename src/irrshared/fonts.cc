@@ -89,7 +89,7 @@ FontManager::~FontManager(){
   fs->drop();
   gui->drop();
 }
-  
+
 void FontManager::load(irr::stringc font){
   irr::path path("irrlicht/fonts/");
   path.append(font);
@@ -145,7 +145,7 @@ inline FontFamily* FontManager::getFontFamily(irr::stringc font){
   else
     return n->getValue()->resolve(*this);
 }
-irr::IGUIFont* FontManager::getFont(irr::stringc font,int size,bool bold,bool italic){
+irr::IGUIFont* FontManager::getFont(irr::core::stringc font,int size,bool bold,bool italic){
   FontFamily* f=getFontFamily(font);
   if(f==0)
     return 0;

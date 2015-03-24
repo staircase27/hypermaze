@@ -1,10 +1,10 @@
 #include "string.hh"
 String::String(Maze m):maze(m),endPos(0,0,0),route(),stringDir(LEFT),targetDir(FORWARD){
-  Vector start=m.size.dotProduct(to_shift_vector(stringDir))*to_shift_vector(stringDir)+
-      m.size.dotProduct(to_shift_vector(targetDir))*to_shift_vector(targetDir)+
-      m.size.dotProduct(to_vector(perpendicular(stringDir,targetDir)))/2*to_vector(perpendicular(stringDir,targetDir));
+  Vector start=m.size().dotProduct(to_shift_vector(stringDir))*to_shift_vector(stringDir)+
+      m.size().dotProduct(to_shift_vector(targetDir))*to_shift_vector(targetDir)+
+      m.size().dotProduct(to_vector(perpendicular(stringDir,targetDir)))/2*to_vector(perpendicular(stringDir,targetDir));
   Vector pos=start;
-  while(pos.dotProduct(to_vector(stringDir))!=(start+m.size).dotProduct(to_vector(stringDir))){
+  while(pos.dotProduct(to_vector(stringDir))!=(start+m.size()).dotProduct(to_vector(stringDir))){
     route.push_back(StringElement(pos,stringDir,true));
     pos+=to_vector(stringDir);
   }
@@ -13,7 +13,7 @@ String::String(Maze m):maze(m),endPos(0,0,0),route(),stringDir(LEFT),targetDir(F
 
 bool String::hasWon() const{
   Vector d=to_vector(targetDir);
-  int t=maze.size.dotProduct(-to_shift_vector(opposite(targetDir)));
+  int t=maze.size().dotProduct(-to_shift_vector(opposite(targetDir)));
   if(endPos.dotProduct(d)<t)
     return false;
   for(std::list<StringElement>::const_iterator it=route.begin();it!=route.end();++it)
@@ -85,7 +85,7 @@ struct HistoryElement{
       length(length),selected(selected),d(d),startcollapsed(startcollapsed),endcollapsed(endcollapsed){};
   HistoryElement():length(0),selected(),d(),startcollapsed(),endcollapsed(){};
 };
-StringPlay::StringPlay(String& s):s(s),score(0),undohistory(new LimitedStack<HistoryElement>(10+2*s.maze.size.dotProduct(Vector(1,1,1)))),inextendedmove(false){};
+StringPlay::StringPlay(String& s):s(s),score(0),undohistory(new LimitedStack<HistoryElement>(10+2*s.maze.size().dotProduct(Vector(1,1,1)))),inextendedmove(false){};
 
 void StringPlay::externalEditHappened(){
   inextendedmove=false;
@@ -135,22 +135,22 @@ bool StringPlay::canMove(Dirn d){
     if(!it->selected)
       continue;
     any=true;
-    if(d==UP && it->pos.Y>=s.maze.size.Y-1)
+    if(d==UP && it->pos.Y>=s.maze.size().Y-1)
       return false;
     if(d==DOWN && it->pos.Y<=1)
       return false;
-    if(d==LEFT && it->pos.X>=s.maze.size.X+5)
+    if(d==LEFT && it->pos.X>=s.maze.size().X+5)
       return false;
     if(d==RIGHT && it->pos.X<=-5)
       return false;
-    if(d==FORWARD && it->pos.Z>=s.maze.size.Z+5)
+    if(d==FORWARD && it->pos.Z>=s.maze.size().Z+5)
       return false;
     if(d==BACK && it->pos.Z<=-5)
       return false;
     if(it->d!=d && it->d!=opposite(d)){
       Vector wall=it->pos+to_shift_vector(it->d)+to_shift_vector(d);
       Dirn wallDirn=perpendicular(it->d,d);
-      if(inCube(wall,Vector(0,0,0),s.maze.size)){
+      if(inCube(wall,Vector(0,0,0),s.maze.size())){
         if(((*s.maze[wall])&to_mask(wallDirn))!=0)
           return false;
       }

@@ -1,6 +1,6 @@
 /**
- * @file hypio.cc
- * @brief Implementation of hypio.hh
+ * @file irrhypioimp.cc
+ * @brief Implementation of irrhypioimp.hh
  */
 #include "irrhypioimp.hh"
 #include <cstring>
