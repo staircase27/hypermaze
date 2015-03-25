@@ -227,11 +227,11 @@ namespace irr{
                 collMan->getRayFromScreenCoordinates(mousePos),startPoint,tmp);
             std::pair<StringPointer,bool> sp=pd.getStringPointer(string);
             bool selected=false;
-            if(sp.first!=pd.s.end()){
+            if(sp.first!=pd.s->end()){
               selected=sp.first->selected;
             }
             if(sp.second && ! selected){
-              if(sp.first!=pd.s.begin()){
+              if(sp.first!=pd.s->begin()){
                 --sp.first;
                 selected|=sp.first->selected;
               }
@@ -269,12 +269,12 @@ namespace irr{
             (ldir.getLengthSQ()-ldir.dotProduct(con(to_vector(LEFT)))*ldir.dotProduct(con(to_vector(LEFT))))-moved;
 
         while(weight>1){
-          if(sp.first!=pd.s.end()){
+          if(sp.first!=pd.s->end()){
             if(moved<0)
               pd.sp.setSelected(sp.first,selected);
             ++sp.first;
             if(moved>=0)
-              if(sp.first!=pd.s.end())
+              if(sp.first!=pd.s->end())
                 pd.sp.setSelected(sp.first,!selected);
             pd.stringSelectionUpdated();
             ++moved;
@@ -284,9 +284,9 @@ namespace irr{
           }
         }
         while(weight<-1){
-          if(sp.first!=pd.s.begin()){
+          if(sp.first!=pd.s->begin()){
             if(moved>0)
-              if(sp.first!=pd.s.end())
+              if(sp.first!=pd.s->end())
                 pd.sp.setSelected(sp.first,selected);
             --sp.first;
             if(moved<=0)
@@ -315,19 +315,19 @@ namespace irr{
             irr::ISceneNode* node=collMan-> getSceneNodeAndCollisionPointFromRay(
                 collMan->getRayFromScreenCoordinates(mousePos),tmp2,tmp);
             std::pair<StringPointer,bool> sp=pd.getStringPointer(node);
-            if(sp.second||sp.first!=pd.s.end()){
+            if(sp.second||sp.first!=pd.s->end()){
               bool selected=false;
-              if(sp.first!=pd.s.end()){
+              if(sp.first!=pd.s->end()){
                 selected=sp.first->selected;
               }
               if(sp.second && ! selected){
-                if(sp.first!=pd.s.begin()){
+                if(sp.first!=pd.s->begin()){
                   --sp.first;
                   selected|=sp.first->selected;
                 }
               }
               selected=!selected;
-              for(StringPointer p=pd.s.begin();p!=pd.s.end();++p)
+              for(StringPointer p=pd.s->begin();p!=pd.s->end();++p)
                 pd.sp.setSelected(p,selected);
               pd.stringSelectionUpdated();
               return true;
@@ -341,21 +341,21 @@ namespace irr{
             irr::ISceneNode* node=collMan-> getSceneNodeAndCollisionPointFromRay(
                 collMan->getRayFromScreenCoordinates(mousePos),startPoint,tmp);
             std::pair<StringPointer,bool> sp=pd.getStringPointer(node);
-            if(sp.second||sp.first!=pd.s.end()){
+            if(sp.second||sp.first!=pd.s->end()){
               bool selected=false;
-              if(sp.first!=pd.s.end()){
+              if(sp.first!=pd.s->end()){
                 selected=sp.first->selected;
               }
               if(sp.second && ! selected){
-                if(sp.first!=pd.s.begin()){
+                if(sp.first!=pd.s->begin()){
                   --sp.first;
                   selected|=sp.first->selected;
                   ++sp.first;
                 }
               }
-              if(sp.first!=pd.s.end())
+              if(sp.first!=pd.s->end())
                 pd.sp.setSelected(sp.first,!selected);
-              if(sp.second && sp.first!=pd.s.begin()){
+              if(sp.second && sp.first!=pd.s->begin()){
                 --sp.first;
                 pd.sp.setSelected(sp.first,!selected);
               }

@@ -111,20 +111,20 @@ bool MazeDisplay::hideSide(Dirn side,bool out){
   return true;
 }
 void StringDisplay::update(){
-  irr::vector3df position=center-(MazeDisplay::wall+MazeDisplay::gap)*con(s.maze.size())/2;
+  irr::vector3df position=center-(MazeDisplay::wall+MazeDisplay::gap)*con(s->maze.size())/2;
   bool active=false;
   int i=0;
   list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
-  StringPointer sit=s.begin();
+  StringPointer sit=s->begin();
 
-  startEnd->setPosition(position+con(s.getStart())*(MazeDisplay::wall+MazeDisplay::gap)
-      -con(to_vector(s.stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
-  startEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s.stringDir))));
-  endEnd->setPosition(position+con(s.getEnd())*(MazeDisplay::wall+MazeDisplay::gap)
-      +con(to_vector(s.stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
-  endEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s.stringDir))));
+  startEnd->setPosition(position+con(s->getStart())*(MazeDisplay::wall+MazeDisplay::gap)
+      -con(to_vector(s->stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
+  startEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s->stringDir))));
+  endEnd->setPosition(position+con(s->getEnd())*(MazeDisplay::wall+MazeDisplay::gap)
+      +con(to_vector(s->stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
+  endEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s->stringDir))));
 
-  while(sit!=s.end()){
+  while(sit!=s->end()){
 
     if(nit==nodes.end()){
       nit=nodes.insert(nit,ng->makeUnitString(true));
@@ -163,7 +163,7 @@ void StringDisplay::update(){
     (*nit)->setID(STRING_ID+i);
   }
   (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1));
-  (*nit)->setPosition(position+con(s.getEnd())*(MazeDisplay::wall+MazeDisplay::gap));
+  (*nit)->setPosition(position+con(s->getEnd())*(MazeDisplay::wall+MazeDisplay::gap));
   if(i>=activeNodes)
     (*nit)->setVisible(true);
 
@@ -182,8 +182,8 @@ void StringDisplay::update(){
 void StringDisplay::updateActive(){
   bool active=false;
   list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
-  StringPointer sit=s.begin();
-  while(sit!=s.end()){
+  StringPointer sit=s->begin();
+  while(sit!=s->end()){
     ng->makeStringActive(*nit,active||sit->selected);
     active=sit->selected;
 
@@ -198,13 +198,13 @@ void StringDisplay::updateActive(){
 
 pair<StringPointer,bool> StringDisplay::getStringPointer(irr::ISceneNode* node){
   if(node==0)
-    return pair<StringPointer,bool>(s.end(),false);
+    return pair<StringPointer,bool>(s->end(),false);
   int i=node->getID()-STRING_ID;
   if(i<0)
-    return pair<StringPointer,bool>(s.end(),false);
+    return pair<StringPointer,bool>(s->end(),false);
 
-  StringPointer sit=s.begin();
-  while(sit!=s.end()){
+  StringPointer sit=s->begin();
+  while(sit!=s->end()){
     if(i==0)
       return pair<StringPointer,bool>(sit,true);
     --i;
@@ -219,6 +219,14 @@ pair<StringPointer,bool> StringDisplay::getStringPointer(irr::ISceneNode* node){
     return pair<StringPointer,bool>(sit,false);
 }
 
+PuzzleDisplay::PuzzleDisplay(NodeGen* ng,irr::IrrlichtDevice* device,FontManager* fm,SoundManager* sm):m(Vector(5,5,5)),sc(),s(new String(m)),sp(s),ng(ng),md(m,ng),sd(s,ng),won(false),device(device),fm(fm),sm(sm){
+  for(Dirn* d=allDirns;d!=allDirns+6;++d){
+    irr::scene::IMeshSceneNode* node = ng->makeUnitHandle(to_vector(*d).dotProduct(to_vector(s->targetDir)));
+    node->setScale(irr::core::vector3df(1,1,1)*(md.wall+md.gap)/2);
+    node->setPosition(-con(to_vector(*d))*(abs(to_vector(*d).dotProduct(m.size()))/2+2)*(md.wall+md.gap));
+    slicers[node]=*d;
+  }
+};
 
 SP<Dirn> PuzzleDisplay::getSlicerDirn(irr::ISceneNode* slicer){
     map<irr::ISceneNode*,Dirn>::iterator it=slicers.find(slicer);
@@ -263,7 +271,7 @@ void PuzzleDisplay::stringUpdated(){
   MessageGui g;
   for(int i=0;i<r.messageCount;++i)
       g.message(device,fm,r.messages[i]);
-  if((!won) && (s.hasWon()||r.forceWin))
+  if((!won) && (s->hasWon()||r.forceWin))
     win();
 };
 void PuzzleDisplay::stringSelectionUpdated(){
@@ -283,8 +291,8 @@ void PuzzleDisplay::stringSelectionUpdated(){
 void PuzzleDisplay::mazeUpdated(){
     md.clear();
     md.init(m,ng);
-    s=String(m);
-    sp=StringPlay(s);
+    s=SP<String>(new String(m));
+    sp.SetString(s);
     sd.setString(s);
     for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
       slicer->first->setPosition(-con(to_vector(slicer->second))*(abs(to_vector(slicer->second).dotProduct(m.size()))/2+2)*(md.wall+md.gap));

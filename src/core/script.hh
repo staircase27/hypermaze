@@ -86,7 +86,7 @@ class Condition: public virtual PolymorphicHypIO{
      * @param s the current string object
      * @return true if the condition is matched and the event should trigger
      */
-    virtual bool is(int time,const Script& script,const String& s)=0;
+    virtual bool is(int time,const Script& script,SP<const String> s)=0;
     ///virtual destructor to allow overiding in subclasses
     virtual ~Condition(){};
   public:
@@ -183,25 +183,25 @@ class Action: public virtual PolymorphicHypIO{
      * @param r the response to record our actions in
      * @param s the string to act on
      */
-		virtual void doStart(ScriptResponseStart& r,String& s)=0;
+		virtual void doStart(ScriptResponseStart& r,SP<String> s)=0;
     ///do the appropriate action for a win event
     /**
      * @param r the response to record our actions in
      * @param s the string to act on
      */
-		virtual void doWin(ScriptResponseWin& r,String& s)=0;
+		virtual void doWin(ScriptResponseWin& r,SP<String> s)=0;
     ///do the appropriate action for a move event
     /**
      * @param r the response to record our actions in
      * @param s the string to act on
      */
-		virtual void doMove(ScriptResponseMove& r,String& s)=0;
+		virtual void doMove(ScriptResponseMove& r,SP<String> s)=0;
     ///do the appropriate action for a move event
     /**
      * @param r the response to record our actions in
      * @param s the string to act on
      */
-		virtual void doSelect(ScriptResponseSelect& r,String& s)=0;
+		virtual void doSelect(ScriptResponseSelect& r,SP<String> s)=0;
 		
 		///virtual destructor so that implementations will delete correctly
 		virtual ~Action(){};
@@ -265,10 +265,10 @@ class Script{
       now=t;
     }
 
-    ScriptResponseStart runStart(String& s);
-    ScriptResponseWin runWin(String& s);
-    ScriptResponseMove runMove(String& s);
-    ScriptResponseSelect runSelect(String& s);
+    ScriptResponseStart runStart(SP<String> s);
+    ScriptResponseWin runWin(SP<String> s);
+    ScriptResponseMove runMove(SP<String> s);
+    ScriptResponseSelect runSelect(SP<String> s);
     
     friend IOResult read(HypIStream&,Script&);
     friend bool write(HypOStream&,const Script&);

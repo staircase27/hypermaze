@@ -173,7 +173,7 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(const String& s,SPA<Pair<SP<ConstStringPointer> > > groups=SPA<Pair<SP<ConstStringPointer> > >());
+	  bool match(SP<const String> s,SPA<Pair<SP<ConstStringPointer> > > groups=SPA<Pair<SP<ConstStringPointer> > >());
     ///check a match against a non-constant String
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -182,7 +182,7 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(      String& s,SPA<Pair<SP<     StringPointer> > > groups=SPA<Pair<SP<     StringPointer> > >());
+	  bool match(      SP<String> s,SPA<Pair<SP<     StringPointer> > > groups=SPA<Pair<SP<     StringPointer> > >());
     ///check a match against a constant String and process each match found
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -192,7 +192,7 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(const String& s,StringMatcherCallback<ConstStringPointer>& cb,
+	  bool match(SP<const String> s,StringMatcherCallback<ConstStringPointer>& cb,
 	      SPA<Pair<SP<ConstStringPointer> > > groups=SPA<Pair<SP<ConstStringPointer> > >());
     ///check a match against a non-constant String
     /**
@@ -203,7 +203,7 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(      String& s,StringMatcherCallback<     StringPointer>& cb,
+	  bool match(      SP<String> s,StringMatcherCallback<     StringPointer>& cb,
 	      SPA<Pair<SP<     StringPointer> > > groups=SPA<Pair<SP<     StringPointer> > >());
 	  
 	private:
@@ -220,7 +220,7 @@ class StringMatcher{
      * @return true if there are any matches of this pattern to the string
      */
 	  template <class STRING,class POINTER>
-	  bool match(STRING& s,SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
+	  bool match(SP<STRING> s,SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
 	  ///The internal implementation function for a step in matching against a string
 	  /**
 	   * This function does the actual processing. It finds the "best" match for this segment of the pattern
@@ -240,7 +240,7 @@ class StringMatcher{
      * @return true if there are any matches of this pattern to the string
      */
 	  template <class STRING,class POINTER>
-	  bool matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
+	  bool matchStep(SP<STRING> s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
 	      SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
 };
 
@@ -266,7 +266,7 @@ class ConditionTrue: public Condition, public PolymorphicHypIOImpl<ConditionTrue
     /**
      * @copydoc Condition::is
      */
-    virtual bool is(int time,const Script& script,const String& s){return true;}
+    virtual bool is(int time,const Script& script,SP<const String> s){return true;}
 };
 ///Read a ConditionTrue from a stream
 /**
@@ -294,7 +294,7 @@ class ConditionOr: public Condition, public PolymorphicHypIOImpl<ConditionOr,2>{
     /**
      * @copydoc Condition::is
      */
-    virtual bool is(int time,const Script& script,const String& s);
+    virtual bool is(int time,const Script& script,SP<const String> s);
 };
 ///Read a ConditionOr from a stream
 /**
@@ -320,7 +320,7 @@ class ConditionAnd: public Condition, public PolymorphicHypIOImpl<ConditionAnd,3
     /**
      * @copydoc Condition::is
      */
-    virtual bool is(int time,const Script& script,const String& s);
+    virtual bool is(int time,const Script& script,SP<const String> s);
 };
 ///Read a ConditionAnd from a stream
 /**
@@ -345,7 +345,7 @@ class ConditionNot: public Condition, public PolymorphicHypIOImpl<ConditionNot,4
     /**
      * @copydoc Condition::is
      */
-    virtual bool is(int time,const Script& script,const String& s){
+    virtual bool is(int time,const Script& script,SP<const String> s){
       return !condition->is(time,script,s);
     }
 };
@@ -373,7 +373,7 @@ class ConditionAfter: public Condition, public PolymorphicHypIOImpl<ConditionAft
     /**
      * @copydoc Condition::is
      */
-    virtual bool is(int time,const Script& script,const String& s);
+    virtual bool is(int time,const Script& script,SP<const String> s);
 };
 ///Read a ConditionAfter from a stream
 /**
@@ -398,7 +398,7 @@ class ConditionBefore: public Condition, public PolymorphicHypIOImpl<ConditionBe
     /**
      * @copydoc Condition::is
      */
-    virtual bool is(int time,const Script& script,const String& s);
+    virtual bool is(int time,const Script& script,SP<const String> s);
 };
 ///Read a ConditionBefore from a stream
 /**
@@ -424,7 +424,7 @@ class ConditionStringPattern: public Condition, public PolymorphicHypIOImpl<Cond
     /**
      * @copydoc Condition::is
      */
-    virtual bool is(int time,const Script& script,const String& s){
+    virtual bool is(int time,const Script& script,SP<const String> s){
       return sm.match(s);
     }
 };
@@ -454,25 +454,25 @@ class ActionMulti: public Action, public PolymorphicHypIOImpl<ActionMulti,0>{
     SPA<SP<Action> >actions;
     ///@copydoc Action::doStart
     ///delegates to the stored actions
-		virtual void doStart(ScriptResponseStart& r,String& s){
+		virtual void doStart(ScriptResponseStart& r,SP<String> s){
 		  for(int i=0;i<num;++i)
 		    actions[i]->doStart(r,s);
 		};
     ///@copydoc Action::doWin
     ///delegates to the stored actions
-		virtual void doWin(ScriptResponseWin& r,String& s){
+		virtual void doWin(ScriptResponseWin& r,SP<String> s){
 		  for(int i=0;i<num;++i)
 		    actions[i]->doWin(r,s);
 		}
     ///@copydoc Action::doMove
     ///delegates to the stored actions
-		virtual void doMove(ScriptResponseMove& r,String& s){
+		virtual void doMove(ScriptResponseMove& r,SP<String> s){
 		  for(int i=0;i<num;++i)
 		    actions[i]->doMove(r,s);
 		};
     ///@copydoc Action::doSelect
     ///delegates to the stored actions
-		virtual void doSelect(ScriptResponseSelect& r,String& s){
+		virtual void doSelect(ScriptResponseSelect& r,SP<String> s){
 		  for(int i=0;i<num;++i)
 		    actions[i]->doSelect(r,s);
 		};
@@ -501,16 +501,16 @@ class ActionWin: public Action{
   public:
     ///@copydoc Action::doStart
     ///implemented as a no-op
-		virtual void doStart(ScriptResponseStart& r,String& s){};
+		virtual void doStart(ScriptResponseStart& r,SP<String> s){};
     ///@copydoc Action::doWin
     ///only do method to implement
-		virtual void doWin(ScriptResponseWin& r,String& s)=0;
+		virtual void doWin(ScriptResponseWin& r,SP<String> s)=0;
     ///@copydoc Action::doMove
     ///implemented as a no-op
-		virtual void doMove(ScriptResponseMove& r,String& s){};
+		virtual void doMove(ScriptResponseMove& r,SP<String> s){};
     ///@copydoc Action::doSelect
     ///implemented as a no-op
-		virtual void doSelect(ScriptResponseSelect& r,String& s){};
+		virtual void doSelect(ScriptResponseSelect& r,SP<String> s){};
 		///virtual destructor so that implementations will delete correctly
 		virtual ~ActionWin(){};
 };
@@ -522,19 +522,19 @@ class ActionCommon: public Action{
      * @param r the response to record our actions in
      * @param s the string to act on
      */
-		virtual void doCommon(ScriptResponse& r,String& s)=0;
+		virtual void doCommon(ScriptResponse& r,SP<String> s)=0;
     ///@copydoc Action::doStart
     ///calls doCommon
-		virtual void doStart(ScriptResponseStart& r,String& s){doCommon(r,s);};
+		virtual void doStart(ScriptResponseStart& r,SP<String> s){doCommon(r,s);};
     ///@copydoc Action::doWin
     ///calls doCommon
-		virtual void doWin(ScriptResponseWin& r,String& s){doCommon(r,s);};
+		virtual void doWin(ScriptResponseWin& r,SP<String> s){doCommon(r,s);};
     ///@copydoc Action::doMove
     ///calls doCommon
-		virtual void doMove(ScriptResponseMove& r,String& s){doCommon(r,s);};
+		virtual void doMove(ScriptResponseMove& r,SP<String> s){doCommon(r,s);};
     ///@copydoc Action::doSelect
     ///calls doCommon
-		virtual void doSelect(ScriptResponseSelect& r,String& s){doCommon(r,s);};
+		virtual void doSelect(ScriptResponseSelect& r,SP<String> s){doCommon(r,s);};
 		///virtual destructor so that implementations will delete correctly
 		virtual ~ActionCommon(){};
 };
@@ -544,7 +544,7 @@ class ActionNothing:public ActionCommon, public PolymorphicHypIOImpl<ActionNothi
   public:
     ///@copydoc ActionCommon::doCommon
     ///implemented as a no-op
-    virtual void doCommon(ScriptResponse& r,String& s){};
+    virtual void doCommon(ScriptResponse& r,SP<String> s){};
 };
 ///Read an ActionNothing from a stream
 /**
@@ -571,7 +571,7 @@ class ActionMessage:public ActionCommon, public PolymorphicHypIOImpl<ActionMessa
     Message m;///<the message to show
     ///@copydoc ActionCommon::doCommon
     ///adds a message to the message list in the response
-    virtual void doCommon(ScriptResponse& r,String& s);
+    virtual void doCommon(ScriptResponse& r,SP<String> s);
 };
 ///Read an ActionMessage from a stream
 /**
@@ -593,7 +593,7 @@ class ActionBlockWin:public ActionWin, public PolymorphicHypIOImpl<ActionBlockWi
   public:
     ///@copydoc Action::doWin
     ///sets the block win flag in the response object
-    virtual void doWin(ScriptResponseWin& r,String& s){
+    virtual void doWin(ScriptResponseWin& r,SP<String> s){
       r.block=true;
     };
 };
@@ -622,7 +622,7 @@ class ActionWinMessage:public ActionWin, public PolymorphicHypIOImpl<ActionWinMe
     Message m;///<the message to show
     ///@copydoc Action::doWin
     ///sets the message to show on the win screen in the response object
-    virtual void doWin(ScriptResponseWin& r,String& s){
+    virtual void doWin(ScriptResponseWin& r,SP<String> s){
       r.winMessage=m;
     };
 };
@@ -648,7 +648,7 @@ class ActionWinNextLevel:public ActionWin, public PolymorphicHypIOImpl<ActionWin
     Pair<SPA<const char> > nextLevel;///<the next level's url and a "name" for it
     ///@copydoc Action::doWin
     ///sets the next level to show on the win screen in the response object
-    virtual void doWin(ScriptResponseWin& r,String& s){
+    virtual void doWin(ScriptResponseWin& r,SP<String> s){
       r.nextLevel=nextLevel;
     };
 };
@@ -672,16 +672,16 @@ class ActionForceWin:public Action, public PolymorphicHypIOImpl<ActionForceWin,6
   public:
     ///@copydoc Action::doStart
     ///implemented as a no-op as doesn't make sence to force a win at startup
-		virtual void doStart(ScriptResponseStart& r,String& s){};
+		virtual void doStart(ScriptResponseStart& r,SP<String> s){};
     ///@copydoc Action::doWin
     ///implemented as a no-op as can't force win when already winning
-		virtual void doWin(ScriptResponseWin& r,String& s){};
+		virtual void doWin(ScriptResponseWin& r,SP<String> s){};
     ///@copydoc Action::doMove
     ///sets the force win flag in the response objct
-		virtual void doMove(ScriptResponseMove& r,String& s){r.forceWin=true;};
+		virtual void doMove(ScriptResponseMove& r,SP<String> s){r.forceWin=true;};
     ///@copydoc Action::doSelect
     ///sets the force win flag in the response objct
-		virtual void doSelect(ScriptResponseSelect& r,String& s){r.forceWin=true;};
+		virtual void doSelect(ScriptResponseSelect& r,SP<String> s){r.forceWin=true;};
 };
 ///Read an ActionForceWin from a stream
 /**
@@ -710,7 +710,7 @@ class ActionStringConditionSelect:public ActionCommon, public PolymorphicHypIOIm
   
     ///@copydoc ActionCommon::doCommon
     ///changes the selectedness of string elements and records that changes have been made in the response
-    virtual void doCommon(ScriptResponse& r,String& s);
+    virtual void doCommon(ScriptResponse& r,SP<String> s);
 };
 ///Read an ActionStringConditionSelect from a stream
 /**
@@ -738,7 +738,7 @@ class ActionSetStringRoute:public ActionCommon, public PolymorphicHypIOImpl<Acti
     ///@copydoc ActionCommon::doCommon
     ///this calls the StringMatcher to find a match then edits the retuned match.
     ///if all is true this is repeated till the pattern fails to match. this can lead to infinite loops
-    virtual void doCommon(ScriptResponse& r,String& s);
+    virtual void doCommon(ScriptResponse& r,SP<String> s);
 };
 ///Read an ActionSetStringRoute from a stream
 /**

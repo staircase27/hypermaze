@@ -52,7 +52,7 @@ int main(){
         removeWall(m,Vector(x,m.size().Y-1,z),DOWN);
     }
   cout<<m;
-  String s(m);
+  SP<String> s(new String(m));
   StringPlay l(s);
   cout<<s<<endl;
   cout<<l.canMove(DOWN)<<endl;

@@ -116,20 +116,20 @@ bool write(HypOStream& s,const PatternTag& pt){
   return write(s,pt.min,0) && write(s,pt.max,0) && write(s,pt.greedy);
 }
 
-bool StringMatcher::match(const String& s,SPA<Pair<SP<ConstStringPointer> > > groups){
+bool StringMatcher::match(SP<const String> s,SPA<Pair<SP<ConstStringPointer> > > groups){
   return match<const String,ConstStringPointer>(s,groups,0);
 }
-bool StringMatcher::match(String& s,SPA<Pair<SP<StringPointer> > > groups){
+bool StringMatcher::match(SP<String> s,SPA<Pair<SP<StringPointer> > > groups){
   return match<String,StringPointer>(s,groups,0);
 }
-bool StringMatcher::match(const String& s,StringMatcherCallback<ConstStringPointer>& cb,
+bool StringMatcher::match(SP<const String> s,StringMatcherCallback<ConstStringPointer>& cb,
     SPA<Pair<SP<ConstStringPointer> > > groups){
   if(groups.isnull()){
     groups=SPA<Pair<SP<ConstStringPointer> > >(group_count);
 	}
   return match<const String,ConstStringPointer>(s,groups,&cb);
 }
-bool StringMatcher::match(String& s,StringMatcherCallback<StringPointer>& cb,
+bool StringMatcher::match(SP<String> s,StringMatcherCallback<StringPointer>& cb,
     SPA<Pair<SP<StringPointer> > >groups){
   if(groups.isnull()){
     groups=SPA<Pair<SP<StringPointer> > >(group_count);
@@ -138,18 +138,18 @@ bool StringMatcher::match(String& s,StringMatcherCallback<StringPointer>& cb,
 }
 
 template <class STRING,class POINTER>
-bool StringMatcher::match(STRING& s,SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
+bool StringMatcher::match(SP<STRING> s,SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
   SPA<PatternMatch<POINTER> > m;
   if(!groups.isnull())
     m=SPA<PatternMatch<POINTER> >(count);
-  return matchStep(s,s.begin(),m,0,groups,cb);
+  return matchStep(s,s->begin(),m,0,groups,cb);
 }
 
 template <class STRING,class POINTER>
-bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
+bool StringMatcher::matchStep(SP<STRING> s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
     SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb){
   if(level==count){
-    if(p==s.end()){
+    if(p==s->end()){
       //valid so store in group if it's defined
 			if(!groups.isnull()){
 				for(int i=0;i<group_count;++i){
@@ -171,13 +171,13 @@ bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > ma
       matches[level].start=SP<POINTER>(new POINTER(p));
     int i=0;
     while(i<pt.min){
-      if(p==s.end()||!sec.matches(p))
+      if(p==s->end()||!sec.matches(p))
         return false;
       ++i;++p;
     }
     if(pt.greedy){
       //go to first that doesn't match or length is max+1 (i is max)  (whichevers first)
-      while(i<pt.max && p!=s.end() && sec.matches(p)){
+      while(i<pt.max && p!=s->end() && sec.matches(p)){
         ++i;++p;
       }
     }
@@ -196,7 +196,7 @@ bool StringMatcher::matchStep(STRING& s,POINTER p,SPA<PatternMatch<POINTER> > ma
         //stepping back. don't need to check if valid as was checked while searching forward]
         --i;--p;
       }else{
-        if(p==s.end() || !sec.matches(p))
+        if(p==s->end() || !sec.matches(p))
           return match;
         ++i;++p;
       }
@@ -311,7 +311,7 @@ bool write(HypOStream& s,const SP<const Condition>& c){
   return c->dowrite(s);
 }
 
-bool ConditionOr::is(int time,const Script& script,const String& s){
+bool ConditionOr::is(int time,const Script& script,SP<const String> s){
   for(int i=0;i<count;++i)
     if(conditions[i]->is(time,script,s))
       return true;
@@ -324,7 +324,7 @@ bool write(HypOStream& s,const ConditionOr& c){
   return write(s,(SPA<const SP<const Condition> >&)c.conditions,c.count);
 }
 
-bool ConditionAnd::is(int time,const Script& script,const String& s){
+bool ConditionAnd::is(int time,const Script& script,SP<const String> s){
   for(int i=0;i<count;++i)
     if(!conditions[i]->is(time,script,s))
       return false;
@@ -344,7 +344,7 @@ bool write(HypOStream& s,const ConditionNot& c){
   return write(s,(SP<const Condition>&)c.condition);
 }
 
-bool ConditionAfter::is(int time,const Script& script,const String& s){
+bool ConditionAfter::is(int time,const Script& script,SP<const String> s){
   return script.getTime(event)!=-1 && script.getTime(event)+delay<=time;
 }
 IOResult read(HypIStream& s,ConditionAfter& c){
@@ -357,7 +357,7 @@ bool write(HypOStream& s,const ConditionAfter& c){
   return write(s,c.event,0) && write(s,c.delay,0);
 }
 
-bool ConditionBefore::is(int time,const Script& script,const String& s){
+bool ConditionBefore::is(int time,const Script& script,SP<const String> s){
   return script.getTime(event)==-1;
 }
 IOResult read(HypIStream& s,ConditionBefore& c){
@@ -442,7 +442,7 @@ bool write(HypOStream& s,const ActionMulti& a){
   return write(s,(SPA<const SP<const Action> >&)a.actions,a.num);
 }
 
-void ActionMessage::doCommon(ScriptResponse& r,String&){
+void ActionMessage::doCommon(ScriptResponse& r,SP<String>){
   if(r.messageCount==0){
     r.messages=SPA<Message>(1);
   }else{
@@ -477,9 +477,9 @@ bool write(HypOStream& s,const ActionWinNextLevel& a){
   return write(s,a.nextLevel.a,true) && write(s,a.nextLevel.b,true);
 }
 
-void ActionStringConditionSelect::doCommon(ScriptResponse& r,String& s){
+void ActionStringConditionSelect::doCommon(ScriptResponse& r,SP<String> s){
   StringEdit se(s);
-  for(StringPointer p=s.begin();p!=s.end();++p){
+  for(StringPointer p=s->begin();p!=s->end();++p){
     if(!change.matches(p))
       continue;
     bool newsel=select.matches(p);
@@ -498,7 +498,7 @@ bool write(HypOStream& s,const ActionStringConditionSelect& a){
   return write(s,a.change) && write(s,a.select);
 }
 
-void ActionSetStringRoute::doCommon(ScriptResponse& r,String& s){
+void ActionSetStringRoute::doCommon(ScriptResponse& r,SP<String> s){
   if(!ranges.groupCount())
     return;
   StringEdit se(s);
@@ -582,11 +582,11 @@ bool write(HypOStream& s,const Script& sc){
   return true;
 }
 
-ScriptResponseStart Script::runStart(String& s){
+ScriptResponseStart Script::runStart(SP<String> s){
   ScriptResponseStart r;
   for(int i=0;i<eventcount;++i){
     if((events[i].trigger&TRIGGER_START)!=0){
-      if(events[i].condition->is(now,*this,s)){
+      if(events[i].condition->is(now,*this,SP<const String>(s))){
         events[i].action->doStart(r,s);
         times[i]=now;
       }
@@ -594,11 +594,11 @@ ScriptResponseStart Script::runStart(String& s){
   }
   return r;
 }
-ScriptResponseWin Script::runWin(String& s){
+ScriptResponseWin Script::runWin(SP<String> s){
   ScriptResponseWin r;
   for(int i=0;i<eventcount;++i){
     if((events[i].trigger&TRIGGER_WIN)!=0){
-      if(events[i].condition->is(now,*this,s)){
+      if(events[i].condition->is(now,*this,SP<const String>(s))){
         events[i].action->doWin(r,s);
         times[i]=now;
       }
@@ -606,11 +606,11 @@ ScriptResponseWin Script::runWin(String& s){
   }
   return r;
 }
-ScriptResponseMove Script::runMove(String& s){
+ScriptResponseMove Script::runMove(SP<String> s){
   ScriptResponseMove r;
   for(int i=0;i<eventcount;++i){
     if((events[i].trigger&TRIGGER_MOVE)!=0){
-      if(events[i].condition->is(now,*this,s)){
+      if(events[i].condition->is(now,*this,SP<const String>(s))){
         events[i].action->doMove(r,s);
         times[i]=now;
       }
@@ -618,11 +618,11 @@ ScriptResponseMove Script::runMove(String& s){
   }
   return r;
 }
-ScriptResponseSelect Script::runSelect(String& s){
+ScriptResponseSelect Script::runSelect(SP<String> s){
   ScriptResponseSelect r;
   for(int i=0;i<eventcount;++i){
     if((events[i].trigger&TRIGGER_SELECT)!=0){
-      if(events[i].condition->is(now,*this,s)){
+      if(events[i].condition->is(now,*this,SP<const String>(s))){
         events[i].action->doSelect(r,s);
         times[i]=now;
       }

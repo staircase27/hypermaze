@@ -103,7 +103,7 @@ class MouseStringSelectorController: public Controller{
     virtual bool OnEvent(const irr::SEvent& event);
 
     MouseStringSelectorController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,FontManager*,SoundManager* sm):
-        Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),sp(pd.s.end(),false){};
+        Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),sp(pd.s->end(),false){};
 };
 
 class MultiInterfaceController:public Controller{
