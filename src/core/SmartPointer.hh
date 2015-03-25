@@ -151,13 +151,6 @@ class SP{
 
 };
 
-template <class T> class SPA;
-
-template<class T> inline void memcopy(SPA<T>,SPA<const T>,size_t);
-template<class T> inline void memcopy(SPA<T>,const T*,size_t);
-template<class T> inline void memcopy(T*,SPA<const T>,size_t);
-template<class T> inline void memcopy(T*,const T*,size_t);
-
 ///A Smart array pointer class
 /**
  * This class provides a more advanced smart pointer class that reference
@@ -199,6 +192,7 @@ class SPA{
     template <class U>
     SPA<T>(const SPA<U>& op):p(op.p),c(op.c),h(op.h){++*c;}
 
+    ///Declare friend so it can access the data pointer for the wrong type
     template <class U>
     friend class SPA;
 
@@ -399,75 +393,144 @@ class SPA{
       return p==0;
     }
 
+    /// Cast this to a const version
+    /**
+     * @return a const version of this SPA
+     */
     operator SPA<const T>(){
       return SPA<const T>(*this);
     }
 
     #ifdef IOSTREAM
+    ///Declare friend so it can access the data pointer
     template<class U>
     friend std::ostream& operator<<(std::ostream&,const SPA<U>&);
     #endif
 
+    ///Declare friend so it can access the data pointer
     friend size_t strlen(const SPA<const char>);
+    ///Declare friend so it can access the data pointer
     template<class U> friend void memcopy(SPA<U>,SPA<const U>,size_t);
+    ///Declare friend so it can access the data pointer
     template<class U> friend void memcopy(U*,SPA<const U>,size_t);
+    ///Declare friend so it can access the data pointer
     template<class U> friend void memcopy(SPA<U>,const U*,size_t);
 };
 
+/// A override of strlen for SPAs
+/**
+ * @param s the string to get the length of
+ * @return the length of the string in s
+ */
 inline size_t strlen(const SPA<const char> s){
    return std::strlen(s.p);
 }
 
-template<class T>
-inline void memcopy(SPA<T> dest,SPA<T> src,size_t num){
-  memcopy(dest,SPA<const T>(src),num);
+/// A type aware memcpy like function
+/**
+ * This is the version that actually calls memcpy. All others call this either
+ * directly or indirectly.
+ * @param dest the destination for the data
+ * @param src the source for the data
+ * @param num the number of elements to copy
+ */
+template<class U>
+inline void memcopy(U* dest,const U* src,size_t num){
+  std::memcpy(dest,src,num*sizeof(U));
 }
-template<class T>
-inline void memcopy(T* dest,SPA<T> src,size_t num){
-  memcopy(dest,SPA<const T>(src),num);
-}
-template<class T>
-inline void memcopy(SPA<T> dest,SPA<const T> src,size_t num){
+/// A type aware memcpy like function
+/**
+ * @param dest the destination for the data
+ * @param src the source for the data
+ * @param num the number of elements to copy
+ */
+template<class U>
+inline void memcopy(SPA<U> dest,SPA<const U> src,size_t num){
   memcopy(dest.p,src.p,num);
 }
-template<class T>
-inline void memcopy(T* dest,SPA<const T> src,size_t num){
+/// A type aware memcpy like function
+/**
+ * @param dest the destination for the data
+ * @param src the source for the data
+ * @param num the number of elements to copy
+ */
+template<class U>
+inline void memcopy(U* dest,SPA<const U> src,size_t num){
   memcopy(dest,src.p,num);
 }
-template<class T>
-inline void memcopy(SPA<T> dest,const T* src,size_t num){
+/// A type aware memcpy like function
+/**
+ * @param dest the destination for the data
+ * @param src the source for the data
+ * @param num the number of elements to copy
+ */
+template<class U>
+inline void memcopy(SPA<U> dest,const U* src,size_t num){
   memcopy(dest.p,src,num);
 }
-template<class T>
-inline void memcopy(SPA<T> dest,T* src,size_t num){
-  memcopy(dest,(const T*)src,num);
+/// A type aware memcpy like function
+/**
+ * @param dest the destination for the data
+ * @param src the source for the data
+ * @param num the number of elements to copy
+ */
+template<class U>
+inline void memcopy(SPA<U> dest,SPA<U> src,size_t num){
+  memcopy(dest,SPA<const U>(src),num);
 }
-template<class T>
-inline void memcopy(T* dest,const T* src,size_t num){
-  std::memcpy(dest,src,num*sizeof(T));
+/// A type aware memcpy like function
+/**
+ * @param dest the destination for the data
+ * @param src the source for the data
+ * @param num the number of elements to copy
+ */
+template<class U>
+inline void memcopy(U* dest,SPA<U> src,size_t num){
+  memcopy(dest,SPA<const U>(src),num);
 }
-
+/// A type aware memcpy like function
+/**
+ * @param dest the destination for the data
+ * @param src the source for the data
+ * @param num the number of elements to copy
+ */
+template<class U>
+inline void memcopy(SPA<U> dest,U* src,size_t num){
+  memcopy(dest,(const U*)src,num);
+}
 
 #ifdef IOSTREAM
-#define DEBUGPOINTER
-
-template <class T>
-std::ostream& operator<<(std::ostream& o,const SP<T>& p){
+/// write a representation of the contents of a SP to a stream
+/**
+ * If DEBUDPOINTER is set then output the representation of the contents along 
+ * with the reference count, otherwise just print the contents
+ * @param o the stream to write to
+ * @param p the pointer to write
+ * @return the stream o
+ */
+template <class U>
+std::ostream& operator<<(std::ostream& o,const SP<U>& p){
 #ifdef DEBUGPOINTER
   return o<<"<SP: "<<p.p<<" ("<<*p.c<<")>";
 #else
   return o<<p.p;
 #endif
 }
-template <class T>
-std::ostream& operator<<(std::ostream& o,const SPA<T>& p){
+/// write a representation of the contents of a SP to a stream
+/**
+ * If DEBUGPOINTER is set then output the representation of the contents along 
+ * with the head location and reference count, otherwise just print the contents
+ * @param o the stream to write to
+ * @param p the pointer to write
+ * @return the stream o
+ */
+template <class U>
+std::ostream& operator<<(std::ostream& o,const SPA<U>& p){
 #ifdef DEBUGPOINTER
   return o<<"<SPA: "<<p.p<<" from "<<(void*)p.h<<" ("<<*p.c<<")>";
 #else
   return o<<p.p;
 #endif
 }
-
 #endif
-
 #endif

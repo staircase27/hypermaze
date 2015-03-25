@@ -48,27 +48,27 @@ Maze& Maze::operator=(const Maze& m){
 
 #ifdef IOSTREAM
 void prettyPrint(std::ostream& o,Maze m,int w){
-  w/=(m.thesize.X*4+2);
-  o<<m.thesize.X<<" "<<m.thesize.Y<<" "<<m.thesize.Z<<" :"<<w<<endl;
-  for(int Z=0;Z<m.thesize.Z;Z+=w){
-    for(int y=m.thesize.Y-1;y>=0;--y){
-      for(int z=Z;z<m.thesize.Z&&z<Z+w;++z){
-        for(int x=m.thesize.X-1;x>=0;--x){
+  w/=(m.size().X*4+2);
+  o<<m.size().X<<" "<<m.size().Y<<" "<<m.size().Z<<" :"<<w<<endl;
+  for(int Z=0;Z<m.size().Z;Z+=w){
+    for(int y=m.size().Y-1;y>=0;--y){
+      for(int z=Z;z<m.size().Z&&z<Z+w;++z){
+        for(int x=m.size().X-1;x>=0;--x){
           o<<(((*m[Vector(x,y,z)]&1<<10)==0)?"#":"X")<<(((*m[Vector(x,y,z)]&to_mask(RIGHT))==0)?" ":"=");
         }
         o<<" ";
-        for(int x=m.thesize.X-1;x>=0;--x){
+        for(int x=m.size().X-1;x>=0;--x){
           o<<(((*m[Vector(x,y,z)]&to_mask(FORWARD))==0)?" ":"+")<<" ";
         }
         o<<" ";
       }
       o<<endl;
-      for(int z=Z;z<m.thesize.Z&&z<Z+w;++z){
-        for(int x=m.thesize.X-1;x>=0;--x){
+      for(int z=Z;z<m.size().Z&&z<Z+w;++z){
+        for(int x=m.size().X-1;x>=0;--x){
           o<<(((*m[Vector(x,y,z)]&to_mask(DOWN))==0)?" ":"|")<<" ";
         }
         o<<" ";
-        for(int x=m.thesize.X-1;x>=0;--x){
+        for(int x=m.size().X-1;x>=0;--x){
           o<<"  ";
         }
         o<<" ";
@@ -89,7 +89,7 @@ IOResult read(HypIStream& s,Maze& m){
     return IOResult(false,r.eof);
   m=Maze(thesize);
   int pos=-1;//start at -1 so first increment doesn't sift us of the maze
-  while(++pos<m.thesize.X*m.thesize.Y*m.thesize.Z){
+  while(++pos<thesize.X*thesize.Y*thesize.Z){
     if(!(r=read(s,m.maze[pos],16)).ok)
       return IOResult(false,r.eof);
   }
@@ -97,12 +97,12 @@ IOResult read(HypIStream& s,Maze& m){
 }
 
 bool write(HypOStream& s,const Maze& m){
-  bool status=write(s,m.thesize.X);
-  status&=write(s,m.thesize.Y);
-  status&=write(s,m.thesize.Z);
+  bool status=write(s,m.size().X);
+  status&=write(s,m.size().Y);
+  status&=write(s,m.size().Z);
   s.setNextSpace("\n");
   SPA<int> p=m.maze;
-  SPA<int> end=m.maze+m.thesize.X*m.thesize.Y*m.thesize.Z;
+  SPA<int> end=m.maze+m.size().X*m.size().Y*m.size().Z;
   while(p!=end){
     status&=write(s,*p,16);
     ++p;

@@ -15,7 +15,7 @@ void addWall(Maze m,Vector v,Dirn wall){
   *p|=to_mask(wall);
   p=p+to_vector(wall);
   v=v+to_vector(wall);
-  if(v.X<0||v.X==m.size.X||v.Y<0||v.Y==m.size.Y||v.Z<0||v.Z==m.size.Z)
+  if(v.X<0||v.X==m.size().X||v.Y<0||v.Y==m.size().Y||v.Z<0||v.Z==m.size().Z)
     return;
   *p|=to_mask(opposite(wall));
 }
@@ -24,7 +24,7 @@ void removeWall(Maze m,Vector v,Dirn wall){
   *p&=~to_mask(wall);
   p=p+to_vector(wall);
   v=v+to_vector(wall);
-  if(v.X<0||v.X==m.size.X||v.Y<0||v.Y==m.size.Y||v.Z<0||v.Z==m.size.Z)
+  if(v.X<0||v.X==m.size().X||v.Y<0||v.Y==m.size().Y||v.Z<0||v.Z==m.size().Z)
     return;
   *p&=~to_mask(opposite(wall));
 }
@@ -42,14 +42,14 @@ int main(){
   
   Maze m(Vector(5,5,5));
   cout<<m;
-  for(int x=0;x<m.size.X;++x)
-    for(int z=0;z<m.size.Z;++z){
-      for(int y=0;y<m.size.Y-1;++y)
+  for(int x=0;x<m.size().X;++x)
+    for(int z=0;z<m.size().Z;++z){
+      for(int y=0;y<m.size().Y-1;++y)
         addWall(m,Vector(x,y,z),UP);
       if((x+z)%2==0)
         removeWall(m,Vector(x,0,z),UP);
       else
-        removeWall(m,Vector(x,m.size.Y-1,z),DOWN);
+        removeWall(m,Vector(x,m.size().Y-1,z),DOWN);
     }
   cout<<m;
   String s(m);

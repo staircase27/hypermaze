@@ -125,8 +125,8 @@ bool write(HypOStream& s,const Maze& m);
  */
 class Point{
   private:
-		Vector size; //< The size of the maze for moving the point around the maze
-    SPA<int> point; //< The current point this points to
+    Vector size; ///< The size of the maze for moving the point around the maze
+    SPA<int> point; ///< The current point this points to
   public:
     /// Create a new point.
     /**
@@ -174,8 +174,8 @@ class Point{
  */
 class ConstPoint{
   private:
-		Vector size; //< The size of the maze for moving the point around the maze
-    SPA<int> point; //< The current point this points to
+    Vector size; ///< The size of the maze for moving the point around the maze
+    SPA<int> point; ///< The current point this points to
   public:
     /// Create a new point.
     /**
@@ -229,14 +229,14 @@ class ConstPoint{
  * @return the stream o
  */
 inline std::ostream& operator<<(std::ostream& o,const Maze& m){
-  o<<m.size.X<<" "<<m.size.Y<<" "<<m.size.Z<<std::hex<<std::endl;
+  o<<m.size().X<<" "<<m.size().Y<<" "<<m.size().Z<<std::hex<<std::endl;
   SPA<int> p=m.maze;
-  for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i,++p){
+  for(int i=0;i<m.size().X*m.size().Y*m.size().Z;++i,++p){
     o<<*p<<" ";
     #ifdef DEBUG
-    if((i+1)%m.size.X==0)
+    if((i+1)%m.size().X==0)
       o<<std::endl;
-    if((i+1)%(m.size.X*m.size.Y)==0)
+    if((i+1)%(m.size().X*m.size().Y)==0)
       o<<std::endl;
     #endif
   }
@@ -252,10 +252,11 @@ inline std::ostream& operator<<(std::ostream& o,const Maze& m){
  * @return the stream o
  */
 inline std::istream& operator>>(std::istream& o,Maze& m){
-  o>>m.size.X>>m.size.Y>>m.size.Z>>std::hex;
-  m=Maze(m.size);
+  Vector size;
+  o>>size.X>>size.Y>>size.Z>>std::hex;
+  m=Maze(size);
   SPA<int> p=m.maze;
-  for(int i=0;i<m.size.X*m.size.Y*m.size.Z;++i,++p){
+  for(int i=0;i<m.thesize.X*m.thesize.Y*m.size().Z;++i,++p){
     o>>*p;
   }
   return o>>std::dec;
