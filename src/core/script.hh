@@ -1,3 +1,9 @@
+/**
+ * @file script.hh
+ * @brief The script classes.
+ * This doesn't include the classes that implement most of the logic. These are
+ * defined in scriptimpl.hh
+ */
 #include "maze.hh"
 #include "string.hh"
 #include "SmartPointer.hh"
@@ -59,10 +65,14 @@ class PolymorphicHypIO{
     ///Method to implement to allow polymorphic writing
     /**
      * @param s the stream to write this object to
-     * @return true if the array was written ok
+     * @return true if the item was written ok
      */
     virtual bool dowrite(HypOStream& s) const=0;
   public:
+    ///Get the id of this class
+    /**
+     * @return the id of this class
+     */
     virtual int getid() const=0;
 };
 
@@ -236,52 +246,111 @@ bool write(HypOStream& s,const SP<const Action>& c);
  */
 class Event{
   public:
-		int trigger;
-		SP<Condition> condition;
-		SP<Action> action;
+		int trigger;///< The trigger(s) for the event as a bitmask
+		SP<Condition> condition;///<The condition for the event to trigger
+		SP<Action> action;///<The action to take when it triggers
 		
+                /// Create an empty event that never triggers and has a default condition and action
 		Event():trigger(0),condition(Condition::defaultvalue),action(Action::defaultvalue){};
+                ///Create an event with the specified triggers, conditions and actions
+                /**
+                 * @param trigger the trigger(s) for the event as a bitmask
+                 * @param condition the condition for the event to trigger
+                 * @param action the action to take when it triggers
+                 */
 		Event(int trigger,SP<Condition> condition,SP<Action> action):
 		    trigger(trigger),condition(condition),action(action){};
 };
 
+///The core script object
 class Script{
   private:
-    int eventcount;
-    SPA<Event> events;
-    SPA<int> times;
-    int now;
+    int eventcount; ///< The number of events in this script
+    SPA<Event> events; ///< The array of events for this script
+    SPA<int> times; ///< The last trigger times for each event
+    int now; ///< The time now
   public:
+    ///Create a new empty script
     Script():eventcount(0),events(),times(){};
+    ///Create a script for some events
+    /**
+     * @param eventcount the number of events the new script will have
+     * @param events the actual event for the new script
+     */
     Script(int eventcount,const SPA<Event>& events):eventcount(eventcount),events(events),times(eventcount){
       for(int i=0;i<eventcount;++i)
         times[i]=-1;
     };
+    /// Get the time the specified event last ran
+    /**
+     * @param event the index of the event in question
+     * @return the time the specified event ran
+     */
     inline int getTime(int event) const{
       return times[event];
     }
     
+    /// Update the scripts version of the current time
+    /**
+     * @param t the time now
+     */
     void setnow(int t){
       now=t;
     }
 
+    /// Run the script for a start event
+    /**
+     * @param s the string
+     * @return the result of the script
+     */
     ScriptResponseStart runStart(SP<String> s);
+    /// Run the script for a win event
+    /**
+     * @param s the string
+     * @return the result of the script
+     */
     ScriptResponseWin runWin(SP<String> s);
+    /// Run the script for a move event
+    /**
+     * @param s the string
+     * @return the result of the script
+     */
     ScriptResponseMove runMove(SP<String> s);
+    /// Run the script for a select event
+    /**
+     * @param s the string
+     * @return the result of the script
+     */
     ScriptResponseSelect runSelect(SP<String> s);
     
-    friend IOResult read(HypIStream&,Script&);
-    friend bool write(HypOStream&,const Script&);
+    /// Private access so it can load the script into it
+    friend IOResult read(HypIStream& s,Script& sc);
+    /// Private access so it write the data out
+    friend bool write(HypOStream& s,const Script& sc);
     
+    /// Get the events in this script
     inline const SPA<Event>& getevents() const{
       return events;
     }
+    /// Get the number of events in this script
     inline const int& geteventcount() const{
       return eventcount;
     }
 };
 
+///Read a script from a stream
+/**
+ * @param s the stream to read from
+ * @param sc the script object to read into
+ * @return the result of the read
+ */
 IOResult read(HypIStream& s,Script& sc);
+///Write a script to a stream
+/**
+ * @param s the stream to write to
+ * @param sc the script to write
+ * @return true if the write succeded else false
+ */
 bool write(HypOStream& s,const Script& sc);
 
 #endif

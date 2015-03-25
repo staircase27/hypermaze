@@ -1,6 +1,7 @@
 /**
  * @file vector.hh
- * This file provides a vector class and a few functions for use with it.
+ * @brief This file provides a vector class and a few functions for use with it.
+ * 
  * If we are using irrlicht then the Vector class is just an alias for irr::code::vector3di
  * otherwise we have to implement one ourselves.
  */

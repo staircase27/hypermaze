@@ -1,3 +1,7 @@
+/**
+ * @file script.cc
+ * @brief The implementation of script.hh and scriptimpl.hh
+ */
 #include <cctype>
 #include "script.hh"
 #include "scriptimpl.hh"
@@ -275,6 +279,14 @@ bool write(HypOStream& s,const SPA<const SP<const T> >& a, const int& c){
 
 const SP<Condition> Condition::defaultvalue=SP<Condition>(new ConditionTrue());
 
+///Shortcut function to create an read an object
+/**
+ * @tparam T the actual type of the object
+ * @tparam U the type of the pointer to store it in
+ * @param s the stream to read from
+ * @param c the SP object to store it in
+ * @return the result of the read
+ */
 template <class T,class U>
 IOResult createAndRead(HypIStream& s,SP<U>& c){
   SP<T> ac=SP<T>(new T());

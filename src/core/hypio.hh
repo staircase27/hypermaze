@@ -3,12 +3,12 @@
  * @brief The general interface to the io system for hypermaze
  * 
  * This file contains classes and functions for input and output but doesn't give any implementations.
- * Implementations are included in hypioimp.hh
+ * Implementations are included in their relevent header files.
  *
  * public use of this system corresponds to functions of the form
  * <tt>IOResult read(HypIStream&,type&,OPTIONS...)</tt> or
  * <tt>bool write(HypOStream&,const type&,OPTIONS...)</tt>.
- * To implement a reading and writing for new types implement methods like the above.
+ * To implement reading and writing for new types implement methods like the above.
  * 
  * When reading make sure to leave the object in a consistent (if non-sensical) state when
  * reading it. e.g. if reading an array make sure the array is the size you claim to have made

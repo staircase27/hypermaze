@@ -1,3 +1,8 @@
+/**
+ * @file scriptimpl.hh
+ * @brief The script implementation classes.
+ * The base classes are defined in script.hh
+ */
 #include "script.hh"
 
 #ifndef SCRIPTIMPL_HH_INC
@@ -12,17 +17,26 @@
 template <class T,int ID>
 class PolymorphicHypIOImpl: public virtual PolymorphicHypIO{
   protected:
-    ///@copydoc PolymorphicHypIO
-    ///writes the id provided as a template param then delegates writing data to the function for the templated type T
+    /**
+     * @copydoc PolymorphicHypIO
+     * writes the id provided as a template param then delegates writing data to the function for the templated type T
+     * @param s the stream to write this object to
+     * @return true if the item was written ok
+     */
     virtual bool dowrite(HypOStream& s) const{
       if(!write(s,ID,0))
         return false;
       return write(s,(T&)*this);
     }
+    /**
+     * @copydoc
+     * @return the id of this class which is the template paramiter ID
+     */
     virtual int getid() const{
       return ID;
     };
   public:
+    ///The id of the class. This is just the template paramiter ID
     static const int id=ID;
 };
 
@@ -450,8 +464,8 @@ inline bool write(HypOStream& s,const ConditionStringPattern& c){
 ///An action class that does a list of actions
 class ActionMulti: public Action, public PolymorphicHypIOImpl<ActionMulti,0>{
   public:
-    int num;
-    SPA<SP<Action> >actions;
+    int num;///< The number of actions in this action
+    SPA<SP<Action> >actions;///< The actual actions in this action
     ///@copydoc Action::doStart
     ///delegates to the stored actions
 		virtual void doStart(ScriptResponseStart& r,SP<String> s){
@@ -565,7 +579,7 @@ inline bool write(HypOStream& s,const ActionNothing& a){
   return true;
 }
 
-//an action to display a message to the player
+///an action to display a message to the player
 class ActionMessage:public ActionCommon, public PolymorphicHypIOImpl<ActionMessage,2>{
   public:
     Message m;///<the message to show

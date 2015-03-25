@@ -1,6 +1,6 @@
 /**
  * @file string.cc
- * The implementation of string.hh
+ * @brief The implementation of string.hh
  */
 #include "string.hh"
 String::String(Maze m,Dirn stringDir,Dirn targetDir):maze(m),endPos(0,0,0),route(),stringDir(stringDir),targetDir(targetDir){

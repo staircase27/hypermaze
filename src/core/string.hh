@@ -1,6 +1,6 @@
 /**
  * @file string.hh
- * The solution string for a maze and the classes to handle it
+ * @brief The solution string for a maze and the classes to handle it
  */
 #include "vector.hh"
 #include "dirns.hh"

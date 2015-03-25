@@ -1,6 +1,6 @@
 /**
  * @file dirns.hh
- * A 3D Direction type and various functions to convert between dirns, bitmasks, and vectors
+ * @brief A 3D Direction type and various functions to convert between dirns, bitmasks, and vectors
  */
 #ifndef DIRNS_HH_INC
 #define DIRNS_HH_INC

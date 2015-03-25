@@ -1,6 +1,6 @@
 /**
  * @file maze.hh
- * A Hypermaze class and classes to access the maze data
+ * @brief A Hypermaze class and classes to access the maze data
  */
 
 #include "dirns.hh"

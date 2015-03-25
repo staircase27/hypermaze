@@ -1,6 +1,6 @@
 /**
  * @file
- * This file provides two smart pointer classes
+ * @brief This file provides two smart pointer classes
  */
 
 #ifndef SMARTPOINTER_HH_INC
