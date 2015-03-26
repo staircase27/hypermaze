@@ -44,5 +44,6 @@ IrrHypOStream::~IrrHypOStream(){
 bool IrrHypOStream::writeToSink(){
   bool valid=f->write(buf,end)==end;
   end=0;
+  return valid;
 }
 #endif
