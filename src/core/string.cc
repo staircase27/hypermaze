@@ -3,6 +3,7 @@
  * @brief The implementation of string.hh
  */
 #include "string.hh"
+
 String::String(Maze m,Dirn stringDir,Dirn targetDir):maze(m),endPos(0,0,0),route(),stringDir(stringDir),targetDir(targetDir){
   Vector start=m.size().dotProduct(to_shift_vector(stringDir))*to_shift_vector(stringDir)+
       m.size().dotProduct(to_shift_vector(targetDir))*to_shift_vector(targetDir)+
@@ -117,7 +118,7 @@ class HistoryElement{
     Dirn d; ///< the direction the move was in
     std::list<Dirn> startcollapsed; ///< the route segments that where collapsed from the start of the string
     std::list<Dirn> endcollapsed; ///< the route segments that where collapsed from the end of the string
-    
+
     /// Create a new history element
     /**
      * @param length The length of the string just after the move

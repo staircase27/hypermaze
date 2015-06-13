@@ -18,6 +18,7 @@
 #define IRRSLIT(a) a
 #endif
 
+#include <iostream>
 
 //keep a pointer around so we can free on next call
 irr::fschar_t* path=0;
@@ -169,6 +170,78 @@ const irr::fschar_t* getSystemConfigPath(){
 const irr::fschar_t* getDefaultConfigPath(){
   return IRRSLIT("config/");
 }
-
-
-
+#include <iostream>
+void getDriveList(){
+  int strscount=0, strslen=0, buflen=255;
+  irr::fschar_t* drives=new irr::fschar_t[buflen];
+  #ifdef WIN32
+    #ifdef _IRR_WCHAR_FILESYSTEM
+      strslen=GetLogicalDriveStringsW(buflen,drives);
+    #else
+      strslen=GetLogicalDriveStringsA(buflen,drives);
+    #endif
+    if(strslen+1>buflen){
+      buflen=strslen+1;
+      delete[] drives;
+      drives=new irr::fschar_t[buflen];
+    }
+    #ifdef _IRR_WCHAR_FILESYSTEM
+      strslen=GetLogicalDriveStringsW(buflen,drives);
+    #else
+      strslen=GetLogicalDriveStringsA(buflen,drives);
+    #endif
+    if(strslen>=0){
+      for(irr::fschar_t* drive=drives;IRRFSSLEN(drive)>0;drive+=IRRFSSLEN(drive)+1){
+        char* descbuf=new irr::fschar_t[124];
+        descbuf[0]='\0';
+        if(
+        #ifdef _IRR_WCHAR_FILESYSTEM
+          GetVolumeInformationW(drive,descbuf,124,0,0,0,0,0)
+        #else
+          GetVolumeInformationA(drive,descbuf,124,0,0,0,0,0)
+        #endif
+        ==0){
+          int err=GetLastError();
+          std::cout<<"Error getting drive info for "<<drive<<" : "<<err<<std::endl;
+          DWORD retSize;
+          LPTSTR pTemp=NULL;
+          retSize=FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|
+                           FORMAT_MESSAGE_FROM_SYSTEM|
+                           FORMAT_MESSAGE_ARGUMENT_ARRAY,
+                           NULL,
+                           GetLastError(),
+                           LANG_NEUTRAL,
+                           (LPTSTR)&pTemp,
+                           0,
+                           NULL );
+          std::cout<<pTemp<<std::endl;
+          LocalFree((HLOCAL)pTemp);
+        }
+        if(IRRFSSLEN(descbuf)==0){
+          unsigned int type=
+            #ifdef __IRR_WCHAR_FILESYSTEM
+              GetDriveTypeW(drive);
+            #else
+              GetDriveTypeA(drive);
+            #endif
+          switch(type){
+            case DRIVE_FIXED:
+            case DRIVE_REMOVABLE:
+              memcpy(descbuf,IRRSLIT("Local Disk"),11*sizeof(irr::fschar_t));
+              break;
+            case DRIVE_REMOTE:
+              memcpy(descbuf,IRRSLIT("Remote Drive"),13*sizeof(irr::fschar_t));
+              break;
+            case DRIVE_CDROM:
+              memcpy(descbuf,IRRSLIT("CDROM Drive"),12*sizeof(irr::fschar_t));
+              break;
+            default:
+              memcpy(descbuf,IRRSLIT("Unknown Drive"),13*sizeof(irr::fschar_t));
+              break;
+          }
+        }
+        std::cout<<"drive: "<<drive<<" : "<<descbuf<<" ("<<drive<<")" <<std::endl;
+      }
+    }
+  #endif
+}

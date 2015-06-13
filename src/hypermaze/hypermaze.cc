@@ -177,6 +177,8 @@ class IrrlichtMusicLoader: public MusicLoader{
 
 int main(int argc,char* argv[]){
 
+  getDriveList();
+
   irr::IrrlichtDevice *device = irr::createDevice( irr::video::EDT_OPENGL,
       irr::dimension2d<irr::u32>(640, 480), 16, false, false, false);
 
@@ -285,7 +287,7 @@ int main(int argc,char* argv[]){
   #ifdef IRRFONTFIX
   delete[] font_prefix;
   #endif
-  
+
 
   return 0;
 }

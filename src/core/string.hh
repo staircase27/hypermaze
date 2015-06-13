@@ -297,7 +297,7 @@ class String{
     String& operator=(const String& o);
     ///Copying isn't allowed
     String(const String& o);
-    
+
     ///Friend to allow access to update the string
     friend class StringPlay;
     ///Friend to allow access to update the string
@@ -318,7 +318,7 @@ class HistoryElement;
 /// give access to update the string following the rules of the puzzle
 class StringPlay{
   SP<String> s;///< The string we are working on
-  
+
   int score; ///< The current score for the play so far
 
   LimitedStack<HistoryElement>* undohistory;///< the undo history
@@ -339,7 +339,7 @@ class StringPlay{
     inline SP<String> getString(){
       return s;
     }
-    
+
     ///Set the string to a new string
     /**
      * This also resets everything to as new.
@@ -401,7 +401,7 @@ class StringPlay{
      * tryMove or undo
      * @param d the direction to move in
      * @param undo if this move is an undo. This is used so we update the score
-     * in the correct direction. Also if this move isn't an undo it adds the 
+     * in the correct direction. Also if this move isn't an undo it adds the
      * move to the history
      */
     void doMove(Dirn d,bool undo);
@@ -458,7 +458,7 @@ class StringEdit{
     /// Set the specified element to selected
     /**
      * Provided here for convenience
-     * @note StringPlay::externalEditHappened() should be called for any 
+     * @note StringPlay::externalEditHappened() should be called for any
      * StringPlays using the same String
      * @param p the element to set the selection state of
      * @param selected if it should be set to selected or unselected
@@ -472,7 +472,7 @@ class StringEdit{
      * if the new route doesn't fill the gap String::stringDir will be used to
      * connect up. This also slides the segment after the move around to line up
      * with the new route.
-     * @note StringPlay::externalEditHappened() should be called for any 
+     * @note StringPlay::externalEditHappened() should be called for any
      * StringPlays using the same String
      * @param sp the start of the range to replace with the new route
      * @param ep the element after range to replace with the new route
