@@ -18,8 +18,6 @@
 #define IRRSLIT(a) a
 #endif
 
-#include <iostream>
-
 //keep a pointer around so we can free on next call
 irr::fschar_t* path=0;
 
@@ -171,8 +169,10 @@ const irr::fschar_t* getDefaultConfigPath(){
   return IRRSLIT("config/");
 }
 #include <iostream>
-void getDriveList(){
+int getDriveList(irr::fschar_t*& drivespecs){
   int strscount=0, strslen=0, buflen=255;
+  delete[] path;
+  drivespecs=path=new irr::fschar_t[buflen];
   irr::fschar_t* drives=new irr::fschar_t[buflen];
   #ifdef WIN32
     #ifdef _IRR_WCHAR_FILESYSTEM
@@ -191,33 +191,30 @@ void getDriveList(){
       strslen=GetLogicalDriveStringsA(buflen,drives);
     #endif
     if(strslen>=0){
+      buflen*=4;
+      delete[] path;
+      drivespecs=path=new irr::fschar_t[buflen];
+      strslen=0;
       for(irr::fschar_t* drive=drives;IRRFSSLEN(drive)>0;drive+=IRRFSSLEN(drive)+1){
+        int len=IRRFSSLEN(drive);
+        if(strslen+len+1>buflen){
+          path=new irr::fschar_t[buflen+124];
+          memcpy(path,drivespecs,strslen);
+          delete[] drivespecs;
+          buflen+=124;
+          drivespecs=path;
+        }
+        memcpy(drivespecs+strslen,drive,(len+1)*sizeof(irr::fschar_t));
+        strslen+=len+1;
         char* descbuf=new irr::fschar_t[124];
         descbuf[0]='\0';
-        if(
         #ifdef _IRR_WCHAR_FILESYSTEM
-          GetVolumeInformationW(drive,descbuf,124,0,0,0,0,0)
+          GetVolumeInformationW(drive,descbuf,124,0,0,0,0,0);
         #else
-          GetVolumeInformationA(drive,descbuf,124,0,0,0,0,0)
+          GetVolumeInformationA(drive,descbuf,124,0,0,0,0,0);
         #endif
-        ==0){
-          int err=GetLastError();
-          std::cout<<"Error getting drive info for "<<drive<<" : "<<err<<std::endl;
-          DWORD retSize;
-          LPTSTR pTemp=NULL;
-          retSize=FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|
-                           FORMAT_MESSAGE_FROM_SYSTEM|
-                           FORMAT_MESSAGE_ARGUMENT_ARRAY,
-                           NULL,
-                           GetLastError(),
-                           LANG_NEUTRAL,
-                           (LPTSTR)&pTemp,
-                           0,
-                           NULL );
-          std::cout<<pTemp<<std::endl;
-          LocalFree((HLOCAL)pTemp);
-        }
-        if(IRRFSSLEN(descbuf)==0){
+        int desclen=IRRFSSLEN(descbuf);
+        if(desclen==0){
           unsigned int type=
             #ifdef __IRR_WCHAR_FILESYSTEM
               GetDriveTypeW(drive);
@@ -228,20 +225,50 @@ void getDriveList(){
             case DRIVE_FIXED:
             case DRIVE_REMOVABLE:
               memcpy(descbuf,IRRSLIT("Local Disk"),11*sizeof(irr::fschar_t));
+              desclen=10;
               break;
             case DRIVE_REMOTE:
               memcpy(descbuf,IRRSLIT("Remote Drive"),13*sizeof(irr::fschar_t));
+              desclen=12;
               break;
             case DRIVE_CDROM:
               memcpy(descbuf,IRRSLIT("CDROM Drive"),12*sizeof(irr::fschar_t));
+              desclen=11;
               break;
             default:
               memcpy(descbuf,IRRSLIT("Unknown Drive"),13*sizeof(irr::fschar_t));
+              desclen=12;
               break;
           }
         }
-        std::cout<<"drive: "<<drive<<" : "<<descbuf<<" ("<<drive<<")" <<std::endl;
+        if(strslen+desclen+len+3>buflen){
+          path=new irr::fschar_t[buflen+124];
+          memcpy(path,drivespecs,strslen);
+          delete[] drivespecs;
+          buflen+=124;
+          drivespecs=path;
+        }
+        memcpy(drivespecs+strslen,descbuf,desclen*sizeof(irr::fschar_t));
+        memcpy(drivespecs+strslen+desclen,IRRSLIT(" ("),2*sizeof(irr::fschar_t));
+        memcpy(drivespecs+strslen+desclen+2,drive,(len-1)*sizeof(irr::fschar_t));
+        memcpy(drivespecs+strslen+desclen+2+len-1,IRRSLIT(")"),2*sizeof(irr::fschar_t));
+        delete[] descbuf;
+        strslen+=desclen+3+len;
+        ++strscount;
       }
     }
   #endif
+  if(strscount>=0){
+    path=new irr::fschar_t[strslen+1];
+    memcpy(path,drivespecs,strslen);
+    delete[] drivespecs;
+    drivespecs=path;
+    drivespecs[strslen]=IRRSLIT('\0');
+  }else{
+    delete[] path;
+    drivespecs=path=new irr::fschar_t[15];
+    memcpy(path,IRRSLIT("/\0File System\0"),15*sizeof(irr::fschar_t));
+    strslen=14;
+  }
+  return strslen;
 }

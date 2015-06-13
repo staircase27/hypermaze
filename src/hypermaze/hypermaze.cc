@@ -177,7 +177,11 @@ class IrrlichtMusicLoader: public MusicLoader{
 
 int main(int argc,char* argv[]){
 
-  getDriveList();
+  irr::fschar_t* drives;
+  int len=getDriveList(drives);
+  for(irr::fschar_t* drive=drives;strlen(drive)>0;drive+=strlen(drive)+1){
+    cout<<drive<<endl;
+  }
 
   irr::IrrlichtDevice *device = irr::createDevice( irr::video::EDT_OPENGL,
       irr::dimension2d<irr::u32>(640, 480), 16, false, false, false);

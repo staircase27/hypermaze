@@ -7,5 +7,5 @@ const irr::fschar_t* getDataPath();
 const irr::fschar_t* getUserConfigPath();
 const irr::fschar_t* getSystemConfigPath();
 const irr::fschar_t* getDefaultConfigPath();
-void getDriveList();
+int getDriveList(irr::fschar_t*&);
 #endif
