@@ -258,7 +258,7 @@ int getDriveList(irr::fschar_t*& drivespecs){
       }
     }
   #endif
-  if(strscount>=0){
+  if(strscount>0){
     path=new irr::fschar_t[strslen+1];
     memcpy(path,drivespecs,strslen);
     delete[] drivespecs;

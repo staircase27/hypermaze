@@ -179,9 +179,11 @@ int main(int argc,char* argv[]){
 
   irr::fschar_t* drives;
   int len=getDriveList(drives);
+  cout<<"Drives: "<<len<<endl;
   for(irr::fschar_t* drive=drives;strlen(drive)>0;drive+=strlen(drive)+1){
     cout<<drive<<endl;
   }
+  cout<<"End Drives"<<endl;
 
   irr::IrrlichtDevice *device = irr::createDevice( irr::video::EDT_OPENGL,
       irr::dimension2d<irr::u32>(640, 480), 16, false, false, false);
