@@ -1,8 +1,6 @@
-/*
- * File:   FontManager.cc
- * Author: armstrong
- *
- * Created on December 5, 2014, 10:14 AM
+/**
+ * @file fonts.cc
+ * @brief Implementation of fonts.hh
  */
 
 #include "fonts.hh"
@@ -74,6 +72,12 @@ FontFamily* VirtualFontSet::resolve(FontManager& m){
   return m.getFontFamily(realname);
 }
 
+/// Helper function to convert a string to a bool
+/**
+ * Treats empty string, 0 or false as false and all other as true
+ * @param str the string to convert
+ * @return the bool it parses too
+ */
 inline bool parsebool(const wchar_t* str){
   return wcscmp(L"",str)!=0&&wcscmp(L"0",str)!=0&&wcscmp(L"false",str)!=0;
 }
