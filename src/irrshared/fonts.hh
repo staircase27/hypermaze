@@ -36,7 +36,7 @@ class FontSet{
     /**
      * @param fm the font manager that is used to resolve this FontSet
      * @return a concrete FontFamily or Null if it can't resolve
-     *//
+     */
     virtual FontFamily* resolve(FontManager& fm)=0;
     ///virtual destuctor so concrete implementations can tidy up when deleted.
     virtual ~FontSet(){};
