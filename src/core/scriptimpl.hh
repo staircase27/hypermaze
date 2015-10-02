@@ -29,7 +29,7 @@ class PolymorphicHypIOImpl: public virtual PolymorphicHypIO{
       return write(s,(T&)*this);
     }
     /**
-     * @copydoc
+     * @copydoc PolymorphicHypIO
      * @return the id of this class which is the template paramiter ID
      */
     virtual int getid() const{
@@ -164,7 +164,7 @@ class StringMatcherCallback{
  * can be implemented by adding a pattern element that can match anything and any length. The match is done
  * using a recursive backtracking matcher function. The sections of the patter that we are interested in are
  * specified by groups property.
- */ 
+ */
 class StringMatcher{
   public:
     int count;///<the number of elements to the pattern
@@ -178,7 +178,7 @@ class StringMatcher{
 	   * @return how many groups this matcher will return
 	   */
     inline int groupCount(){return group_count;}
-    
+
     ///check a match against a constant String
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -219,7 +219,7 @@ class StringMatcher{
      */
 	  bool match(      SP<String> s,StringMatcherCallback<     StringPointer>& cb,
 	      SPA<Pair<SP<     StringPointer> > > groups=SPA<Pair<SP<     StringPointer> > >());
-	  
+
 	private:
 	  ///The internal implementation function for matches
 	  /**
@@ -433,7 +433,7 @@ bool write(HypOStream& s,const ConditionBefore& c);
 class ConditionStringPattern: public Condition, public PolymorphicHypIOImpl<ConditionStringPattern,7>{
   public:
     StringMatcher sm;///<the string matcher to check the string against
-  
+
     ///return true if the string matches the StringMatcher
     /**
      * @copydoc Condition::is
@@ -721,7 +721,7 @@ class ActionStringConditionSelect:public ActionCommon, public PolymorphicHypIOIm
   public:
     StringElementCondition change; ///<if the string element's selectedness should be changed
     StringElementCondition select; ///<if the string element should be changed to selected or deselected
-  
+
     ///@copydoc ActionCommon::doCommon
     ///changes the selectedness of string elements and records that changes have been made in the response
     virtual void doCommon(ScriptResponse& r,SP<String> s);
@@ -748,7 +748,7 @@ class ActionSetStringRoute:public ActionCommon, public PolymorphicHypIOImpl<Acti
     int count;///<the number of elements in the new route
     SPA<Dirn> route;///<the directions the string goes in the new route
     bool all;///<set the route for all matches or just the first. if all then the changed string must eventually not match
-  
+
     ///@copydoc ActionCommon::doCommon
     ///this calls the StringMatcher to find a match then edits the retuned match.
     ///if all is true this is repeated till the pattern fails to match. this can lead to infinite loops

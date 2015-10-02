@@ -59,7 +59,7 @@ class FontFamily: public FontSet{
 
   public:
     /**
-     * @inheritDoc
+     * @copydoc FontSet
      * Resolves to itself as it's already a Font Family
      */
     FontFamily* resolve(FontManager&){
@@ -80,8 +80,8 @@ class FontFamily: public FontSet{
     /**
      * @param fontname the path to the new font
      * @param size the size of the new font
-     * @param if the new font is bold
-     * @param if the new font is italic
+     * @param bold if the new font is bold
+     * @param italic if the new font is italic
      * @return true if a new font was actually added
      */
     bool addFont(irr::io::path fontname,int size,bool bold=false,bool italic=false);
@@ -102,7 +102,7 @@ class VirtualFontSet:public FontSet{
     VirtualFontSet(irr::core::stringc name):realname(name){}
     /// Use the font manager to resolve the pointed to name to a concrete font.
     /**
-     * @param the font manager to resolve this alias using
+     * @param m the font manager to resolve this alias using
      * @return the FontFamily this resolves to or Null
      */
     FontFamily* resolve(FontManager& m);
