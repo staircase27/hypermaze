@@ -59,10 +59,10 @@ class FontFamily: public FontSet{
 
   public:
     /**
-     * @copydoc FontSet
+     * @copydoc FontSet::resolve
      * Resolves to itself as it's already a Font Family
      */
-    FontFamily* resolve(FontManager&){
+    FontFamily* resolve(FontManager& fm){
       return this;
     }
     /// Get the path for the font requested.

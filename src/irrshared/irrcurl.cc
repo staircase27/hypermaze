@@ -1,18 +1,30 @@
+/**
+ * @file irrcurl.cc
+ * @brief Implementation of irrcurl.hh
+ */
 #include "irrcurl.hh"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef USE_CURL
+#ifndef USE_CURL
 #include <curl/curl.h>
 
+/// A container for a chunk of memory
 struct MemoryStruct {
-  char *memory;
-  size_t size;
+  char *memory;///< The actual memory
+  size_t size;///< The size of the memory chunk
 };
 
-static size_t
-WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+/// Callback used to write memory into the provided MemoryStruct
+/**
+ * @param contents the new contents
+ * @param size the size of a unit of the data
+ * @param nmemb the number of data unit
+ * @param userp the pointer to the MemoryStruct to store the data in
+ * @return the amount of data processed. will always be size*nmemb
+ */
+static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;

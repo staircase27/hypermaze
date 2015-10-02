@@ -1,3 +1,8 @@
+/**
+ * @file platformcompat.cc
+ * @brief Implementation of platformcompat.hh
+ * Currently contains implementations for Win32 and Linux/Unix
+ */
 #include "platformcompat.hh"
 #ifdef WIN32
 #define WINVER 0x0601
@@ -18,7 +23,7 @@
 #define IRRSLIT(a) a
 #endif
 
-//keep a pointer around so we can free on next call
+/// keep a pointer around so we can free on next call
 irr::fschar_t* path=0;
 
 const irr::fschar_t* getDataPath(){

@@ -1,3 +1,7 @@
+/**
+ * @file sound.cc
+ * @brief Implementation of sound.hh
+ */
 #include "sound.hh"
 
 #ifdef OPENAL
@@ -5,39 +9,43 @@
 #include <AL/alc.h>
 #include <AL/alut.h>
 #include <cstring>
-// Position of the source sound.
+/// Position of the source sound.
 static const ALfloat SourcePos[] = { 0.0, 0.0, 0.0 };
-// Velocity of the source sound.
+/// Velocity of the source sound.
 static const ALfloat SourceVel[] = { 0.0, 0.0, 0.0 };
-// Position of the Listener.
+/// Position of the Listener.
 static const ALfloat ListenerPos[] = { 0.0, 0.0, 0.0 };
-// Velocity of the Listener.
+/// Velocity of the Listener.
 static const ALfloat ListenerVel[] = { 0.0, 0.0, 0.0 };
-// Orientation of the Listener. (first 3 elements are "at", second 3 are "up")
-// Also note that these should be units of '1'.
+/// Orientation of the Listener. (first 3 elements are "at", second 3 are "up")
+/**
+ * Also note that these should be units of '1'.
+ */
 static const ALfloat ListenerOri[] = { 0.0, 0.0, -1.0,  0.0, 1.0, 0.0 };
 
 
+/// An implementation of SoundManager that uses openAl and ALUT
 class OpenALSoundManager: public SoundManager{
-    #define NUM_EFFECTS 2
-    #define NUM_MUSICS 2
-    #define NUM_BUFFERS (NUM_EFFECTS+NUM_MUSICS)
-    #define NUM_SOURCES 2
-    bool valid;
-    bool playing;
-    ALuint  buffer[NUM_BUFFERS];
-    ALuint  source[NUM_SOURCES];
-    
+    #define NUM_EFFECTS 2 //< The number of effects available
+    #define NUM_MUSICS 2 //< Number of music tracks that can be loaded at once
+    #define NUM_BUFFERS (NUM_EFFECTS+NUM_MUSICS) //< The number of buffers we therefore need
+    #define NUM_SOURCES 2 //< The number of things that can be played at the same time
+    bool valid; ///< Are we valid
+    bool playing; ///< If music is currently playing
+    ALuint  buffer[NUM_BUFFERS]; ///< An array containing the buffers to use
+    ALuint  source[NUM_SOURCES]; ///< An array containing the sources
+
   public:
+    /// Construct a new SoundManager
     OpenALSoundManager():valid(true),playing(false),buffer(){
       memset(buffer,0,2*sizeof(ALuint));
       if(!alutInit(0, 0)){
         valid=false;
         return;
       }
-      
+
       alGenSources(NUM_SOURCES, source);
-      
+
       for(int i=0;i<NUM_SOURCES;++i){
         alSourcef (source[i], AL_PITCH,    1.0      );
         alSourcef (source[i], AL_GAIN,     1.0      );
@@ -45,12 +53,13 @@ class OpenALSoundManager: public SoundManager{
         alSourcefv(source[i], AL_VELOCITY, SourceVel);
         alSourcei (source[i], AL_LOOPING,  false     );
       }
-      
+
       alListenerfv(AL_POSITION,    ListenerPos);
       alListenerfv(AL_VELOCITY,    ListenerVel);
       alListenerfv(AL_ORIENTATION, ListenerOri);
     }
-    
+
+    /// load the next music track
     void loadMusic(ALuint* buffer){
       if(!ms)
         return
@@ -69,8 +78,7 @@ class OpenALSoundManager: public SoundManager{
         ml->finished(data,length);
       }
     }
-      
-    
+
     virtual void setMusicVolume(unsigned int volume){
       alSourcef(source[1],AL_GAIN,volume/50.0);
     };
@@ -88,7 +96,13 @@ class OpenALSoundManager: public SoundManager{
       alGetSourcef(source[1],AL_GAIN,&vol);
       return (unsigned int)(vol*50.0);
     };
-    
+
+    /**
+     * @copydoc SoundManager::playEffect
+     * Loads the effect using the set MusicLoader and MusicSource.
+     * If a different effect is already playing this new effect will replace it.
+     * If the same effect is already playing this just ignore the request.
+     */
     virtual void playEffect(SOUND_EFFECT effect){
       if(buffer[(int) effect]==0){
         const char* track=ms->getEffectName(effect);
@@ -115,7 +129,7 @@ class OpenALSoundManager: public SoundManager{
         alSourcePlay(source[0]);
       }
     }
-    
+
     virtual void startMusic(){
       playing=true;
       run();
@@ -127,7 +141,13 @@ class OpenALSoundManager: public SoundManager{
     virtual bool isPlaying(){
       return playing;
     }
-    
+
+    /**
+     * @copydoc SoundManager::run
+     * This queues the next track and starts it
+     * playing if needed either due to being told
+     * to start or the previous track running out.
+     */
     virtual void run(){
       if(!playing)
         return;
@@ -169,21 +189,21 @@ class OpenALSoundManager: public SoundManager{
           alSourcePlay(source[1]);
       }
     };
-    
+
     virtual bool isValid(){return valid;};
 
     virtual ~OpenALSoundManager(){
       alDeleteBuffers(NUM_BUFFERS, buffer);
       alDeleteSources(NUM_SOURCES, source);
       alutExit();
-    }    
+    }
 };
-
 SoundManager* createSoundManager(){
   return new OpenALSoundManager();
 }
 
 #else
+/// An implementation of SoundManager that does nothing
 class EmptySoundManager: public SoundManager{
   public:
     virtual void setMusicVolume(unsigned int volume){};
@@ -191,15 +211,15 @@ class EmptySoundManager: public SoundManager{
 
     virtual unsigned int getMusicVolume(){return 0;};
     virtual unsigned int getEffectVolume(){return 0;};
-    
+
     virtual void playEffect(SOUND_EFFECT effect){};
-    
+
     virtual void startMusic(){};
     virtual void stopMusic(){};
     virtual bool isPlaying(){return false;}
-    
+
     virtual void run(){};
-    
+
     virtual bool isValid(){return false;};
 };
 

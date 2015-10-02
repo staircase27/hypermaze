@@ -18,7 +18,7 @@ template <class T,int ID>
 class PolymorphicHypIOImpl: public virtual PolymorphicHypIO{
   protected:
     /**
-     * @copydoc PolymorphicHypIO
+     * @copydoc PolymorphicHypIO::dowrite
      * writes the id provided as a template param then delegates writing data to the function for the templated type T
      * @param s the stream to write this object to
      * @return true if the item was written ok
@@ -29,7 +29,7 @@ class PolymorphicHypIOImpl: public virtual PolymorphicHypIO{
       return write(s,(T&)*this);
     }
     /**
-     * @copydoc PolymorphicHypIO
+     * @copydoc PolymorphicHypIO::getid
      * @return the id of this class which is the template paramiter ID
      */
     virtual int getid() const{
