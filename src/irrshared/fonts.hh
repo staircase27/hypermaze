@@ -1,6 +1,7 @@
 /**
  * @file fonts.hh
  * @brief The font management system for hypermaze
+ *
  * Fonts are stored in the irrlicht/fonts/ directory in the form of xml files.
  * See FontManager::load for details. For irrlicht version < 1.9
  * a work round is needed as they can't load fonts from virtual filesystems correctly.

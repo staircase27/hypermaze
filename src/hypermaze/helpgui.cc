@@ -1,5 +1,6 @@
 #include "helpgui.hh"
 #include "keymapgui.hh"
+#include "../irrshared/GUIFormattedText.hh"
 
 bool HelpGui::OnEventImpl(const irr::SEvent &event){
   if(event.EventType == irr::EET_GUI_EVENT){

@@ -1,6 +1,5 @@
 #include "irrlicht.h"
 #include "gui.hh"
-#include "../irrshared/GUIFormattedText.hh"
 
 class KeyMap;
 

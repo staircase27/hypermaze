@@ -108,8 +108,21 @@ irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,const char* url){
 #endif
 
 irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const char* url){
-  irr::core::stringw urlw(url);
-  return createAndOpen(fs,urlw.c_str());
+  if(!url)
+    return 0;
+  const char* c=url;
+  bool isurl=false;
+  while((!isurl)&&*c!=0&&*c!='/'&&*c!='\\'){
+    if(*c==':' && *(c+1)=='/' && *(c+2)=='/')
+      isurl=true;
+    ++c;
+  }
+  if(isurl)
+    return createAndOpenURL(fs,url);
+  else{
+    irr::core::stringw urlw(url);
+    return fs->createAndOpenFile(urlw.c_str());
+  }
 }
 
 irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const wchar_t* url){

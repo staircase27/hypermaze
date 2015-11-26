@@ -26,10 +26,10 @@ static const ALfloat ListenerOri[] = { 0.0, 0.0, -1.0,  0.0, 1.0, 0.0 };
 
 /// An implementation of SoundManager that uses openAl and ALUT
 class OpenALSoundManager: public SoundManager{
-    #define NUM_EFFECTS 2 //< The number of effects available
-    #define NUM_MUSICS 2 //< Number of music tracks that can be loaded at once
-    #define NUM_BUFFERS (NUM_EFFECTS+NUM_MUSICS) //< The number of buffers we therefore need
-    #define NUM_SOURCES 2 //< The number of things that can be played at the same time
+    #define NUM_EFFECTS 2 ///< The number of effects available
+    #define NUM_MUSICS 2 ///< Number of music tracks that can be loaded at once
+    #define NUM_BUFFERS (NUM_EFFECTS+NUM_MUSICS) ///< The number of buffers we therefore need
+    #define NUM_SOURCES 2 ///< The number of things that can be played at the same time
     bool valid; ///< Are we valid
     bool playing; ///< If music is currently playing
     ALuint  buffer[NUM_BUFFERS]; ///< An array containing the buffers to use

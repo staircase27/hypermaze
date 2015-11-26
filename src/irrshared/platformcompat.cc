@@ -16,10 +16,14 @@
 #endif
 
 #ifdef _IRR_WCHAR_FILESYSTEM
+/// A macro that expands to the correct strlen function of irr::fschar_t* strings
 #define IRRFSSLEN wcslen
+/// A macro that gives the correct version of a string literal for irr::fschar_t* strings
 #define IRRSLIT(a) L##a
 #else
+/// A macro that expands to the correct strlen function of irr::fschar_t* strings
 #define IRRFSSLEN strlen
+/// A macro that gives the correct version of a string literal for irr::fschar_t* strings
 #define IRRSLIT(a) a
 #endif
 
@@ -170,10 +174,11 @@ const irr::fschar_t* getSystemConfigPath(){
   #endif
   #endif
 }
+
 const irr::fschar_t* getDefaultConfigPath(){
   return IRRSLIT("config/");
 }
-#include <iostream>
+
 int getDriveList(irr::fschar_t*& drivespecs){
   int strscount=0, strslen=0, buflen=255;
   delete[] path;

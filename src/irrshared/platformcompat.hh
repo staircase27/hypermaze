@@ -6,7 +6,7 @@
 
 #ifndef PLATFORMCOMPAT_HH_INC
 #define PLATFORMCOMPAT_HH_INC
-/// Get the path to store data in usually something like the users home directory
+/// Get the path to the games data files
 /**
  * @return the path to the data location
  */

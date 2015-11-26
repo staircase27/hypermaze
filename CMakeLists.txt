@@ -163,8 +163,6 @@ int main(){
   endif(HAVE_WIN_KNOWN_FOLDERS)
 endif(WIN32)
 
-
-
 ########### next target ###############
 
 set(scriptedit_SRCS
