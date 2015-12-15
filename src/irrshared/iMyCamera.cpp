@@ -1,6 +1,8 @@
-// Copyright (C) 2002-2011 Nikolaus Gebhardt
-// This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in irrlicht.h
+// Based on code Copyright (C) 2002-2011 Nikolaus Gebhardt
+/**
+ * @file iMyCamera.cpp
+ * @brief Implementation of iMyCamera.hh
+ */
 
 #include <ISceneManager.h>
 #include "iMyCamera.hh"
@@ -10,108 +12,106 @@
 
 using namespace irr;
 using namespace std;
-//! constructor
+/// Special scene node animator for FPS cameras
+/** This scene node animator can be attached to a camera to make it act
+like a 3d modelling tool camera
+*/
+class CSceneNodeAnimatorCameraMy : public scene::ISceneNodeAnimator
+{
+public:
+    /// Constructor
+    CSceneNodeAnimatorCameraMy(gui::ICursorControl* cursor, f32 rotateSpeedX = -500.f, f32 rotateSpeedY = -200.f,
+        f32 zoomSpeed = 0.03f, f32 translationSpeed = 100.f);
 
-    //! Special scene node animator for FPS cameras
-    /** This scene node animator can be attached to a camera to make it act
-    like a 3d modelling tool camera
-    */
-    class CSceneNodeAnimatorCameraMy : public scene::ISceneNodeAnimator 
+    /// Destructor
+    virtual ~CSceneNodeAnimatorCameraMy();
+
+    /// Animates the scene node, currently only works on cameras
+    virtual void animateNode(scene::ISceneNode* node, u32 timeMs);
+
+    /// Event receiver
+    virtual bool OnEvent(const SEvent& event);
+
+    /// Returns the speed of movement in units per millisecond
+    virtual f32 getMoveSpeed() const;
+
+    /// Sets the speed of movement in units per millisecond
+    virtual void setMoveSpeed(f32 moveSpeed);
+
+    /// Returns the rotation speed
+    virtual f32 getRotateSpeedX() const;
+
+    /// Set the rotation speed
+    virtual void setRotateSpeedX(f32 rotateSpeed);
+
+    /// Returns the rotation speed
+    virtual f32 getRotateSpeedY() const;
+
+    /// Set the rotation speed
+    virtual void setRotateSpeedY(f32 rotateSpeed);
+
+    /// Returns the zoom speed
+    virtual f32 getZoomSpeed() const;
+
+    /// Set the zoom speed
+    virtual void setZoomSpeed(f32 zoomSpeed);
+
+    /// Returns the current distance, i.e. orbit radius
+    virtual f32 getDistance() const;
+
+    /// Set the distance
+    virtual void setDistance(f32 distance);
+
+    /// This animator will receive events when attached to the active camera
+    virtual bool isEventReceiverEnabled() const
     {
-    public:
-        //! Constructor
-        CSceneNodeAnimatorCameraMy(gui::ICursorControl* cursor, f32 rotateSpeedX = -500.f, f32 rotateSpeedY = -200.f, 
-            f32 zoomSpeed = 0.03f, f32 translationSpeed = 100.f);
+        return true;
+    }
 
-        //! Destructor
-        virtual ~CSceneNodeAnimatorCameraMy();
+    /// Returns type of the scene node
+    virtual scene::ESCENE_NODE_ANIMATOR_TYPE getType() const
+    {
+        return scene::ESNAT_CAMERA_MAYA;
+    }
 
-        //! Animates the scene node, currently only works on cameras
-        virtual void animateNode(scene::ISceneNode* node, u32 timeMs);
+    /// Creates a clone of this animator.
+    /** Please note that you will have to drop
+    (IReferenceCounted::drop()) the returned pointer after calling
+    this. */
+    virtual scene::ISceneNodeAnimator* createClone(scene::ISceneNode* node, scene::ISceneManager* newManager=0);
 
-        //! Event receiver
-        virtual bool OnEvent(const SEvent& event);
+private:
 
-        //! Returns the speed of movement in units per millisecond
-        virtual f32 getMoveSpeed() const;
+    void allKeysUp();
+    void animate();
+    bool isMouseKeyDown(s32 key) const;
 
-        //! Sets the speed of movement in units per millisecond
-        virtual void setMoveSpeed(f32 moveSpeed);
+    bool MouseKeys[3];
+    int MouseWheel;
 
-        //! Returns the rotation speed
-        virtual f32 getRotateSpeedX() const;
+    gui::ICursorControl *CursorControl;
+    scene::ICameraSceneNode* OldCamera;
+    core::vector3df Target;
+    core::vector3df LastCameraTarget;   // to find out if the camera target was moved outside this animator
+    core::position2df RotateStart;
+    core::position2df ZoomStart;
+    core::position2df TranslateStart;
+    core::position2df MousePos;
+    f32 ZoomSpeed;
+    f32 RotateSpeedX;
+    f32 RotateSpeedY;
+    f32 TranslateSpeed;
+    f32 Zoom;
+    f32 RotX, RotY;
+    bool Rotating;
+    bool Moving;
+    bool Translating;
+    bool Fine;
+    core::dimension2d<u32> lastdim;
 
-        //! Set the rotation speed
-        virtual void setRotateSpeedX(f32 rotateSpeed);
+};
 
-        //! Returns the rotation speed
-        virtual f32 getRotateSpeedY() const;
 
-        //! Set the rotation speed
-        virtual void setRotateSpeedY(f32 rotateSpeed);
-
-        //! Returns the zoom speed
-        virtual f32 getZoomSpeed() const;
-
-        //! Set the zoom speed
-        virtual void setZoomSpeed(f32 zoomSpeed);
-
-        //! Returns the current distance, i.e. orbit radius
-        virtual f32 getDistance() const;
-
-        //! Set the distance
-        virtual void setDistance(f32 distance);
-
-        //! This animator will receive events when attached to the active camera
-        virtual bool isEventReceiverEnabled() const
-        {
-            return true;
-        }
-
-        //! Returns type of the scene node
-        virtual scene::ESCENE_NODE_ANIMATOR_TYPE getType() const 
-        {
-            return scene::ESNAT_CAMERA_MAYA;
-        }
-
-        //! Creates a clone of this animator.
-        /** Please note that you will have to drop
-        (IReferenceCounted::drop()) the returned pointer after calling
-        this. */
-        virtual scene::ISceneNodeAnimator* createClone(scene::ISceneNode* node, scene::ISceneManager* newManager=0);
-
-    private:
-
-        void allKeysUp();
-        void animate();
-        bool isMouseKeyDown(s32 key) const;
-
-        bool MouseKeys[3];
-        int MouseWheel;
-
-        gui::ICursorControl *CursorControl;
-        scene::ICameraSceneNode* OldCamera;
-        core::vector3df Target;
-        core::vector3df LastCameraTarget;   // to find out if the camera target was moved outside this animator
-        core::position2df RotateStart;
-        core::position2df ZoomStart;
-        core::position2df TranslateStart;
-        core::position2df MousePos;
-        f32 ZoomSpeed;
-        f32 RotateSpeedX;
-        f32 RotateSpeedY;
-        f32 TranslateSpeed;
-        f32 Zoom;
-        f32 RotX, RotY;
-        bool Rotating;
-        bool Moving;
-        bool Translating;
-        bool Fine;
-        core::dimension2d<u32> lastdim;
-        
-    };
-
-    
 
 
 CSceneNodeAnimatorCameraMy::CSceneNodeAnimatorCameraMy(gui::ICursorControl* cursor,
@@ -131,7 +131,7 @@ CSceneNodeAnimatorCameraMy::CSceneNodeAnimatorCameraMy(gui::ICursorControl* curs
 }
 
 
-//! destructor
+/// destructor
 CSceneNodeAnimatorCameraMy::~CSceneNodeAnimatorCameraMy()
 {
     if (CursorControl)
@@ -139,11 +139,11 @@ CSceneNodeAnimatorCameraMy::~CSceneNodeAnimatorCameraMy()
 }
 
 
-//! It is possible to send mouse and key events to the camera. Most cameras
-//! may ignore this input, but camera scene nodes which are created for
-//! example with scene::ISceneManager::addMayaCameraSceneNode or
-//! scene::ISceneManager::addMeshViewerCameraSceneNode, may want to get this input
-//! for changing their position, look at target or whatever.
+/// It is possible to send mouse and key events to the camera. Most cameras
+/// may ignore this input, but camera scene nodes which are created for
+/// example with scene::ISceneManager::addMayaCameraSceneNode or
+/// scene::ISceneManager::addMeshViewerCameraSceneNode, may want to get this input
+/// for changing their position, look at target or whatever.
 bool CSceneNodeAnimatorCameraMy::OnEvent(const SEvent& event)
 {
     if (event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key == KEY_SPACE){
@@ -192,7 +192,7 @@ bool CSceneNodeAnimatorCameraMy::OnEvent(const SEvent& event)
 }
 
 
-//! OnAnimate() is called just before rendering the whole scene.
+/// OnAnimate() is called just before rendering the whole scene.
 void CSceneNodeAnimatorCameraMy::animateNode(scene::ISceneNode *node, u32 timeMs)
 {
     //LM = Rotate around camera pivot
@@ -212,7 +212,7 @@ void CSceneNodeAnimatorCameraMy::animateNode(scene::ISceneNode *node, u32 timeMs
     scene::ISceneManager * smgr = camera->getSceneManager();
     if (smgr && smgr->getActiveCamera() != camera)
         return;
-      
+
 
     if (OldCamera != camera)
     {
@@ -243,7 +243,7 @@ void CSceneNodeAnimatorCameraMy::animateNode(scene::ISceneNode *node, u32 timeMs
     }
 
     float SpeedFactor=Fine?0.1:1;
-    
+
     if (MouseWheel!=0)
     {
         const f32 old = Zoom;
@@ -308,67 +308,67 @@ void CSceneNodeAnimatorCameraMy::allKeysUp()
 }
 
 
-//! Sets the rotation speed
+/// Sets the rotation speed
 void CSceneNodeAnimatorCameraMy::setRotateSpeedX(f32 speed)
 {
     RotateSpeedX = speed;
 }
-//! Sets the rotation speed
+/// Sets the rotation speed
 void CSceneNodeAnimatorCameraMy::setRotateSpeedY(f32 speed)
 {
     RotateSpeedY = speed;
 }
 
 
-//! Sets the movement speed
+/// Sets the movement speed
 void CSceneNodeAnimatorCameraMy::setMoveSpeed(f32 speed)
 {
     TranslateSpeed = speed;
 }
 
 
-//! Sets the zoom speed
+/// Sets the zoom speed
 void CSceneNodeAnimatorCameraMy::setZoomSpeed(f32 speed)
 {
     ZoomSpeed = speed;
 }
 
 
-//! Set the distance
+/// Set the distance
 void CSceneNodeAnimatorCameraMy::setDistance(f32 distance)
 {
     Zoom=distance;
 }
 
-        
-//! Gets the rotation speed
+
+/// Gets the rotation speed
 f32 CSceneNodeAnimatorCameraMy::getRotateSpeedX() const
 {
     return RotateSpeedX;
 }
 
-//! Gets the rotation speed
+/// Gets the rotation speed
 f32 CSceneNodeAnimatorCameraMy::getRotateSpeedY() const
 {
     return RotateSpeedY;
 }
 
 
-// Gets the movement speed
+/// Gets the movement speed
 f32 CSceneNodeAnimatorCameraMy::getMoveSpeed() const
 {
     return TranslateSpeed;
 }
 
 
-//! Gets the zoom speed
+/// Gets the zoom speed
 f32 CSceneNodeAnimatorCameraMy::getZoomSpeed() const
 {
     return ZoomSpeed;
 }
 
 
-//! Returns the current distance, i.e. orbit radius
+/// Returns the current distance, i.e. orbit radius
 f32 CSceneNodeAnimatorCameraMy::getDistance() const
 {
     return Zoom;
@@ -399,4 +399,4 @@ scene::ICameraSceneNode* addCameraSceneNodeMy(scene::ISceneManager* smgr,gui::IC
     }
 
     return node;
-}    
+}

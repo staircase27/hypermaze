@@ -1,3 +1,8 @@
+/**
+ * @file GUIFormattedText.cc
+ * @brief Implementation of GUIFormattedText.hh
+ */
+
 #include "GUIFormattedText.hh"
 namespace irr{
   using namespace gui;
@@ -61,8 +66,8 @@ void GUIFormattedText::setText( const wchar_t* text){
 
 int GUIFormattedText::addText(const wchar_t* text,int i){
   if(i<0)
-    i+=paragraphs.size();
-  if(i<0 || i>=paragraphs.size())
+    i+=paragraphs.size()+1;
+  if(i<0 || i>paragraphs.size())
     return -1;
   irr::IGUIStaticText* par=Environment->addStaticText(text,
       irr::rect<irr::s32>(irr::position2di(0,0),RelativeRect.getSize()),false,true,this,-1,false);

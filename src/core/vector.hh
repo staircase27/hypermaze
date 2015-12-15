@@ -1,7 +1,7 @@
 /**
  * @file vector.hh
  * @brief This file provides a vector class and a few functions for use with it.
- * 
+ *
  * If we are using irrlicht then the Vector class is just an alias for irr::code::vector3di
  * otherwise we have to implement one ourselves.
  */
@@ -14,7 +14,7 @@
 #define VECTOR_HH_INC
 
 #ifdef IRRLICHT
-  #include "irrlicht.h"
+  #include "vector3d.h"
   /// A vector for locations in the maze
   /**
    * We use the irrlicht vector when we are linking with irrlicht
