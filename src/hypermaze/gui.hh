@@ -1,3 +1,9 @@
+/**
+ * @file gui.hh
+ * @brief The GUIs for the hypermaze
+ * This header defines a few different GUIElements and classes used for
+ * the hypermaze guis and the hypermaze gui classes for each type of gui.
+ */
 #include "irrlicht.h"
 #include "../core/script.hh"
 #include "../irrshared/fonts.hh"
@@ -7,19 +13,29 @@
 class Maze;
 class PuzzleDisplay;
 
+/// The id for empty GUI element used to contain other elements
 static const int MGUIET_EMPTY = irr::gui::EGUIET_COUNT+10;
 
+/// An empty GUI element used to contains other elements
 class CGUIEmptyElement : public irr::gui::IGUIElement
 {
   public:
+    /// Construct a new empty GUI element
+    /**
+     * @param environment the GUI environment that the element is attached to
+     * @param parent the parent of the new element
+     */
     CGUIEmptyElement(irr::gui::IGUIEnvironment* environment, irr::gui::IGUIElement* parent)
         :irr::gui::IGUIElement((irr::gui::EGUI_ELEMENT_TYPE)MGUIET_EMPTY, environment, parent,
                                 -1, irr::core::rect<irr::s32>(0,0,100000,10000)) {}
 
-    irr::gui::IGUIEnvironment* GetEnvironment() { return Environment; }
-
+    /// Get the name of this element
+    /**
+     * @return the const string "empty"
+     */
     virtual const irr::c8* getTypeName() const   { return "empty"; }
 
+    /// Check if a point is inside this element.
     virtual bool isPointInside(const irr::core::position2d<irr::s32>& point) const { return false; }
 
     virtual bool bringToFront(IGUIElement* element)
