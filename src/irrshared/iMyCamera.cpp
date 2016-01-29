@@ -342,6 +342,7 @@ irr::scene::ICameraSceneNode* addCameraSceneNodeMy(
             target, id, makeActive);
     if (node)
     {
+        node->setFOV(1.256637061*0.6);
         scene::ISceneNodeAnimator* anm = new CSceneNodeAnimatorCameraMy(cursorControl,
             rotateSpeedX, rotateSpeedY, zoomSpeed);
 

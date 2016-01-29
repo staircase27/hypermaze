@@ -36,8 +36,18 @@ class CGUIEmptyElement : public irr::gui::IGUIElement
     virtual const irr::c8* getTypeName() const   { return "empty"; }
 
     /// Check if a point is inside this element.
+    /**
+     * @param point the point to check
+     * @return always returns false. Nothing should count as inside this element
+     */
     virtual bool isPointInside(const irr::core::position2d<irr::s32>& point) const { return false; }
 
+    /// Bring this element to the font
+    /**
+     * Overridden to also bring this to front of parent
+     * @param element the element to bring to the front
+     * @return True if successful, false if not.
+     */
     virtual bool bringToFront(IGUIElement* element)
     {
       bool result = IGUIElement::bringToFront(element);
