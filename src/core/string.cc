@@ -184,13 +184,45 @@ bool StringPlay::slide(bool moveEnd,bool out){
 }
 
 bool StringPlay::canMove(Dirn d){
+  // Not allowed to try and drag the end elements out of the maze
+  if(d==opposite(s->stringDir)){
+    if(s->route.front().selected)
+      return false;
+  }else if(d==s->stringDir){
+    if(s->route.back().selected)
+      return false;
+  }
+  bool lastselected=s->route.front().selected;
   bool any=false;
-  if((d==opposite(s->stringDir)&&s->route.front().selected)||(d==s->stringDir&&s->route.back().selected))
-    return false;
-  for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it){
-    if(!it->selected)
+  std::list<StringElement>::iterator previt=s->route.begin();
+  std::list<StringElement>::iterator it=s->route.begin();
+  for(;it!=s->route.end();previt=it,++it){
+    if(!it->selected){
+      if(lastselected){
+        // element directly after the end of a selection
+        // don't allow last element to move in the direction it points unless the element after it
+        // (i.e. this element) also points the same direction (i.e. can be deleted)
+        // i.e. avoiding moving _|- into _|_ where the string doubles back on itself
+        if(previt->d == d && it->d != d)
+          return false;
+        lastselected=false;
+      }
+      // If not selected then no further checks needed as won't move
       continue;
+    }
+    if(!lastselected){
+      lastselected=true;
+      // First element of a selection
+      // don't allow to move opposite to it's direction unless the previous element points
+      // the same direction (i.e. can be deleted)
+      // i.e. avoiding moving _|- into _|_ where the string doubles back on itself
+      if(it->d == opposite(d) && previt->d != opposite(d))
+        return false;
+
+    }
+    // We have at least one selected element
     any=true;
+    // Check for moving out of bounds
     if(d==UP && it->pos.Y>=s->maze.size().Y-1)
       return false;
     if(d==DOWN && it->pos.Y<=1)
@@ -203,6 +235,8 @@ bool StringPlay::canMove(Dirn d){
       return false;
     if(d==BACK && it->pos.Z<=-5)
       return false;
+
+    // Check if we will hit a wall
     if(it->d!=d && it->d!=opposite(d)){
       Vector wall=it->pos+to_shift_vector(it->d)+to_shift_vector(d);
       Dirn wallDirn=perpendicular(it->d,d);
@@ -219,6 +253,8 @@ void StringPlay::doMove(Dirn d,bool undo){
   int length=0;
   int movescore=0;
   bool lastselected=false;
+
+  //do the move
   for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it){
     ++length;
     if(it->selected){
@@ -254,12 +290,14 @@ void StringPlay::doMove(Dirn d,bool undo){
     }
     lastselected=it->selected;
   }
-
+  // fix up the end
   if(lastselected)
     if(d==s->stringDir||d==opposite(s->stringDir))
       s->route.insert(s->route.end(),StringElement(s->endPos+to_vector(d),opposite(d),false));
     else
       s->endPos+=to_vector(d);
+
+  // collapse any lines along the edge (or slightly sticking out)
   if(!undo){
     score+=movescore;
     SPA<unsigned char> selection((length+CHAR_BIT-1)/CHAR_BIT);
@@ -268,12 +306,24 @@ void StringPlay::doMove(Dirn d,bool undo){
       if(it->selected)
         selection[i/CHAR_BIT]|=(1<<(i%CHAR_BIT));
     std::list<Dirn> startcollapsed;
-    while(s->route.front().d!=s->stringDir){
+    int out=0;
+    while(out!=0 || s->route.front().d!=s->stringDir){
+      // checks we end at the same distance as we started at
+      if(s->route.front().d == opposite(s->stringDir))
+        out++;
+      else if(s->route.front().d == s->stringDir)
+        out--;
       startcollapsed.push_back(s->route.front().d);
       s->route.pop_front();
     }
     std::list<Dirn> endcollapsed;
-    while(s->route.back().d!=s->stringDir){
+    out=0;
+    while(out!=0 || s->route.back().d!=s->stringDir){
+      // checks we end at the same distance as we started at
+      if(s->route.back().d == opposite(s->stringDir))
+        out++;
+      else if(s->route.back().d == s->stringDir)
+        out--;
       endcollapsed.push_back(s->route.back().d);
       s->endPos=s->route.back().pos;
       s->route.pop_back();
@@ -289,18 +339,18 @@ bool StringPlay::undo(bool extendedmove){
   inextendedmove=extendedmove;
   if(undohistory->empty())
     return false;
-  HistoryElement el=undohistory->popTop();
-  for(std::list<Dirn>::iterator it=el.startcollapsed.begin();it!=el.startcollapsed.end();++it){
+  HistoryElement histel=undohistory->popTop();
+  for(std::list<Dirn>::iterator it=histel.startcollapsed.begin();it!=histel.startcollapsed.end();++it){
     s->route.push_front(StringElement(s->route.front().pos-to_vector(*it),*it,false));
   }
-  for(std::list<Dirn>::iterator it=el.endcollapsed.begin();it!=el.endcollapsed.end();++it){
+  for(std::list<Dirn>::iterator it=histel.endcollapsed.begin();it!=histel.endcollapsed.end();++it){
     s->route.push_back(StringElement(s->endPos,*it,false));
     s->endPos+=to_vector(*it);
   }
   int i=0;
   for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it,++i)
-    it->selected=el.isselected(i);
-  doMove(opposite(el.d),true);
+    it->selected=histel.isselected(i);
+  doMove(opposite(histel.d),true);
   return true;
 }
 
