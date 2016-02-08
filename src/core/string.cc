@@ -13,6 +13,7 @@ String::String(Maze m,Dirn stringDir,Dirn targetDir):maze(m),endPos(0,0,0),route
     route.push_back(StringElement(pos,stringDir,true));
     pos+=to_vector(stringDir);
   }
+  route.front().selected=false;
   endPos=pos;
 };
 
@@ -102,18 +103,65 @@ class LimitedStack{
     }
 };
 
+/// A Bitset
+class Bitset{
+  SPA<unsigned char> bits; ///< the actual bits in this bitset
+  public:
+    /// Construct an empty bitset.
+    /**
+     * All accesses to this bitset are invalid
+     */
+    Bitset():bits(){};
+    /// Construct a bitset of the specified size
+    /**
+     * @param length the length to make the bitset.
+     */
+    explicit Bitset(const unsigned int& length):bits((length+CHAR_BIT-1)/CHAR_BIT){};
+    /// Get a single bit from the bitset
+    /**
+     * @param i the index of the bit.
+     * @return true if the bit is set else false
+     */
+    inline bool get(int i){
+      return (bits[i/CHAR_BIT]&(1<<(i%CHAR_BIT)))!=0;
+    }
+    /// Set a single bit in the bitset
+    /**
+     * @param i the index of the bit to set
+     */
+    inline void set(int i){
+      bits[i/CHAR_BIT]|=(1<<(i%CHAR_BIT));
+    }
+    /// Unset a single bit in the bitset
+    /**
+     * @param i the index of the bit to unset
+     */
+    inline void unset(int i){
+      bits[i/CHAR_BIT]&=~(1<<(i%CHAR_BIT));
+    }
+
+    ostream& print(ostream& s,int length){
+      for(int i=length-1;i>=0;--i)
+        if(get(i))
+          s<<"1";
+        else
+          s<<"0";
+      return s;
+    }
+};
+
 ///An element in the move history
 class HistoryElement{
   public:
     int length; ///< The length of the string just after the move
-    SPA<unsigned char> selected; ///< The selection state of the string just after the move
+    Bitset selected; ///< The selection state of the string just after the move
     /// was an element of the string selected
     /**
      * @param i the index of the element to check
      * @return true it was selected
      */
     bool isselected(int i){
-      return (selected[i/CHAR_BIT]&(1<<(i%CHAR_BIT)))!=0;
+      return selected.get(i);
     }
     Dirn d; ///< the direction the move was in
     std::list<Dirn> startcollapsed; ///< the route segments that where collapsed from the start of the string
@@ -127,7 +175,7 @@ class HistoryElement{
      * @param startcollapsed the route segments that where collapsed from the start of the string
      * @param endcollapsed the route segments that where collapsed from the end of the string
      */
-    HistoryElement(int length,SPA<unsigned char> selected,Dirn d,std::list<Dirn> startcollapsed,std::list<Dirn> endcollapsed):
+    HistoryElement(int length,Bitset selected,Dirn d,std::list<Dirn> startcollapsed,std::list<Dirn> endcollapsed):
         length(length),selected(selected),d(d),startcollapsed(startcollapsed),endcollapsed(endcollapsed){};
     /// Create a new empty history element
     HistoryElement():length(0),selected(),d(),startcollapsed(),endcollapsed(){};
@@ -249,40 +297,48 @@ bool StringPlay::canMove(Dirn d){
   return any;
 }
 
-void StringPlay::doMove(Dirn d,bool undo){
-  int length=0;
+std::pair<int,int> StringPlay::doMoveI(Dirn d){
+  int length=0; // needed so we can store the selection state later
   int movescore=0;
   bool lastselected=false;
 
   //do the move
-  for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it){
-    ++length;
+  for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it,++length){
     if(it->selected){
       if(!lastselected){
+        // At start of selection so need to ensure the route connects up
         if(it!=s->route.begin()){
           std::list<StringElement>::iterator nit=it;
           --nit;
           if(nit->d==opposite(d)){
+            // nit can't be selected as at start of selection
             s->route.erase(nit);
             --length;
           }else{
             s->route.insert(it,StringElement(it->pos,d,false));
             ++length;
           }
-        }else if(d==s->stringDir||d==opposite(s->stringDir))
+        }else if(d==s->stringDir){
+          // start of string and dragging in to maze
           s->route.insert(it,StringElement(it->pos,d,false));
+          ++length;
+        }
+
       }
+      // selected (may or may not be start of selection)
       it->pos+=to_vector(d);
+      // only costs for score if element moves not in the direction it points (or the opposite direction)
       if(it->d!=d && it->d!=opposite(d))
-          movescore+=1;
+        ++movescore;
     }else if(lastselected){
+      // just after end of selection
       if(it->d==d){
         it=s->route.erase(it);
         --length;
-        if(it==s->route.end()){
-          lastselected=false;
-          break;
-        }
+        // "it" is now the next element so decrement and continue the loop so it gets processed
+        lastselected=false;
+        --it;
+        continue;
       }else{
         s->route.insert(it,StringElement(it->pos+to_vector(d),opposite(d),false));
         ++length;
@@ -292,45 +348,53 @@ void StringPlay::doMove(Dirn d,bool undo){
   }
   // fix up the end
   if(lastselected)
-    if(d==s->stringDir||d==opposite(s->stringDir))
+    if(d==opposite(s->stringDir)){
       s->route.insert(s->route.end(),StringElement(s->endPos+to_vector(d),opposite(d),false));
-    else
+      ++length;
+    }else
       s->endPos+=to_vector(d);
+  return std::make_pair(movescore,length);
+}
 
+void StringPlay::doMove(Dirn d){
+  std::pair<int,int> ret=doMoveI(d);
+  score+=ret.first;
+
+  // record the selection state to ensure it is correct before undo
+  Bitset selection(ret.second);
+  int i=0;
+  for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it,++i)
+    if(it->selected)
+      selection.set(i);
+  if(i!=ret.second)
+    std::cout<<"LENGTH WRONG AT MOVE "<<i<<" "<<ret.second<<endl;
   // collapse any lines along the edge (or slightly sticking out)
-  if(!undo){
-    score+=movescore;
-    SPA<unsigned char> selection((length+CHAR_BIT-1)/CHAR_BIT);
-    int i=0;
-    for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it,++i)
-      if(it->selected)
-        selection[i/CHAR_BIT]|=(1<<(i%CHAR_BIT));
-    std::list<Dirn> startcollapsed;
-    int out=0;
-    while(out!=0 || s->route.front().d!=s->stringDir){
-      // checks we end at the same distance as we started at
-      if(s->route.front().d == opposite(s->stringDir))
-        out++;
-      else if(s->route.front().d == s->stringDir)
-        out--;
-      startcollapsed.push_back(s->route.front().d);
-      s->route.pop_front();
-    }
-    std::list<Dirn> endcollapsed;
-    out=0;
-    while(out!=0 || s->route.back().d!=s->stringDir){
-      // checks we end at the same distance as we started at
-      if(s->route.back().d == opposite(s->stringDir))
-        out++;
-      else if(s->route.back().d == s->stringDir)
-        out--;
-      endcollapsed.push_back(s->route.back().d);
-      s->endPos=s->route.back().pos;
-      s->route.pop_back();
-    }
-    undohistory->pushTop(HistoryElement(length,selection,d,startcollapsed,endcollapsed));
-  }else
-    score-=movescore;
+  std::list<Dirn> startcollapsed;
+  int out=0;
+  while(out!=0 || s->route.front().d!=s->stringDir){
+    // checks we end at the same distance as we started at
+    if(s->route.front().d == opposite(s->stringDir))
+      out++;
+    else if(s->route.front().d == s->stringDir)
+      out--;
+    startcollapsed.push_front(s->route.front().d);
+    s->route.pop_front();
+  }
+
+  std::list<Dirn> endcollapsed;
+  out=0;
+  while(out!=0 || s->route.back().d!=s->stringDir){
+    // checks we end at the same distance as we started at
+    if(s->route.back().d == opposite(s->stringDir))
+      out++;
+    else if(s->route.back().d == s->stringDir)
+      out--;
+    endcollapsed.push_front(s->route.back().d);
+    s->endPos=s->route.back().pos;
+    s->route.pop_back();
+  }
+
+  undohistory->pushTop(HistoryElement(ret.second,selection,d,startcollapsed,endcollapsed));
 }
 
 bool StringPlay::undo(bool extendedmove){
@@ -340,6 +404,8 @@ bool StringPlay::undo(bool extendedmove){
   if(undohistory->empty())
     return false;
   HistoryElement histel=undohistory->popTop();
+
+  // Add the ends back in
   for(std::list<Dirn>::iterator it=histel.startcollapsed.begin();it!=histel.startcollapsed.end();++it){
     s->route.push_front(StringElement(s->route.front().pos-to_vector(*it),*it,false));
   }
@@ -347,10 +413,17 @@ bool StringPlay::undo(bool extendedmove){
     s->route.push_back(StringElement(s->endPos,*it,false));
     s->endPos+=to_vector(*it);
   }
+
+  // fix selection (both for end elements that have been added back in and
+  // in case the user has changed the selection.
   int i=0;
   for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it,++i)
     it->selected=histel.isselected(i);
-  doMove(opposite(histel.d),true);
+  if(i!=histel.length)
+    std::cout<<"LENGTH INVALID "<<i<<" "<<histel.length<<std::endl;
+
+  // Undo the actual move
+  score-=doMoveI(opposite(histel.d)).first;
   return true;
 }
 
@@ -359,7 +432,7 @@ bool StringPlay::tryMove(Dirn d,bool extendedmove){
     return false;
   inextendedmove=extendedmove;
   if(canMove(d)){
-    doMove(d,false);
+    doMove(d);
     return true;
   }else{
     return false;
