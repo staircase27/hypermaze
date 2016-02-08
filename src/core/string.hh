@@ -400,6 +400,7 @@ class StringPlay{
      * @note this will do the move even if it isn't valid. Always called via
      * tryMove (and doMove) or undo
      * @param d the direction to move in
+     * @return a pair containing the score change for the move and the length of the string after the move
      */
     std::pair<int,int> doMoveI(Dirn d);
 

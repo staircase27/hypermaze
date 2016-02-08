@@ -139,15 +139,6 @@ class Bitset{
     inline void unset(int i){
       bits[i/CHAR_BIT]&=~(1<<(i%CHAR_BIT));
     }
-
-    ostream& print(ostream& s,int length){
-      for(int i=length-1;i>=0;--i)
-        if(get(i))
-          s<<"1";
-        else
-          s<<"0";
-      return s;
-    }
 };
 
 ///An element in the move history
@@ -366,8 +357,7 @@ void StringPlay::doMove(Dirn d){
   for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it,++i)
     if(it->selected)
       selection.set(i);
-  if(i!=ret.second)
-    std::cout<<"LENGTH WRONG AT MOVE "<<i<<" "<<ret.second<<endl;
+
   // collapse any lines along the edge (or slightly sticking out)
   std::list<Dirn> startcollapsed;
   int out=0;
@@ -419,8 +409,6 @@ bool StringPlay::undo(bool extendedmove){
   int i=0;
   for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it,++i)
     it->selected=histel.isselected(i);
-  if(i!=histel.length)
-    std::cout<<"LENGTH INVALID "<<i<<" "<<histel.length<<std::endl;
 
   // Undo the actual move
   score-=doMoveI(opposite(histel.d)).first;
