@@ -177,16 +177,15 @@ bool KeyMapGui::OnEventImpl(const irr::SEvent &event){
       return true;
     }
   }
-  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-    cancelClicked=true;
-    return true;
-  }
   if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
     okClicked=true;
     return true;
   }
   if(event.EventType == irr::EET_KEY_INPUT_EVENT&&event.KeyInput.PressedDown){
-    if(editing>=0){
+    if(event.KeyInput.Key==irr::KEY_ESCAPE){
+      cancelClicked=true;
+      return true;
+    }else if(editing>=0){
       KeySpec ks(event.KeyInput.Char,event.KeyInput.Shift,event.KeyInput.Control);
       if(event.KeyInput.Char==0)
         ks=KeySpec(event.KeyInput.Key,event.KeyInput.Shift,event.KeyInput.Control);
@@ -199,11 +198,13 @@ bool KeyMapGui::OnEventImpl(const irr::SEvent &event){
 
       editing=-1;
       return true;
+    }else if(event.KeyInput.Key==irr::KEY_RETURN){
+      okClicked=true;
+      return true;
     }
   }
   return false;
 };
-
 
 bool KeyMapGui::edit(irr::IrrlichtDevice* _device,FontManager* _fm,KeyMap& _km){
   if(kmtmp==0)
@@ -224,8 +225,8 @@ void KeyMapGui::createGUI(){
   irr::core::rect<irr::s32> rect=driver->getViewPort();
   irr::core::position2d<irr::s32> center=rect.getCenter();
   irr::core::dimension2d<irr::s32> size=rect.getSize();
-  size.Width=std::min(600,size.Width-10);
-  size.Height=std::min(600,size.Height-10);
+  size.Width=min(600,size.Width-10);
+  size.Height=min(600,size.Height-10);
 
   table = guienv->addTable(irr::core::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),el,-1,true);
   table->addColumn(L"Action",0);
@@ -260,4 +261,3 @@ bool KeyMapGui::run(){
 KeyMapGui::~KeyMapGui(){
   delete kmtmp;
 }
-

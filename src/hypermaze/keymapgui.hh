@@ -1,5 +1,5 @@
 #include "irrlicht.h"
-#include "gui.hh"
+#include "../irrshared/gui.hh"
 
 class KeyMap;
 
@@ -25,11 +25,11 @@ class KeyMapGui: BaseGui{
 
   public:
     KeyMapGui():kmtmp(0){};
-    
+
     bool edit(irr::IrrlichtDevice* _device,FontManager* _fm,KeyMap& _km);
     void createGUI();
     bool run();
-    
+
     virtual ~KeyMapGui();
 };
 

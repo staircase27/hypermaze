@@ -8,48 +8,50 @@ include(CheckCXXSourceCompiles)
 ########### next target ###############
 
 set(hypermaze_SRCS
-    src/shared/irrhypioimp.cc
-    src/shared/irrhypioimp.hh
-    src/shared/bufhypio.cc
-    src/shared/bufhypio.hh
-    src/core/string.hh
-    src/core/string.cc
-    src/core/maze.hh
-    src/core/script.hh
     src/core/dirns.hh
-    src/core/maze.cc
-    src/core/mazegen.hh
-    src/core/SmartPointer.hh
     src/core/hypio.cc
     src/core/hypio.hh
+    src/core/maze.cc
+    src/core/maze.hh
+    src/core/mazegen.hh
     src/core/script.cc
-    src/core/vector.hh
+    src/core/script.hh
     src/core/scriptimpl.hh
-    src/irrshared/GUIFormattedText.cc
-    src/irrshared/GUIFormattedText.hh
-    src/irrshared/fonts.hh
-    src/irrshared/fonts.cc
-    src/irrshared/irrcurl.cc
-    src/irrshared/irrcurl.hh
-    src/irrshared/iMyCamera.cpp
-    src/irrshared/iMyCamera.hh
-    src/irrshared/platformcompat.hh
-    src/irrshared/platformcompat.cc
-    src/hypermaze/gui.cc
+    src/core/SmartPointer.hh
+    src/core/string.cc
+    src/core/string.hh
+    src/core/vector.hh
+    src/hypermaze/controller.cc
+    src/hypermaze/controller.hh
+    src/hypermaze/guis.cc
+    src/hypermaze/guis.hh
     src/hypermaze/helpgui.cc
     src/hypermaze/helpgui.hh
-    src/hypermaze/controller.hh
-    src/hypermaze/keymap.hh
-    src/shared/sound.hh
-    src/shared/sound.cc
     src/hypermaze/hypermaze.cc
-    src/hypermaze/irrdisp.hh
     src/hypermaze/irrdisp.cc
-    src/hypermaze/keymapgui.hh
+    src/hypermaze/irrdisp.hh
+    src/hypermaze/keymap.cc
     src/hypermaze/keymapgui.cc
-    src/hypermaze/gui.hh
-    src/hypermaze/controller.cc
-    src/hypermaze/keymap.cc)
+    src/hypermaze/keymapgui.hh
+    src/hypermaze/keymap.hh
+    src/irrshared/fonts.cc
+    src/irrshared/fonts.hh
+    src/irrshared/gui.cc
+    src/irrshared/gui.hh
+    src/irrshared/GUIFormattedText.cc
+    src/irrshared/GUIFormattedText.hh
+    src/irrshared/iMyCamera.cpp
+    src/irrshared/iMyCamera.hh
+    src/irrshared/irrcurl.cc
+    src/irrshared/irrcurl.hh
+    src/irrshared/platformcompat.cc
+    src/irrshared/platformcompat.hh
+    src/shared/bufhypio.cc
+    src/shared/bufhypio.hh
+    src/shared/irrhypioimp.cc
+    src/shared/irrhypioimp.hh
+    src/shared/sound.cc
+    src/shared/sound.hh)
 
 add_executable(hypermaze ${hypermaze_SRCS})
 

@@ -1,4 +1,4 @@
-#include "gui.hh"
+#include "guis.hh"
 #include "helpgui.hh"
 #include "controller.hh"
 #include "irrdisp.hh"

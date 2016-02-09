@@ -1,5 +1,5 @@
 #include "irrlicht.h"
-#include "gui.hh"
+#include "../irrshared/gui.hh"
 
 class KeyMap;
 
