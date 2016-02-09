@@ -1,3 +1,7 @@
+/**
+ * @file gui.cc
+ * @brief Implementation of gui.hh
+ */
 #include "gui.hh"
 
 namespace irr{

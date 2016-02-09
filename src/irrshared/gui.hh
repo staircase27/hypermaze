@@ -82,7 +82,7 @@ class BaseGui : private irr::IEventReceiver{
     FontManager* fm; ///< Used to access the fonts used by the gui
     /// The old event receiver. Stored so it can be restored at end and selected events can be forwarded on
     irr::IEventReceiver* oldReceiver;
-    CGUIEmptyElement* el; /// The top level element that all components from this gui should be added to.
+    CGUIEmptyElement* el; ///< The top level element that all components from this gui should be added to.
 
     /// Event receiver.
     /**
