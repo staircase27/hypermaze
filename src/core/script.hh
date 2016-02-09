@@ -32,7 +32,7 @@ struct Pair{
 
 ///read an array of pointers to items from a stream
 /**
- * the type T must define a const static member variable 
+ * the type T must define a const static member variable
  * SP<T> T::defaultValue that is used to fill in values in the array that can't be read.
  * when this function returns the array will have at least length c and will contain fully
  * valid objects
@@ -76,7 +76,7 @@ class PolymorphicHypIO{
     virtual int getid() const=0;
 };
 
-///the different maze events that can trigger scripts  
+///the different maze events that can trigger scripts
 enum Trigger{
   TRIGGER_START=1,///<trigger when the maze is loaded
   TRIGGER_WIN=2,///<trigger when they have won the maze
@@ -193,29 +193,29 @@ class Action: public virtual PolymorphicHypIO{
      * @param r the response to record our actions in
      * @param s the string to act on
      */
-		virtual void doStart(ScriptResponseStart& r,SP<String> s)=0;
+    virtual void doStart(ScriptResponseStart& r,SP<String> s)=0;
     ///do the appropriate action for a win event
     /**
      * @param r the response to record our actions in
      * @param s the string to act on
      */
-		virtual void doWin(ScriptResponseWin& r,SP<String> s)=0;
+    virtual void doWin(ScriptResponseWin& r,SP<String> s)=0;
     ///do the appropriate action for a move event
     /**
      * @param r the response to record our actions in
      * @param s the string to act on
      */
-		virtual void doMove(ScriptResponseMove& r,SP<String> s)=0;
+    virtual void doMove(ScriptResponseMove& r,SP<String> s)=0;
     ///do the appropriate action for a move event
     /**
      * @param r the response to record our actions in
      * @param s the string to act on
      */
-		virtual void doSelect(ScriptResponseSelect& r,SP<String> s)=0;
-		
-		///virtual destructor so that implementations will delete correctly
-		virtual ~Action(){};
-		
+    virtual void doSelect(ScriptResponseSelect& r,SP<String> s)=0;
+
+    ///virtual destructor so that implementations will delete correctly
+    virtual ~Action(){};
+
     ///the default Action to use when creating lists of Actions
     static const SP<Action> defaultvalue;
     ///enable write to access the protected method
@@ -246,20 +246,20 @@ bool write(HypOStream& s,const SP<const Action>& c);
  */
 class Event{
   public:
-		int trigger;///< The trigger(s) for the event as a bitmask
-		SP<Condition> condition;///<The condition for the event to trigger
-		SP<Action> action;///<The action to take when it triggers
-		
-                /// Create an empty event that never triggers and has a default condition and action
-		Event():trigger(0),condition(Condition::defaultvalue),action(Action::defaultvalue){};
-                ///Create an event with the specified triggers, conditions and actions
-                /**
-                 * @param trigger the trigger(s) for the event as a bitmask
-                 * @param condition the condition for the event to trigger
-                 * @param action the action to take when it triggers
-                 */
-		Event(int trigger,SP<Condition> condition,SP<Action> action):
-		    trigger(trigger),condition(condition),action(action){};
+    int trigger;///< The trigger(s) for the event as a bitmask
+    SP<Condition> condition;///<The condition for the event to trigger
+    SP<Action> action;///<The action to take when it triggers
+
+    /// Create an empty event that never triggers and has a default condition and action
+    Event():trigger(0),condition(Condition::defaultvalue),action(Action::defaultvalue){};
+    ///Create an event with the specified triggers, conditions and actions
+    /**
+     * @param trigger the trigger(s) for the event as a bitmask
+     * @param condition the condition for the event to trigger
+     * @param action the action to take when it triggers
+     */
+    Event(int trigger,SP<Condition> condition,SP<Action> action):
+       trigger(trigger),condition(condition),action(action){};
 };
 
 ///The core script object
@@ -289,7 +289,7 @@ class Script{
     inline int getTime(int event) const{
       return times[event];
     }
-    
+
     /// Update the scripts version of the current time
     /**
      * @param t the time now
@@ -322,12 +322,12 @@ class Script{
      * @return the result of the script
      */
     ScriptResponseSelect runSelect(SP<String> s);
-    
+
     /// Private access so it can load the script into it
     friend IOResult read(HypIStream& s,Script& sc);
     /// Private access so it write the data out
     friend bool write(HypOStream& s,const Script& sc);
-    
+
     /// Get the events in this script
     inline const SPA<Event>& getevents() const{
       return events;

@@ -18,84 +18,88 @@ void addMessageToElement(GUIFormattedText* text,FontManager* fm,const Message& m
   int buflen=0;
   wchar_t* buf=0;
   for(int i=0;i<m.count;++i){
-      int len=strlen(m.paragraphs[i].b);
-      if(buflen<len){
-          delete[] buf;
-          buf=new wchar_t[len+1];
-          buflen=len;
+    int len=strlen(m.paragraphs[i].b);
+    if(buflen<len){
+      delete[] buf;
+      buf=new wchar_t[len+1];
+      buflen=len;
+    }
+    for(int j=0;j<len;++j){
+      buf[j]=(wchar_t)m.paragraphs[i].b[j];
+    }
+    buf[len]=L'\0';
+    int ti=text->addText(buf);
+    if(strlen(m.paragraphs[i].a)>0){
+      //format is: size:B?I?:colour:font name
+      int size=0;
+      SPA<const char> end=m.paragraphs[i].a;
+      while(*end!=0&&*end!=':'){
+        if('0'<=*end&&*end<='9'){
+          size*=10;
+          size+=*end-'0';
+        }
+        ++end;
       }
-      for(int j=0;j<len;++j){
-          buf[j]=(wchar_t)m.paragraphs[i].b[j];
+      bool bold=false;
+      bool italic=false;
+      if(*end!=0)
+        ++end;
+      while(*end!=0&&*end!=':'){
+        if(*end=='b'||*end=='B')
+          bold=true;
+        else if(*end=='i'||*end=='I')
+          italic=true;
+        ++end;
       }
-      buf[len]=L'\0';
-      int ti=text->addText(buf);
-      if(strlen(m.paragraphs[i].a)>0){
-        //format is: size:B?I?:colour:font name
-        int size=0;
-        SPA<const char> end=m.paragraphs[i].a;
+      if(*end!=0)
+        ++end;
+      if(*end!=0&&*end!=':'){
+        int len=0;
+        int colour=0;
+        //read colour
+        //colour format is aarrggbb in hex
+        // or simplied formats g/gg -> FFgggggg or
+        // rgb/rrggbb-> FFrrggbb or argb/aargb/arrggbb->aarrggbb
         while(*end!=0&&*end!=':'){
-          if('0'<=*end&&*end<='9'){
-            size*=10;
-            size+=*end-'0';
+          if(('0'<=*end&&*end<='9')||('A'<=*end&&*end<='F')){
+            ++len;
+            colour*=16;
+            if('0'<=*end&&*end<='9')
+              colour+=*end-'0';
+            else
+              colour+=*end-'A'+10;
           }
           ++end;
         }
-        bool bold=false;
-        bool italic=false;
-        if(*end!=0)
-          ++end;
-        while(*end!=0&&*end!=':'){
-          if(*end=='b'||*end=='B')
-            bold=true;
-          else if(*end=='i'||*end=='I')
-            italic=true;
-          ++end;
-        }
-        if(*end!=0)
-          ++end;
-        if(*end!=0&&*end!=':'){
-          int len=0;
-          int colour=0;
-          //read colour
-          while(*end!=0&&*end!=':'){
-            if(('0'<=*end&&*end<='9')||('A'<=*end&&*end<='F')){
-              ++len;
-              colour*=16;
-              if('0'<=*end&&*end<='9')
-                colour+=*end-'0';
-              else
-                colour+=*end-'A'+10;
+        if(len>0){
+          if(len==1)
+              colour==(colour&0xf) | ((colour&0xf)<<4);
+          else if(len==2)
+            colour==(colour&0xff) | ((colour&0xff)<<8) | ((colour&0xff)<<16) | 0xff000000;
+          else{
+            if(len<=5){
+              // [aa]rgb to aarrggbb (aa being only a is handled later)
+              colour=(colour&0xf) | ((colour&0xf)<<4) | ((colour&0xf0)<<4) | ((colour&0xf0)<<8)  |
+                     ((colour&0xf00)<<8) | ((colour&0xf00)<<12)  | ((colour&0xff000)<<12);
+              len+=3;
             }
-            ++end;
+            if(len==6){
+              colour|=0xff000000;
+            }else if(len==7){
+              colour|=((colour&0x0f000000)<<4);
+            }// else (len==8 (or more)) so use the 8 as aarrggbb
           }
-          if(len>0){
-            if(len<=2){
-              if(len==1)
-                colour==(colour&0xf) | ((colour&0xf)<<4);
-              colour==(colour&0xff) | ((colour&0xff)<<8) | ((colour&0xff)<<16) | 0xff000000;
-            }else{
-              if(len<=4){
-                colour=(colour&0xf) | ((colour&0xf)<<4) | ((colour&0xf0)<<4) | ((colour&0xf0)<<8)  |
-                       ((colour&0xf00)<<8) | ((colour&0xf00)<<12)  | ((colour&0xf000)<<12);
-                len+=3;
-              }
-              if(len<=6){
-                colour|=0xff000000;
-              }else if(len==7){
-                colour|=((colour&0x0f000000)<<4);
-              }
-            }
-            text->setOverrideColor(ti,irr::SColor(colour));
-          }
-        }
-        if(*end==0){
-          text->setOverrideFont(ti,fm->getFont(size,bold,italic));
-        }else{
-          //read font name and use
-          irr::stringc font(&*end);
-          text->setOverrideFont(ti,fm->getFont(font,size,bold,italic));
+          text->setOverrideColor(ti,irr::SColor(colour));
         }
       }
+      if(*end==0){
+        text->setOverrideFont(ti,fm->getFont(size,bold,italic));
+      }else{
+        //read font name and use
+        irr::stringc font(&*end);
+        text->setOverrideFont(ti,fm->getFont(font,size,bold,italic));
+      }
+    }
   }
   delete[] buf;
 }
@@ -115,8 +119,8 @@ bool ErrorGui::OnEventImpl(const irr::SEvent &event){
       return true;
   }
   if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-	okClicked=true;
-	return true;
+    okClicked=true;
+    return true;
   }
   return false;
 };
@@ -187,8 +191,8 @@ bool ConfirmGui::OnEventImpl(const irr::SEvent &event){
     }
   }
   if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-	cancelClicked=true;
-	return true;
+    cancelClicked=true;
+    return true;
   }
   return false;
 };
@@ -237,7 +241,6 @@ void ConfirmGui::createGUI(){
   text->setAllTextAlignment(irr::gui::EGUIA_CENTER,irr::gui::EGUIA_CENTER);
   text->drop();
 
-
   makeElementFromMessage(guienv,fm,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+imsize.Height+10,center.X+size.Width/2,center.Y+size.Height/2-10-32),this->detail);
 
   guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120-120-10,center.Y+size.Height/2-32,center.X+size.Width/2-120-10,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Ok"));
@@ -254,23 +257,23 @@ bool ConfirmGui::run(){
 
 bool GenerateGui::OnEventImpl(const irr::SEvent &event){
   if(event.EventType == irr::EET_GUI_EVENT){
-	if(event.GUIEvent.EventType==irr::EGET_BUTTON_CLICKED){
-	  if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
-		okClicked=true;
-		return true;
-	  }else{
-		cancelClicked=true;
-		return true;
-	  }
-	}
-	if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-	  okClicked=true;
-	  return true;
-	}
+    if(event.GUIEvent.EventType==irr::EGET_BUTTON_CLICKED){
+      if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
+        okClicked=true;
+        return true;
+      }else{
+        cancelClicked=true;
+        return true;
+      }
+    }
+    if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
+      okClicked=true;
+      return true;
+    }
   }
   if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-	cancelClicked=true;
-	return true;
+    cancelClicked=true;
+    return true;
   }
   return false;
 };
@@ -291,19 +294,19 @@ void GenerateGui::createGUI(){
   size.Width=min(400,size.Width-10);
 
   xSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32-10-32,
-	  center.X+size.Width/2,center.Y-5-32-10),true,el);
+      center.X+size.Width/2,center.Y-5-32-10),true,el);
   xSize->setDecimalPlaces(0);
   xSize->setRange(3,75);
   xSize->setValue(pd->m.size().X);
 
   ySize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,
-	  center.X+size.Width/2,center.Y-5),true,el);
+      center.X+size.Width/2,center.Y-5),true,el);
   ySize->setDecimalPlaces(0);
   ySize->setRange(3,75);
   ySize->setValue(pd->m.size().Y);
 
   zSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y+5,
-	  center.X+size.Width/2,center.Y+5+32),true,el);
+      center.X+size.Width/2,center.Y+5+32),true,el);
   zSize->setDecimalPlaces(0);
   zSize->setRange(3,75);
   zSize->setValue(pd->m.size().Z);
@@ -318,34 +321,34 @@ void GenerateGui::createGUI(){
 }
 bool GenerateGui::run(){
   if(cancelClicked)
-	return false;
+    return false;
   if(okClicked){
-  pd->m=::generate<RandLimitMazeGenHalf<Hunter<RandOrderWalker<DiagonalWalker> > > >(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
-  pd->sc=Script();
-	return false;
+    pd->m=::generate<RandLimitMazeGenHalf<Hunter<RandOrderWalker<DiagonalWalker> > > >(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
+    pd->sc=Script();
+    return false;
   }
   return true;
 }
 
 bool SaveGui::OnEventImpl(const irr::SEvent &event){
   if(event.EventType == irr::EET_GUI_EVENT){
-	if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
-	  if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
-		okClicked=true;
-		return true;
-	  }else{
-		cancelClicked=true;
-		return true;
-	  }
-	}
+    if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
+      if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
+        okClicked=true;
+        return true;
+      }else{
+        cancelClicked=true;
+        return true;
+      }
+    }
     if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-	okClicked=true;
-	return true;
+      okClicked=true;
+      return true;
     }
   }
   if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-	cancelClicked=true;
-	return true;
+    cancelClicked=true;
+    return true;
   }
   return false;
 };
@@ -377,66 +380,66 @@ void SaveGui::createGUI(){
 }
 bool SaveGui::run(){
   if(cancelClicked)
-	return false;
+    return false;
   if(okClicked){
     if(device->getFileSystem()->existFile(fileField->getText())){
-    el->setVisible(false);
-    ConfirmGui cg;
-    bool overwrite = cg.confirm(device,fm,L"File already exists.","Do you want to overwrite the existing file? Existing contents will be lost.");
-    el->setVisible(true);
-    if(!overwrite){
-      device->getGUIEnvironment()->setFocus(fileField);
-	    return true;
+      el->setVisible(false);
+      ConfirmGui cg;
+      bool overwrite = cg.confirm(device,fm,L"File already exists.","Do you want to overwrite the existing file? Existing contents will be lost.");
+      el->setVisible(true);
+      if(!overwrite){
+        device->getGUIEnvironment()->setFocus(fileField);
+        return true;
+      }
     }
-  }
-	irr::IWriteFile* out=device->getFileSystem()->createAndWriteFile(fileField->getText());
-	if(!out){
-    okClicked=false;
-    el->setVisible(false);
-    ErrorGui eg;
-    eg.error(device,fm,L"Error Opening File","File can't be opened for writing.");
-    el->setVisible(true);
-    device->getGUIEnvironment()->setFocus(fileField);
-	  return true;
-  }
-	IrrHypOStream os(out);
-	out->drop();
-	bool status=write(os,pd->m);
-	os.setNextSpace("\n\n");
-	status&=write(os,pd->sc);
-	if(!status){
-    okClicked=false;
-    el->setVisible(false);
-    ErrorGui eg;
-    eg.error(device,fm,L"Error writing maze to file","There was an error while writing to the file. The file may only include a partial or broken level. Please try again.");
-    el->setVisible(true);
-	  return true;
-	}
-	return false;
-  }
+    irr::IWriteFile* out=device->getFileSystem()->createAndWriteFile(fileField->getText());
+    if(!out){
+      okClicked=false;
+      el->setVisible(false);
+      ErrorGui eg;
+      eg.error(device,fm,L"Error Opening File","File can't be opened for writing.");
+      el->setVisible(true);
+      device->getGUIEnvironment()->setFocus(fileField);
+        return true;
+    }
+    IrrHypOStream os(out);
+    out->drop();
+    bool status=write(os,pd->m);
+    os.setNextSpace("\n\n");
+    status&=write(os,pd->sc);
+    if(!status){
+      okClicked=false;
+      el->setVisible(false);
+      ErrorGui eg;
+      eg.error(device,fm,L"Error writing maze to file","There was an error while writing to the file. The file may only include a partial or broken level. Please try again.");
+      el->setVisible(true);
       return true;
     }
+    return false;
+  }
+  return true;
+}
 
 
 bool OpenGui::OnEventImpl(const irr::SEvent &event){
   if(event.EventType == irr::EET_GUI_EVENT){
-	if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
-	  if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
-		okClicked=true;
-		return true;
-	  }else{
-		cancelClicked=true;
-		return true;
-	  }
-	}
+    if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
+      if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
+        okClicked=true;
+        return true;
+      }else{
+        cancelClicked=true;
+        return true;
+      }
+    }
     if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-	okClicked=true;
-	return true;
+    okClicked=true;
+    return true;
     }
   }
   if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-	cancelClicked=true;
-	return true;
+    cancelClicked=true;
+    return true;
   }
   return false;
 };
@@ -467,73 +470,72 @@ void OpenGui::createGUI(){
 }
 bool OpenGui::run(){
   if(cancelClicked)
-	return false;
+    return false;
   if(okClicked){
-	irr::IReadFile* in=createAndOpen(device->getFileSystem(),fileField->getText());
-	if(!in){
-          okClicked=false;
-          el->setVisible(false);
-          ErrorGui eg;
-          if(device->getFileSystem()->existFile(fileField->getText()))
-            eg.error(device,fm,L"Error Opening File","File exists but can't be opened.");
-          else
-            eg.error(device,fm,L"Error Opening File","File doesn't exist.");
-          el->setVisible(true);
-          device->getGUIEnvironment()->setFocus(fileField);
-	  return true;
-        }
-	IrrHypIStream is(in);
-	in->drop();
-	bool status = read(is,pd->m).ok;
-	pd->sc=Script();// reset it to blank as a default
-	status &= read(is,pd->sc).ok;
-	if(!status){
-          el->setVisible(false);
-          ErrorGui eg;
-          eg.error(device,fm,L"Error Reading File","The level may have been loaded but it may have errors. If it not correct please try again or get a new copy of the level.");
-          el->setVisible(true);
-  }
-  return false;
+    irr::IReadFile* in=createAndOpen(device->getFileSystem(),fileField->getText());
+    if(!in){
+      okClicked=false;
+      el->setVisible(false);
+      ErrorGui eg;
+      if(device->getFileSystem()->existFile(fileField->getText()))
+        eg.error(device,fm,L"Error Opening File","File exists but can't be opened.");
+      else
+        eg.error(device,fm,L"Error Opening File","File doesn't exist.");
+      el->setVisible(true);
+      device->getGUIEnvironment()->setFocus(fileField);
+      return true;
+    }
+    IrrHypIStream is(in);
+    in->drop();
+    bool status = read(is,pd->m).ok;
+    pd->sc=Script();// reset it to blank as a default
+    status &= read(is,pd->sc).ok;
+    if(!status){
+      el->setVisible(false);
+      ErrorGui eg;
+      eg.error(device,fm,L"Error Reading File","The level may have been loaded but it may have errors. If it not correct please try again or get a new copy of the level.");
+      el->setVisible(true);
+    }
+    return false;
   }
   return true;
 }
 
 bool WinGui::OnEventImpl(const irr::SEvent &event){
   if(event.EventType == irr::EET_GUI_EVENT){
-	if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
-	  switch(event.GUIEvent.Caller->getID()){
-		case GUI_ID_OK_BUTTON:
-		  okClicked=true;
-		  return true;
-		case GUI_ID_GENERATE_BUTTON:
-		  generateClicked=true;
-		  return true;
-		case GUI_ID_NEXT_BUTTON:
-		  nextClicked=true;
-		  return true;
-		case GUI_ID_LOAD_BUTTON:
-		  loadClicked=true;
-		  return true;
-		case GUI_ID_SAVE_BUTTON:
-		  saveClicked=true;
-		  return true;
-	  }
-	  return false;
-	}
-	if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-	  okClicked=true;
-	  return true;
-	}
+    if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
+      switch(event.GUIEvent.Caller->getID()){
+        case GUI_ID_OK_BUTTON:
+          okClicked=true;
+          return true;
+        case GUI_ID_GENERATE_BUTTON:
+          generateClicked=true;
+          return true;
+        case GUI_ID_NEXT_BUTTON:
+          nextClicked=true;
+          return true;
+        case GUI_ID_LOAD_BUTTON:
+          loadClicked=true;
+          return true;
+        case GUI_ID_SAVE_BUTTON:
+          saveClicked=true;
+          return true;
+      }
+      return false;
+    }
+    if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
+      okClicked=true;
+      return true;
+    }
   }
   if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE &&
-	  (keyblock==0||device->getTimer()->getTime()>keyblock)){
-	okClicked=true;
-	keyblock=0;
-	return true;
+      (keyblock==0||device->getTimer()->getTime()>keyblock)){
+    okClicked=true;
+    keyblock=0;
+    return true;
   }
   return false;
 };
-
 
 bool WinGui::won(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd,const Message& m, Pair<SPA<const char> > nextLevel){
   this->pd=&pd;
@@ -585,7 +587,7 @@ void WinGui::createGUI(){
 }
 bool WinGui::run(){
   if(okClicked){
-	return false;
+    return false;
   }
   if(nextClicked){
     nextClicked=false;
@@ -601,34 +603,34 @@ bool WinGui::run(){
   }
 
   if(saveClicked){
-	el->setVisible(false);
-	SaveGui sg;
-	sg.save(device,fm,*pd);
-	el->setVisible(true);
-	saveClicked=false;
-	keyblock=device->getTimer()->getTime()+500;
+    el->setVisible(false);
+    SaveGui sg;
+    sg.save(device,fm,*pd);
+    el->setVisible(true);
+    saveClicked=false;
+    keyblock=device->getTimer()->getTime()+500;
   }
   if(loadClicked){
-	el->setVisible(false);
-	OpenGui og;
-	if(og.open(device,fm,*pd)){
-	  pd->mazeUpdated();
-	  return false;
-	}
-	el->setVisible(true);
-	loadClicked=false;
-	keyblock=device->getTimer()->getTime()+500;
+    el->setVisible(false);
+    OpenGui og;
+    if(og.open(device,fm,*pd)){
+      pd->mazeUpdated();
+      return false;
+    }
+    el->setVisible(true);
+    loadClicked=false;
+    keyblock=device->getTimer()->getTime()+500;
   }
   if(generateClicked){
-	el->setVisible(false);
-	GenerateGui gg;
-	if(gg.generate(device,fm,*pd)){
-	  pd->mazeUpdated();
-	  return false;
-	}
-	el->setVisible(true);
-	generateClicked=false;
-	keyblock=device->getTimer()->getTime()+500;
+    el->setVisible(false);
+    GenerateGui gg;
+    if(gg.generate(device,fm,*pd)){
+      pd->mazeUpdated();
+      return false;
+    }
+    el->setVisible(true);
+    generateClicked=false;
+    keyblock=device->getTimer()->getTime()+500;
   }
   return true;
 }
@@ -640,8 +642,8 @@ bool MessageGui::OnEventImpl(const irr::SEvent &event){
       return true;
   }
   if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-	okClicked=true;
-	return true;
+    okClicked=true;
+    return true;
   }
   return false;
 };
@@ -674,4 +676,3 @@ bool MessageGui::run(){
   }
   return true;
 }
-

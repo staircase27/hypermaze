@@ -66,10 +66,14 @@ class CGUIEmptyElement : public irr::gui::IGUIElement
       return result;
     }
 };
-
+/// Base class for guis.
+/**
+ * This class sets up a base element for all components of the gui to be placed in,
+ * event receiver code and a main event loop to take over from the normal event loop
+ */
 class BaseGui : irr::IEventReceiver{
   protected:
-    irr::IrrlichtDevice* device;
+    irr::IrrlichtDevice* device; ///< The irrlicht device. Needed
     FontManager* fm;
     irr::IEventReceiver* oldReceiver;
     CGUIEmptyElement* el;

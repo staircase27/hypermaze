@@ -10,21 +10,21 @@ namespace irr{
 
 bool BaseGui::OnEvent(const irr::SEvent &event){
   if(oldReceiver && event.EventType == irr::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
-	oldReceiver->OnEvent(event);
+    oldReceiver->OnEvent(event);
   if(oldReceiver && event.EventType == irr::EET_MOUSE_INPUT_EVENT && (event.MouseInput.Event==irr::EMIE_LMOUSE_LEFT_UP || event.MouseInput.Event==irr::EMIE_RMOUSE_LEFT_UP || event.MouseInput.Event==irr::EMIE_MMOUSE_LEFT_UP))
-	oldReceiver->OnEvent(event);
+    oldReceiver->OnEvent(event);
   return OnEventImpl(event);
 };
 void BaseGui::apply(irr::IrrlichtDevice* _device){
   if(device)
-	unapply();
+    unapply();
   device=_device;
   oldReceiver=device->getEventReceiver();
   device->setEventReceiver(this);
 }
 void BaseGui::unapply(){
   if(device)
-	device->setEventReceiver(oldReceiver);
+    device->setEventReceiver(oldReceiver);
   device=0;
 };
 void BaseGui::main(irr::IrrlichtDevice* _device,FontManager* _fm){
@@ -40,13 +40,13 @@ void BaseGui::main(irr::IrrlichtDevice* _device,FontManager* _fm){
 
   while(device->run()){
 
-	if(!run())
-	  break;
+    if(!run())
+      break;
 
-	driver->beginScene(true, true, irr::SColor(255,113,113,133));
-	smgr->drawAll();
-	guienv->drawAll();
-	driver->endScene();
+    driver->beginScene(true, true, irr::SColor(255,113,113,133));
+    smgr->drawAll();
+    guienv->drawAll();
+    driver->endScene();
   }
 
   unapply();

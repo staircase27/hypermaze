@@ -12,7 +12,7 @@
 #include "irrlicht.h"
 
 #ifndef FONTMANAGER_HH
-#define	FONTMANAGER_HH
+#define FONTMANAGER_HH
 
 #if IRRLICHT_VERSION_MAJOR<=1 || IRRLICHT_VERSION_MINOR<=9
 #define IRRFONTFIX
@@ -174,5 +174,5 @@ class FontManager {
 
 };
 
-#endif	/* FONTMANAGER_HH */
+#endif /* FONTMANAGER_HH */
 

@@ -172,11 +172,11 @@ class StringMatcher{
     int group_count;///<the number of groups to output
     SPA<Pair<int> > groups;///<the indicies in the part of the start and end of each group to output
     ///default constructor that sets up with no pattern elements and no groups
-	  StringMatcher():count(0),pattern(),group_count(0),groups(){};
-	  ///get the number of groups this matchers will return
-	  /**
-	   * @return how many groups this matcher will return
-	   */
+    StringMatcher():count(0),pattern(),group_count(0),groups(){};
+    ///get the number of groups this matchers will return
+    /**
+     * @return how many groups this matcher will return
+     */
     inline int groupCount(){return group_count;}
 
     ///check a match against a constant String
@@ -187,7 +187,7 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(SP<const String> s,SPA<Pair<SP<ConstStringPointer> > > groups=SPA<Pair<SP<ConstStringPointer> > >());
+    bool match(SP<const String> s,SPA<Pair<SP<ConstStringPointer> > > groups=SPA<Pair<SP<ConstStringPointer> > >());
     ///check a match against a non-constant String
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -196,7 +196,7 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(      SP<String> s,SPA<Pair<SP<     StringPointer> > > groups=SPA<Pair<SP<     StringPointer> > >());
+    bool match(      SP<String> s,SPA<Pair<SP<     StringPointer> > > groups=SPA<Pair<SP<     StringPointer> > >());
     ///check a match against a constant String and process each match found
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -206,8 +206,8 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(SP<const String> s,StringMatcherCallback<ConstStringPointer>& cb,
-	      SPA<Pair<SP<ConstStringPointer> > > groups=SPA<Pair<SP<ConstStringPointer> > >());
+    bool match(SP<const String> s,StringMatcherCallback<ConstStringPointer>& cb,
+        SPA<Pair<SP<ConstStringPointer> > > groups=SPA<Pair<SP<ConstStringPointer> > >());
     ///check a match against a non-constant String
     /**
      * can also return the groups if the optional paramiter groups is included. If included
@@ -217,34 +217,34 @@ class StringMatcher{
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @return true if there are any matches of this pattern to the string
      */
-	  bool match(      SP<String> s,StringMatcherCallback<     StringPointer>& cb,
-	      SPA<Pair<SP<     StringPointer> > > groups=SPA<Pair<SP<     StringPointer> > >());
+    bool match(      SP<String> s,StringMatcherCallback<     StringPointer>& cb,
+        SPA<Pair<SP<     StringPointer> > > groups=SPA<Pair<SP<     StringPointer> > >());
 
-	private:
-	  ///The internal implementation function for matches
-	  /**
-	   * called by all the other match functions. This sets up some data storage and then called
-	   * matchStep to do the matching.
-	   * @tparam STRING the type of the string. Either String or const String
-	   * @tparam POINTER the type of a pointer to an element of the string of type STRING.
-	   * Either StringPointer or ConstStringPointer respectively
+  private:
+    ///The internal implementation function for matches
+    /**
+     * called by all the other match functions. This sets up some data storage and then called
+     * matchStep to do the matching.
+     * @tparam STRING the type of the string. Either String or const String
+     * @tparam POINTER the type of a pointer to an element of the string of type STRING.
+     * Either StringPointer or ConstStringPointer respectively
      * @param s the string to match this pattern against
      * @param groups optional argument that will be filled with the groups matched by this pattern
      * @param cb option pointer to the callback
      * @return true if there are any matches of this pattern to the string
      */
-	  template <class STRING,class POINTER>
-	  bool match(SP<STRING> s,SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
-	  ///The internal implementation function for a step in matching against a string
-	  /**
-	   * This function does the actual processing. It finds the "best" match for this segment of the pattern
-	   * and calls it's self to check if later steps match. If it doesn't it keeps seaching through "worse"
-	   * options till it finds one. Once the last step in the match has been found the data is stored and the
-	   * callback if provided is called to proccess the match. If a call back was provided then we keep
-	   * searching for solutions till all are found or else we return True immediately.
-	   * @tparam STRING the type of the string. Either String or const String
-	   * @tparam POINTER the type of a pointer to an element of the string of type STRING.
-	   * Either StringPointer or ConstStringPointer respectively
+    template <class STRING,class POINTER>
+    bool match(SP<STRING> s,SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
+    ///The internal implementation function for a step in matching against a string
+    /**
+     * This function does the actual processing. It finds the "best" match for this segment of the pattern
+     * and calls it's self to check if later steps match. If it doesn't it keeps seaching through "worse"
+     * options till it finds one. Once the last step in the match has been found the data is stored and the
+     * callback if provided is called to proccess the match. If a call back was provided then we keep
+     * searching for solutions till all are found or else we return True immediately.
+     * @tparam STRING the type of the string. Either String or const String
+     * @tparam POINTER the type of a pointer to an element of the string of type STRING.
+     * Either StringPointer or ConstStringPointer respectively
      * @param s the string to match this pattern against
      * @param p the place to start matching this pattern element against
      * @param matches array of objects to use as storage for the match data
@@ -253,9 +253,9 @@ class StringMatcher{
      * @param cb option pointer to the callback
      * @return true if there are any matches of this pattern to the string
      */
-	  template <class STRING,class POINTER>
-	  bool matchStep(SP<STRING> s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
-	      SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
+    template <class STRING,class POINTER>
+    bool matchStep(SP<STRING> s,POINTER p,SPA<PatternMatch<POINTER> > matches,int level,
+        SPA<Pair<SP<POINTER> > > groups,StringMatcherCallback<POINTER>* cb);
 };
 
 ///Read a StringMatcher from a stream
@@ -468,30 +468,30 @@ class ActionMulti: public Action, public PolymorphicHypIOImpl<ActionMulti,0>{
     SPA<SP<Action> >actions;///< The actual actions in this action
     ///@copydoc Action::doStart
     ///delegates to the stored actions
-		virtual void doStart(ScriptResponseStart& r,SP<String> s){
-		  for(int i=0;i<num;++i)
-		    actions[i]->doStart(r,s);
-		};
+    virtual void doStart(ScriptResponseStart& r,SP<String> s){
+      for(int i=0;i<num;++i)
+        actions[i]->doStart(r,s);
+    };
     ///@copydoc Action::doWin
     ///delegates to the stored actions
-		virtual void doWin(ScriptResponseWin& r,SP<String> s){
-		  for(int i=0;i<num;++i)
-		    actions[i]->doWin(r,s);
-		}
+    virtual void doWin(ScriptResponseWin& r,SP<String> s){
+      for(int i=0;i<num;++i)
+        actions[i]->doWin(r,s);
+    }
     ///@copydoc Action::doMove
     ///delegates to the stored actions
-		virtual void doMove(ScriptResponseMove& r,SP<String> s){
-		  for(int i=0;i<num;++i)
-		    actions[i]->doMove(r,s);
-		};
+    virtual void doMove(ScriptResponseMove& r,SP<String> s){
+      for(int i=0;i<num;++i)
+        actions[i]->doMove(r,s);
+    };
     ///@copydoc Action::doSelect
     ///delegates to the stored actions
-		virtual void doSelect(ScriptResponseSelect& r,SP<String> s){
-		  for(int i=0;i<num;++i)
-		    actions[i]->doSelect(r,s);
-		};
-		///virtual destructor so that implementations will delete correctly
-		virtual ~ActionMulti(){};
+    virtual void doSelect(ScriptResponseSelect& r,SP<String> s){
+      for(int i=0;i<num;++i)
+        actions[i]->doSelect(r,s);
+    };
+    ///virtual destructor so that implementations will delete correctly
+    virtual ~ActionMulti(){};
 };
 
 ///Read a ActionMulti from a stream
@@ -515,18 +515,18 @@ class ActionWin: public Action{
   public:
     ///@copydoc Action::doStart
     ///implemented as a no-op
-		virtual void doStart(ScriptResponseStart& r,SP<String> s){};
+    virtual void doStart(ScriptResponseStart& r,SP<String> s){};
     ///@copydoc Action::doWin
     ///only do method to implement
-		virtual void doWin(ScriptResponseWin& r,SP<String> s)=0;
+    virtual void doWin(ScriptResponseWin& r,SP<String> s)=0;
     ///@copydoc Action::doMove
     ///implemented as a no-op
-		virtual void doMove(ScriptResponseMove& r,SP<String> s){};
+    virtual void doMove(ScriptResponseMove& r,SP<String> s){};
     ///@copydoc Action::doSelect
     ///implemented as a no-op
-		virtual void doSelect(ScriptResponseSelect& r,SP<String> s){};
-		///virtual destructor so that implementations will delete correctly
-		virtual ~ActionWin(){};
+    virtual void doSelect(ScriptResponseSelect& r,SP<String> s){};
+    ///virtual destructor so that implementations will delete correctly
+    virtual ~ActionWin(){};
 };
 ///A specialisation of Action for Actions that apply to all events the same way
 class ActionCommon: public Action{
@@ -536,21 +536,21 @@ class ActionCommon: public Action{
      * @param r the response to record our actions in
      * @param s the string to act on
      */
-		virtual void doCommon(ScriptResponse& r,SP<String> s)=0;
+    virtual void doCommon(ScriptResponse& r,SP<String> s)=0;
     ///@copydoc Action::doStart
     ///calls doCommon
-		virtual void doStart(ScriptResponseStart& r,SP<String> s){doCommon(r,s);};
+    virtual void doStart(ScriptResponseStart& r,SP<String> s){doCommon(r,s);};
     ///@copydoc Action::doWin
     ///calls doCommon
-		virtual void doWin(ScriptResponseWin& r,SP<String> s){doCommon(r,s);};
+    virtual void doWin(ScriptResponseWin& r,SP<String> s){doCommon(r,s);};
     ///@copydoc Action::doMove
     ///calls doCommon
-		virtual void doMove(ScriptResponseMove& r,SP<String> s){doCommon(r,s);};
+    virtual void doMove(ScriptResponseMove& r,SP<String> s){doCommon(r,s);};
     ///@copydoc Action::doSelect
     ///calls doCommon
-		virtual void doSelect(ScriptResponseSelect& r,SP<String> s){doCommon(r,s);};
-		///virtual destructor so that implementations will delete correctly
-		virtual ~ActionCommon(){};
+    virtual void doSelect(ScriptResponseSelect& r,SP<String> s){doCommon(r,s);};
+    ///virtual destructor so that implementations will delete correctly
+    virtual ~ActionCommon(){};
 };
 
 ///an action that does nothing
@@ -686,16 +686,16 @@ class ActionForceWin:public Action, public PolymorphicHypIOImpl<ActionForceWin,6
   public:
     ///@copydoc Action::doStart
     ///implemented as a no-op as doesn't make sence to force a win at startup
-		virtual void doStart(ScriptResponseStart& r,SP<String> s){};
+    virtual void doStart(ScriptResponseStart& r,SP<String> s){};
     ///@copydoc Action::doWin
     ///implemented as a no-op as can't force win when already winning
-		virtual void doWin(ScriptResponseWin& r,SP<String> s){};
+    virtual void doWin(ScriptResponseWin& r,SP<String> s){};
     ///@copydoc Action::doMove
     ///sets the force win flag in the response objct
-		virtual void doMove(ScriptResponseMove& r,SP<String> s){r.forceWin=true;};
+    virtual void doMove(ScriptResponseMove& r,SP<String> s){r.forceWin=true;};
     ///@copydoc Action::doSelect
     ///sets the force win flag in the response objct
-		virtual void doSelect(ScriptResponseSelect& r,SP<String> s){r.forceWin=true;};
+    virtual void doSelect(ScriptResponseSelect& r,SP<String> s){r.forceWin=true;};
 };
 ///Read an ActionForceWin from a stream
 /**

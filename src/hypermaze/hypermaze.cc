@@ -197,9 +197,9 @@ int main(int argc,char* argv[]){
     irr::IFileSystem* fs=device->getFileSystem();
     const irr::fschar_t* path=
     #ifdef __IRR_WCHAR_FILESYSTEM
-	 _wgetenv("HYPERMAZE_DATA_DIR");
+        _wgetenv("HYPERMAZE_DATA_DIR");
     #else
-         getenv("HYPERMAZE_DATA_DIR");
+        getenv("HYPERMAZE_DATA_DIR");
     #endif
     if(!path)
       path=getDataPath();
