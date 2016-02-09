@@ -19,7 +19,7 @@ bool HelpGui::OnEventImpl(const irr::SEvent &event){
     }
   }
   if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE &&
-      (keyblock==0||device->getTimer()->getTime()>keyblock)){
+      (keyblock==0||getDevice()->getTimer()->getTime()>keyblock)){
     okClicked=true;
     keyblock=0;
     return true;
@@ -38,8 +38,8 @@ void HelpGui::createGUI(){
   okClicked=keyMapClicked=false;
   keyblock=0;
 
-  irr::video::IVideoDriver* driver = device->getVideoDriver();
-  irr::gui::IGUIEnvironment *guienv = device->getGUIEnvironment();
+  irr::video::IVideoDriver* driver = getDevice()->getVideoDriver();
+  irr::gui::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
 
   irr::core::rect<irr::s32> rect=driver->getViewPort();
   irr::core::position2d<irr::s32> center=rect.getCenter();
@@ -48,9 +48,9 @@ void HelpGui::createGUI(){
   size.Height=min(600,size.Height-10);
 
   GUIFormattedText* text=new GUIFormattedText(L"Hyper Maze Puzzle Game by Staircase",
-      guienv,el,0,irr::core::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,
+      guienv,getTopElement(),0,irr::core::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,
           center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true);
-  text->setOverrideFont(0,fm->getFont(24,true));
+  text->setOverrideFont(0,getFontManager()->getFont(24,true));
   text->setAllTextAlignment(irr::gui::EGUIA_CENTER,irr::gui::EGUIA_CENTER);
   text->addText(L"\nBend, Stretch and Move the String through the maze to get it to the far"
                 L" side of the hyper maze.\n Either click and drag on the controls or use the"
@@ -62,14 +62,14 @@ void HelpGui::createGUI(){
   text->drop();
 
   guienv->addButton(irr::core::rect<irr::s32>(center.X-75,center.Y+size.Height/2-32-32-10,
-          center.X+75,center.Y+size.Height/2-32-10),el,GUI_ID_KEY_MAP_BUTTON,L"Edit Key Map");
+          center.X+75,center.Y+size.Height/2-32-10),getTopElement(),GUI_ID_KEY_MAP_BUTTON,L"Edit Key Map");
   irr::gui::IGUIButton* ok=guienv->addButton(
       irr::core::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,
-          center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"OK");
+          center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"OK");
 
   guienv->setFocus(ok);
 
-  device->setWindowCaption(L"Hyper Maze: Help");
+  getDevice()->setWindowCaption(L"Hyper Maze: Help");
 }
 
 bool HelpGui::run(){
@@ -77,12 +77,12 @@ bool HelpGui::run(){
     return false;
   }
   if(keyMapClicked){
-    el->setVisible(false);
+    getTopElement()->setVisible(false);
     KeyMapGui kmg;
-    kmg.edit(device,fm,*km);
-    el->setVisible(true);
+    kmg.edit(getDevice(),getFontManager(),*km);
+    getTopElement()->setVisible(true);
     keyMapClicked=false;
-    keyblock=device->getTimer()->getTime()+500;
+    keyblock=getDevice()->getTimer()->getTime()+500;
   }
   return true;
 }

@@ -69,29 +69,93 @@ class CGUIEmptyElement : public irr::gui::IGUIElement
 /// Base class for guis.
 /**
  * This class sets up a base element for all components of the gui to be placed in,
- * event receiver code and a main event loop to take over from the normal event loop
+ * event receiver code and a main event loop to take over from the normal event loop.
+ *
+ * To use create a subclass that implements the virtual methods and
+ * with a public method that the users call. This public method must store any parameters that
+ * the gui needs then call main. Once main returns it should do any tidy up it needs and
+ * then return any output you want to return.
  */
-class BaseGui : irr::IEventReceiver{
-  protected:
-    irr::IrrlichtDevice* device; ///< The irrlicht device. Needed
-    FontManager* fm;
+class BaseGui : private irr::IEventReceiver{
+  private:
+    irr::IrrlichtDevice* device; ///< The irrlicht device. Needed for access to irrlicht system
+    FontManager* fm; ///< Used to access the fonts used by the gui
+    /// The old event receiver. Stored so it can be restored at end and selected events can be forwarded on
     irr::IEventReceiver* oldReceiver;
-    CGUIEmptyElement* el;
+    CGUIEmptyElement* el; /// The top level element that all components from this gui should be added to.
 
-    BaseGui():device(0),fm(0){};
-
+    /// Event receiver.
+    /**
+     * Passes key up and mouse button up events on to the original event receiver
+     * (so they don't resume thinking keys are still down) and then pass events
+     * on to OnEventImpl
+     * @param event The event that needs processing.
+     * @return True of the event was processed.
+     */
     bool OnEvent(const irr::SEvent &event);
-    virtual bool OnEventImpl(const irr::SEvent &event)=0;
 
+    /// Setup the gui on the specified device
     void apply(irr::IrrlichtDevice* _device);
+    /// Remove the gui on the specified device
     void unapply();
 
+  protected:
+
+    /// Construct a new BaseGui. Called by child.
+    BaseGui():device(0),fm(0){};
+
+    /// Access the irrlicht device. Needed for access to irrlicht system
+    /**
+     * @return the current irrlicht device in use
+     */
+    inline irr::IrrlichtDevice* getDevice(){
+      return device;
+    }
+    /// Access the FontManager which provides access to the fonts used by the gui
+    /**
+     * @return the current FontManager in use
+     */
+    inline FontManager* getFontManager(){
+      return fm;
+    }
+    /// Access the top level element that all components from this gui should be added to.
+    /**
+     * @return this gui's top level element
+     */
+    inline CGUIEmptyElement* getTopElement(){
+      return el;
+    }
+
+    /// Event receiver for the gui.
+    /**
+     * Function that should be implemented to process events.
+     * @param event The event that needs processing.
+     * @return True of the event was processed.
+     */
+    virtual bool OnEventImpl(const irr::SEvent &event)=0;
+
+    /// Create the gui and setup all the elements
+    /**
+     * Should create all elements as descendants of el
+     */
     virtual void createGUI()=0;
 
+    /// Called one per event loop to do any processing the gui
+    /// needs to do but was too long to do either regularly or
+    /// was too long for the event receiver.
+    /**
+     * @return false if the gui is finished.
+     */
     virtual bool run()=0;
 
+    /// The main function that needs to be called to start the gui system
+    /**
+     * @param _device the irrlicht device so the gui can access the irrlicht gui systems
+     * @param _fm the font manager to request fonts from
+     */
     void main(irr::IrrlichtDevice* _device,FontManager* _fm);
 
+    /// Virtual destructor so subclasses can override
     virtual ~BaseGui(){};
 };
 #endif

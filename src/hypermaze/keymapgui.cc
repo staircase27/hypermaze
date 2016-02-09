@@ -219,8 +219,8 @@ void KeyMapGui::createGUI(){
   editing=-1;
   okClicked=cancelClicked=false;
 
-  irr::video::IVideoDriver* driver = device->getVideoDriver();
-  irr::gui::IGUIEnvironment *guienv = device->getGUIEnvironment();
+  irr::video::IVideoDriver* driver = getDevice()->getVideoDriver();
+  irr::gui::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
 
   irr::core::rect<irr::s32> rect=driver->getViewPort();
   irr::core::position2d<irr::s32> center=rect.getCenter();
@@ -228,7 +228,7 @@ void KeyMapGui::createGUI(){
   size.Width=min(600,size.Width-10);
   size.Height=min(600,size.Height-10);
 
-  table = guienv->addTable(irr::core::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),el,-1,true);
+  table = guienv->addTable(irr::core::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),getTopElement(),-1,true);
   table->addColumn(L"Action",0);
   table->addColumn(L"Key",1);
   table->setColumnWidth(0,size.Width/2-10);
@@ -241,12 +241,12 @@ void KeyMapGui::createGUI(){
     table->setCellText(i,1,toString(kmtmp->getKeySpec(KeyMap::actionNames[i].first)).c_str());
   }
 
-  guienv->addButton(irr::core::rect<irr::s32>(center.X+size.Width/2-210,center.Y+size.Height/2-32,center.X+size.Width/2-100,center.Y+size.Height/2),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
-  guienv->addButton(irr::core::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Apply");
+  guienv->addButton(irr::core::rect<irr::s32>(center.X+size.Width/2-210,center.Y+size.Height/2-32,center.X+size.Width/2-100,center.Y+size.Height/2),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel");
+  guienv->addButton(irr::core::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"Apply");
 
   guienv->setFocus(table);
 
-  device->setWindowCaption(L"Hyper Maze: Configure");
+  getDevice()->setWindowCaption(L"Hyper Maze: Configure");
 
 }
 bool KeyMapGui::run(){
@@ -254,7 +254,7 @@ bool KeyMapGui::run(){
     return false;
   if(okClicked){
     *kmp=*kmtmp;
-    return !kmtmp->save(device->getFileSystem());
+    return !kmtmp->save(getDevice()->getFileSystem());
   }
   return true;
 }

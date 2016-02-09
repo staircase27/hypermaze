@@ -145,8 +145,8 @@ bool ErrorGui::error(irr::IrrlichtDevice* _device,FontManager* _fm,const irr::co
 void ErrorGui::createGUI(){
   okClicked=false;
 
-  irr::IVideoDriver* driver = device->getVideoDriver();
-  irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+  irr::IVideoDriver* driver = getDevice()->getVideoDriver();
+  irr::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
 
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
@@ -154,23 +154,23 @@ void ErrorGui::createGUI(){
   size.Width=min(400,size.Width-10);
   size.Height=min(600,size.Height-10);
 
-  irr::video::ITexture* tex = device->getVideoDriver()->getTexture("irrlicht/error.png");
+  irr::video::ITexture* tex = getDevice()->getVideoDriver()->getTexture("irrlicht/error.png");
   irr::dimension2d<irr::u32> imsize;
   if(tex!=0){
     imsize=tex->getSize();
-    guienv->addImage(tex,irr::core::position2d<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2),true,el,-1,L"Error");
+    guienv->addImage(tex,irr::core::position2d<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2),true,getTopElement(),-1,L"Error");
   }
 
-  GUIFormattedText* text=new GUIFormattedText(msg.c_str(),guienv,el,0,irr::core::rect<irr::s32>(center.X-size.Width/2+imsize.Width+10,center.Y-size.Height/2,center.X+size.Width/2,center.Y-size.Height/2+imsize.Height),true,true);
-  text->setOverrideFont(0,fm->getFont(24,true));
+  GUIFormattedText* text=new GUIFormattedText(msg.c_str(),guienv,getTopElement(),0,irr::core::rect<irr::s32>(center.X-size.Width/2+imsize.Width+10,center.Y-size.Height/2,center.X+size.Width/2,center.Y-size.Height/2+imsize.Height),true,true);
+  text->setOverrideFont(0,getFontManager()->getFont(24,true));
   text->setAllTextAlignment(irr::gui::EGUIA_CENTER,irr::gui::EGUIA_CENTER);
   text->drop();
 
-  makeElementFromMessage(guienv,fm,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+imsize.Height+10,center.X+size.Width/2,center.Y+size.Height/2-10-32),this->detail);
+  makeElementFromMessage(guienv,getFontManager(),getTopElement(),irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+imsize.Height+10,center.X+size.Width/2,center.Y+size.Height/2-10-32),this->detail);
 
-  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Ok"));
+  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"Ok"));
 
-  device->setWindowCaption(L"Hyper Maze: Error");
+  getDevice()->setWindowCaption(L"Hyper Maze: Error");
 }
 bool ErrorGui::run(){
   if(okClicked){
@@ -218,8 +218,8 @@ void ConfirmGui::createGUI(){
   okClicked=false;
   cancelClicked=false;
 
-  irr::IVideoDriver* driver = device->getVideoDriver();
-  irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+  irr::IVideoDriver* driver = getDevice()->getVideoDriver();
+  irr::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
 
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
@@ -227,26 +227,26 @@ void ConfirmGui::createGUI(){
   size.Width=min(400,size.Width-10);
   size.Height=min(600,size.Height-10);
 
-  irr::video::ITexture* tex = device->getVideoDriver()->getTexture("irrlicht/confirm.png");
+  irr::video::ITexture* tex = getDevice()->getVideoDriver()->getTexture("irrlicht/confirm.png");
   irr::dimension2d<irr::u32> imsize;
   if(tex!=0){
     imsize=tex->getSize();
-    guienv->addImage(tex,irr::core::position2d<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2),true,el,-1,L"Confirm");
+    guienv->addImage(tex,irr::core::position2d<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2),true,getTopElement(),-1,L"Confirm");
   }
   if(imsize.Height<50)
     imsize.Height=50;
 
-  GUIFormattedText* text=new GUIFormattedText(msg.c_str(),guienv,el,0,irr::core::rect<irr::s32>(center.X-size.Width/2+imsize.Width+10,center.Y-size.Height/2,center.X+size.Width/2,center.Y-size.Height/2+imsize.Height),true,true);
-  text->setOverrideFont(0,fm->getFont(24,true));
+  GUIFormattedText* text=new GUIFormattedText(msg.c_str(),guienv,getTopElement(),0,irr::core::rect<irr::s32>(center.X-size.Width/2+imsize.Width+10,center.Y-size.Height/2,center.X+size.Width/2,center.Y-size.Height/2+imsize.Height),true,true);
+  text->setOverrideFont(0,getFontManager()->getFont(24,true));
   text->setAllTextAlignment(irr::gui::EGUIA_CENTER,irr::gui::EGUIA_CENTER);
   text->drop();
 
-  makeElementFromMessage(guienv,fm,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+imsize.Height+10,center.X+size.Width/2,center.Y+size.Height/2-10-32),this->detail);
+  makeElementFromMessage(guienv,getFontManager(),getTopElement(),irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+imsize.Height+10,center.X+size.Width/2,center.Y+size.Height/2-10-32),this->detail);
 
-  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120-120-10,center.Y+size.Height/2-32,center.X+size.Width/2-120-10,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Ok"));
-  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_CANCEL_BUTTON,L"Cancel"));
+  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120-120-10,center.Y+size.Height/2-32,center.X+size.Width/2-120-10,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"Ok"));
+  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel"));
 
-  device->setWindowCaption(L"Hyper Maze: Confirm");
+  getDevice()->setWindowCaption(L"Hyper Maze: Confirm");
 }
 bool ConfirmGui::run(){
   if(okClicked || cancelClicked){
@@ -285,8 +285,8 @@ bool GenerateGui::generate(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleD
 void GenerateGui::createGUI(){
   okClicked=cancelClicked=false;
 
-  irr::IVideoDriver* driver = device->getVideoDriver();
-  irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+  irr::IVideoDriver* driver = getDevice()->getVideoDriver();
+  irr::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
 
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
@@ -294,29 +294,29 @@ void GenerateGui::createGUI(){
   size.Width=min(400,size.Width-10);
 
   xSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32-10-32,
-      center.X+size.Width/2,center.Y-5-32-10),true,el);
+      center.X+size.Width/2,center.Y-5-32-10),true,getTopElement());
   xSize->setDecimalPlaces(0);
   xSize->setRange(3,75);
   xSize->setValue(pd->m.size().X);
 
   ySize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,
-      center.X+size.Width/2,center.Y-5),true,el);
+      center.X+size.Width/2,center.Y-5),true,getTopElement());
   ySize->setDecimalPlaces(0);
   ySize->setRange(3,75);
   ySize->setValue(pd->m.size().Y);
 
   zSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y+5,
-      center.X+size.Width/2,center.Y+5+32),true,el);
+      center.X+size.Width/2,center.Y+5+32),true,getTopElement());
   zSize->setDecimalPlaces(0);
   zSize->setRange(3,75);
   zSize->setValue(pd->m.size().Z);
 
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5+32+10,center.X+size.Width/2-100,center.Y+5+32+10+32),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5+32+10,center.X+size.Width/2,center.Y+5+32+10+32),el,GUI_ID_OK_BUTTON,L"Generate");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5+32+10,center.X+size.Width/2-100,center.Y+5+32+10+32),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5+32+10,center.X+size.Width/2,center.Y+5+32+10+32),getTopElement(),GUI_ID_OK_BUTTON,L"Generate");
 
   guienv->setFocus(xSize->getEditBox());
 
-  device->setWindowCaption(L"Hyper Maze: Generate New Maze");
+  getDevice()->setWindowCaption(L"Hyper Maze: Generate New Maze");
 
 }
 bool GenerateGui::run(){
@@ -360,46 +360,46 @@ bool SaveGui::save(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& 
 void SaveGui::createGUI(){
   okClicked=cancelClicked=false;
 
-  irr::IVideoDriver* driver = device->getVideoDriver();
-  irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+  irr::IVideoDriver* driver = getDevice()->getVideoDriver();
+  irr::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
 
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
   irr::dimension2d<irr::s32> size=rect.getSize();
   size.Width=min(400,size.Width-10);
 
-  fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,center.X+size.Width/2,center.Y-5),true,el);
+  fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,center.X+size.Width/2,center.Y-5),true,getTopElement());
 
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5,center.X+size.Width/2-100,center.Y+5+32),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5,center.X+size.Width/2,center.Y+5+32),el,GUI_ID_OK_BUTTON,L"Save");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5,center.X+size.Width/2-100,center.Y+5+32),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5,center.X+size.Width/2,center.Y+5+32),getTopElement(),GUI_ID_OK_BUTTON,L"Save");
 
   guienv->setFocus(fileField);
 
-  device->setWindowCaption(L"Hyper Maze: Save");
+  getDevice()->setWindowCaption(L"Hyper Maze: Save");
 
 }
 bool SaveGui::run(){
   if(cancelClicked)
     return false;
   if(okClicked){
-    if(device->getFileSystem()->existFile(fileField->getText())){
-      el->setVisible(false);
+    if(getDevice()->getFileSystem()->existFile(fileField->getText())){
+      getTopElement()->setVisible(false);
       ConfirmGui cg;
-      bool overwrite = cg.confirm(device,fm,L"File already exists.","Do you want to overwrite the existing file? Existing contents will be lost.");
-      el->setVisible(true);
+      bool overwrite = cg.confirm(getDevice(),getFontManager(),L"File already exists.","Do you want to overwrite the existing file? Existing contents will be lost.");
+      getTopElement()->setVisible(true);
       if(!overwrite){
-        device->getGUIEnvironment()->setFocus(fileField);
+        getDevice()->getGUIEnvironment()->setFocus(fileField);
         return true;
       }
     }
-    irr::IWriteFile* out=device->getFileSystem()->createAndWriteFile(fileField->getText());
+    irr::IWriteFile* out=getDevice()->getFileSystem()->createAndWriteFile(fileField->getText());
     if(!out){
       okClicked=false;
-      el->setVisible(false);
+      getTopElement()->setVisible(false);
       ErrorGui eg;
-      eg.error(device,fm,L"Error Opening File","File can't be opened for writing.");
-      el->setVisible(true);
-      device->getGUIEnvironment()->setFocus(fileField);
+      eg.error(getDevice(),getFontManager(),L"Error Opening File","File can't be opened for writing.");
+      getTopElement()->setVisible(true);
+      getDevice()->getGUIEnvironment()->setFocus(fileField);
         return true;
     }
     IrrHypOStream os(out);
@@ -409,10 +409,10 @@ bool SaveGui::run(){
     status&=write(os,pd->sc);
     if(!status){
       okClicked=false;
-      el->setVisible(false);
+      getTopElement()->setVisible(false);
       ErrorGui eg;
-      eg.error(device,fm,L"Error writing maze to file","There was an error while writing to the file. The file may only include a partial or broken level. Please try again.");
-      el->setVisible(true);
+      eg.error(getDevice(),getFontManager(),L"Error writing maze to file","There was an error while writing to the file. The file may only include a partial or broken level. Please try again.");
+      getTopElement()->setVisible(true);
       return true;
     }
     return false;
@@ -451,38 +451,38 @@ bool OpenGui::open(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& 
 void OpenGui::createGUI(){
   okClicked=cancelClicked=false;
 
-  irr::IVideoDriver* driver = device->getVideoDriver();
-  irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+  irr::IVideoDriver* driver = getDevice()->getVideoDriver();
+  irr::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
 
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
   irr::dimension2d<irr::s32> size=rect.getSize();
   size.Width=min(400,size.Width-10);
 
-  fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,center.X+size.Width/2,center.Y-5),true,el);
+  fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,center.X+size.Width/2,center.Y-5),true,getTopElement());
 
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5,center.X+size.Width/2-100,center.Y+5+32),el,GUI_ID_CANCEL_BUTTON,L"Cancel");
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5,center.X+size.Width/2,center.Y+5+32),el,GUI_ID_OK_BUTTON,L"Open");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5,center.X+size.Width/2-100,center.Y+5+32),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5,center.X+size.Width/2,center.Y+5+32),getTopElement(),GUI_ID_OK_BUTTON,L"Open");
 
   guienv->setFocus(fileField);
 
-  device->setWindowCaption(L"Hyper Maze: Open");
+  getDevice()->setWindowCaption(L"Hyper Maze: Open");
 }
 bool OpenGui::run(){
   if(cancelClicked)
     return false;
   if(okClicked){
-    irr::IReadFile* in=createAndOpen(device->getFileSystem(),fileField->getText());
+    irr::IReadFile* in=createAndOpen(getDevice()->getFileSystem(),fileField->getText());
     if(!in){
       okClicked=false;
-      el->setVisible(false);
+      getTopElement()->setVisible(false);
       ErrorGui eg;
-      if(device->getFileSystem()->existFile(fileField->getText()))
-        eg.error(device,fm,L"Error Opening File","File exists but can't be opened.");
+      if(getDevice()->getFileSystem()->existFile(fileField->getText()))
+        eg.error(getDevice(),getFontManager(),L"Error Opening File","File exists but can't be opened.");
       else
-        eg.error(device,fm,L"Error Opening File","File doesn't exist.");
-      el->setVisible(true);
-      device->getGUIEnvironment()->setFocus(fileField);
+        eg.error(getDevice(),getFontManager(),L"Error Opening File","File doesn't exist.");
+      getTopElement()->setVisible(true);
+      getDevice()->getGUIEnvironment()->setFocus(fileField);
       return true;
     }
     IrrHypIStream is(in);
@@ -491,10 +491,10 @@ bool OpenGui::run(){
     pd->sc=Script();// reset it to blank as a default
     status &= read(is,pd->sc).ok;
     if(!status){
-      el->setVisible(false);
+      getTopElement()->setVisible(false);
       ErrorGui eg;
-      eg.error(device,fm,L"Error Reading File","The level may have been loaded but it may have errors. If it not correct please try again or get a new copy of the level.");
-      el->setVisible(true);
+      eg.error(getDevice(),getFontManager(),L"Error Reading File","The level may have been loaded but it may have errors. If it not correct please try again or get a new copy of the level.");
+      getTopElement()->setVisible(true);
     }
     return false;
   }
@@ -529,7 +529,7 @@ bool WinGui::OnEventImpl(const irr::SEvent &event){
     }
   }
   if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE &&
-      (keyblock==0||device->getTimer()->getTime()>keyblock)){
+      (keyblock==0||getDevice()->getTimer()->getTime()>keyblock)){
     okClicked=true;
     keyblock=0;
     return true;
@@ -549,8 +549,8 @@ void WinGui::createGUI(){
   okClicked=nextClicked=generateClicked=loadClicked=saveClicked=false;
   keyblock=0;
 
-  irr::IVideoDriver* driver = device->getVideoDriver();
-  irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+  irr::IVideoDriver* driver = getDevice()->getVideoDriver();
+  irr::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
 
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
@@ -558,18 +558,18 @@ void WinGui::createGUI(){
   size.Width=min(600,size.Width-10);
   size.Height=min(600,size.Height-10);
 
-  GUIFormattedText* text=new GUIFormattedText(L"Congratulations!",guienv,el,0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true);
-  text->setOverrideFont(0,fm->getFont(24,true));
+  GUIFormattedText* text=new GUIFormattedText(L"Congratulations!",guienv,getTopElement(),0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true);
+  text->setOverrideFont(0,getFontManager()->getFont(24,true));
   text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
   text->addText((irr::stringw(L"Score: ")+=pd->sp.getScore()).c_str());
-  addMessageToElement(text,fm,m);
+  addMessageToElement(text,getFontManager(),m);
   text->addText(L"\nWhat would you like to do now?");
   text->drop();
 
-  irr::IGUIButton* def=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-320,center.Y+size.Height/2-32-32-10,center.X+size.Width/2-130,center.Y+size.Height/2-32-10),el,GUI_ID_OK_BUTTON,L"Back to Current Maze");
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32-32-10,center.X+size.Width/2,center.Y+size.Height/2-32-10),el,GUI_ID_SAVE_BUTTON,L"Save Maze");
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_LOAD_BUTTON,L"Load a Maze");
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-320,center.Y+size.Height/2-32,center.X+size.Width/2-130,center.Y+size.Height/2),el,GUI_ID_GENERATE_BUTTON,L"Generate New Maze");
+  irr::IGUIButton* def=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-320,center.Y+size.Height/2-32-32-10,center.X+size.Width/2-130,center.Y+size.Height/2-32-10),getTopElement(),GUI_ID_OK_BUTTON,L"Back to Current Maze");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32-32-10,center.X+size.Width/2,center.Y+size.Height/2-32-10),getTopElement(),GUI_ID_SAVE_BUTTON,L"Save Maze");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_LOAD_BUTTON,L"Load a Maze");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-320,center.Y+size.Height/2-32,center.X+size.Width/2-130,center.Y+size.Height/2),getTopElement(),GUI_ID_GENERATE_BUTTON,L"Generate New Maze");
 
   if(!nextLevel.a.isnull()){
     irr::stringw label(L"Next Level");
@@ -577,13 +577,13 @@ void WinGui::createGUI(){
       label.append(L": ");
       label.append(irr::stringw(&*nextLevel.b));
     }
-    def=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-600,center.Y+size.Height/2-32,center.X+size.Width/2-330,center.Y+size.Height/2),el,GUI_ID_NEXT_BUTTON,label.c_str());
+    def=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-600,center.Y+size.Height/2-32,center.X+size.Width/2-330,center.Y+size.Height/2),getTopElement(),GUI_ID_NEXT_BUTTON,label.c_str());
     def->setToolTipText(irr::stringw(&*nextLevel.a).c_str());
   }
 
   guienv->setFocus(def);
 
-  device->setWindowCaption(L"Hyper Maze: Congratulations");
+  getDevice()->setWindowCaption(L"Hyper Maze: Congratulations");
 }
 bool WinGui::run(){
   if(okClicked){
@@ -591,7 +591,7 @@ bool WinGui::run(){
   }
   if(nextClicked){
     nextClicked=false;
-    irr::IReadFile* in=createAndOpen(device->getFileSystem(),&*nextLevel.a);
+    irr::IReadFile* in=createAndOpen(getDevice()->getFileSystem(),&*nextLevel.a);
     if(!in)
       return true;
     IrrHypIStream is(in);
@@ -603,34 +603,34 @@ bool WinGui::run(){
   }
 
   if(saveClicked){
-    el->setVisible(false);
+    getTopElement()->setVisible(false);
     SaveGui sg;
-    sg.save(device,fm,*pd);
-    el->setVisible(true);
+    sg.save(getDevice(),getFontManager(),*pd);
+    getTopElement()->setVisible(true);
     saveClicked=false;
-    keyblock=device->getTimer()->getTime()+500;
+    keyblock=getDevice()->getTimer()->getTime()+500;
   }
   if(loadClicked){
-    el->setVisible(false);
+    getTopElement()->setVisible(false);
     OpenGui og;
-    if(og.open(device,fm,*pd)){
+    if(og.open(getDevice(),getFontManager(),*pd)){
       pd->mazeUpdated();
       return false;
     }
-    el->setVisible(true);
+    getTopElement()->setVisible(true);
     loadClicked=false;
-    keyblock=device->getTimer()->getTime()+500;
+    keyblock=getDevice()->getTimer()->getTime()+500;
   }
   if(generateClicked){
-    el->setVisible(false);
+    getTopElement()->setVisible(false);
     GenerateGui gg;
-    if(gg.generate(device,fm,*pd)){
+    if(gg.generate(getDevice(),getFontManager(),*pd)){
       pd->mazeUpdated();
       return false;
     }
-    el->setVisible(true);
+    getTopElement()->setVisible(true);
     generateClicked=false;
-    keyblock=device->getTimer()->getTime()+500;
+    keyblock=getDevice()->getTimer()->getTime()+500;
   }
   return true;
 }
@@ -655,8 +655,8 @@ bool MessageGui::message(irr::IrrlichtDevice* _device,FontManager* _fm,const Mes
 void MessageGui::createGUI(){
   okClicked=false;
 
-  irr::IVideoDriver* driver = device->getVideoDriver();
-  irr::IGUIEnvironment *guienv = device->getGUIEnvironment();
+  irr::IVideoDriver* driver = getDevice()->getVideoDriver();
+  irr::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
 
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
@@ -664,11 +664,11 @@ void MessageGui::createGUI(){
   size.Width=min(400,size.Width-10);
   size.Height=min(600,size.Height-10);
 
-  makeElementFromMessage(guienv,fm,el,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),m);
+  makeElementFromMessage(guienv,getFontManager(),getTopElement(),irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),m);
 
-  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),el,GUI_ID_OK_BUTTON,L"Ok"));
+  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"Ok"));
 
-  device->setWindowCaption(L"Hyper Maze: Message");
+  getDevice()->setWindowCaption(L"Hyper Maze: Message");
 }
 bool MessageGui::run(){
   if(okClicked){
