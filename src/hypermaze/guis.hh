@@ -12,6 +12,40 @@
 class Maze;
 class PuzzleDisplay;
 
+/// A gui to display a message
+class MessageGui: BaseGui{
+
+  Message m; ///< The message to display
+
+  bool okClicked; ///< Has ok been clicked yet?
+
+  /// An enum for button IDs
+  enum
+  {
+    GUI_ID_OK_BUTTON=201, ///< The ID for the OK button
+  };
+
+  protected:
+    /// @copydoc BaseGui::OnEventImpl
+    virtual bool OnEventImpl(const irr::SEvent &event);
+    /// @copydoc BaseGui::createGUI
+    void createGUI();
+    /// @copydoc BaseGui::run
+    bool run();
+  public:
+    /// Show the message gui
+    /**
+     * @param _device the irrlicht device
+     * @param _fm the font manager to use for fonts
+     * @param m the message to show
+     * @return true of the ok button was clicked
+     */
+    bool message(irr::IrrlichtDevice* _device,FontManager* _fm,const Message& m);
+
+    /// Construct a MessageGui object
+    MessageGui():m(){}
+};
+
 /// A gui to display an error message
 class ErrorGui: BaseGui{
 
@@ -179,78 +213,90 @@ class SaveGui: BaseGui{
     bool save(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd);
 };
 
+/// Gui to load a maze from file
 class OpenGui: BaseGui{
 
-  bool okClicked;
-  bool cancelClicked;
+  bool okClicked; ///< Has ok been clicked yet?
+  bool cancelClicked; ///< Has cancel been clicked yet?
 
+  /// The puzzle display object to get the maze and script from
   PuzzleDisplay* pd;
 
+  /// GUI element to input the file name to save the maze as
   irr::gui::IGUIEditBox * fileField;
 
+  /// An enum for button IDs
   enum
   {
-    GUI_ID_OK_BUTTON=201,
-    GUI_ID_CANCEL_BUTTON
+    GUI_ID_OK_BUTTON=201, ///< ID for the ok button
+    GUI_ID_CANCEL_BUTTON, ///< ID for the cancel button
   };
 
   protected:
+    /// @copydoc BaseGui::OnEventImpl
     virtual bool OnEventImpl(const irr::SEvent &event);
+    /// @copydoc BaseGui::createGUI
     void createGUI();
+    /// @copydoc BaseGui::run
     bool run();
   public:
+    /// show the open gui
+    /**
+     * @param _device the irrlicht device
+     * @param _fm the font manager to use for fonts
+     * @param pd the puzzle display to store the loaded maze and script into
+     * @return true if a new maze was loaded
+     */
     bool open(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd);
 };
 
+/// Gui to show you have won and options for what to do next
 class WinGui: BaseGui{
 
-  bool okClicked,nextClicked,generateClicked,loadClicked, saveClicked;
+  bool okClicked, ///< Has ok been clicked yet?
+       nextClicked, ///< Has next been clicked yet?
+       generateClicked, ///< Has generate been clicked yet?
+       loadClicked, ///< Has load been clicked yet?
+       saveClicked; ///< Has save been clicked yet?
 
+  /// The puzzle display object so a new maze can be loaded or generated if requested
   PuzzleDisplay* pd;
 
-  Message m;
-  Pair<SPA<const char> > nextLevel;
+  Message m; ///< A message to show on the win screen. Usually set by the current maze's script
+  Pair<SPA<const char> > nextLevel; ///< The name and path for the next level. Usually set by the current maze's script
 
-  irr::u32 keyblock;
+  irr::u32 keyblock; ///< A timer to block input so a key can't repeat trigger the same action
 
+  /// An enum for button IDs
   enum
   {
-    GUI_ID_OK_BUTTON=201,
-    GUI_ID_GENERATE_BUTTON,
-    GUI_ID_LOAD_BUTTON,
-    GUI_ID_SAVE_BUTTON,
-    GUI_ID_NEXT_BUTTON
+    GUI_ID_OK_BUTTON=201, ///< ID for the ok button
+    GUI_ID_GENERATE_BUTTON, ///< ID for the generate button
+    GUI_ID_LOAD_BUTTON, ///< ID for the load button
+    GUI_ID_SAVE_BUTTON, ///< ID for the save button
+    GUI_ID_NEXT_BUTTON ///< ID for the next button
   };
 
   protected:
+    /// @copydoc BaseGui::OnEventImpl
     virtual bool OnEventImpl(const irr::SEvent &event);
+    /// @copydoc BaseGui::createGUI
     void createGUI();
+    /// @copydoc BaseGui::run
     bool run();
   public:
+    /// Show the win gui
+    /**
+     * @param _device the irrlicht device
+     * @param _fm the font manager to use for fonts
+     * @param pd the puzzle display to store the loaded maze and script into
+     * @param m a message to show on the win gui. Usually set by the current level's script
+     * @param nextLevel the name and path for the next level. Usually set by the current level's script
+     * @return true
+     */
     bool won(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd,const Message& m, Pair<SPA<const char> > nextLevel);
 
-    WinGui():pd(0),m(),nextLevel(){}
-};
-
-class MessageGui: BaseGui{
-
-  Message m;
-
-  bool okClicked;
-
-  enum
-  {
-    GUI_ID_OK_BUTTON=201,
-  };
-
-  protected:
-    virtual bool OnEventImpl(const irr::SEvent &event);
-    void createGUI();
-    bool run();
-  public:
-    bool message(irr::IrrlichtDevice* _device,FontManager* _fm,const Message& m);
-
-    MessageGui():m(){}
+    WinGui():m(),nextLevel(){}
 };
 
 #endif

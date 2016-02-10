@@ -1,3 +1,7 @@
+/**
+ * @file helpgui.cc
+ * @brief The implementation of helpgui.hh
+ */
 #include "helpgui.hh"
 #include "keymapgui.hh"
 #include "../irrshared/GUIFormattedText.hh"

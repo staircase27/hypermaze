@@ -1,3 +1,7 @@
+/**
+ * @file guis.cc
+ * @brief The implementation of guis.hh
+ */
 #include "guis.hh"
 #include "irrdisp.hh"
 #include "../core/maze.hh"
@@ -14,6 +18,12 @@ namespace irr{
   using namespace gui;
 };
 
+/// Add a message to a formatted text gui element.
+/**
+ * @param text the formatted text gui element to add the message to
+ * @param fm the font manager to load fonts from
+ * @param m the message to add
+ */
 void addMessageToElement(GUIFormattedText* text,FontManager* fm,const Message& m){
   int buflen=0;
   wchar_t* buf=0;
@@ -104,12 +114,64 @@ void addMessageToElement(GUIFormattedText* text,FontManager* fm,const Message& m
   delete[] buf;
 }
 
-GUIFormattedText* makeElementFromMessage(irr::IGUIEnvironment* guienv,FontManager* fm,irr::IGUIElement* el,irr::rect<irr::s32> bounds, const Message& m){
+/// create a formatted text gui element that contains a message
+/**
+ * @param guienv the guienvironment controlling the current gui
+ * @param fm the font manager to use fonts from
+ * @param el the parent gui element to put the formatted text element
+ * @param bounds the bounds for the formatted text element
+ * @param m the message to put in the gui formatted text element
+ * @return the new formatted text gui element
+ */
+GUIFormattedText* makeElementFromMessage(irr::IGUIEnvironment* guienv,FontManager* fm,
+    irr::IGUIElement* el,irr::rect<irr::s32> bounds, const Message& m){
   GUIFormattedText* text=new GUIFormattedText(0,guienv,el,0,bounds,true,true);
   text->setAllTextAlignment(irr::EGUIA_CENTER,irr::EGUIA_CENTER);
   addMessageToElement(text,fm,m);
   text->drop();
   return text;
+}
+
+bool MessageGui::OnEventImpl(const irr::SEvent &event){
+  if(event.EventType == irr::EET_GUI_EVENT && event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED)
+    if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
+      okClicked=true;
+      return true;
+  }
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+    okClicked=true;
+    return true;
+  }
+  return false;
+};
+bool MessageGui::message(irr::IrrlichtDevice* _device,FontManager* _fm,const Message& m){
+  this->m=m;
+  main(_device,_fm);
+  return okClicked;
+}
+void MessageGui::createGUI(){
+  okClicked=false;
+
+  irr::IVideoDriver* driver = getDevice()->getVideoDriver();
+  irr::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
+
+  irr::rect<irr::s32> rect=driver->getViewPort();
+  irr::position2d<irr::s32> center=rect.getCenter();
+  irr::dimension2d<irr::s32> size=rect.getSize();
+  size.Width=min(400,size.Width-10);
+  size.Height=min(600,size.Height-10);
+
+  makeElementFromMessage(guienv,getFontManager(),getTopElement(),irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),m);
+
+  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"Ok"));
+
+  getDevice()->setWindowCaption(L"Hyper Maze: Message");
+}
+bool MessageGui::run(){
+  if(okClicked){
+    return false;
+  }
+  return true;
 }
 
 bool ErrorGui::OnEventImpl(const irr::SEvent &event){
@@ -632,48 +694,6 @@ bool WinGui::run(){
     getTopElement()->setVisible(true);
     generateClicked=false;
     keyblock=getDevice()->getTimer()->getTime()+500;
-  }
-  return true;
-}
-
-bool MessageGui::OnEventImpl(const irr::SEvent &event){
-  if(event.EventType == irr::EET_GUI_EVENT && event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED)
-    if(event.GUIEvent.Caller->getID()==GUI_ID_OK_BUTTON){
-      okClicked=true;
-      return true;
-  }
-  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
-    okClicked=true;
-    return true;
-  }
-  return false;
-};
-bool MessageGui::message(irr::IrrlichtDevice* _device,FontManager* _fm,const Message& m){
-  this->m=m;
-  main(_device,_fm);
-  return okClicked;
-}
-void MessageGui::createGUI(){
-  okClicked=false;
-
-  irr::IVideoDriver* driver = getDevice()->getVideoDriver();
-  irr::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
-
-  irr::rect<irr::s32> rect=driver->getViewPort();
-  irr::position2d<irr::s32> center=rect.getCenter();
-  irr::dimension2d<irr::s32> size=rect.getSize();
-  size.Width=min(400,size.Width-10);
-  size.Height=min(600,size.Height-10);
-
-  makeElementFromMessage(guienv,getFontManager(),getTopElement(),irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),m);
-
-  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"Ok"));
-
-  getDevice()->setWindowCaption(L"Hyper Maze: Message");
-}
-bool MessageGui::run(){
-  if(okClicked){
-    return false;
   }
   return true;
 }
