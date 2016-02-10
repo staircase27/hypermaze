@@ -388,6 +388,7 @@ bool SaveGui::run(){
       bool overwrite = cg.confirm(getDevice(),getFontManager(),L"File already exists.","Do you want to overwrite the existing file? Existing contents will be lost.");
       getTopElement()->setVisible(true);
       if(!overwrite){
+        okClicked=false;
         getDevice()->getGUIEnvironment()->setFocus(fileField);
         return true;
       }
@@ -400,7 +401,7 @@ bool SaveGui::run(){
       eg.error(getDevice(),getFontManager(),L"Error Opening File","File can't be opened for writing.");
       getTopElement()->setVisible(true);
       getDevice()->getGUIEnvironment()->setFocus(fileField);
-        return true;
+      return true;
     }
     IrrHypOStream os(out);
     out->drop();
