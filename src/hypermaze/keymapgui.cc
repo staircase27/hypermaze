@@ -1,6 +1,15 @@
+/**
+ * @file keymapgui.cc
+ * @brief The implementation of keymapgui.hh
+ */
 #include "keymapgui.hh"
 #include "keymap.hh"
 
+/// Convert a keycode to a string for showing in the gui
+/**
+ * @param k the keycode to convert
+ * @return a string describing the key
+ */
 irr::core::stringw toString(const irr::EKEY_CODE& k){
   switch(k){
     case irr::KEY_BACK: return L"BACKSPACE key";
@@ -142,7 +151,11 @@ irr::core::stringw toString(const irr::EKEY_CODE& k){
   }
 }
 
-
+/// Convert a keyspac to a string for displaying in the gui
+/**
+ * @param ks the keyspec to convert
+ * @return a string representing the keyspec
+ */
 inline irr::core::stringw toString(KeySpec ks){
   irr::core::stringw s;
   if(ks.chr==0 && (ks.key==irr::KEY_KEY_CODES_COUNT || ks.key==0))
