@@ -1,3 +1,16 @@
+Dependancies
+************
+
+Before instalation can be started a few libraries must be installed.
+
+The only compulsary library is Irrlicht (http://irrlicht.sourceforge.net/)
+
+There are various optional libraries that enable other features to be used which are:
+ * For url and internet access to levels - libCURL (https://curl.haxx.se/libcurl/)
+ * For sound ALUT and OpenAL (Hard to find. Often available in linux distros)
+
+Note that for compiling the dev versions of packages will be needed as well as the actual library
+
 Installation Instructions
 *************************
 

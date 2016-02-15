@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef USE_CURL
+#ifdef USE_CURL
 #include <curl/curl.h>
 
 /// A container for a chunk of memory
