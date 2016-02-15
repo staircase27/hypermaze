@@ -9,7 +9,6 @@ namespace irr{
 
     bool KeyboardController::OnEvent(const irr::SEvent& event)
     {
-      // Remember whether each key is down or up
       if (event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown){
         KeyMap::Action a;
         if(event.KeyInput.Char==0)
