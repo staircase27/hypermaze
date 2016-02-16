@@ -51,10 +51,16 @@ struct KeySpec{
   inline bool operator<(const KeySpec& o) const{
     if(chr<o.chr)
       return true;
+    if(chr>o.chr)
+      return false;
     if(key<o.key)
       return true;
-    if(!(shift)&&o.shift)
+    if(key>o.key)
+      return false;
+    if(!shift&&o.shift)
       return true;
+    if(shift&&!o.shift)
+      return false;
     if((!control)&&o.control)
       return true;
     return false;
