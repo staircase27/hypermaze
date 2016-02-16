@@ -202,11 +202,12 @@ bool KeyMapGui::OnEventImpl(const irr::SEvent &event){
       KeySpec ks(event.KeyInput.Char,event.KeyInput.Shift,event.KeyInput.Control);
       if(event.KeyInput.Char==0)
         ks=KeySpec(event.KeyInput.Key,event.KeyInput.Shift,event.KeyInput.Control);
+      std::cout<<"Setting key "<<KeyMap::actionNames[editing].first<<" "<<ks.key<<" "<<ks.chr<<" "<<ks.shift<<ks.control<<std::endl;
       KeyMap::Action old=kmtmp->addMapping(ks,KeyMap::actionNames[editing].first).second;
-      for(int i=0;i<KeyMap::A_COUNT-1;++i){
-        if(old==KeyMap::actionNames[i].first)
-          table->setCellText(i,1,toString(kmtmp->getKeySpec(old)).c_str());
-      }
+      if(old!=KeyMap::A_NONE)
+        for(int i=0;i<KeyMap::A_COUNT-1;++i)
+          if(old==KeyMap::actionNames[i].first)
+            table->setCellText(i,1,toString(kmtmp->getKeySpec(old)).c_str());
       table->setCellText(editing,1,toString(kmtmp->getKeySpec(KeyMap::actionNames[editing].first)).c_str());
       if(event.KeyInput.Key != irr::KEY_SHIFT && event.KeyInput.Key != irr::KEY_CONTROL &&
           event.KeyInput.Key != irr::KEY_LCONTROL && event.KeyInput.Key != irr::KEY_RCONTROL &&

@@ -12,9 +12,9 @@ namespace irr{
       if (event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown){
         KeyMap::Action a;
         if(event.KeyInput.Char==0)
-          a=map.getAction(event.KeyInput.Key);
+          a=map.getTriggeredAction(KeySpec(event.KeyInput.Key,event.KeyInput.Shift,event.KeyInput.Control));
         else
-          a=map.getAction(event.KeyInput.Char);
+          a=map.getTriggeredAction(KeySpec(event.KeyInput.Char,event.KeyInput.Shift,event.KeyInput.Control));
         if(a!=KeyMap::A_NONE){
           actionTriggered[a]=true;
           return true;

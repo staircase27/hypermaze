@@ -34,6 +34,13 @@ struct KeySpec{
    * @param control is control pressed too
    */
   KeySpec(irr::EKEY_CODE key,bool shift=false,bool control=false):key(key),shift(shift),control(control),chr(0){};
+  /// Create a keyspec that corresponds to a keyspec but with modifiers changed
+  /**
+   * @param ks the keyspec to copy
+   * @param shift is shift pressed too
+   * @param control is control pressed too
+   */
+  KeySpec(const KeySpec& ks,bool shift,bool control):chr(ks.chr),shift(shift),control(control),key(ks.key){};
 
   /// Create a total ordering to enable this to be a key in a map
   /**
@@ -125,6 +132,30 @@ class KeyMap{
       keyMap[key]=a;
       revMap[a]=key;
       return old;
+    }
+    /// Get the action triggered by a keyspec
+    /**
+     * This also checks for the keyspec but without any modifiers present
+     * @param key the keyspec to look up
+     * @return The action for key if set or @link KeyMap::A_NONE A_NONE @endlink
+     */
+    inline Action getTriggeredAction(KeySpec key){
+      std::cout<<"key press "<<key.key<<" "<<key.chr<<" "<<key.shift<<key.control<<std::endl;
+      Action a=keyMap[key];
+      if(a == A_NONE && key.shift){
+        std::cout<<"key trying without shift"<<std::endl;
+        a=keyMap[KeySpec(key,false,key.control)];
+      }
+      if(a == A_NONE && key.control){
+        std::cout<<"key trying without control"<<std::endl;
+        a=keyMap[KeySpec(key,key.shift,false)];
+        if(a == A_NONE && key.shift){
+          std::cout<<"key trying without both"<<std::endl;
+          a=keyMap[KeySpec(key,false,false)];
+        }
+      }
+      std::cout<<"key result "<<a<<std::endl;
+      return a;
     }
     /// Get the action for a keyspec
     /**
