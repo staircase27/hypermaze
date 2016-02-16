@@ -4,6 +4,7 @@
  */
 #include "keymapgui.hh"
 #include "keymap.hh"
+#include <cwctype>
 
 /// Convert a keycode to a string for showing in the gui
 /**
@@ -42,56 +43,56 @@ irr::core::stringw toString(const irr::EKEY_CODE& k){
     case irr::KEY_INSERT: return L"Insert";
     case irr::KEY_DELETE: return L"Delete";
     case irr::KEY_HELP: return L"Help";
-    case irr::KEY_KEY_0: return L"0 key";
-    case irr::KEY_KEY_1: return L"1 key";
-    case irr::KEY_KEY_2: return L"2 key";
-    case irr::KEY_KEY_3: return L"3 key";
-    case irr::KEY_KEY_4: return L"4 key";
-    case irr::KEY_KEY_5: return L"5 key";
-    case irr::KEY_KEY_6: return L"6 key";
-    case irr::KEY_KEY_7: return L"7 key";
-    case irr::KEY_KEY_8: return L"8 key";
-    case irr::KEY_KEY_9: return L"9 key";
-    case irr::KEY_KEY_A: return L"A key";
-    case irr::KEY_KEY_B: return L"B key";
-    case irr::KEY_KEY_C: return L"C key";
-    case irr::KEY_KEY_D: return L"D key";
-    case irr::KEY_KEY_E: return L"E key";
-    case irr::KEY_KEY_F: return L"F key";
-    case irr::KEY_KEY_G: return L"G key";
-    case irr::KEY_KEY_H: return L"H key";
-    case irr::KEY_KEY_I: return L"I key";
-    case irr::KEY_KEY_J: return L"J key";
-    case irr::KEY_KEY_K: return L"K key";
-    case irr::KEY_KEY_L: return L"L key";
-    case irr::KEY_KEY_M: return L"M key";
-    case irr::KEY_KEY_N: return L"N key";
-    case irr::KEY_KEY_O: return L"O key";
-    case irr::KEY_KEY_P: return L"P key";
-    case irr::KEY_KEY_Q: return L"Q key";
-    case irr::KEY_KEY_R: return L"R key";
-    case irr::KEY_KEY_S: return L"S key";
-    case irr::KEY_KEY_T: return L"T key";
-    case irr::KEY_KEY_U: return L"U key";
-    case irr::KEY_KEY_V: return L"V key";
-    case irr::KEY_KEY_W: return L"W key";
-    case irr::KEY_KEY_X: return L"X key";
-    case irr::KEY_KEY_Y: return L"Y key";
-    case irr::KEY_KEY_Z: return L"Z key";
+    case irr::KEY_KEY_0: return L"0";
+    case irr::KEY_KEY_1: return L"1";
+    case irr::KEY_KEY_2: return L"2";
+    case irr::KEY_KEY_3: return L"3";
+    case irr::KEY_KEY_4: return L"4";
+    case irr::KEY_KEY_5: return L"5";
+    case irr::KEY_KEY_6: return L"6";
+    case irr::KEY_KEY_7: return L"7";
+    case irr::KEY_KEY_8: return L"8";
+    case irr::KEY_KEY_9: return L"9";
+    case irr::KEY_KEY_A: return L"a";
+    case irr::KEY_KEY_B: return L"b";
+    case irr::KEY_KEY_C: return L"c";
+    case irr::KEY_KEY_D: return L"d";
+    case irr::KEY_KEY_E: return L"e";
+    case irr::KEY_KEY_F: return L"f";
+    case irr::KEY_KEY_G: return L"g";
+    case irr::KEY_KEY_H: return L"h";
+    case irr::KEY_KEY_I: return L"i";
+    case irr::KEY_KEY_J: return L"j";
+    case irr::KEY_KEY_K: return L"k";
+    case irr::KEY_KEY_L: return L"l";
+    case irr::KEY_KEY_M: return L"m";
+    case irr::KEY_KEY_N: return L"n";
+    case irr::KEY_KEY_O: return L"o";
+    case irr::KEY_KEY_P: return L"p";
+    case irr::KEY_KEY_Q: return L"q";
+    case irr::KEY_KEY_R: return L"r";
+    case irr::KEY_KEY_S: return L"s";
+    case irr::KEY_KEY_T: return L"t";
+    case irr::KEY_KEY_U: return L"u";
+    case irr::KEY_KEY_V: return L"v";
+    case irr::KEY_KEY_W: return L"w";
+    case irr::KEY_KEY_X: return L"x";
+    case irr::KEY_KEY_Y: return L"y";
+    case irr::KEY_KEY_Z: return L"z";
     case irr::KEY_LWIN: return L"Left Windows";
     case irr::KEY_RWIN: return L"Right Windows";
     case irr::KEY_APPS: return L"Applications key";
     case irr::KEY_SLEEP: return L"Computer Sleep key";
-    case irr::KEY_NUMPAD0: return L"Numeric keypad 0 key";
-    case irr::KEY_NUMPAD1: return L"Numeric keypad 1 key";
-    case irr::KEY_NUMPAD2: return L"Numeric keypad 2 key";
-    case irr::KEY_NUMPAD3: return L"Numeric keypad 3 key";
-    case irr::KEY_NUMPAD4: return L"Numeric keypad 4 key";
-    case irr::KEY_NUMPAD5: return L"Numeric keypad 5 key";
-    case irr::KEY_NUMPAD6: return L"Numeric keypad 6 key";
-    case irr::KEY_NUMPAD7: return L"Numeric keypad 7 key";
-    case irr::KEY_NUMPAD8: return L"Numeric keypad 8 key";
-    case irr::KEY_NUMPAD9: return L"Numeric keypad 9 key";
+    case irr::KEY_NUMPAD0: return L"Numeric keypad 0";
+    case irr::KEY_NUMPAD1: return L"Numeric keypad 1";
+    case irr::KEY_NUMPAD2: return L"Numeric keypad 2";
+    case irr::KEY_NUMPAD3: return L"Numeric keypad 3";
+    case irr::KEY_NUMPAD4: return L"Numeric keypad 4";
+    case irr::KEY_NUMPAD5: return L"Numeric keypad 5";
+    case irr::KEY_NUMPAD6: return L"Numeric keypad 6";
+    case irr::KEY_NUMPAD7: return L"Numeric keypad 7";
+    case irr::KEY_NUMPAD8: return L"Numeric keypad 8";
+    case irr::KEY_NUMPAD9: return L"Numeric keypad 9";
     case irr::KEY_MULTIPLY: return L"Multiply key";
     case irr::KEY_ADD: return L"Add key";
     case irr::KEY_SEPARATOR: return L"Separator key";
@@ -130,10 +131,10 @@ irr::core::stringw toString(const irr::EKEY_CODE& k){
     case irr::KEY_RCONTROL: return L"Right Control";
     case irr::KEY_LMENU: return L"Left Alt";
     case irr::KEY_RMENU: return L"Right Alt";
-    case irr::KEY_PLUS: return L"Plus";
-    case irr::KEY_COMMA: return L"Comma";
-    case irr::KEY_MINUS: return L"Minus";
-    case irr::KEY_PERIOD: return L"Period";
+    case irr::KEY_PLUS: return L"+";
+    case irr::KEY_COMMA: return L",";
+    case irr::KEY_MINUS: return L"-";
+    case irr::KEY_PERIOD: return L".";
     case irr::KEY_ATTN: return L"Attn key";
     case irr::KEY_CRSEL: return L"CrSel key";
     case irr::KEY_EXSEL: return L"ExSel key";
@@ -164,7 +165,7 @@ inline irr::core::stringw toString(KeySpec ks){
     s+=L"Ctrl+";
   if(ks.shift)
     s+=L"Shift+";
-  if(ks.chr==0)
+  if(ks.chr==0 || std::iswcntrl(ks.chr))
     s+=toString(ks.key);
   else
     s+=ks.chr;
@@ -199,11 +200,9 @@ bool KeyMapGui::OnEventImpl(const irr::SEvent &event){
       cancelClicked=true;
       return true;
     }else if(editing>=0){
-      KeySpec ks(event.KeyInput.Char,event.KeyInput.Shift,event.KeyInput.Control);
-      if(event.KeyInput.Char==0)
-        ks=KeySpec(event.KeyInput.Key,event.KeyInput.Shift,event.KeyInput.Control);
-      std::cout<<"Setting key "<<KeyMap::actionNames[editing].first<<" "<<ks.key<<" "<<ks.chr<<" "<<ks.shift<<ks.control<<std::endl;
-      KeyMap::Action old=kmtmp->addMapping(ks,KeyMap::actionNames[editing].first).second;
+      KeyMap::Action old=kmtmp->addMapping(
+          KeySpec(event.KeyInput.Key,event.KeyInput.Shift,event.KeyInput.Control,event.KeyInput.Char),
+          KeyMap::actionNames[editing].first).second;
       if(old!=KeyMap::A_NONE)
         for(int i=0;i<KeyMap::A_COUNT-1;++i)
           if(old==KeyMap::actionNames[i].first)

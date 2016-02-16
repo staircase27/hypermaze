@@ -20,27 +20,20 @@ struct KeySpec{
   bool control; ///< is control pressed
   /// Create an empty keyspec that doesn't correspond to any valid key press
   KeySpec():chr(0),key(irr::KEY_KEY_CODES_COUNT),shift(false),control(false){};
-  /// Create a keyspec that corresponds to a key that produces a character
-  /**
-   * @param chr the character produced by the key
-   * @param shift is shift pressed too
-   * @param control is control pressed too
-   */
-  KeySpec(wchar_t chr,bool shift=false,bool control=false):chr(chr),shift(shift),control(control),key(irr::KEY_KEY_CODES_COUNT){};
-  /// Create a keyspec that corresponds to a key that doesn't produce a character
+  /// Create a keyspec
   /**
    * @param key the keycode for the key
    * @param shift is shift pressed too
    * @param control is control pressed too
    */
-  KeySpec(irr::EKEY_CODE key,bool shift=false,bool control=false):key(key),shift(shift),control(control),chr(0){};
+  KeySpec(irr::EKEY_CODE key,bool shift=false,bool control=false,wchar_t chr=0):key(key),shift(shift),control(control),chr(chr){};
   /// Create a keyspec that corresponds to a keyspec but with modifiers changed
   /**
    * @param ks the keyspec to copy
    * @param shift is shift pressed too
    * @param control is control pressed too
    */
-  KeySpec(const KeySpec& ks,bool shift,bool control):chr(ks.chr),shift(shift),control(control),key(ks.key){};
+  KeySpec(const KeySpec& ks,bool shift,bool control):chr(ks.chr),key(ks.key),shift(shift),control(control){};
 
   /// Create a total ordering to enable this to be a key in a map
   /**
@@ -49,10 +42,6 @@ struct KeySpec{
    * @return true if this is considered strictly less than o else false
    */
   inline bool operator<(const KeySpec& o) const{
-    if(chr<o.chr)
-      return true;
-    if(chr>o.chr)
-      return false;
     if(key<o.key)
       return true;
     if(key>o.key)
@@ -72,7 +61,7 @@ struct KeySpec{
    * @return true if the keyspecs are the same
    */
   inline bool operator ==(const KeySpec& o) const{
-    return chr==o.chr&&key==o.key&&shift==o.shift&&control==o.control;
+    return key==o.key&&shift==o.shift&&control==o.control;
   }
 };
 
@@ -146,21 +135,16 @@ class KeyMap{
      * @return The action for key if set or @link KeyMap::A_NONE A_NONE @endlink
      */
     inline Action getTriggeredAction(KeySpec key){
-      std::cout<<"key press "<<key.key<<" "<<key.chr<<" "<<key.shift<<key.control<<std::endl;
       Action a=keyMap[key];
       if(a == A_NONE && key.shift){
-        std::cout<<"key trying without shift"<<std::endl;
         a=keyMap[KeySpec(key,false,key.control)];
       }
       if(a == A_NONE && key.control){
-        std::cout<<"key trying without control"<<std::endl;
         a=keyMap[KeySpec(key,key.shift,false)];
         if(a == A_NONE && key.shift){
-          std::cout<<"key trying without both"<<std::endl;
           a=keyMap[KeySpec(key,false,false)];
         }
       }
-      std::cout<<"key result "<<a<<std::endl;
       return a;
     }
     /// Get the action for a keyspec
