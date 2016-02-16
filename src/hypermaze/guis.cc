@@ -138,7 +138,8 @@ bool MessageGui::OnEventImpl(const irr::SEvent &event){
       okClicked=true;
       return true;
   }
-  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT &&
+      (event.KeyInput.Key==irr::KEY_ESCAPE || event.KeyInput.Key==irr::KEY_RETURN)){
     okClicked=true;
     return true;
   }
@@ -180,7 +181,8 @@ bool ErrorGui::OnEventImpl(const irr::SEvent &event){
       okClicked=true;
       return true;
   }
-  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT &&
+      (event.KeyInput.Key==irr::KEY_ESCAPE && event.KeyInput.Key==irr::KEY_RETURN)){
     okClicked=true;
     return true;
   }
@@ -256,6 +258,10 @@ bool ConfirmGui::OnEventImpl(const irr::SEvent &event){
     cancelClicked=true;
     return true;
   }
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_RETURN){
+    okClicked=true;
+    return true;
+  }
   return false;
 };
 bool ConfirmGui::confirm(irr::IrrlichtDevice* _device,FontManager* _fm,const irr::core::stringw msg,irr::core::stringc detail){
@@ -306,7 +312,7 @@ void ConfirmGui::createGUI(){
   makeElementFromMessage(guienv,getFontManager(),getTopElement(),irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+imsize.Height+10,center.X+size.Width/2,center.Y+size.Height/2-10-32),this->detail);
 
   guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120-120-10,center.Y+size.Height/2-32,center.X+size.Width/2-120-10,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"Ok"));
-  guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel"));
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel");
 
   getDevice()->setWindowCaption(L"Hyper Maze: Confirm");
 }
@@ -333,9 +339,49 @@ bool GenerateGui::OnEventImpl(const irr::SEvent &event){
       return true;
     }
   }
-  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown && event.KeyInput.Key==irr::KEY_ESCAPE){
     cancelClicked=true;
     return true;
+  }
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown && event.KeyInput.Key==irr::KEY_RETURN){
+    okClicked=true;
+    return true;
+  }
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown && event.KeyInput.Key==irr::KEY_UP){
+    irr::IGUIElement* el=getDevice()->getGUIEnvironment()->getFocus();
+    while(el->isSubElement())
+      el=el->getParent();
+    if(el==xSize){
+      if(xSize->getValue()<xSize->getMax())
+        xSize->setValue(xSize->getValue()+1);
+      return true;
+    }else if(el==ySize){
+      if(ySize->getValue()<ySize->getMax())
+        ySize->setValue(ySize->getValue()+1);
+      return true;
+    }else  if(el==zSize){
+      if(zSize->getValue()<zSize->getMax())
+        zSize->setValue(zSize->getValue()+1);
+      return true;
+    }
+  }
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown && event.KeyInput.Key==irr::KEY_DOWN){
+    irr::IGUIElement* el=getDevice()->getGUIEnvironment()->getFocus();
+    while(el->isSubElement())
+      el=el->getParent();
+    if(el==xSize){
+      if(xSize->getValue()>xSize->getMin())
+        xSize->setValue(xSize->getValue()-1);
+      return true;
+    }else if(el==ySize){
+      if(ySize->getValue()>ySize->getMin())
+        ySize->setValue(ySize->getValue()-1);
+      return true;
+    }else  if(el==zSize){
+      if(zSize->getValue()>zSize->getMin())
+        zSize->setValue(zSize->getValue()-1);
+      return true;
+    }
   }
   return false;
 };
@@ -587,15 +633,47 @@ bool WinGui::OnEventImpl(const irr::SEvent &event){
       return false;
     }
     if(event.GUIEvent.EventType == irr::gui::EGET_EDITBOX_ENTER){
-      okClicked=true;
+      if(!nextLevel.a.isnull())
+        nextClicked=true;
+      else
+        okClicked=true;
       return true;
     }
   }
-  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE &&
-      (keyblock==0||getDevice()->getTimer()->getTime()>keyblock)){
-    okClicked=true;
-    keyblock=0;
-    return true;
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown &&
+     (keyblock==0||getDevice()->getTimer()->getTime()>keyblock)){
+    if(event.KeyInput.Key==irr::KEY_ESCAPE){
+      okClicked=true;
+      keyblock=0;
+      return true;
+    }else if(event.KeyInput.Key==irr::KEY_RETURN){
+      if(!nextLevel.a.isnull())
+        nextClicked=true;
+      else
+        okClicked=true;
+      keyblock=0;
+      return true;
+    }else if(event.KeyInput.Key==irr::KEY_KEY_N && !nextLevel.a.isnull()){
+      nextClicked=true;
+      keyblock=0;
+      return true;
+    }else if(event.KeyInput.Key==irr::KEY_KEY_B){
+      okClicked=true;
+      keyblock=0;
+      return true;
+    }else if(event.KeyInput.Key==irr::KEY_KEY_G){
+      generateClicked=true;
+      keyblock=0;
+      return true;
+    }else if(event.KeyInput.Key==irr::KEY_KEY_L){
+      loadClicked=true;
+      keyblock=0;
+      return true;
+    }else if(event.KeyInput.Key==irr::KEY_KEY_S){
+      saveClicked=true;
+      keyblock=0;
+      return true;
+    }
   }
   return false;
 };
@@ -629,10 +707,10 @@ void WinGui::createGUI(){
   text->addText(L"\nWhat would you like to do now?");
   text->drop();
 
-  irr::IGUIButton* def=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-320,center.Y+size.Height/2-32-32-10,center.X+size.Width/2-130,center.Y+size.Height/2-32-10),getTopElement(),GUI_ID_OK_BUTTON,L"Back to Current Maze");
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32-32-10,center.X+size.Width/2,center.Y+size.Height/2-32-10),getTopElement(),GUI_ID_SAVE_BUTTON,L"Save Maze");
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_LOAD_BUTTON,L"Load a Maze");
-  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-320,center.Y+size.Height/2-32,center.X+size.Width/2-130,center.Y+size.Height/2),getTopElement(),GUI_ID_GENERATE_BUTTON,L"Generate New Maze");
+  irr::IGUIButton* def=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-320,center.Y+size.Height/2-32-32-10,center.X+size.Width/2-130,center.Y+size.Height/2-32-10),getTopElement(),GUI_ID_OK_BUTTON,L"Back to Current Maze (b)");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32-32-10,center.X+size.Width/2,center.Y+size.Height/2-32-10),getTopElement(),GUI_ID_SAVE_BUTTON,L"Save Maze (s)");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_LOAD_BUTTON,L"Load a Maze (l)");
+  guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-320,center.Y+size.Height/2-32,center.X+size.Width/2-130,center.Y+size.Height/2),getTopElement(),GUI_ID_GENERATE_BUTTON,L"Generate New Maze (g)");
 
   if(!nextLevel.a.isnull()){
     irr::stringw label(L"Next Level");
@@ -640,6 +718,7 @@ void WinGui::createGUI(){
       label.append(L": ");
       label.append(irr::stringw(&*nextLevel.b));
     }
+    label.append(L" (n)");
     def=guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-600,center.Y+size.Height/2-32,center.X+size.Width/2-330,center.Y+size.Height/2),getTopElement(),GUI_ID_NEXT_BUTTON,label.c_str());
     def->setToolTipText(irr::stringw(&*nextLevel.a).c_str());
   }

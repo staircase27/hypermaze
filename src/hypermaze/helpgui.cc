@@ -22,11 +22,18 @@ bool HelpGui::OnEventImpl(const irr::SEvent &event){
       return true;
     }
   }
-  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE &&
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown &&
       (keyblock==0||getDevice()->getTimer()->getTime()>keyblock)){
-    okClicked=true;
-    keyblock=0;
-    return true;
+    if(event.KeyInput.Key == irr::KEY_ESCAPE || event.KeyInput.Key == irr::KEY_RETURN){
+      okClicked=true;
+      keyblock=0;
+      return true;
+    }else if(event.KeyInput.Key == irr::KEY_KEY_E){
+      keyMapClicked=true;
+      keyblock=0;
+      return true;
+
+    }
   }
   return false;
 };
@@ -66,7 +73,7 @@ void HelpGui::createGUI(){
   text->drop();
 
   guienv->addButton(irr::core::rect<irr::s32>(center.X-75,center.Y+size.Height/2-32-32-10,
-          center.X+75,center.Y+size.Height/2-32-10),getTopElement(),GUI_ID_KEY_MAP_BUTTON,L"Edit Key Map");
+          center.X+75,center.Y+size.Height/2-32-10),getTopElement(),GUI_ID_KEY_MAP_BUTTON,L"Edit Key Map (e)");
   irr::gui::IGUIButton* ok=guienv->addButton(
       irr::core::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,
           center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"OK");

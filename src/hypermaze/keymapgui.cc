@@ -216,6 +216,16 @@ bool KeyMapGui::OnEventImpl(const irr::SEvent &event){
     }else if(event.KeyInput.Key==irr::KEY_RETURN){
       okClicked=true;
       return true;
+    }else if(event.KeyInput.Key==irr::KEY_SPACE){
+      if(editing>=0)
+        table->setCellText(editing,1,toString(kmtmp->getKeySpec(KeyMap::actionNames[editing].first)));
+      editing=table->getSelected();
+      table->setCellText(editing,1,L"Press New Key");
+      return true;
+    }else if(event.KeyInput.Key==irr::KEY_UP && table->getSelected()>0){
+      table->setSelected(table->getSelected()-1);
+    }else if(event.KeyInput.Key==irr::KEY_DOWN && table->getSelected()+1<table->getRowCount()){
+      table->setSelected(table->getSelected()+1);
     }
   }
   return false;
@@ -255,6 +265,7 @@ void KeyMapGui::createGUI(){
     table->setCellText(i,0,KeyMap::actionNames[i].second);
     table->setCellText(i,1,toString(kmtmp->getKeySpec(KeyMap::actionNames[i].first)).c_str());
   }
+  table->setSelected(0);
 
   guienv->addButton(irr::core::rect<irr::s32>(center.X+size.Width/2-210,center.Y+size.Height/2-32,center.X+size.Width/2-100,center.Y+size.Height/2),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel");
   guienv->addButton(irr::core::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"Apply");
