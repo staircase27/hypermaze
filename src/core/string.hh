@@ -395,16 +395,25 @@ class StringPlay{
     bool canMove(Dirn d);
 
   private:
+    ///Internal function to move the string in the specified direction
+    /**
+     * @note this will do the move even if it isn't valid. Always called via
+     * tryMove (and doMove) or undo
+     * @param d the direction to move in
+     * @return a pair containing the score change for the move and the length of the string after the move
+     */
+    std::pair<int,int> doMoveI(Dirn d);
+
     ///Move the string in the specified direction
     /**
      * @note this will do the move even if it isn't valid. Always called via
      * tryMove or undo
+     * This does the correct extra logic needed when this is a new move not an undo
+     * and uses doMoveI for anything that is common to both cases.
+     * This also stores the move in the undo history.
      * @param d the direction to move in
-     * @param undo if this move is an undo. This is used so we update the score
-     * in the correct direction. Also if this move isn't an undo it adds the
-     * move to the history
      */
-    void doMove(Dirn d,bool undo);
+    void doMove(Dirn d);
 
   public:
     /// Undo a previous move
@@ -492,7 +501,7 @@ class StringEdit{
 inline std::ostream& operator<<(std::ostream& o,SP<String> s){
   o<<"<String ";
   for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it)
-    o<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";
+    o<<it->pos<<"-"<<(it->selected?"*":" ")<<it->d<<(it->selected?"*":" ")<<"-";
   return o<<s->endPos<<">";
 }
 
@@ -506,7 +515,7 @@ inline std::ostream& operator<<(std::ostream& o,SP<String> s){
 inline std::ostream& operator<<(std::ostream& o,const StringPlay& s){
   o<<"<StringPlay ";
   for(std::list<StringElement>::iterator it=s.s->route.begin();it!=s.s->route.end();++it)
-    o<<it->pos<<"-"<<(it->selected?"":"*")<<it->d<<(it->selected?"":"*")<<"-";
+    o<<it->pos<<"-"<<(it->selected?"*":" ")<<it->d<<(it->selected?"*":" ")<<"-";
   return o<<s.s->endPos<<">";
 }
 #endif

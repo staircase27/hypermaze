@@ -859,7 +859,7 @@ bool edit(ActionMessage& e){
         }
         cout<<"please enter the new tag for the paragraph \""<<e.m.paragraphs[i].b<<"\": ";
         string s;
-	cin.ignore(100,'\n');
+        cin.ignore(100,'\n');
         getline(cin,s);
         cout<<"\""<<s<<"\""<<endl;
         if(s.length()<=0)
@@ -887,7 +887,7 @@ bool edit(ActionMessage& e){
         }
         cout<<"please enter new text for the paragraph: ";
         string s;
-	cin.ignore(100,'\n');
+        cin.ignore(100,'\n');
         getline(cin,s);
         if(s.length()<=0)
           break;
@@ -965,7 +965,7 @@ bool edit(ActionWinMessage& e){
         }
         cout<<"please enter the new tag for the paragraph \""<<e.m.paragraphs[i].b<<"\": ";
         string s;
-	cin.ignore(100,'\n');
+        cin.ignore(100,'\n');
         getline(cin,s);
         cout<<"\""<<s<<"\""<<endl;
         if(s.length()<=0)
@@ -993,7 +993,7 @@ bool edit(ActionWinMessage& e){
         }
         cout<<"please enter new text for the paragraph: ";
         string s;
-	cin.ignore(100,'\n');
+        cin.ignore(100,'\n');
         getline(cin,s);
         if(s.length()<=0)
           break;
@@ -1024,7 +1024,7 @@ bool edit(ActionWinNextLevel& e){
       case 'u':{
         cout<<"please enter the new url: ";
         string s;
-	cin.ignore(100,'\n');
+        cin.ignore(100,'\n');
         getline(cin,s);
         if(s.length()<=0)
           break;
@@ -1038,7 +1038,7 @@ bool edit(ActionWinNextLevel& e){
       case 'n':{
         cout<<"please enter the new name: ";
         string s;
-	cin.ignore(100,'\n');
+        cin.ignore(100,'\n');
         getline(cin,s);
         if(s.length()<=0)
           break;
@@ -1401,7 +1401,7 @@ void edit(){
       case 's':{
         char* tmp=new char[256];
         cout<<"Current filename is "<<fname<<"please enter the filename or leave blank to use same name: ";
-	cin.ignore(100,'\n');
+        cin.ignore(100,'\n');
         cin.getline(tmp,256);
         if(strlen(tmp)!=0){
           delete[] fname;

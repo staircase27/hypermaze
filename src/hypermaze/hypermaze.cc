@@ -197,9 +197,9 @@ int main(int argc,char* argv[]){
     irr::IFileSystem* fs=device->getFileSystem();
     const irr::fschar_t* path=
     #ifdef __IRR_WCHAR_FILESYSTEM
-	 _wgetenv("HYPERMAZE_DATA_DIR");
+        _wgetenv("HYPERMAZE_DATA_DIR");
     #else
-         getenv("HYPERMAZE_DATA_DIR");
+        getenv("HYPERMAZE_DATA_DIR");
     #endif
     if(!path)
       path=getDataPath();
@@ -247,7 +247,7 @@ int main(int argc,char* argv[]){
   }
 
   addCameraSceneNodeMy(smgr,device->getCursorControl(),0,irr::vector3df(0,0,0),
-      irr::vector3df(0,0,-300),-500.,-100.,-3.,100.);
+      irr::vector3df(0,0,-300),-500.,-100.,-3.);
 
   irr::ILightSceneNode* light1 =
                 smgr->addLightSceneNode(0, irr::vector3df(-100,100,-100),

@@ -1,3 +1,7 @@
+/**
+ * @file keymap.cc
+ * @brief The implementation of keymap.hh
+ */
 #include "keymap.hh"
 
 namespace irr{
@@ -6,6 +10,14 @@ namespace irr{
 }
 using namespace std;
 
+/// Convert a multi byte character to a wide character
+/**
+ * Wrapper round mbtowc that handles null bytes and returns a size of 1
+ * @param pwc pointer to a wchar_t object to place the character in
+ * @param pmb a multi byte string to read a single wide character from
+ * @param max the maximum amount of chars to process from pmb
+ * @return the number of characters to process
+ */
 inline int mbtowc0( wchar_t * pwc, const char * pmb, size_t max ){
   if(*pmb==0){
     *pwc=0;
@@ -160,31 +172,31 @@ const pair<KeyMap::Action,Dirn> KeyMap::moveActions[6]={
       pair<KeyMap::Action,Dirn>(KeyMap::A_MOVE_BACK,BACK)};
 
 const pair<KeyMap::Action,const wchar_t*> KeyMap::actionNames[A_COUNT-1]={
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_GENERATE,L"A_GENERATE"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_LOAD,L"A_LOAD"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SAVE,L"A_SAVE"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_CONF,L"A_CONF"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_UP,L"A_MOVE_UP"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_DOWN,L"A_MOVE_DOWN"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_LEFT,L"A_MOVE_LEFT"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_RIGHT,L"A_MOVE_RIGHT"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_FORWARD,L"A_MOVE_FORWARD"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_BACK,L"A_MOVE_BACK"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLIDE_START_OUT,L"A_SLIDE_START_OUT"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLIDE_START_IN,L"A_SLIDE_START_IN"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLIDE_END_IN,L"A_SLIDE_END_IN"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLIDE_END_OUT,L"A_SLIDE_END_OUT"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_UP_IN,L"A_SLICE_UP_IN"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_UP_OUT,L"A_SLICE_UP_OUT"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_DOWN_IN,L"A_SLICE_DOWN_IN"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_DOWN_OUT,L"A_SLICE_DOWN_OUT"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_LEFT_IN,L"A_SLICE_LEFT_IN"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_LEFT_OUT,L"A_SLICE_LEFT_OUT"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_RIGHT_IN,L"A_SLICE_RIGHT_IN"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_RIGHT_OUT,L"A_SLICE_RIGHT_OUT"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_FORWARD_IN,L"A_SLICE_FORWARD_IN"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_FORWARD_OUT,L"A_SLICE_FORWARD_OUT"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_BACK_IN,L"A_SLICE_BACK_IN"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_BACK_OUT,L"A_SLICE_BACK_OUT"),
-      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_UNDO,L"A_UNDO")};
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_GENERATE,L"Generate Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_LOAD,L"Load Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SAVE,L"Save Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_CONF,L"Show Help"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_UP,L"Move String Up"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_DOWN,L"Move String Down"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_LEFT,L"Move String Left"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_RIGHT,L"Move String Right"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_FORWARD,L"Move String Forwards"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_MOVE_BACK,L"Move String Backwards"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLIDE_START_OUT,L"Extend Start of Selection Outwards"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLIDE_START_IN,L"Shrink Start of Selection Inwards"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLIDE_END_IN,L"Shrink End of Selection Inwards"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLIDE_END_OUT,L"Extend End of Selection Outwards"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_UP_IN,L"Hide Top of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_UP_OUT,L"Show Top of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_DOWN_IN,L"Hide Bottom of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_DOWN_OUT,L"Show Bottom of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_LEFT_IN,L"Hide Left of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_LEFT_OUT,L"Show Left of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_RIGHT_IN,L"Hide Right of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_RIGHT_OUT,L"Show Right of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_FORWARD_IN,L"Hide Front of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_FORWARD_OUT,L"Show Front of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_BACK_IN,L"Hide Back of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_SLICE_BACK_OUT,L"Show Back of Maze"),
+      pair<KeyMap::Action,const wchar_t*>(KeyMap::A_UNDO,L"Undo")};
 

@@ -1,3 +1,7 @@
+/**
+ * @file irrcurl.cc
+ * @brief Implementation of irrcurl.hh
+ */
 #include "irrcurl.hh"
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,13 +10,21 @@
 #ifdef USE_CURL
 #include <curl/curl.h>
 
+/// A container for a chunk of memory
 struct MemoryStruct {
-  char *memory;
-  size_t size;
+  char *memory;///< The actual memory
+  size_t size;///< The size of the memory chunk
 };
 
-static size_t
-WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+/// Callback used to write memory into the provided MemoryStruct
+/**
+ * @param contents the new contents
+ * @param size the size of a unit of the data
+ * @param nmemb the number of data unit
+ * @param userp the pointer to the MemoryStruct to store the data in
+ * @return the amount of data processed. will always be size*nmemb
+ */
+static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
@@ -96,8 +108,21 @@ irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,const char* url){
 #endif
 
 irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const char* url){
-  irr::core::stringw urlw(url);
-  return createAndOpen(fs,urlw.c_str());
+  if(!url)
+    return 0;
+  const char* c=url;
+  bool isurl=false;
+  while((!isurl)&&*c!=0&&*c!='/'&&*c!='\\'){
+    if(*c==':' && *(c+1)=='/' && *(c+2)=='/')
+      isurl=true;
+    ++c;
+  }
+  if(isurl)
+    return createAndOpenURL(fs,url);
+  else{
+    irr::core::stringw urlw(url);
+    return fs->createAndOpenFile(urlw.c_str());
+  }
 }
 
 irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const wchar_t* url){

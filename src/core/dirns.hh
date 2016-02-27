@@ -181,9 +181,15 @@ inline Dirn perpendicular(Dirn d,Dirn e){
  * @param d the Dirn to print.
  * @return the stream o
  */
+#if 1
+inline std::ostream& operator<<(std::ostream& o,Dirn d){
+  return o<<"<Dirn "<<(int)d<<">";
+}
+#else
 inline std::ostream& operator<<(std::ostream& o,Dirn d){
   return o<<"<Dirn "<<(int)d<<": "<<to_vector(d)<<">";
 }
+#endif
 #endif
 
 #endif

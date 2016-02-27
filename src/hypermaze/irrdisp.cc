@@ -1,7 +1,7 @@
 #include "irrdisp.hh"
 #include "controller.hh"
 #include "../core/script.hh"
-#include "gui.hh"
+#include "guis.hh"
 
 #ifdef IOSTREAM
 #include <iostream>

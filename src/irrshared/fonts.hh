@@ -1,6 +1,7 @@
 /**
  * @file fonts.hh
  * @brief The font management system for hypermaze
+ *
  * Fonts are stored in the irrlicht/fonts/ directory in the form of xml files.
  * See FontManager::load for details. For irrlicht version < 1.9
  * a work round is needed as they can't load fonts from virtual filesystems correctly.
@@ -11,7 +12,7 @@
 #include "irrlicht.h"
 
 #ifndef FONTMANAGER_HH
-#define	FONTMANAGER_HH
+#define FONTMANAGER_HH
 
 #if IRRLICHT_VERSION_MAJOR<=1 || IRRLICHT_VERSION_MINOR<=9
 #define IRRFONTFIX
@@ -59,10 +60,10 @@ class FontFamily: public FontSet{
 
   public:
     /**
-     * @inheritDoc
+     * @copydoc FontSet::resolve
      * Resolves to itself as it's already a Font Family
      */
-    FontFamily* resolve(FontManager&){
+    FontFamily* resolve(FontManager& fm){
       return this;
     }
     /// Get the path for the font requested.
@@ -80,8 +81,8 @@ class FontFamily: public FontSet{
     /**
      * @param fontname the path to the new font
      * @param size the size of the new font
-     * @param if the new font is bold
-     * @param if the new font is italic
+     * @param bold if the new font is bold
+     * @param italic if the new font is italic
      * @return true if a new font was actually added
      */
     bool addFont(irr::io::path fontname,int size,bool bold=false,bool italic=false);
@@ -102,7 +103,7 @@ class VirtualFontSet:public FontSet{
     VirtualFontSet(irr::core::stringc name):realname(name){}
     /// Use the font manager to resolve the pointed to name to a concrete font.
     /**
-     * @param the font manager to resolve this alias using
+     * @param m the font manager to resolve this alias using
      * @return the FontFamily this resolves to or Null
      */
     FontFamily* resolve(FontManager& m);
@@ -173,5 +174,5 @@ class FontManager {
 
 };
 
-#endif	/* FONTMANAGER_HH */
+#endif /* FONTMANAGER_HH */
 

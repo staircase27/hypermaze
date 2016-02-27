@@ -1,4 +1,4 @@
-#include "gui.hh"
+#include "guis.hh"
 #include "helpgui.hh"
 #include "controller.hh"
 #include "irrdisp.hh"
@@ -9,13 +9,9 @@ namespace irr{
 
     bool KeyboardController::OnEvent(const irr::SEvent& event)
     {
-      // Remember whether each key is down or up
       if (event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown){
         KeyMap::Action a;
-        if(event.KeyInput.Char==0)
-          a=map.getAction(event.KeyInput.Key);
-        else
-          a=map.getAction(event.KeyInput.Char);
+        a=map.getTriggeredAction(KeySpec(event.KeyInput.Key,event.KeyInput.Shift,event.KeyInput.Control));
         if(a!=KeyMap::A_NONE){
           actionTriggered[a]=true;
           return true;

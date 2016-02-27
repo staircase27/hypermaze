@@ -130,14 +130,14 @@ bool StringMatcher::match(SP<const String> s,StringMatcherCallback<ConstStringPo
     SPA<Pair<SP<ConstStringPointer> > > groups){
   if(groups.isnull()){
     groups=SPA<Pair<SP<ConstStringPointer> > >(group_count);
-	}
+  }
   return match<const String,ConstStringPointer>(s,groups,&cb);
 }
 bool StringMatcher::match(SP<String> s,StringMatcherCallback<StringPointer>& cb,
     SPA<Pair<SP<StringPointer> > >groups){
   if(groups.isnull()){
     groups=SPA<Pair<SP<StringPointer> > >(group_count);
-	}
+  }
   return match<String,StringPointer>(s,groups,&cb);
 }
 
@@ -155,14 +155,14 @@ bool StringMatcher::matchStep(SP<STRING> s,POINTER p,SPA<PatternMatch<POINTER> >
   if(level==count){
     if(p==s->end()){
       //valid so store in group if it's defined
-			if(!groups.isnull()){
-				for(int i=0;i<group_count;++i){
-				  groups[i].a=matches[this->groups[i].a].start;
-				  groups[i].b=matches[this->groups[i].b].end;
-				}
-			  if(cb)
-			    cb->process(groups);
-			}
+      if(!groups.isnull()){
+        for(int i=0;i<group_count;++i){
+          groups[i].a=matches[this->groups[i].a].start;
+          groups[i].b=matches[this->groups[i].b].end;
+        }
+        if(cb)
+          cb->process(groups);
+      }
       return true;
     }else{
       return false;
@@ -187,8 +187,8 @@ bool StringMatcher::matchStep(SP<STRING> s,POINTER p,SPA<PatternMatch<POINTER> >
     }
     //while i is still in valid range
     while(i>=pt.min && i<=pt.max){
-	    if(!matches.isnull())
-			  matches[level].end=SP<POINTER>(new POINTER(p));
+      if(!matches.isnull())
+        matches[level].end=SP<POINTER>(new POINTER(p));
       //see if we can match the next group
       match|=matchStep(s,p,matches,level+1,groups,cb);
 
@@ -519,10 +519,10 @@ void ActionSetStringRoute::doCommon(ScriptResponse& r,SP<String> s){
     for(int i=0;i<ranges.groupCount();++i){
       se.setStringSegment(*groups[i].a,*groups[i].b,count,route);
     }
-	  r.stringChanged=true;
-	  if(!all)
-	    break;
-	}
+    r.stringChanged=true;
+    if(!all)
+      break;
+  }
 }
 IOResult read(HypIStream& s,ActionSetStringRoute& a){
   IOResult r=read(s,a.ranges);
