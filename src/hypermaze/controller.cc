@@ -163,7 +163,7 @@ namespace irr{
               alloweddirns|=to_mask(*d);
           pd.sp.startExtendedMove();
         }
-        Dirn dir;
+        Dirn dir=FORWARD;
         int beststeps=0;
         irr::f32 smallest=10000000;
         irr::f32 realsmallest=10000000;

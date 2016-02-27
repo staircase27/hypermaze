@@ -173,8 +173,8 @@ int getDriveList(irr::fschar_t*& drivespecs){
   int strscount=0, strslen=0, buflen=255;
   delete[] path;
   drivespecs=path=new irr::fschar_t[buflen];
-  irr::fschar_t* drives=new irr::fschar_t[buflen];
   #ifdef WIN32
+    irr::fschar_t* drives=new irr::fschar_t[buflen];
     #ifdef _IRR_WCHAR_FILESYSTEM
       strslen=GetLogicalDriveStringsW(buflen,drives);
     #else
@@ -184,12 +184,12 @@ int getDriveList(irr::fschar_t*& drivespecs){
       buflen=strslen+1;
       delete[] drives;
       drives=new irr::fschar_t[buflen];
+      #ifdef _IRR_WCHAR_FILESYSTEM
+        strslen=GetLogicalDriveStringsW(buflen,drives);
+      #else
+        strslen=GetLogicalDriveStringsA(buflen,drives);
+      #endif
     }
-    #ifdef _IRR_WCHAR_FILESYSTEM
-      strslen=GetLogicalDriveStringsW(buflen,drives);
-    #else
-      strslen=GetLogicalDriveStringsA(buflen,drives);
-    #endif
     if(strslen>=0){
       buflen*=4;
       delete[] path;
@@ -257,6 +257,7 @@ int getDriveList(irr::fschar_t*& drivespecs){
         ++strscount;
       }
     }
+    delete[] drives;
   #endif
   if(strscount>0){
     path=new irr::fschar_t[strslen+1];
