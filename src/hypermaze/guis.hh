@@ -13,7 +13,7 @@ class Maze;
 class PuzzleDisplay;
 
 /// A gui to display a message
-class MessageGui: BaseGui{
+class MessageGui: private BaseGui{
 
   Message m; ///< The message to display
 
@@ -25,7 +25,7 @@ class MessageGui: BaseGui{
     GUI_ID_OK_BUTTON=201, ///< The ID for the OK button
   };
 
-  protected:
+  private:
     /// @copydoc BaseGui::OnEventImpl
     virtual bool OnEventImpl(const irr::SEvent &event);
     /// @copydoc BaseGui::createGUI
@@ -47,7 +47,7 @@ class MessageGui: BaseGui{
 };
 
 /// A gui to display an error message
-class ErrorGui: BaseGui{
+class ErrorGui: private BaseGui{
 
   Message detail; ///< The error message details
   irr::core::stringw msg; ///< The summary error message to show
@@ -60,7 +60,7 @@ class ErrorGui: BaseGui{
     GUI_ID_OK_BUTTON=201, ///< The ID for the OK button
   };
 
-  protected:
+  private:
     /// @copydoc BaseGui::OnEventImpl
     virtual bool OnEventImpl(const irr::SEvent &event);
     /// @copydoc BaseGui::createGUI
@@ -92,7 +92,7 @@ class ErrorGui: BaseGui{
 };
 
 /// A gui to confirm an action with the user
-class ConfirmGui: BaseGui{
+class ConfirmGui: private BaseGui{
 
   Message detail; ///< The error message details
   irr::core::stringw msg; ///< The summary error message to show
@@ -107,7 +107,7 @@ class ConfirmGui: BaseGui{
     GUI_ID_CANCEL_BUTTON, ///< ID for the cancel button
   };
 
-  protected:
+  private:
     /// @copydoc BaseGui::OnEventImpl
     virtual bool OnEventImpl(const irr::SEvent &event);
     /// @copydoc BaseGui::createGUI
@@ -139,7 +139,7 @@ class ConfirmGui: BaseGui{
 };
 
 /// Gui to generate a new maze
-class GenerateGui: BaseGui{
+class GenerateGui: private BaseGui{
 
   bool okClicked; ///< Has ok been clicked yet?
   bool cancelClicked; ///< Has cancel been clicked yet?
@@ -158,7 +158,7 @@ class GenerateGui: BaseGui{
     GUI_ID_CANCEL_BUTTON, ///< ID for the cancel button
   };
 
-  protected:
+  private:
     /// @copydoc BaseGui::OnEventImpl
     virtual bool OnEventImpl(const irr::SEvent &event);
     /// @copydoc BaseGui::createGUI
@@ -177,7 +177,7 @@ class GenerateGui: BaseGui{
 };
 
 /// Gui to save a maze
-class SaveGui: BaseGui{
+class SaveGui: private BaseGui{
 
   bool okClicked; ///< Has ok been clicked yet?
   bool cancelClicked; ///< Has cancel been clicked yet?
@@ -195,7 +195,7 @@ class SaveGui: BaseGui{
     GUI_ID_CANCEL_BUTTON, ///< ID for the cancel button
   };
 
-  protected:
+  private:
     /// @copydoc BaseGui::OnEventImpl
     virtual bool OnEventImpl(const irr::SEvent &event);
     /// @copydoc BaseGui::createGUI
@@ -214,7 +214,7 @@ class SaveGui: BaseGui{
 };
 
 /// Gui to load a maze from file
-class OpenGui: BaseGui{
+class OpenGui: private BaseGui{
 
   bool okClicked; ///< Has ok been clicked yet?
   bool cancelClicked; ///< Has cancel been clicked yet?
@@ -232,7 +232,7 @@ class OpenGui: BaseGui{
     GUI_ID_CANCEL_BUTTON, ///< ID for the cancel button
   };
 
-  protected:
+  private:
     /// @copydoc BaseGui::OnEventImpl
     virtual bool OnEventImpl(const irr::SEvent &event);
     /// @copydoc BaseGui::createGUI
@@ -251,7 +251,7 @@ class OpenGui: BaseGui{
 };
 
 /// Gui to show you have won and options for what to do next
-class WinGui: BaseGui{
+class WinGui: private BaseGui{
 
   bool okClicked, ///< Has ok been clicked yet?
        nextClicked, ///< Has next been clicked yet?
@@ -277,7 +277,7 @@ class WinGui: BaseGui{
     GUI_ID_NEXT_BUTTON ///< ID for the next button
   };
 
-  protected:
+  private:
     /// @copydoc BaseGui::OnEventImpl
     virtual bool OnEventImpl(const irr::SEvent &event);
     /// @copydoc BaseGui::createGUI

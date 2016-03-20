@@ -8,7 +8,7 @@
 class KeyMap;
 
 /// A gui to show some help and give access to the keymap
-class HelpGui: BaseGui{
+class HelpGui: private BaseGui{
 
   bool okClicked, ///< has the ok button been clicked yet
        keyMapClicked; ///< has the keymap button been clicked yet
@@ -24,7 +24,7 @@ class HelpGui: BaseGui{
     GUI_ID_KEY_MAP_BUTTON ///< The ID for the keymap button
   };
 
-  protected:
+  private:
     /// @copydoc BaseGui::OnEventImpl
     virtual bool OnEventImpl(const irr::SEvent &event);
     /// @copydoc BaseGui::createGUI

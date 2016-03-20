@@ -8,7 +8,7 @@
 class KeyMap;
 
 /// A gui to edit the keymap
-class KeyMapGui: BaseGui{
+class KeyMapGui: private BaseGui{
 
   KeyMap* kmtmp; ///< A temporary keymap to store any edits in
   KeyMap* kmp; ///< They keymap we are editing (only changed if ok is clicked)
@@ -26,7 +26,7 @@ class KeyMapGui: BaseGui{
     GUI_ID_CANCEL_BUTTON, ///< ID for the cancel button
   };
 
-  protected:
+  private:
     /// @copydoc BaseGui::OnEventImpl
     virtual bool OnEventImpl(const irr::SEvent &event);
     /// @copydoc BaseGui::createGUI
