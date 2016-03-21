@@ -107,17 +107,31 @@ irr::io::IReadFile* createAndOpenURL(irr::io::IFileSystem* fs,const char* url){
 }
 #endif
 
+bool isurl(const wchar_t* url){
+  if(!url)
+    return false;
+  while(*url!=0&&*url!='/'&&*url!='\\'){
+    if(*url==':' && *(url+1)=='/' && *(url+2)=='/')
+      return true;
+    ++url;
+  }
+  return false;
+}
+bool isurl(const char* url){
+  if(!url)
+    return false;
+  while(*url!=0&&*url!='/'&&*url!='\\'){
+    if(*url==':' && *(url+1)=='/' && *(url+2)=='/')
+      return true;
+    ++url;
+  }
+  return false;
+}
+
 irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const char* url){
   if(!url)
     return 0;
-  const char* c=url;
-  bool isurl=false;
-  while((!isurl)&&*c!=0&&*c!='/'&&*c!='\\'){
-    if(*c==':' && *(c+1)=='/' && *(c+2)=='/')
-      isurl=true;
-    ++c;
-  }
-  if(isurl)
+  if(isurl(url))
     return createAndOpenURL(fs,url);
   else{
     irr::core::stringw urlw(url);
@@ -128,14 +142,7 @@ irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const char* url){
 irr::io::IReadFile* createAndOpen(irr::io::IFileSystem* fs,const wchar_t* url){
   if(!url)
     return 0;
-  const wchar_t* c=url;
-  bool isurl=false;
-  while((!isurl)&&*c!=0&&*c!=L'/'&&*c!=L'\\'){
-    if(*c==L':' && *(c+1)==L'/' && *(c+2)==L'/')
-      isurl=true;
-    ++c;
-  }
-  if(isurl)
+  if(isurl(url))
     return createAndOpenURL(fs,url);
   else
     return fs->createAndOpenFile(url);

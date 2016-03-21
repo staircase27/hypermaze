@@ -3,6 +3,7 @@
  * @brief The implementation of opensavegui.hh
  */
 #include "opensavegui.hh"
+#include "irrcurl.hh"
 
 namespace irr{
   using namespace core;
@@ -67,7 +68,7 @@ bool OpenSaveGui::run(){
   if(okClicked){
     getTopElement()->setVisible(false);
     const wchar_t* file=fileField->getText();
-    E_PATH_TYPE type=getDevice()->getFileSystem()->existFile(file)?FILE:ABSENT;
+    E_PATH_TYPE type=isurl(file)?URL:getDevice()->getFileSystem()->existFile(file)?FILE:ABSENT;
     switch(this->select(file,type)){
       case PROCESS:
         if(this->process(file))
