@@ -254,12 +254,16 @@ bool ConfirmGui::OnEventImpl(const irr::SEvent &event){
       return true;
     }
   }
-  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE){
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_ESCAPE&&
+     (keyblock==0||getDevice()->getTimer()->getTime()>keyblock)){
     cancelClicked=true;
+    keyblock=0;
     return true;
   }
-  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_RETURN){
+  if(event.EventType == irr::EET_KEY_INPUT_EVENT && event.KeyInput.Key==irr::KEY_RETURN &&
+     (keyblock==0||getDevice()->getTimer()->getTime()>keyblock)){
     okClicked=true;
+    keyblock=0;
     return true;
   }
   return false;
@@ -315,6 +319,7 @@ void ConfirmGui::createGUI(){
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel");
 
   getDevice()->setWindowCaption(L"Hyper Maze: Confirm");
+  keyblock=getDevice()->getTimer()->getTime()+500;
 }
 bool ConfirmGui::run(){
   if(okClicked || cancelClicked){
@@ -438,6 +443,7 @@ bool GenerateGui::run(){
   return true;
 }
 
+#ifndef USEOPENSAVE
 bool SaveGui::OnEventImpl(const irr::SEvent &event){
   if(event.EventType == irr::EET_GUI_EVENT){
     if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
@@ -529,7 +535,6 @@ bool SaveGui::run(){
   return true;
 }
 
-
 bool OpenGui::OnEventImpl(const irr::SEvent &event){
   if(event.EventType == irr::EET_GUI_EVENT){
     if(event.GUIEvent.EventType==irr::gui::EGET_BUTTON_CLICKED){
@@ -609,6 +614,80 @@ bool OpenGui::run(){
   }
   return true;
 }
+#else
+bool SaveGui::save(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd){
+  this->pd=&pd;
+  return this->display(_device,_fm);
+}
+
+SaveGui::E_SELECTION_TYPE SaveGui::select(const wchar_t* file,SaveGui::E_PATH_TYPE type){
+  if(type==FOLDER)
+    return CHANGEDIR;
+  else if(type==FILE){
+    ConfirmGui cg;
+    bool overwrite = cg.confirm(getDevice(),getFontManager(),L"File already exists.","Do you want to overwrite the existing file? Existing contents will be lost.");
+    if(!overwrite)
+      return INVALID;
+    return PROCESS;
+  }else if(type==ABSENT)
+    return PROCESS;
+  else
+    return INVALID;
+}
+
+bool SaveGui::process(const wchar_t* file){
+  irr::IWriteFile* out=getDevice()->getFileSystem()->createAndWriteFile(file);
+  if(!out){
+    ErrorGui eg;
+    eg.error(getDevice(),getFontManager(),L"Error Opening File","File can't be opened for writing.");
+    return false;
+  }
+  IrrHypOStream os(out);
+  out->drop();
+  bool status=write(os,pd->m);
+  os.setNextSpace("\n\n");
+  status&=write(os,pd->sc);
+  if(!status){
+    ErrorGui eg;
+    eg.error(getDevice(),getFontManager(),L"Error writing maze to file","There was an error while writing to the file. The file may only include a partial or broken level. Please try again.");
+  }
+  return true;
+}
+
+bool OpenGui::open(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd){
+  this->pd=&pd;
+  return this->display(_device,_fm);
+}
+OpenGui::E_SELECTION_TYPE OpenGui::select(const wchar_t* file,OpenGui::E_PATH_TYPE type){
+  if(type==FOLDER)
+    return CHANGEDIR;
+  else if(type==ABSENT){
+    ErrorGui eg;
+    eg.error(getDevice(),getFontManager(),L"Error Opening File","File doesn't exist.");
+    return INVALID;
+  }else
+    return PROCESS;
+}
+bool OpenGui::process(const wchar_t* file){
+    irr::IReadFile* in=createAndOpen(getDevice()->getFileSystem(),file);
+    if(!in){
+      ErrorGui eg;
+      eg.error(getDevice(),getFontManager(),L"Error Opening File","File exists but can't be opened.");
+      eg.error(getDevice(),getFontManager(),L"Error Opening File","File doesn't exist.");
+      return false;
+    }
+    IrrHypIStream is(in);
+    in->drop();
+    bool status = read(is,pd->m).ok;
+    pd->sc=Script();// reset it to blank as a default
+    status &= read(is,pd->sc).ok;
+    if(!status){
+      ErrorGui eg;
+      eg.error(getDevice(),getFontManager(),L"Error Reading File","The level may have been loaded but it may have errors. If it not correct please try again or get a new copy of the level.");
+    }
+    return true;
+}
+#endif // USEOPENSAVE
 
 bool WinGui::OnEventImpl(const irr::SEvent &event){
   if(event.EventType == irr::EET_GUI_EVENT){

@@ -25,6 +25,7 @@ struct KeySpec{
    * @param key the keycode for the key
    * @param shift is shift pressed too
    * @param control is control pressed too
+   * @param chr the character the key produces for display use
    */
   KeySpec(irr::EKEY_CODE key,bool shift=false,bool control=false,wchar_t chr=0):key(key),shift(shift),control(control),chr(chr){};
   /// Create a keyspec that corresponds to a keyspec but with modifiers changed

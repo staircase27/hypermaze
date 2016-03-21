@@ -51,7 +51,9 @@ set(hypermaze_SRCS
     src/shared/irrhypioimp.cc
     src/shared/irrhypioimp.hh
     src/shared/sound.cc
-    src/shared/sound.hh)
+    src/shared/sound.hh
+    src/irrshared/opensavegui.cc
+    src/irrshared/opensavegui.hh)
 
 add_executable(hypermaze ${hypermaze_SRCS})
 

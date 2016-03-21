@@ -7,6 +7,9 @@
 #include "../core/script.hh"
 #include "../irrshared/gui.hh"
 
+#include "../irrshared/opensavegui.hh"
+#define USEOPENSAVE
+
 #ifndef GUIS_HH_INC
 #define GUIS_HH_INC
 class Maze;
@@ -99,6 +102,7 @@ class ConfirmGui: private BaseGui{
 
   bool okClicked; ///< Has ok been clicked yet?
   bool cancelClicked; ///< Has cancel been clicked yet?
+  irr::u32 keyblock; ///< A timer to block input so a key can't repeat trigger the same action
 
   /// An enum for button IDs
   enum
@@ -176,6 +180,7 @@ class GenerateGui: private BaseGui{
     bool generate(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd);
 };
 
+#ifndef USEOPENSAVE
 /// Gui to save a maze
 class SaveGui: private BaseGui{
 
@@ -249,6 +254,71 @@ class OpenGui: private BaseGui{
      */
     bool open(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd);
 };
+#else
+/// Gui to save a maze
+class SaveGui: private OpenSaveGui{
+
+  /// The puzzle display object to get the maze and script from
+  PuzzleDisplay* pd;
+
+  private:
+    /// @copydoc OpenSaveGui::getButtonName
+    const wchar_t* getButtonName(){
+      return L"Save";
+    }
+    /// @copydoc OpenSaveGui::getWindowTitle
+    const wchar_t* getWindowTitle(){
+      return L"HyperMaze: Save";
+    }
+    /// @copydoc OpenSaveGui::select
+    /**
+     * This changes into directories, confirms if the user wants to replace an existing file
+     * and processes urls and absent paths
+     */
+    E_SELECTION_TYPE select(const wchar_t* file,E_PATH_TYPE type);
+    /// @copydoc OpenSaveGui::process
+    /**
+     * This saves the maze to the file specified and shows an error message if anything failed
+     */
+    bool process(const wchar_t* file);
+  public:
+    /// Show the save gui
+    /**
+     * @param _device the irrlicht device
+     * @param _fm the font manager to use for fonts
+     * @param pd the puzzle display to get the maze and script from
+     * @return true if the maze was saved successfully
+     */
+    bool save(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd);
+};
+
+/// Gui to load a maze from file
+class OpenGui: private OpenSaveGui{
+  /// The puzzle display object to get the maze and script from
+  PuzzleDisplay* pd;
+
+  private:
+    /// @copydoc OpenSaveGui::select
+    /**
+     * This changes into directories, opens files and urls and shows an error for absent paths
+     */
+    E_SELECTION_TYPE select(const wchar_t* file,E_PATH_TYPE type);
+    /// @copydoc OpenSaveGui::process
+    /**
+     * This loads the maze from the file specified and shows an error message if anything failed
+     */
+    bool process(const wchar_t* file);
+  public:
+    /// show the open gui
+    /**
+     * @param _device the irrlicht device
+     * @param _fm the font manager to use for fonts
+     * @param pd the puzzle display to store the loaded maze and script into
+     * @return true if a new maze was loaded
+     */
+    bool open(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd);
+};
+#endif // USEOPENSAVE
 
 /// Gui to show you have won and options for what to do next
 class WinGui: private BaseGui{
