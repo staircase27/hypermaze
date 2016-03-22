@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 include(CheckCXXSourceCompiles)
+include(CMakeDependentOption)
 
 ########### next target ###############
 
@@ -110,17 +111,11 @@ if(WIN32)
 
 endif(WIN32)
 
-function(hypermaze_find_package package foundvar libsvar includesvar defn)
-
-  find_package(${package} ${ARGV5})
-
-  if(${foundvar})
+function(hypermaze_add_package libsvar includesvar)
 
     target_link_libraries(hypermaze ${${libsvar}})
 
     target_include_directories(hypermaze PUBLIC ${${includesvar}})
-
-    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS ${defn})
 
     if(WIN32)
 
@@ -134,17 +129,46 @@ function(hypermaze_find_package package foundvar libsvar includesvar defn)
 
     endif(WIN32)
 
+endfunction()  
+
+function(hypermaze_find_required_package package foundvar libsvar includesvar defn)
+
+  find_package(${package} REQUIRED)
+
+  if(${foundvar})
+
+    hypermaze_add_package(${libsvar} ${includesvar})
+    
+    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS ${defn})
+
   endif(${foundvar})
 
 endfunction()
 
-hypermaze_find_package(Irrlicht IRRLICHT_FOUND IRRLICHT_LIBRARIES IRRLICHT_INCLUDE_DIRS IRRLICHT REQUIRED)
+function(hypermaze_find_optional_packages option defn description default count)
+  math(EXPR count "${count} * 4 + 1")
+  set(foundvars)
+  foreach(index RANGE 5 ${count} 4)
+    math(EXPR indexfoundvar "${index} + 1")
+    find_package(${ARGV${index}})
+    list(APPEND foundvars ${ARGV${indexfoundvar}})
+  endforeach(index)
+  CMAKE_DEPENDENT_OPTION(${option} ${description} ${default} ${foundvars} OFF)
+  if(${option})
+    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS ${defn})
+    foreach(index RANGE 5 ${count} 4)
+      math(EXPR indexlibsvar "${index} + 2")
+      math(EXPR indexincludesvar "${index} +3")
+      hypermaze_add_package(${ARGV${indexlibsvar}} ${ARGV${indexincludesvar}})
+    endforeach(index)
+  endif(${option})
+endfunction()
 
-hypermaze_find_package(ALUT ALUT_FOUND ALUT_LIBRARIES ALUT_INCLUDE_DIR ALUT)
+hypermaze_find_required_package(Irrlicht IRRLICHT_FOUND IRRLICHT_LIBRARIES IRRLICHT_INCLUDE_DIRS IRRLICHT)
 
-hypermaze_find_package(OpenAL OPENAL_FOUND OPENAL_LIBRARY OPENAL_INCLUDE_DIR OPENAL)
+hypermaze_find_optional_packages(USE_OPENAL USE_OPENAL "Use OpenAL library for sound" ON 2 ALUT ALUT_FOUND ALUT_LIBRARIES ALUT_INCLUDE_DIR OpenAL  OPENAL_FOUND OPENAL_LIBRARY OPENAL_INCLUDE) 
 
-hypermaze_find_package(CURL CURL_FOUND CURL_LIBRARIES CURL_INCLUDE_DIR USE_CURL)
+hypermaze_find_optional_packages(USE_CURL USE_CURL "Use the curl library for url opening (enables url opening feature)" ON 1 CURL CURL_FOUND CURL_LIBRARIES CURL_INCLUDE_DIR)
 
 if(WIN32)
   CHECK_CXX_SOURCE_COMPILES( "
@@ -227,7 +251,7 @@ add_custom_target(all-full DEPENDS hypermaze scriptedit levelgen)
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-file(RELATIVE_PATH PROJECT_SOURCE_RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+#file(RELATIVE_PATH PROJECT_SOURCE_RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 file(GLOB_RECURSE ALL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hh)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/DoxyfileNOMACRO.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
 add_custom_target(doc
@@ -256,8 +280,8 @@ set(CPACK_PACKAGE_VERSION_PATCH "0")
 
 set(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "Irrlicht")
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS "ON")
 
-set(CPACK_SOURCE_IGNORE_FILES /\\\\.git/;;/build/;.*~$;/\\\\..*;/doc/doxygen/.+/)
+set(CPACK_SOURCE_IGNORE_FILES /\\\\.git/;;/build/;.*~$;/\\\\..*)
 
 include(CPack)

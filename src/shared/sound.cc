@@ -4,7 +4,7 @@
  */
 #include "sound.hh"
 
-#ifdef OPENAL
+#ifdef USE_OPENAL
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alut.h>
