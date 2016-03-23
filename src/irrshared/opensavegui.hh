@@ -103,7 +103,7 @@ class OpenSaveGui : private BaseGui
      * @param folder is the file a folder
      * @return true if the file should be shown
      */
-    virtual bool filterfiles(const wchar_t* file,bool folder){};
+	virtual bool filterfiles(const wchar_t* file, bool folder) { return true; };
 
     /// Show the open/save gui
     /**

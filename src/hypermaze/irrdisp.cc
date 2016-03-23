@@ -13,6 +13,9 @@ namespace irr{
   using namespace scene;
 }
 
+const double MazeDisplay::wall = 5;
+const double MazeDisplay::gap = 20;
+
 void MazeDisplay::init(Maze& m,NodeGen* ng,irr::vector3df center){
   for(set<Dirn>::iterator d=dirns.begin();d!=dirns.end();++d){
     limits[*d].first.first=limits[*d].first.second=0;

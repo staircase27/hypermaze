@@ -82,10 +82,10 @@ void addMessageToElement(GUIFormattedText* text,FontManager* fm,const Message& m
           ++end;
         }
         if(len>0){
-          if(len==1)
-              colour==(colour&0xf) | ((colour&0xf)<<4);
-          else if(len==2)
-            colour==(colour&0xff) | ((colour&0xff)<<8) | ((colour&0xff)<<16) | 0xff000000;
+          if (len == 1)
+            colour = (colour & 0xf) | ((colour & 0xf) << 4);
+          if(len<=2)
+            colour=(colour&0xff) | ((colour&0xff)<<8) | ((colour&0xff)<<16) | 0xff000000;
           else{
             if(len<=5){
               // [aa]rgb to aarrggbb (aa being only a is handled later)

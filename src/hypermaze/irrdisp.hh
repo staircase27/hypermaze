@@ -57,8 +57,8 @@ class MazeDisplay{
   std::map<Dirn,std::vector<std::vector<VisibleCounter*>*>*> nodes;
   std::set<Dirn> dirns;
   public:
-    static const double wall=5;
-    static const double gap=20;
+    static const double wall;
+    static const double gap;
 
     void init(Maze& m,NodeGen* ng,irr::core::vector3df center=irr::core::vector3df(0,0,0));
 

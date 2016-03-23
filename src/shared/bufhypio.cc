@@ -109,6 +109,7 @@ bool BufHypOStream::addSpace(){
     writeToSink();
   memcopy(buf+end,space,l);
   end+=l;
+  return true;
 }
 
 bool BufHypOStream::write(const int& _i,const int& _base){

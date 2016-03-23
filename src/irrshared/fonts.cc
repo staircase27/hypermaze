@@ -82,7 +82,7 @@ inline bool parsebool(const wchar_t* str){
   return wcscmp(L"",str)!=0&&wcscmp(L"0",str)!=0&&wcscmp(L"false",str)!=0;
 }
 
-FontManager::FontManager(irr::io::IFileSystem* fs,irr::gui::IGUIEnvironment* gui):fs(fs),gui(gui){
+FontManager::FontManager(irr::io::IFileSystem* fs,irr::gui::IGUIEnvironment* gui):fs(fs),gui(gui),fonts(){
   fs->grab();gui->grab();
 }
 

@@ -127,6 +127,7 @@ function(hypermaze_add_package libsvar includesvar)
 
       endforeach()
 
+
     endif(WIN32)
 
 endfunction()  
@@ -261,6 +262,8 @@ COMMENT "Generating API documentation with Doxygen" VERBATIM DEPENDS ${CMAKE_CUR
 endif(DOXYGEN_FOUND)
 
 ########### cpack ###############
+
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${BINDIR})
 
 INCLUDE(InstallRequiredSystemLibraries)
 

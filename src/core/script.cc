@@ -14,7 +14,7 @@ template <class T>
 bool StringElementCondition::matches(T el){
   if((selectionCondition&2)==0&&(((selectionCondition&1)==1)!=el->selected))
     return false;
-  if(dirnsCondition&to_mask(el->d)==0)
+  if((dirnsCondition&to_mask(el->d))==0)
     return false;
   bool match=xrange_count==0;
   for(int i=0;i<xrange_count&&!match;++i)
@@ -317,6 +317,7 @@ IOResult read(HypIStream& s,SP<Condition>& c){
       return createAndRead<ConditionStringPattern>(s,c);
     default:
       c=Condition::defaultvalue;
+      return r;
   }
 }
 bool write(HypOStream& s,const SP<const Condition>& c){
@@ -441,6 +442,7 @@ IOResult read(HypIStream& s,SP<Action>& a){
       return createAndRead<ActionSetStringRoute>(s,a);
     default:
       a=Action::defaultvalue;
+      return r;
   }
 }
 bool write(HypOStream& s,const SP<const Action>& a){
