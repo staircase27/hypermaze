@@ -174,6 +174,7 @@ bool StringMatcher::matchStep(SP<STRING> s,POINTER p,SPA<PatternMatch<POINTER> >
     if(!matches.isnull())
       matches[level].start=SP<POINTER>(new POINTER(p));
     int i=0;
+    // move p to point to element after end of current sections first match
     while(i<pt.min){
       if(p==s->end()||!sec.matches(p))
         return false;
@@ -185,8 +186,9 @@ bool StringMatcher::matchStep(SP<STRING> s,POINTER p,SPA<PatternMatch<POINTER> >
         ++i;++p;
       }
     }
-    //while i is still in valid range
-    while(i>=pt.min && i<=pt.max){
+
+    //will check if can actually loop in the loop
+    while(true){
       if(!matches.isnull())
         matches[level].end=SP<POINTER>(new POINTER(p));
       //see if we can match the next group
@@ -197,12 +199,15 @@ bool StringMatcher::matchStep(SP<STRING> s,POINTER p,SPA<PatternMatch<POINTER> >
         return true;
 
       if(pt.greedy){
-        //stepping back. don't need to check if valid as was checked while searching forward]
-        --i;--p;
-      }else{
-        if(p==s->end() || !sec.matches(p))
+        //stepping back. just need to check if we go back to far as already checked they are valid.
+        if (i<=pt.min)
           return match;
-        ++i;++p;
+        --i; --p;
+      }else{
+        //stepping on. need to check everything as not yet checked.
+        if(i>= pt.max || p==s->end() || !sec.matches(p))
+          return match;
+        ++i; ++p;
       }
     }
     return match;

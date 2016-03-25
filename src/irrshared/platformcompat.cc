@@ -36,7 +36,7 @@ const irr::fschar_t* getDataPath(){
   #else
     #ifdef WIN32
       delete[] path;
-      irr::fschar_t* path=new irr::fschar_t[MAX_PATH];
+      path=new irr::fschar_t[MAX_PATH];
       #ifdef _IRR_WCHAR_FILESYSTEM
         int len=GetModuleFileNameW(NULL,path,MAX_PATH-1);
       #else
@@ -78,8 +78,8 @@ const irr::fschar_t* getUserConfigPath(){
     return configpath;
   #else
   #ifdef WIN32
-    delete[] path;
     #ifdef WIN32_USE_KNOWNFOLDER
+      delete[] path;
       path=0;
       wchar_t* winpath=0;
       if (SHGetKnownFolderPath(FOLDERID_RoamingAppData,0,0,winpath)){
@@ -97,6 +97,7 @@ const irr::fschar_t* getUserConfigPath(){
         CoTaskMemFree(winpath);
     }
     #else
+      delete[] path;
       path=new irr::fschar_t[MAX_PATH+12];
       #ifdef _IRR_WCHAR_FILESYSTEM
         if(SHGetFolderPathW(0,CSIDL_APPDATA,0,SHGFP_TYPE_CURRENT,path)!=S_OK){
@@ -132,8 +133,8 @@ const irr::fschar_t* getSystemConfigPath(){
     return IRRSLIT(SYSTEMCONFDIR);
   #else
   #ifdef WIN32
-    delete[] path;
     #ifdef WIN32_USE_KNOWNFOLDER
+      delete[] path;
       path=0;
       wchar_t* winpath=0;
       if (SHGetKnownFolderPath(FOLDERID_ProgramData,0,0,winpath)){
@@ -151,6 +152,7 @@ const irr::fschar_t* getSystemConfigPath(){
         CoTaskMemFree(winpath);
     }
     #else
+      delete[] path;
       path=new irr::fschar_t[MAX_PATH+12];
       #ifdef _IRR_WCHAR_FILESYSTEM
         if(SHGetFolderPathW(0,CSIDL_COMMON_APPDATA,0,SHGFP_TYPE_CURRENT,path)!=S_OK){
