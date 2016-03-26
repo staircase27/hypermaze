@@ -47,8 +47,8 @@ class MyNodeGen:public NodeGen{
       node->setMaterialTexture( 0, string);
       node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
       irr::IMeshSceneNode* washer = smgr->addSphereSceneNode(2,16,node);
-      washer->setScale(irr::vector3df(0.01,1,1));
-      washer->setPosition(irr::vector3df(-(0.5-0.01),0,0));
+      washer->setScale(irr::vector3df(0.01f,1,1));
+      washer->setPosition(irr::vector3df(-(0.5f-0.01f),0,0));
       return node;
     }
 
@@ -91,7 +91,7 @@ class IrrlichtMusicSource: public MusicSource{
   irr::IFileSystem* fs;
   irr::stringc folder;
   irr::IFileList* files;
-  int i;
+  unsigned int i;
   public:
     IrrlichtMusicSource(irr::IFileSystem* fs):fs(fs),i(-1),folder("irrlicht/music/"){
       fs->grab();
@@ -102,15 +102,15 @@ class IrrlichtMusicSource: public MusicSource{
       }else{
         files=fs->createFileList();
         bool hasfiles=false;
-        for(int i=0;(!hasfiles)&&i<files->getFileCount();++i)
-          if(!files->isDirectory(i))
+        for(unsigned int j=0;(!hasfiles)&&i<files->getFileCount();++i)
+          if(!files->isDirectory(j))
             hasfiles=true;
         if(!hasfiles){
           files->drop();
           files=fs->createEmptyFileList(folder,false,false);
         }
       }
-      fs->changeWorkingDirectoryTo(folder);
+      fs->changeWorkingDirectoryTo(cwd);
       fs->setFileListSystem(type);
     };
     virtual ~IrrlichtMusicSource(){

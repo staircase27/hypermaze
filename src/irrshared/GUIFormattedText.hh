@@ -92,7 +92,7 @@ class GUIFormattedText:public irr::gui::IGUIElement{
     /**
      * @return the number of paragraphs
      */
-    virtual int paragraphCount();
+    virtual unsigned int paragraphCount();
 
     /// Set the override front for a specified paragraph
     /**

@@ -94,7 +94,7 @@ namespace irr{
       irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
       irr::vector3df dir=con(to_vector(*slice));
       irr::vector3df ldir=ray.getVector();
-      irr::f32 d=(sliceStart-ray.start).dotProduct(dir*ldir.getLengthSQ()-ldir*dir.dotProduct(ldir))/(dir.dotProduct(ldir)*dir.dotProduct(ldir)-dir.getLengthSQ()*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap)*2-sliced;
+      double d=(sliceStart-ray.start).dotProduct(dir*ldir.getLengthSQ()-ldir*dir.dotProduct(ldir))/(dir.dotProduct(ldir)*dir.dotProduct(ldir)-dir.getLengthSQ()*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap)*2-sliced;
       while(d>1&&pd.hideSide(*slice,false)){
         d--;
         sliced++;
@@ -161,15 +161,15 @@ namespace irr{
         }
         Dirn dir=FORWARD;
         int beststeps=0;
-        irr::f32 smallest=10000000;
-        irr::f32 realsmallest=10000000;
+        double smallest=10000000;
+        double realsmallest=10000000;
         for(Dirn *d=allDirns;d!=allDirns+6;++d){
-          irr::f32 steps=
+          double steps=
               (ldir.getLengthSQ()*con(to_vector(*d)).dotProduct(startPoint-ray.start)-ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(startPoint-ray.start))/
               (ldir.dotProduct(con(to_vector(*d)))*ldir.dotProduct(con(to_vector(*d)))-ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap);
           if(steps<=0.8)
               continue;
-          irr::f32 screendist=mousePos.getDistanceFromSQ(collMan->getScreenCoordinatesFrom3DPosition(startPoint+steps*con(to_vector(*d))));
+          double screendist=mousePos.getDistanceFromSQ(collMan->getScreenCoordinatesFrom3DPosition(startPoint+steps*con(to_vector(*d))));
           if(screendist<smallest){
             if(screendist<realsmallest)
               realsmallest=screendist;
@@ -260,7 +260,7 @@ namespace irr{
       if(string){
         irr::line3d<irr::f32> ray=collMan->getRayFromScreenCoordinates(mousePos);
         irr::vector3df ldir=ray.getVector();
-        irr::f32 weight=con(to_vector(LEFT)).dotProduct(
+        double weight=con(to_vector(LEFT)).dotProduct(
             (ldir.dotProduct(startPoint-ray.start)*ldir-(startPoint-ray.start)*ldir.getLengthSQ())/(MazeDisplay::wall+MazeDisplay::gap))/
             (ldir.getLengthSQ()-ldir.dotProduct(con(to_vector(LEFT)))*ldir.dotProduct(con(to_vector(LEFT))))-moved;
 

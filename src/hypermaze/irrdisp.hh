@@ -14,7 +14,7 @@
 #define IRRDISP_HH_INC
 
 inline irr::core::vector3df con(Vector v){
-  return irr::core::vector3df(-v.X,v.Y,v.Z);
+  return irr::core::vector3df(-(irr::f32)v.X, (irr::f32)v.Y, (irr::f32)v.Z);
 }
 
 inline irr::core::vector3df remSgn(irr::core::vector3df v){

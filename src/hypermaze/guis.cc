@@ -410,19 +410,19 @@ void GenerateGui::createGUI(){
       center.X+size.Width/2,center.Y-5-32-10),true,getTopElement());
   xSize->setDecimalPlaces(0);
   xSize->setRange(3,75);
-  xSize->setValue(pd->m.size().X);
+  xSize->setValue((irr::f32)pd->m.size().X);
 
   ySize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,
       center.X+size.Width/2,center.Y-5),true,getTopElement());
   ySize->setDecimalPlaces(0);
   ySize->setRange(3,75);
-  ySize->setValue(pd->m.size().Y);
+  ySize->setValue((irr::f32)pd->m.size().Y);
 
   zSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y+5,
       center.X+size.Width/2,center.Y+5+32),true,getTopElement());
   zSize->setDecimalPlaces(0);
   zSize->setRange(3,75);
-  zSize->setValue(pd->m.size().Z);
+  zSize->setValue((irr::f32)pd->m.size().Z);
 
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+5+32+10,center.X+size.Width/2-100,center.Y+5+32+10+32),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel");
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+5+32+10,center.X+size.Width/2,center.Y+5+32+10+32),getTopElement(),GUI_ID_OK_BUTTON,L"Generate");
@@ -436,7 +436,7 @@ bool GenerateGui::run(){
   if(cancelClicked)
     return false;
   if(okClicked){
-    pd->m=::generate<RandLimitMazeGenHalf<Hunter<RandOrderWalker<DiagonalWalker> > > >(Vector(xSize->getValue(),ySize->getValue(),zSize->getValue()));
+    pd->m=::generate<RandLimitMazeGenHalf<Hunter<RandOrderWalker<DiagonalWalker> > > >(Vector((irr::s32)xSize->getValue(), (irr::s32)ySize->getValue(), (irr::s32)zSize->getValue()));
     pd->sc=Script();
     return false;
   }

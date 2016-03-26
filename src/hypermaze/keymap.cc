@@ -49,14 +49,14 @@ irr::u32 KeyMap::doparse(char* data,irr::u32 length){
     while(irr::isspace(*data)){++data;}
     if(data>=end) return totalused;
 
-    ks.shift=(bool)irr::strtol10(data,&tmp);
+    ks.shift=irr::strtol10(data,&tmp)!=0;
     data+=tmp-data;
     if(data>=end) return totalused;
 
     while(irr::isspace(*data)){++data;}
     if(data>=end) return totalused;
 
-    ks.control=(bool)irr::strtol10(data,&tmp);
+    ks.control=irr::strtol10(data,&tmp)!=0;
     data+=tmp-data;
     if(data>=end) return totalused;
 

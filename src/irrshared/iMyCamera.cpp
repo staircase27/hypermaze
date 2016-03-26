@@ -126,7 +126,7 @@ public:
 private:
 
     bool indrag; ///< true if we are in a drag (the camera will pan when onAnimate is called)
-    int mouseWheel; ///< The number of mouse wheel ticks scrolled
+    f32 mouseWheel; ///< The number of mouse wheel ticks scrolled
     bool fine; ///< if the movements should be fine (i.e. space is help down)
 
     gui::ICursorControl *cursorControl; ///< The cursor control used to get mouse position
@@ -342,7 +342,7 @@ irr::scene::ICameraSceneNode* addCameraSceneNodeMy(
             target, id, makeActive);
     if (node)
     {
-        node->setFOV(1.256637061*0.6);
+        node->setFOV(1.256637061f*0.6f);
         scene::ISceneNodeAnimator* anm = new CSceneNodeAnimatorCameraMy(cursorControl,
             rotateSpeedX, rotateSpeedY, zoomSpeed);
 

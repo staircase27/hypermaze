@@ -23,7 +23,7 @@ bool write(HypOStream& s,const char*& str,const bool& quote){
 IOResult read(HypIStream& s,bool& b){
   int tmp;
   IOResult r=read(s,tmp,0);
-  b=(bool)tmp;
+  b=tmp!=0;
   return r;
 }
 bool write(HypOStream& s,const bool& b){

@@ -67,7 +67,7 @@ void GUIFormattedText::setText( const wchar_t* text){
 int GUIFormattedText::addText(const wchar_t* text,int i){
   if(i<0)
     i+=paragraphs.size()+1;
-  if(i<0 || i>paragraphs.size())
+  if(i<0 || (unsigned int)i>paragraphs.size())
     return -1;
   irr::IGUIStaticText* par=Environment->addStaticText(text,
       irr::rect<irr::s32>(irr::position2di(0,0),RelativeRect.getSize()),false,true,this,-1,false);
@@ -88,7 +88,7 @@ int GUIFormattedText::addText(const wchar_t* text,int i){
 void GUIFormattedText::removeText(int i){
   if(i<0)
     i+=paragraphs.size();
-  if(i<0 || i>=paragraphs.size())
+  if(i<0 || (unsigned int)i>=paragraphs.size())
     return;
   irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin()+i;
   (*it)->remove();
@@ -96,14 +96,14 @@ void GUIFormattedText::removeText(int i){
   layoutNeeded=true;
 }
 
-int GUIFormattedText::paragraphCount(){
+unsigned int GUIFormattedText::paragraphCount(){
   return paragraphs.size();
 }
 
 void GUIFormattedText::setOverrideFont(int i,irr::IGUIFont* font){
   if(i<0)
     i+=paragraphs.size();
-  if(i<0 || i>=paragraphs.size())
+  if(i<0 || (unsigned int)i>=paragraphs.size())
     return;
   irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin()+i;
   (*it)->setOverrideFont(font);
@@ -129,7 +129,7 @@ void GUIFormattedText::setAllOverrideFont(irr::IGUIFont * font){
 irr::IGUIFont* GUIFormattedText::getOverrideFont(int i){
   if(i<0)
     i+=paragraphs.size();
-  if(i<0 || i>=paragraphs.size())
+  if(i<0 || (unsigned int)i>=paragraphs.size())
     return 0;
   irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin()+i;
   return (*it)->getOverrideFont();
@@ -161,7 +161,7 @@ irr::IGUIFont* GUIFormattedText::getDefaultActiveFont(){
 void GUIFormattedText::setOverrideColor (int i,irr::video::SColor color){
   if(i<0)
     i+=paragraphs.size();
-  if(i<0 || i>=paragraphs.size())
+  if(i<0 || (unsigned int)i>=paragraphs.size())
     return;
   irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin()+i;
   (*it)->setOverrideColor(color);
@@ -170,7 +170,7 @@ void GUIFormattedText::setOverrideColor (int i,irr::video::SColor color){
 void GUIFormattedText::enableOverrideColor (int i,bool enable){
   if(i<0)
     i+=paragraphs.size();
-  if(i<0 || i>=paragraphs.size())
+  if(i<0 || (unsigned int)i>=paragraphs.size())
     return;
   irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin()+i;
   (*it)->enableOverrideColor(enable);
@@ -179,7 +179,7 @@ void GUIFormattedText::enableOverrideColor (int i,bool enable){
 bool GUIFormattedText::isOverrideColorEnabled (int i){
   if(i<0)
     i+=paragraphs.size();
-  if(i<0 || i>=paragraphs.size())
+  if(i<0 || (unsigned int)i>=paragraphs.size())
     return false;
   irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin()+i;
   return (*it)->isOverrideColorEnabled();
@@ -189,7 +189,7 @@ bool GUIFormattedText::isOverrideColorEnabled (int i){
 irr::video::SColor GUIFormattedText::getOverrideColor (int i) const{
   if(i<0)
     i+=paragraphs.size();
-  if(i<0 || i>=paragraphs.size())
+  if(i<0 || (unsigned int)i>=paragraphs.size())
     return irr::video::SColor(101,255,255,255);
   irr::list<irr::IGUIStaticText*>::ConstIterator it=paragraphs.begin()+i;
   return (*it)->getOverrideColor();
@@ -199,7 +199,7 @@ irr::video::SColor GUIFormattedText::getOverrideColor (int i) const{
 void GUIFormattedText::setTextAlignment(int i,irr::EGUI_ALIGNMENT horizontal, irr::EGUI_ALIGNMENT vertical){
   if(i<0)
     i+=paragraphs.size();
-  if(i<0 || i>=paragraphs.size())
+  if(i<0 || (unsigned int)i>=paragraphs.size())
     return;
   irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin()+i;
   (*it)->setTextAlignment(horizontal,vertical);
