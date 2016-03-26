@@ -4,6 +4,9 @@
  * Currently contains implementations for Win32 and Linux/Unix
  */
 #include "platformcompat.hh"
+#ifdef UNIX
+#undef WIN32
+#endif
 #ifdef WIN32
 #define WINVER 0x0601
 #define _WIN32_WINNT 0x0601

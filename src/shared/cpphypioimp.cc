@@ -3,6 +3,7 @@
  * @brief Implementation of cpphypioimp.hh
  */
 #include "cpphypioimp.hh"
+#include <string>
 using namespace std;
 
 #ifdef IOSTREAM
@@ -16,9 +17,10 @@ IOResult CPPHypIStream::read(int& i, const int& base){
     if(c!='0'){
       is>>dec;
     }else{
-      s>>c;
+      is>>c;
       c=is.peek();
       if(c=='x'||c=='X'){
+        is>>c;
         is>>hex;
       }else{
         is>>oct;
