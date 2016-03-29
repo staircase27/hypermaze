@@ -58,42 +58,34 @@ set(hypermaze_SRCS
 
 add_executable(hypermaze ${hypermaze_SRCS})
 
-if(WIN32)
+if(UNIX)
+   message(STATUS "On linux so using linux setup")
+   set(BINDIR "bin")
+   set(DATADIR "share/hypermaze")
+   string(REGEX MATCH "^/usr(/|$)" INSTALL_IN_USR "${CMAKE_INSTALL_PREFIX}")
+   if(INSTALL_IN_USR)
+     set(SYSTEMCONFIGDIR "/etc/hypermaze/")
+   else(INSTALL_IN_USR)
+     GET_FILENAME_COMPONENT(SYSTEMCONFIGDIR "${CMAKE_INSTALL_PREFIX}/etc/hypermaze" ABSOLUTE)
+   endif(INSTALL_IN_USR)
+   set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM>)
+   set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS UNIX DATADIR="${CMAKE_INSTALL_PREFIX}/${DATADIR}" SYSTEMCONFDIR="${SYSTEMCONFDIR}")
+   set(CPACK_SET_DESTDIR ON)
+
+elseif(WIN32)
    message(STATUS "On windows so using all in one directory setup")
-
    set(BINDIR ".")
-
    set(DATADIR ".")
-
    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS WIN32)
 
 elseif(APPLE)
   message(FATAL_ERROR "I don't have a mac and so haven't setup the code locations\
  for macs. If you have a mac and know where things are normally installed please contact me.")
 
-else(WIN32) # on unix like as not windows or apple
+else(UNIX)
+  message(FATAL_ERROR "Unknown system type (not unix win32 or apple) so please contact me.")
 
-   message(STATUS "On linux so using linux setup")
-
-   set(BINDIR "bin")
-
-   set(DATADIR "share/hypermaze")
-
-   string(REGEX MATCH "^/usr(/|$)" INSTALL_IN_USR "${CMAKE_INSTALL_PREFIX}")
-
-   if(INSTALL_IN_USR)
-     set(SYSTEMCONFIGDIR "/etc/hypermaze/")
-   else(INSTALL_IN_USR)
-     GET_FILENAME_COMPONENT(SYSTEMCONFIGDIR "${CMAKE_INSTALL_PREFIX}/etc/hypermaze" ABSOLUTE)
-   endif(INSTALL_IN_USR)
-
-   set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM>)
-
-   set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS UNIX DATADIR="${CMAKE_INSTALL_PREFIX}/${DATADIR}" SYSTEMCONFDIR="${SYSTEMCONFDIR}")
-
-   set(CPACK_SET_DESTDIR ON)
-
-endif(WIN32)
+endif(UNIX)
 
 set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM> $<$<CONFIG:Debug>:DEBUG>)
 
@@ -101,49 +93,38 @@ install(TARGETS hypermaze RUNTIME DESTINATION ${BINDIR})
 
 install(DIRECTORY levels irrlicht config DESTINATION ${DATADIR})
 
+if(MSVC)
+message(STATUS "Using Visual Studio to run")
+set_property(TARGET hypermaze PROPERTY VS_GLOBAL_LocalDebuggerEnvironment "HYPERMAZE_DATA_DIR=${CMAKE_SOURCE_DIR}/
+$(LocalDebuggerEnvironment)")
+else(MSVC)
 add_custom_target(run ${CMAKE_COMMAND} -Daddtoenv=HYPERMAZE_DATA_DIR -DHYPERMAZE_DATA_DIR=${CMAKE_SOURCE_DIR}/ -Dprog=$<TARGET_FILE:hypermaze> -P ${CMAKE_SOURCE_DIR}/cmake/runprog.cmake DEPENDS hypermaze VERBATIM)
+endif(MSVC)
 
-if(WIN32)
-
-  add_custom_target(pre-run ${CMAKE_COMMAND} -E echo "Copying Libraries")
-
-  add_dependencies(run pre-run)
-
-endif(WIN32)
+if(WIN32 AND NOT UNIX)
+#  add_custom_target(pre-run ${CMAKE_COMMAND} -E echo "Copying Libraries")
+#  add_dependencies(run pre-run)
+    add_custom_command(TARGET hypermaze POST_BUILD COMMAND ${CMAKE_COMMAND} -D directory=$<TARGET_FILE_DIR:hypermaze> -D target=$<TARGET_FILE:hypermaze> -P ${CMAKE_SOURCE_DIR}/cmake/copylibraries.cmake VERBATIM)
+endif(WIN32 AND NOT UNIX)
 
 function(hypermaze_add_package libsvar includesvar)
-
     target_link_libraries(hypermaze ${${libsvar}})
-
     target_include_directories(hypermaze PUBLIC ${${includesvar}})
-
-    if(WIN32)
-
+    if(WIN32 AND NOT UNIX)
       install(FILES ${${libsvar}} DESTINATION ${BINDIR})
-
       foreach(lib ${${libsvar}})
-
-        add_custom_command(TARGET pre-run PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${lib} $<TARGET_FILE_DIR:hypermaze> VERBATIM)
-
+#        add_custom_command(TARGET pre-run PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${lib} $<TARGET_FILE_DIR:hypermaze> VERBATIM)
+        add_custom_command(TARGET hypermaze POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${lib} $<TARGET_FILE_DIR:hypermaze> VERBATIM)
       endforeach()
-
-
-    endif(WIN32)
-
-endfunction()  
+    endif(WIN32 AND NOT UNIX)
+endfunction()
 
 function(hypermaze_find_required_package package foundvar libsvar includesvar defn)
-
   find_package(${package} REQUIRED)
-
   if(${foundvar})
-
     hypermaze_add_package(${libsvar} ${includesvar})
-    
     set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS ${defn})
-
   endif(${foundvar})
-
 endfunction()
 
 function(hypermaze_find_optional_packages option defn description default count)
@@ -167,11 +148,11 @@ endfunction()
 
 hypermaze_find_required_package(Irrlicht IRRLICHT_FOUND IRRLICHT_LIBRARIES IRRLICHT_INCLUDE_DIRS IRRLICHT)
 
-hypermaze_find_optional_packages(USE_OPENAL USE_OPENAL "Use OpenAL library for sound" ON 2 ALUT ALUT_FOUND ALUT_LIBRARIES ALUT_INCLUDE_DIR OpenAL  OPENAL_FOUND OPENAL_LIBRARY OPENAL_INCLUDE) 
+hypermaze_find_optional_packages(USE_OPENAL USE_OPENAL "Use OpenAL library for sound" ON 2 ALUT ALUT_FOUND ALUT_LIBRARIES ALUT_INCLUDE_DIR OpenAL  OPENAL_FOUND OPENAL_LIBRARY OPENAL_INCLUDE)
 
 hypermaze_find_optional_packages(USE_CURL USE_CURL "Use the curl library for url opening (enables url opening feature)" ON 1 CURL CURL_FOUND CURL_LIBRARIES CURL_INCLUDE_DIR)
 
-if(WIN32)
+if(WIN32 AND NOT UNIX)
   CHECK_CXX_SOURCE_COMPILES( "
 #define WINVER 0x0601
 #define _WIN32_WINNT 0x0601
@@ -180,17 +161,18 @@ if(WIN32)
 #include \"Shlobj.h\"
 int main(){
   wchar_t* winpath=0;
-  SHGetKnownFolderPath(FOLDERID_ProgramData,0,0,winpath);
+  SHGetKnownFolderPath(FOLDERID_ProgramData,0,0,&winpath);
   CoTaskMemFree(winpath);
-  SHGetKnownFolderPath(FOLDERID_RoamingAppData,0,0,winpath);
+  SHGetKnownFolderPath(FOLDERID_RoamingAppData,0,0,&winpath);
   CoTaskMemFree(winpath);
   return 0;
 }
 " HAVE_WIN_KNOWN_FOLDERS )
   if(HAVE_WIN_KNOWN_FOLDERS)
+    message(STATUS "Have known folders")
     set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS WIN32_USE_KNOWNFOLDER)
   endif(HAVE_WIN_KNOWN_FOLDERS)
-endif(WIN32)
+endif(WIN32 AND NOT UNIX)
 
 ########### next target ###############
 
@@ -216,7 +198,10 @@ add_executable(scriptedit EXCLUDE_FROM_ALL ${scriptedit_SRCS})
 
 set_property(TARGET scriptedit APPEND PROPERTY COMPILE_DEFINITIONS IOSTREAM)
 
+if(NOT MSVC)
 add_custom_target(run-scriptedit $<TARGET_FILE:scriptedit> DEPENDS scriptedit VERBATIM)
+endif(NOT MSVC)
+
 
 ########### next target ###############
 
@@ -242,7 +227,9 @@ add_executable(levelgen EXCLUDE_FROM_ALL ${levelgen_SRCS})
 
 set_property(TARGET levelgen APPEND PROPERTY COMPILE_DEFINITIONS IOSTREAM)
 
+if(NOT MSVC)
 add_custom_target(run-levelgen $<TARGET_FILE:levelgen> DEPENDS levelgen VERBATIM)
+endif(NOT MSVC)
 ########### really compile all ###############
 
 add_custom_target(all-full DEPENDS hypermaze scriptedit levelgen)

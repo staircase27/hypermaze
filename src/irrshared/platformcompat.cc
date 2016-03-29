@@ -85,14 +85,14 @@ const irr::fschar_t* getUserConfigPath(){
       delete[] path;
       path=0;
       wchar_t* winpath=0;
-      if (SHGetKnownFolderPath(FOLDERID_RoamingAppData,0,0,winpath)){
+      if (SHGetKnownFolderPath(FOLDERID_RoamingAppData,0,0,&winpath)){
         #ifdef _IRR_WCHAR_FILESYSTEM
           int len=wcslen(path);
           path=new irr::fschar_t[len+11]
           memcpy(path,winpath,len);
           memcpy(path+len,L"/hypermaze/",11*sizeof(irr::fschar_t));
         #else
-          int len=WideCharToMultiByte(CP_OEMCP,0,winpath,-1,0,0,00)-1;
+          int len=WideCharToMultiByte(CP_OEMCP,0,winpath,-1,0,0,0,0)-1;
           path=new irr::fschar_t[len+11];
           WideCharToMultiByte(CP_OEMCP,0,winpath,-1,path,len+1,0,0);
           memcpy(path+len,"/hypermaze/",11);
@@ -140,14 +140,14 @@ const irr::fschar_t* getSystemConfigPath(){
       delete[] path;
       path=0;
       wchar_t* winpath=0;
-      if (SHGetKnownFolderPath(FOLDERID_ProgramData,0,0,winpath)){
+      if (SHGetKnownFolderPath(FOLDERID_ProgramData,0,0,&winpath)){
         #ifdef _IRR_WCHAR_FILESYSTEM
           int len=wcslen(path);
           path=new irr::fschar_t[len+12]
           memcpy(path,winpath,len);
           memcpy(path+len,L"/hypermaze/",12*sizeof(irr::fschar_t));
         #else
-          int len=WideCharToMultiByte(CP_OEMCP,0,winpath,-1,0,0,00)-1;
+          int len=WideCharToMultiByte(CP_OEMCP,0,winpath,-1,0,0,0,0)-1;
           path=new irr::fschar_t[len+12];
           WideCharToMultiByte(CP_OEMCP,0,winpath,-1,path,len+1,0,0);
           memcpy(path+len,"/hypermaze/",12);
