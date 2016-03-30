@@ -348,10 +348,21 @@ set(CPACK_PACKAGE_VERSION_MINOR "1")
 
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
+
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A 3D maze like puzzle")
+
+# DEB options
+
 set(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS "ON")
 
+# NSIS windows installer options
+
+set(CPACK_NSIS_MENU_LINKS "hypermaze.exe" "Hypermaze")
+
+# Source package options
 set(CPACK_SOURCE_IGNORE_FILES /\\\\.git/;;/build/;.*~$;/\\\\..*)
 
 include(CPack)

@@ -1,12 +1,13 @@
 # README #
 
-Welcome to the repoistory for Hypermaze by staircase (staircase27 on bitbucket)
+Welcome to the repository for Hypermaze by staircase (staircase27 on bitbucket)
 
 ### What is this repository for? ###
 
 This repository is currently private and is my dev location for developing hypermaze.
 Hypermaze is a 3D maze like puzzle where you have to get a "string" through a "maze".
-For more explanations run the puzzle or see http://www.astrolog.org/labyrnth/hypermaz.htm
+For more explanations run the puzzle or for information about hypermazes in general 
+see http://www.astrolog.org/labyrnth/hypermaz.htm
 
 ### How do I get set up? ###
 

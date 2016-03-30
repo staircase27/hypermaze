@@ -49,5 +49,9 @@ If using a makefile based generator, use the commands
         make && make install
 to make and then install the main program
 
+To build packages that cab be installed later use the "package" target. The
+types of packages that will be built is configured using cmake by setting
+variables of the form CPACK_BINARY_* and CPACK_SOURCE_*
+
 The build system will also include targets to build the levelgen and scriptedit
 programs but these can't installed and aren't compiled by default.
