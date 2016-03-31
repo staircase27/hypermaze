@@ -56,6 +56,11 @@ set(hypermaze_SRCS
     src/irrshared/opensavegui.cc
     src/irrshared/opensavegui.hh)
 
+if(MSVC)
+list(APPEND hypermaze_SRCS "res/hypermaze.rc")
+endif(MSVC)
+
+
 add_executable(hypermaze ${hypermaze_SRCS})
 
 if(UNIX)
