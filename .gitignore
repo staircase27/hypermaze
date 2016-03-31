@@ -8,6 +8,8 @@
 .objs
 *.depend
 hypermaze.exe
+# Windows resource compiled data file
+*.aps
 # don't backup the music
 irrlicht/music
 doc/doxygen/*/

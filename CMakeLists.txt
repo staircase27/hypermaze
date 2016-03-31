@@ -56,9 +56,9 @@ set(hypermaze_SRCS
     src/irrshared/opensavegui.cc
     src/irrshared/opensavegui.hh)
 
-if(MSVC)
+if(WIN32 AND NOT UNIX)
 list(APPEND hypermaze_SRCS "res/hypermaze.rc")
-endif(MSVC)
+endif(WIN32 AND NOT UNIX)
 
 
 add_executable(hypermaze ${hypermaze_SRCS})
@@ -176,7 +176,7 @@ function(hypermaze_add_package package libsvar includesvar)
     target_include_directories(hypermaze PUBLIC ${${includesvar}})
     if(WIN32 AND NOT UNIX)
       list(LENGTH ${libsvar} libcount)
-      if(libcount EQUAL 1)
+      if(libcount EQUAL "1")
         string(TOUPPER ${package} var)
         set(var "${var}_DLL")
         hypermaze_lib_install(${${libsvar}} ${var} ${package})
@@ -356,7 +356,7 @@ SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
 
 set(CPACK_PACKAGE_VERSION_MAJOR "1")
 
-set(CPACK_PACKAGE_VERSION_MINOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "2")
 
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 
@@ -374,7 +374,17 @@ set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS "ON")
 
 set(CPACK_NSIS_MENU_LINKS "hypermaze.exe" "Hypermaze")
 
+set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/install.ico")
+
+set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/res/uninstall.ico")
+
+set(CPACK_NSIS_CONTACT "${CPACK_PACKAGE_CONTACT}")
+
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON")
+
+set(CPACK_NSIS_MUI_FINISHPAGE_RUN "hypermaze.exe")
+
 # Source package options
-set(CPACK_SOURCE_IGNORE_FILES /\\\\.git/;;/build/;.*~$;/\\\\..*)
+set(CPACK_SOURCE_IGNORE_FILES /\\\\.git/;;/build/;.*~$;/\\\\..*;.*\\\\.aps)
 
 include(CPack)
