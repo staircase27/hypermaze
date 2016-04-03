@@ -331,13 +331,9 @@ add_custom_target(all-full DEPENDS hypermaze scriptedit levelgen)
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-#file(RELATIVE_PATH PROJECT_SOURCE_RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-file(GLOB_RECURSE ALL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hh)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/DoxyfileNOMACRO.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
-add_custom_target(doc
-${DOXYGEN_EXECUTABLE} doc/Doxyfile
-WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-COMMENT "Generating API documentation with Doxygen" VERBATIM DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/doc/DoxyfileNOMACRO.in ${ALL_SOURCES})
+  file(GLOB_RECURSE ALL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hh)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/DoxyfileNOMACRO.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
+  add_custom_target(doc ${DOXYGEN_EXECUTABLE} doc/Doxyfile WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating API documentation with Doxygen" VERBATIM DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/doc/DoxyfileNOMACRO.in ${ALL_SOURCES})
 endif(DOXYGEN_FOUND)
 
 ########### cpack ###############
@@ -387,6 +383,7 @@ set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
 set(CPACK_NSIS_MUI_FINISHPAGE_RUN "hypermaze.exe")
 
 # Source package options
+
 set(CPACK_SOURCE_IGNORE_FILES /\\\\.git/;;/build/;.*~$;/\\\\..*;.*\\\\.aps)
 
 include(CPack)

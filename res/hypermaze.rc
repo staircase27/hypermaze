@@ -29,7 +29,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 104                     ICON                    "hypermaze.ico"
 
 
-
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -54,6 +53,7 @@ BEGIN
 END
 
 #endif    // APSTUDIO_INVOKED
+
 
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
