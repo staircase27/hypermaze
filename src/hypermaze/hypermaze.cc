@@ -1,3 +1,10 @@
+#ifdef MSVC
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#endif
+
+
+
+
 #include "irrlicht.h"
 #include "irrdisp.hh"
 #include "../core/vector.hh"

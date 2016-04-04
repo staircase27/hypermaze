@@ -92,11 +92,20 @@ else(UNIX)
 
 endif(UNIX)
 
+if(MSVC)
+set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM> $<$<CONFIG:Debug>:DEBUG> MSVC)
+else(MSVC)
 set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM> $<$<CONFIG:Debug>:DEBUG>)
+endif(MSVC)
 
 install(TARGETS hypermaze RUNTIME DESTINATION ${BINDIR})
 
 install(DIRECTORY levels irrlicht config DESTINATION ${DATADIR})
+
+if(WIN32 AND NOT UNIX)
+  # install icon so irrlicht finds it and uses it for the window
+  install(FILES res/irrlicht.ico DESTINATION ${BINDIR})
+endif(WIN32 AND NOT UNIX)
 
 if(MSVC)
 message(STATUS "Using Visual Studio to run")
