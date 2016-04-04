@@ -56,12 +56,13 @@ set(hypermaze_SRCS
     src/irrshared/opensavegui.cc
     src/irrshared/opensavegui.hh)
 
+set(WIN32OPTION)
 if(WIN32 AND NOT UNIX)
 list(APPEND hypermaze_SRCS "res/hypermaze.rc")
+set(WIN32OPTION WIN32)
 endif(WIN32 AND NOT UNIX)
 
-
-add_executable(hypermaze ${hypermaze_SRCS})
+add_executable(hypermaze ${WIN32OPTION} ${hypermaze_SRCS})
 
 if(UNIX)
    message(STATUS "On linux so using linux setup")
@@ -347,6 +348,8 @@ endif(DOXYGEN_FOUND)
 
 ########### cpack ###############
 
+set(CPACK_PACKAGE_NAME "Hypermaze")
+
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${BINDIR})
 
 INCLUDE(InstallRequiredSystemLibraries)
@@ -355,7 +358,7 @@ set(CPACK_PACKAGE_DESCRIPTION "Hypermaze puzzle game")
 
 set(CPACK_PACKAGE_VENDOR "staircase")
 
-set(CPACK_PACKAGE_CONTACT "staircase@darkfeldgames.net")
+set(CPACK_PACKAGE_CONTACT "staircase <staircase@darkfeldgames.net>")
 
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
 
@@ -365,9 +368,13 @@ set(CPACK_PACKAGE_VERSION_MINOR "2")
 
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
+
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
 
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A 3D maze like puzzle")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "3D maze like puzzle")
+
+set(CPACK_STRIP_FILES "ON")
 
 # DEB options
 
