@@ -1,0 +1,61 @@
+# This file will be configured to contain variables for CPack. These variables
+# should be set in the CMake list file of the project before CPack module is
+# included. The list of available CPACK_xxx variables and their associated
+# documentation may be obtained using
+#  cpack --help-variable-list
+#
+# Some variables are common to all generators (e.g. CPACK_PACKAGE_NAME)
+# and some are specific to a generator
+# (e.g. CPACK_NSIS_EXTRA_INSTALL_COMMANDS). The generator specific variables
+# usually begin with CPACK_<GENNAME>_xxxx.
+
+find_package(Git)
+
+set(RAW_PACKAGE_VERSION "")
+if(GIT_FOUND)
+  execute_process(COMMAND ${GIT_EXECUTABLE} "describe" "--dirty" WORKING_DIRECTORY "@CMAKE_CURRENT_SOURCE_DIR@" OUTPUT_VARIABLE RAW_PACKAGE_VERSION)
+  string(STRIP ${RAW_PACKAGE_VERSION} RAW_PACKAGE_VERSION)
+endif(GIT_FOUND)
+if(NOT RAW_PACKAGE_VERSION AND EXISTS "@CMAKE_CURRENT_SOURCE_DIR@/VERSION")
+  #no git or git couldn't find a package version and version file so try it's contents
+  file(READ "@CMAKE_CURRENT_SOURCE_DIR@/VERSION" RAW_PACKAGE_VERSION)
+  string(STRIP "${RAW_PACKAGE_VERSION}" RAW_PACKAGE_VERSION)
+endif(NOT RAW_PACKAGE_VERSION AND EXISTS "@CMAKE_CURRENT_SOURCE_DIR@/VERSION")
+if(NOT RAW_PACKAGE_VERSION)
+  #still no version available
+  set(RAW_PACKAGE_VERSION "~noversion")
+endif(NOT RAW_PACKAGE_VERSION)
+
+string(FIND "${RAW_PACKAGE_VERSION}" "-" suffixindex)
+
+if(suffixindex EQUAL "-1")
+  string(LENGTH "${RAW_PACKAGE_VERSION}" suffixindex)
+endif(suffixindex EQUAL "-1")
+
+string(SUBSTRING "${RAW_PACKAGE_VERSION}" ${suffixindex} -1 suffix)
+string(SUBSTRING "${RAW_PACKAGE_VERSION}" 0 ${suffixindex} RAW_PACKAGE_VERSION)
+
+string(FIND "${RAW_PACKAGE_VERSION}" "." dotindex)
+if(dotindex EQUAL "-1")
+  set(CPACK_PACKAGE_VERSION_MAJOR "${RAW_PACKAGE_VERSION}")
+  set(CPACK_PACKAGE_VERSION_MINOR "0")
+  set(CPACK_PACKAGE_VERSION_PATCH "0${suffix}")
+else(dotindex EQUAL "-1")
+  string(SUBSTRING "${RAW_PACKAGE_VERSION}" 0 ${dotindex} CPACK_PACKAGE_VERSION_MAJOR)
+  math(EXPR dotindex "${dotindex} + 1")
+  string(SUBSTRING "${RAW_PACKAGE_VERSION}" ${dotindex} -1 RAW_PACKAGE_VERSION)
+  string(FIND "${RAW_PACKAGE_VERSION}" "." dotindex)
+  if(dotindex EQUAL "-1")
+    set(CPACK_PACKAGE_VERSION_MINOR "${RAW_PACKAGE_VERSION}")
+    set(CPACK_PACKAGE_VERSION_PATCH "0${suffix}")
+  else(dotindex EQUAL "-1")
+    string(SUBSTRING "${RAW_PACKAGE_VERSION}" 0 ${dotindex} CPACK_PACKAGE_VERSION_MINOR)
+    math(EXPR dotindex "${dotindex} + 1")
+    string(SUBSTRING "${RAW_PACKAGE_VERSION}" ${dotindex} -1 CPACK_PACKAGE_VERSION_PATCH)
+    set(CPACK_PACKAGE_VERSION_PATCH "${CPACK_PACKAGE_VERSION_PATCH}${suffix}")
+  endif(dotindex EQUAL "-1")
+endif(dotindex EQUAL "-1")
+
+@_CPACK_OTHER_VARIABLES_@
+
+set(CPACK_INSTALL_SCRIPT "@CMAKE_CURRENT_SOURCE_DIR@/cmake/CreateVersionFile.cmake")
