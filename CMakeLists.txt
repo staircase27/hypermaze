@@ -58,15 +58,21 @@ set(hypermaze_SRCS
 
 set(WIN32OPTION)
 if(WIN32 AND NOT UNIX)
-list(APPEND hypermaze_SRCS "res/hypermaze.rc")
+list(APPEND hypermaze_SRCS "res/icons/hypermaze.rc")
 set(WIN32OPTION WIN32)
 endif(WIN32 AND NOT UNIX)
 
 add_executable(hypermaze ${WIN32OPTION} ${hypermaze_SRCS})
 
+CMAKE_DEPENDENT_OPTION("USE_GAMES" "Install in \${CMAKE_INSTALL_PREFIX}/games rather than \${CMAKE_INSTALL_PREFIX}/bin" ON "UNIX" OFF)
+
 if(UNIX)
    message(STATUS "On linux so using linux setup")
-   set(BINDIR "bin")
+   if(${USE_GAMES})
+     set(BINDIR "games")
+   else(${USE_GAMES})
+     set(BINDIR "bin")
+   endif(${USE_GAMES})
    set(DATADIR "share/hypermaze")
    string(REGEX MATCH "^/usr(/|$)" INSTALL_IN_USR "${CMAKE_INSTALL_PREFIX}")
    if(INSTALL_IN_USR)
@@ -376,11 +382,24 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "3D maze like puzzle")
 
 set(CPACK_STRIP_FILES "ON")
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CPackExtra.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/CPackExtra.cmake" @ONLY) 
+
+set(CPACK_PROJECT_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/CPackExtra.cmake")
+
+#set(CPACK_INSTALL_COMMANDS "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/cmake/Test.cmake")
+
 # DEB options
+
+set(CPACK_DEBIAN_PACKAGE_NAME "hypermaze")
 
 set(CPACK_DEBIAN_PACKAGE_SECTION "games")
 
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS "ON")
+
+set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "3D maze like puzzle where you have to get a \\\"string\\\" through a \\\"maze\\\"
+ For more explanations run the puzzle or for information about hypermazes in
+ general see http://www.astrolog.org/labyrnth/hypermaz.htm. A tutorial and a
+ level generator are included.")
 
 # NSIS windows installer options
 
