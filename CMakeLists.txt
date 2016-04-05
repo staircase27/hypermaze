@@ -111,7 +111,7 @@ install(DIRECTORY levels irrlicht config DESTINATION ${DATADIR})
 
 if(WIN32 AND NOT UNIX)
   # install icon so irrlicht finds it and uses it for the window
-  install(FILES res/irrlicht.ico DESTINATION ${BINDIR})
+  install(FILES res/icons/irrlicht.ico DESTINATION ${BINDIR})
 endif(WIN32 AND NOT UNIX)
 
 if(MSVC)
@@ -405,9 +405,9 @@ set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "3D maze like puzzle where you have to get 
 
 set(CPACK_NSIS_MENU_LINKS "hypermaze.exe" "Hypermaze")
 
-set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/install.ico")
+set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/icons/install.ico")
 
-set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/res/uninstall.ico")
+set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/res/icons/uninstall.ico")
 
 set(CPACK_NSIS_CONTACT "${CPACK_PACKAGE_CONTACT}")
 
