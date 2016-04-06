@@ -403,6 +403,10 @@ set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "3D maze like puzzle where you have to get 
 
 # NSIS windows installer options
 
+set(CPACK_NSIS_PACKAGE_NAME "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}") # should still show full version even though install version only contains 
+
+set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_PACKAGE_NAME}")
+
 set(CPACK_NSIS_MENU_LINKS "hypermaze.exe" "Hypermaze")
 
 set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/icons/install.ico")
@@ -416,6 +420,8 @@ set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL "ON")
 set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
 
 set(CPACK_NSIS_MUI_FINISHPAGE_RUN "hypermaze.exe")
+
+set(CPACK_NSIS_DEFINES "!define MUI_STARTMENUPAGE_DEFAULTFOLDER \\\"${CPACK_PACKAGE_INSTALL_DIRECTORY}\\\"")
 
 # Source package options
 
