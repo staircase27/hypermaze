@@ -88,6 +88,15 @@ class GUIFormattedText:public irr::gui::IGUIElement{
      */
     virtual void removeText(int i);
 
+    /// Remove all but the paragraph of text at the specified position
+    /**
+     * @param i the index of the paragraph to leave. Can be negative to index backwards from the end
+     */
+    virtual void removeAllButText(int i);
+
+    /// Remove all text
+    virtual void clearText();
+
     /// The count of paragraphs in this element
     /**
      * @return the number of paragraphs

@@ -87,6 +87,8 @@ IOResult read(HypIStream& s,Maze& m){
        (r=read(s,thesize.Y,10)).ok&&
        (r=read(s,thesize.Z,10)).ok))
     return IOResult(false,r.eof);
+  if(thesize.X<=2||thesize.Y<=2||thesize.Z<=2)
+    return IOResult(false,r.eof);
   m=Maze(thesize);
   int pos=-1;//start at -1 so first increment doesn't sift us of the maze
   while(++pos<thesize.X*thesize.Y*thesize.Z){

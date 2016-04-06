@@ -273,14 +273,14 @@ class SaveGui: private OpenSaveGui{
     /// @copydoc OpenSaveGui::select
     /**
      * This changes into directories, confirms if the user wants to replace an existing file
-     * and processes urls and absent paths
+     * accepts absent files
      */
-    E_SELECTION_TYPE select(const wchar_t* file,E_PATH_TYPE type);
+    E_SELECTION_TYPE select(const irr::fschar_t* file,E_PATH_TYPE type);
     /// @copydoc OpenSaveGui::process
     /**
      * This saves the maze to the file specified and shows an error message if anything failed
      */
-    bool process(const wchar_t* file);
+    bool process(const irr::fschar_t* file);
   public:
     /// Show the save gui
     /**
@@ -300,14 +300,24 @@ class OpenGui: private OpenSaveGui{
   private:
     /// @copydoc OpenSaveGui::select
     /**
-     * This changes into directories, opens files and urls and shows an error for absent paths
+     * This changes into directories, opens filesand rejects absent paths
      */
-    E_SELECTION_TYPE select(const wchar_t* file,E_PATH_TYPE type);
+    E_SELECTION_TYPE select(const irr::fschar_t* file,E_PATH_TYPE type);
     /// @copydoc OpenSaveGui::process
     /**
      * This loads the maze from the file specified and shows an error message if anything failed
      */
-    bool process(const wchar_t* file);
+    bool process(const irr::fschar_t* file);
+    /// @copydoc OpenSaveGui::selectURL
+    /**
+     * This always returns true to process urls
+     */
+    bool selectURL(const wchar_t* url);
+    /// @copydoc OpenSaveGui::processURL
+    /**
+     * This loads the maze from the url specified and shows an error message if anything failed
+     */
+    bool processURL(const wchar_t* file);
   public:
     /// show the open gui
     /**

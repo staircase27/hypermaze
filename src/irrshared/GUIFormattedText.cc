@@ -96,6 +96,28 @@ void GUIFormattedText::removeText(int i){
   layoutNeeded=true;
 }
 
+void GUIFormattedText::removeAllButText(int i){
+  if(i<0)
+    i+=paragraphs.size();
+  if(i<0 || (unsigned int)i>=paragraphs.size())
+    return;
+  irr::list<irr::IGUIStaticText*>::Iterator leaveit=paragraphs.begin()+i;
+  irr::IGUIStaticText* leave=*leaveit;
+  for(irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin();it!=paragraphs.end();++it)
+    if(it!=leaveit)
+      (*it)->remove();
+  paragraphs.clear();
+  paragraphs.push_back(leave);
+  layoutNeeded=true;
+}
+
+void GUIFormattedText::clearText(){
+  for(irr::list<irr::IGUIStaticText*>::Iterator it=paragraphs.begin();it!=paragraphs.end();++it)
+    (*it)->remove();
+  paragraphs.clear();
+  layoutNeeded=true;
+}
+
 unsigned int GUIFormattedText::paragraphCount(){
   return paragraphs.size();
 }

@@ -13,9 +13,19 @@ class OpenSaveGui : private BaseGui
 {
   bool okClicked; ///< Has ok been clicked yet?
   bool cancelClicked; ///< Has cancel been clicked yet?
+  bool pathSelected; ///< Has an entry been selected in the path combi box
+  bool itemSelected; ///< Has an entry been selected in the contents list
 
   /// GUI element to input the file name to save/open the maze as/from
+
   irr::gui::IGUIEditBox * fileField;
+  irr::gui::IGUIComboBox* pathfield;
+  irr::gui::IGUIListBox * contentslist;
+
+  irr::io::IFileSystem* fs;
+  irr::io::path path;
+  irr::io::IFileList* rawfiles;
+  irr::io::IFileList* filteredfiles;
 
   /// An enum for button IDs
   enum
@@ -30,6 +40,8 @@ class OpenSaveGui : private BaseGui
     void createGUI();
     /// @copydoc BaseGui::run
     bool run();
+
+    void populateWithFolderContents();
   protected:
     /// Access the irrlicht device. Needed for access to irrlicht system
     /**
@@ -54,7 +66,6 @@ class OpenSaveGui : private BaseGui
     /// what type of thing is the path for
     enum E_PATH_TYPE{
       ABSENT=0, ///< The path is absent
-      URL=1, ///< The path is a url
       FILE=2, ///< The path is a file
       FOLDER=3 ///< The path is a folder
     };
@@ -78,22 +89,38 @@ class OpenSaveGui : private BaseGui
      * @return true if the file is valid and has been processed successfully
      * @note if false is returned this function should show an error message first to explain the problem
      */
-    virtual bool process(const wchar_t* file){return false;};
+    virtual bool process(const irr::fschar_t* file){return false;};
+
+    /// Process the selected file
+    /**
+     * @param file the file to select.
+     * @return true if the file is valid and has been processed successfully
+     * @note if false is returned this function should show an error message first to explain the problem
+     */
+    virtual bool processURL(const wchar_t* url){return false;};
 
     /// Can the specified file be selected and if so what should happen
     /**
      * @param file the file to select.
      * @param type if the selection is file, folder or not yet created
-     * @return true if the file is valid and has been processed successfully
-     * @note if false is returned this function should show an error message first to explain the problem
+     * @return what should be done with the path
      */
-    virtual E_SELECTION_TYPE select(const wchar_t* file,E_PATH_TYPE type){
+    virtual E_SELECTION_TYPE select(const irr::fschar_t* file,E_PATH_TYPE type){
       if(type==FOLDER)
         return CHANGEDIR;
-      else if(type==FILE || type==URL)
+      else if(type==FILE)
         return PROCESS;
       else
         return INVALID;
+    };
+    /// Can the specified url be selected and if so what should happen
+    /**
+     * @param file the file to select.
+     * @param type if the selection is file, folder or not yet created
+     * @return true if the url should be processed (options are equivelent to PROCESS and INVALID)
+     */
+    virtual bool selectURL(const wchar_t* url){
+      return INVALID;
     };
 
     /// Filter the files and folders to show in the dialog

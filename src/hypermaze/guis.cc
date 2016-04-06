@@ -602,8 +602,10 @@ bool OpenGui::run(){
     IrrHypIStream is(in);
     in->drop();
     bool status = read(is,pd->m).ok;
-    pd->sc=Script();// reset it to blank as a default
-    status &= read(is,pd->sc).ok;
+    if(status){
+      pd->sc=Script();// reset it to blank as a default
+      status &= read(is,pd->sc).ok;
+    }
     if(!status){
       getTopElement()->setVisible(false);
       ErrorGui eg;
@@ -620,7 +622,7 @@ bool SaveGui::save(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& 
   return this->display(_device,_fm);
 }
 
-SaveGui::E_SELECTION_TYPE SaveGui::select(const wchar_t* file,SaveGui::E_PATH_TYPE type){
+SaveGui::E_SELECTION_TYPE SaveGui::select(const irr::fschar_t* file,SaveGui::E_PATH_TYPE type){
   if(type==FOLDER)
     return CHANGEDIR;
   else if(type==FILE){
@@ -635,7 +637,7 @@ SaveGui::E_SELECTION_TYPE SaveGui::select(const wchar_t* file,SaveGui::E_PATH_TY
     return INVALID;
 }
 
-bool SaveGui::process(const wchar_t* file){
+bool SaveGui::process(const irr::fschar_t* file){
   irr::IWriteFile* out=getDevice()->getFileSystem()->createAndWriteFile(file);
   if(!out){
     ErrorGui eg;
@@ -658,29 +660,51 @@ bool OpenGui::open(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& 
   this->pd=&pd;
   return this->display(_device,_fm);
 }
-OpenGui::E_SELECTION_TYPE OpenGui::select(const wchar_t* file,OpenGui::E_PATH_TYPE type){
+bool OpenGui::selectURL(const wchar_t* file){
+  return true;
+}
+OpenGui::E_SELECTION_TYPE OpenGui::select(const irr::fschar_t* file,OpenGui::E_PATH_TYPE type){
   if(type==FOLDER)
     return CHANGEDIR;
-  else if(type==ABSENT){
-    ErrorGui eg;
-    eg.error(getDevice(),getFontManager(),L"Error Opening File","File doesn't exist.");
-    return INVALID;
-  }else
+  else if(type==FILE){
     return PROCESS;
+  }
+  return INVALID;
 }
-bool OpenGui::process(const wchar_t* file){
+bool OpenGui::process(const irr::fschar_t* file){
     irr::IReadFile* in=createAndOpen(getDevice()->getFileSystem(),file);
     if(!in){
       ErrorGui eg;
       eg.error(getDevice(),getFontManager(),L"Error Opening File","File exists but can't be opened.");
-      eg.error(getDevice(),getFontManager(),L"Error Opening File","File doesn't exist.");
       return false;
     }
     IrrHypIStream is(in);
     in->drop();
     bool status = read(is,pd->m).ok;
-    pd->sc=Script();// reset it to blank as a default
-    status &= read(is,pd->sc).ok;
+    if(status){
+      pd->sc=Script();// reset it to blank as a default
+      status &= read(is,pd->sc).ok;
+    }
+    if(!status){
+      ErrorGui eg;
+      eg.error(getDevice(),getFontManager(),L"Error Reading File","The level may have been loaded but it may have errors. If it not correct please try again or get a new copy of the level.");
+    }
+    return true;
+}
+bool OpenGui::processURL(const wchar_t* file){
+    irr::IReadFile* in=createAndOpen(getDevice()->getFileSystem(),file);
+    if(!in){
+      ErrorGui eg;
+      eg.error(getDevice(),getFontManager(),L"Error Opening File","File exists but can't be opened.");
+      return false;
+    }
+    IrrHypIStream is(in);
+    in->drop();
+    bool status = read(is,pd->m).ok;
+    if(status){
+      pd->sc=Script();// reset it to blank as a default
+      status &= read(is,pd->sc).ok;
+    }
     if(!status){
       ErrorGui eg;
       eg.error(getDevice(),getFontManager(),L"Error Reading File","The level may have been loaded but it may have errors. If it not correct please try again or get a new copy of the level.");
@@ -811,15 +835,27 @@ bool WinGui::run(){
     return false;
   }
   if(nextClicked){
+    getTopElement()->setVisible(false);
     nextClicked=false;
     irr::IReadFile* in=createAndOpen(getDevice()->getFileSystem(),&*nextLevel.a);
-    if(!in)
+    if(!in){
+      ErrorGui eg;
+      eg.error(getDevice(),getFontManager(),L"Error Opening File","Can't open next level.");
+      keyblock=getDevice()->getTimer()->getTime()+500;
+      getTopElement()->setVisible(true);
       return true;
+    }
     IrrHypIStream is(in);
     in->drop();
-    read(is,pd->m);
-    pd->sc=Script();
-    read(is,pd->sc);
+    bool status = read(is,pd->m).ok;
+    if(status){
+      pd->sc=Script();// reset it to blank as a default
+      status &= read(is,pd->sc).ok;
+    }
+    if(!status){
+      ErrorGui eg;
+      eg.error(getDevice(),getFontManager(),L"Error Reading File","The level may have been loaded but it may have errors. If it not correct please try again or get a new copy of the level.");
+    }
     return false;
   }
 
