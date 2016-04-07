@@ -287,7 +287,7 @@ class SaveGui: private OpenSaveGui{
     */
     int filtercount() { return 1; }
     /// @copydoc OpenSaveGui::filtername
-    wchar_t* filtername(int i) { return L"Hypermaze Levels (*.hml)"; }
+    const wchar_t* filtername(int i) { return L"Hypermaze Levels (*.hml)"; }
     /// @copydoc OpenSaveGui::filterfiles
     bool filterfiles(int i, const irr::fschar_t* file, bool folder);
   public:
@@ -333,7 +333,7 @@ class OpenGui: private OpenSaveGui{
      */
     int filtercount() { return 1; }
     /// @copydoc OpenSaveGui::filtername
-    wchar_t* filtername(int i) { return L"Hypermaze Levels (*.hml)"; }
+    const wchar_t* filtername(int i) { return L"Hypermaze Levels (*.hml)"; }
     /// @copydoc OpenSaveGui::filterfiles
     bool filterfiles(int i, const irr::fschar_t* file, bool folder);
   public:

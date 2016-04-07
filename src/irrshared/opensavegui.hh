@@ -152,7 +152,7 @@ class OpenSaveGui : private BaseGui
      * @param i the index of the filter
      * @return a name for the filters
      */
-    virtual wchar_t* filtername(int i) { return L"Unknown filter"; }
+    virtual const wchar_t* filtername(int i) { return L"Unknown filter"; }
 
     /// Filter the files and folders to show in the dialog
     /**
