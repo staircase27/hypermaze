@@ -220,7 +220,8 @@ int getDriveList(irr::fschar_t*& drivespecs){
           drivespecs=path;
         }
         memcpy(drivespecs+strslen,drive,(len+1)*sizeof(irr::fschar_t));
-        strslen+=len+1;
+        strslen+=len;
+        drivespecs[strslen-1] = '\0';
         char* descbuf=new irr::fschar_t[124];
         descbuf[0]='\0';
         #ifdef _IRR_WCHAR_FILESYSTEM
@@ -283,8 +284,18 @@ int getDriveList(irr::fschar_t*& drivespecs){
   }else{
     delete[] path;
     drivespecs=path=new irr::fschar_t[15];
-    memcpy(path,IRRSLIT("/\0File System\0"),15*sizeof(irr::fschar_t));
-    strslen=14;
+    memcpy(path,IRRSLIT("\0File System\0"),15*sizeof(irr::fschar_t));
+    strslen=13;
+    strscount = 1;
   }
-  return strslen;
+  return strscount;
+}
+
+bool samePath(irr::io::path path1, irr::io::path path2)
+{
+  #ifdef WIN32
+    return path1.equals_ignore_case(path2);
+  #else
+    return path1 == path2;
+  #endif
 }

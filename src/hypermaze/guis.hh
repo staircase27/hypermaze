@@ -281,6 +281,15 @@ class SaveGui: private OpenSaveGui{
      * This saves the maze to the file specified and shows an error message if anything failed
      */
     bool process(const irr::fschar_t* file);
+    /// @copydoc OpenSaveGui::filtercount
+    /**
+    * this has 1 filter
+    */
+    int filtercount() { return 1; }
+    /// @copydoc OpenSaveGui::filtername
+    wchar_t* filtername(int i) { return L"Hypermaze Levels (*.hml)"; }
+    /// @copydoc OpenSaveGui::filterfiles
+    bool filterfiles(int i, const irr::fschar_t* file, bool folder);
   public:
     /// Show the save gui
     /**
@@ -318,6 +327,15 @@ class OpenGui: private OpenSaveGui{
      * This loads the maze from the url specified and shows an error message if anything failed
      */
     bool processURL(const wchar_t* file);
+    /// @copydoc OpenSaveGui::filtercount
+    /**
+     * this has 1 filter
+     */
+    int filtercount() { return 1; }
+    /// @copydoc OpenSaveGui::filtername
+    wchar_t* filtername(int i) { return L"Hypermaze Levels (*.hml)"; }
+    /// @copydoc OpenSaveGui::filterfiles
+    bool filterfiles(int i, const irr::fschar_t* file, bool folder);
   public:
     /// show the open gui
     /**

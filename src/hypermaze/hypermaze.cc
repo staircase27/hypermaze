@@ -185,10 +185,13 @@ class IrrlichtMusicLoader: public MusicLoader{
 int main(int argc,char* argv[]){
 
   irr::fschar_t* drives;
-  int len=getDriveList(drives);
-  cout<<"Drives: "<<len<<endl;
-  for(irr::fschar_t* drive=drives;strlen(drive)>0;drive+=strlen(drive)+1){
-    cout<<drive<<endl;
+  int count=getDriveList(drives);
+  cout<<"Drives: "<<count<<endl;
+  for (int i = 0; i< count; ++i) {
+    cout << drives << endl;
+    drives += strlen(drives) + 1;
+    cout << drives << endl;
+    drives += strlen(drives) + 1;
   }
   cout<<"End Drives"<<endl;
 

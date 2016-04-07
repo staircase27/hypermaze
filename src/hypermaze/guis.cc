@@ -9,6 +9,7 @@
 #include "../core/mazegen.hh"
 #include "../irrshared/GUIFormattedText.hh"
 #include "../irrshared/irrcurl.hh"
+#include "../irrshared/platformcompat.hh"
 
 namespace irr{
   using namespace core;
@@ -656,6 +657,14 @@ bool SaveGui::process(const irr::fschar_t* file){
   return true;
 }
 
+bool SaveGui::filterfiles(int i, const irr::fschar_t* file, bool folder) {
+  if (folder)
+    return true;
+  irr::path filepath(file);
+  return samePath(filepath.subString(filepath.size() - 4, 4), ".hml");
+}
+
+
 bool OpenGui::open(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd){
   this->pd=&pd;
   return this->display(_device,_fm);
@@ -710,6 +719,12 @@ bool OpenGui::processURL(const wchar_t* file){
       eg.error(getDevice(),getFontManager(),L"Error Reading File","The level may have been loaded but it may have errors. If it not correct please try again or get a new copy of the level.");
     }
     return true;
+}
+bool OpenGui::filterfiles(int i, const irr::fschar_t* file, bool folder) {
+  if (folder)
+    return true;
+  irr::path filepath(file);
+  return samePath(filepath.subString(filepath.size() - 4, 4), ".hml");
 }
 #endif // USEOPENSAVE
 

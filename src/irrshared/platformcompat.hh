@@ -36,4 +36,13 @@ const irr::fschar_t* getDefaultConfigPath();
  * @return the number of drives found
  */
 int getDriveList(irr::fschar_t*& drivespecs);
+/// Check if two paths are the same path
+/**
+ * @param path1 the first path to check
+ * @param path2 the second path to check
+ * @return true if the paths are the same path
+ * @note this handles if the paths are case sensitive or not
+ */
+bool samePath(irr::io::path path1, irr::io::path path2);
+
 #endif

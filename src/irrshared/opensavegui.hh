@@ -15,23 +15,33 @@ class OpenSaveGui : private BaseGui
   bool cancelClicked; ///< Has cancel been clicked yet?
   bool pathSelected; ///< Has an entry been selected in the path combi box
   bool itemSelected; ///< Has an entry been selected in the contents list
+  bool filterChanged; ///< Has an entry been selected in the contents list
+  int currentFilter;
 
   /// GUI element to input the file name to save/open the maze as/from
 
   irr::gui::IGUIEditBox * fileField;
   irr::gui::IGUIComboBox* pathfield;
   irr::gui::IGUIListBox * contentslist;
+  irr::gui::IGUIComboBox* filterfield;
 
   irr::io::IFileSystem* fs;
   irr::io::path path;
   irr::io::IFileList* rawfiles;
   irr::io::IFileList* filteredfiles;
 
+  int drivecount;
+  irr::io::path* drives;
+  irr::core::stringw* drivenames;
+
   /// An enum for button IDs
   enum
   {
     GUI_ID_OK_BUTTON=201, ///< ID for the ok button
     GUI_ID_CANCEL_BUTTON, ///< ID for the cancel button
+    GUI_ID_PATH_COMBO, ///< ID for the path combo box
+    GUI_ID_FILTER_COMBO, ///< ID for the filter combo box (if used)
+    GUI_ID_CONTENTS_LIST ///< ID for the contents list box
   };
   private:
     /// @copydoc BaseGui::OnEventImpl
@@ -40,8 +50,11 @@ class OpenSaveGui : private BaseGui
     void createGUI();
     /// @copydoc BaseGui::run
     bool run();
-
+    /// Populate the path combo box and contents list box with contents
     void populateWithFolderContents();
+
+    /// Populate the contents list box with the filtered contents
+    void populateWithFilteredContents();
   protected:
     /// Access the irrlicht device. Needed for access to irrlicht system
     /**
@@ -123,14 +136,33 @@ class OpenSaveGui : private BaseGui
       return INVALID;
     };
 
+    /// How many filters this gui has
+    /**
+     * return 0 to disable filters (the default implementation)
+     * @note If this value returned by this changes while a gui is displayed the result is undefined
+     * @return the filter count
+     */
+    virtual int filtercount() { return 0; }
+
+    /// get a filters name
+    /**
+     * filter 0 will be the default
+     * @note only used if filtercount returns >0.
+     * @note a don't filter option will be added
+     * @param i the index of the filter
+     * @return a name for the filters
+     */
+    virtual wchar_t* filtername(int i) { return L"Unknown filter"; }
+
     /// Filter the files and folders to show in the dialog
     /**
-     * @note the user will be presented an option show all files
+     * @note only used if filtercount returns >0.
+     * @name the user will be presented an option show all files
      * @param file the file to filter
      * @param folder is the file a folder
      * @return true if the file should be shown
      */
-	virtual bool filterfiles(const wchar_t* file, bool folder) { return true; };
+	virtual bool filterfiles(int i, const irr::fschar_t* file, bool folder) { return true; };
 
     /// Show the open/save gui
     /**

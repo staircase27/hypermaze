@@ -4,6 +4,7 @@
  */
 #include "opensavegui.hh"
 #include "irrcurl.hh"
+#include "platformcompat.hh"
 
 #include <iostream>
 
@@ -24,6 +25,8 @@ bool OpenSaveGui::display(irr::IrrlichtDevice* _device,FontManager* _fm){
   main(_device,_fm);
   fs->drop();
   fs=0;
+  delete[] drives;
+  delete[] drivenames;
   return true;
 };
 
@@ -42,8 +45,11 @@ bool OpenSaveGui::OnEventImpl(const irr::SEvent &event){
       okClicked=true;
       return true;
     }
-    if(event.GUIEvent.EventType == irr::gui::EGET_COMBO_BOX_CHANGED){
-      pathSelected=true;
+    if (event.GUIEvent.EventType == irr::gui::EGET_COMBO_BOX_CHANGED) {
+      if (event.GUIEvent.Caller->getID() == GUI_ID_PATH_COMBO)
+        pathSelected = true;
+      else
+        filterChanged = true;
     }
     if(event.GUIEvent.EventType == irr::gui::EGET_LISTBOX_SELECTED_AGAIN){
       itemSelected=true;
@@ -61,7 +67,7 @@ bool OpenSaveGui::OnEventImpl(const irr::SEvent &event){
 };
 
 void OpenSaveGui::createGUI(){
-  okClicked=cancelClicked=pathSelected=itemSelected=false;
+  okClicked=cancelClicked=pathSelected=itemSelected=filterChanged=false;
 
   irr::IVideoDriver* driver = getDevice()->getVideoDriver();
   irr::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
@@ -73,13 +79,34 @@ void OpenSaveGui::createGUI(){
   size.Height=min(600,size.Height-10);
 
   irr::core::stringw pathw(path);
-  pathfield = guienv->addComboBox(irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y-size.Height/2+32),getTopElement(),0);
+  pathfield = guienv->addComboBox(irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y-size.Height/2+32),getTopElement(),GUI_ID_PATH_COMBO);
 
-  contentslist = guienv->addListBox(irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+32+10,center.X+size.Width/2,center.Y+size.Height/2-32-10-32-10),getTopElement(),0,true);
+  irr::fschar_t* drive;
+  drivecount = getDriveList(drive);
+  drives = new irr::path[drivecount];
+  drivenames = new irr::stringw[drivecount];
+  for (int i = 0; i< drivecount; ++i) {
+    drives[i] = drive;
+    drive += strlen(drive) + 1;
+    drivenames[i] = drive;
+    drive += strlen(drive) + 1;
+  }
+
+  contentslist = guienv->addListBox(irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+32+10,center.X+size.Width/2,center.Y+size.Height/2-32-10-32-10),getTopElement(),GUI_ID_CONTENTS_LIST,true);
 
   populateWithFolderContents();
 
   fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y+size.Height/2-32-10-32,center.X+size.Width/2,center.Y+size.Height/2-32-10),true,getTopElement());
+
+  int filtercount = this->filtercount();
+  currentFilter = -1;
+  if (filtercount > 0) {
+    filterfield = guienv->addComboBox(irr::rect<irr::s32>(center.X - size.Width / 2, center.Y + size.Height / 2 - 32, center.X + size.Width / 2 - 220, center.Y + size.Height / 2), getTopElement(), GUI_ID_FILTER_COMBO);
+    for (int i = 0; i < filtercount; ++i)
+      filterfield->addItem(this->filtername(i), i + 1);
+    filterfield->addItem(L"All (*.*)", 0);
+    currentFilter = 0;
+  }
 
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+size.Height/2-32,center.X+size.Width/2-100,center.Y+size.Height/2),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel");
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,getButtonName());
@@ -91,24 +118,30 @@ void OpenSaveGui::createGUI(){
 
 void OpenSaveGui::populateWithFolderContents(){
   pathfield->clear();
-  pathfield->addItem(irr::stringw(path).c_str(),-1);
+  pathfield->addItem(irr::stringw(path).c_str(),0);
+  for (int i = 0; i < drivecount; ++i)
+    pathfield->addItem(drivenames[i].c_str(), i + 1);
   pathfield->setSelected(0);
-  contentslist->clear();
   if(rawfiles)
     rawfiles->drop();
-  if(filteredfiles)
-    filteredfiles->drop();
   rawfiles=fs->createFileList();
-  filteredfiles=fs->createEmptyFileList(path,false,false);
-  for(int i=0;i<rawfiles->getFileCount();++i){
+  populateWithFilteredContents();
+}
+void OpenSaveGui::populateWithFilteredContents() {
+  if (filteredfiles)
+    filteredfiles->drop();
+  contentslist->clear();
+  filteredfiles = fs->createEmptyFileList(path, false, false);
+  for (int i = 0; i < rawfiles->getFileCount(); ++i) {
     irr::core::stringw wname(rawfiles->getFileName(i));
-    if(filterfiles(wname.c_str(),rawfiles->isDirectory(i))){
-      filteredfiles->addItem(rawfiles->getFullFileName(i),rawfiles->getFileOffset(i),
-          rawfiles->getFileSize(i),rawfiles->isDirectory(i),i);
+    if (currentFilter==-1 || filterfiles(currentFilter,rawfiles->getFileName(i).c_str(), rawfiles->isDirectory(i))) {
+      filteredfiles->addItem(rawfiles->getFullFileName(i), rawfiles->getFileOffset(i),
+        rawfiles->getFileSize(i), rawfiles->isDirectory(i), i);
       contentslist->addItem(wname.c_str());
     }
   }
 }
+
 
 bool OpenSaveGui::run(){
   if(cancelClicked)
@@ -132,17 +165,25 @@ bool OpenSaveGui::run(){
       getDevice()->getGUIEnvironment()->setFocus(fileField);
     }else{
       irr::path filepath=fs->getAbsolutePath(file);
-      E_PATH_TYPE type=((irr::stringw(file)==L".")||(irr::stringw(file)==L"..")||(irr::stringw(file)==L"/"))?FOLDER:ABSENT;
+      if(filepath.lastChar()=='/'){
+        filepath.erase(filepath.size() - 1);
+      }
+      E_PATH_TYPE type=((irr::stringw(file)==L".")||(irr::stringw(file)==L"..") || (irr::stringw(file) == L"/") || (irr::stringw(file) == L"\\"))?FOLDER:ABSENT;
+      if (type == ABSENT)
+        for (int i = 0; i < drivecount; ++i)
+          if (samePath(drives[i], filepath)) {
+            type = FOLDER;
+            break;
+          }
       if(type==ABSENT){
         irr::path dir=fs->getFileDir(filepath);
-        if(dir=="")
-          dir="/";
-        if(dir==path){
+        if(samePath(dir,path)){
           if(rawfiles->findFile(filepath,true)!=-1)
             type=FOLDER;
           if(type==ABSENT && rawfiles->findFile(filepath,false)!=-1)
             type=FILE;
         }else{
+          dir.append("/");
           if(fs->changeWorkingDirectoryTo(dir)){
             irr::IFileList* fl=fs->createFileList();
             if(fl->findFile(filepath,true)!=-1)
@@ -162,8 +203,9 @@ bool OpenSaveGui::run(){
           }
           break;
         case CHANGEDIR:
-          path=filepath;
-          fs->changeWorkingDirectoryTo(path);
+          filepath.append("/");
+          fs->changeWorkingDirectoryTo(filepath);
+          path = fs->getWorkingDirectory();
           populateWithFolderContents();
           fileField->setText(L"");
           break;
@@ -178,16 +220,16 @@ bool OpenSaveGui::run(){
     if(index>=0){
       getTopElement()->setVisible(false);
       E_PATH_TYPE type=filteredfiles->isDirectory(index)?FOLDER:FILE;
-      switch(this->select(filteredfiles->getFileName(index).c_str(),type)){
+      switch(this->select(filteredfiles->getFullFileName(index).c_str(),type)){
         case PROCESS:
-          if(this->process(filteredfiles->getFileName(index).c_str())){
+          if(this->process(filteredfiles->getFullFileName(index).c_str())){
             okClicked=true;
             return false;
           }
           break;
         case CHANGEDIR:
-          path=fs->getAbsolutePath(filteredfiles->getFileName(index));
-          fs->changeWorkingDirectoryTo(path);
+          fs->changeWorkingDirectoryTo(fs->getAbsolutePath(filteredfiles->getFileName(index)));
+          path = fs->getWorkingDirectory();
           populateWithFolderContents();
           fileField->setText(L"");
           break;
@@ -198,10 +240,24 @@ bool OpenSaveGui::run(){
   }
   if(pathSelected){
     pathSelected=false;
-    if(pathfield->getSelected()!=0){
-      // do something
+    int i = pathfield->getSelected();
+    if(i>0){ // do nothing for nothing selected or current path selected
+      irr::u32 data = pathfield->getItemData(i);
+      if (data > 0) {
+        fs->changeWorkingDirectoryTo(drives[i - 1]);
+        path = fs->getWorkingDirectory();
+        populateWithFolderContents();
+        fileField->setText(L"");
+      }
     }
     getDevice()->getGUIEnvironment()->setFocus(fileField);
+  }
+  if (filterChanged) {
+    filterChanged = false;
+    if (filterfield->getSelected() < 0)
+      filterfield->setSelected(0);
+    currentFilter = filterfield->getItemData(filterfield->getSelected())-1;
+    populateWithFilteredContents();
   }
   return true;
 }
