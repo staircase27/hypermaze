@@ -1,1 +1,7 @@
 /usr/share/hypermaze
+res/icons/16/hypermaze.png /usr/share/icons/hicolor/16x16/apps/
+res/icons/32/hypermaze.png /usr/share/icons/hicolor/32x32/apps/
+res/icons/48/hypermaze.png /usr/share/icons/hicolor/48x48/apps/
+res/icons/64/hypermaze.png /usr/share/icons/hicolor/64x64/apps/
+res/icons/256/hypermaze.png /usr/share/icons/hicolor/256x256/apps/
+res/icons/scalable/hypermaze.svg /usr/share/icons/hicolor/scalable/apps/
