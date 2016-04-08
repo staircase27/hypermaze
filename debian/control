@@ -1,0 +1,23 @@
+Source: hypermaze
+Section: games
+Priority: optional
+Maintainer: staircase <staircase@darkfieldgames.com>
+Build-Depends: debhelper (>= 9.0.0), cmake	
+Standards-Version: 3.9.5
+Homepage: http://darkfieldgames.com/games/hypermaze
+#Vcs-Git: git://git.debian.org/collab-maint/hypermaze.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/hypermaze.git;a=summary
+
+Package: hypermaze
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, hypermaze-data (=${source:Version})
+Description: 3D maze like puzzle where you have to get a "string" through a "maze"
+ For more explanations run the puzzle or for information about hypermazes in
+ general see http://www.astrolog.org/labyrnth/hypermaz.htm. A tutorial and a
+ level generator are included.
+
+Package: hypermaze-data
+Architecture: all
+Depends: ${misc:Depends}
+Description: architecture independent data for hypermaze
+ Textures, models, sounds and example levels for hypermaze

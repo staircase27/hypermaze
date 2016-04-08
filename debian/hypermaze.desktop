@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Hypermaze
+Comment=3D maze like puzzle game
+Exec=hypermaze
+Terminal=false
+Type=Application
+Icon=hypermaze
+Categories=Game;LogicGame;
+StartupNotify=true
+
