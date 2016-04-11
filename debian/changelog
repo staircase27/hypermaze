@@ -3,13 +3,13 @@ hypermaze (1.0.0~pre2) wily; urgency=medium
   * Converted version numbers to git-buildpackage compatible (~ -> _)
   * UNRELEASED
 
- -- Simon Armstrong <simon@Simons-laptop>  Mon, 11 Apr 2016 09:46:18 +0100
+ -- Simon Armstrong <staircase@darkfieldgames.com>  Mon, 11 Apr 2016 09:46:18 +0100
 
 hypermaze (1.0.0~pre1) wily; urgency=low
 
   * Debian source package and cmake projectw
 
- -- Simon Armstrong <simon@Simons-laptop>  Mon, 11 Apr 2016 09:31:08 +0100
+ -- Simon Armstrong <staircase@darkfieldgames.com>  Mon, 11 Apr 2016 09:31:08 +0100
 
 hypermaze (1.0.0~pre0) wiley; urgency=low
 
