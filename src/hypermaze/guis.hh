@@ -326,7 +326,7 @@ class OpenGui: private OpenSaveGui{
     /**
      * This loads the maze from the url specified and shows an error message if anything failed
      */
-    bool processURL(const wchar_t* file);
+    bool processURL(const wchar_t* url);
     /// @copydoc OpenSaveGui::filtercount
     /**
      * this has 1 filter

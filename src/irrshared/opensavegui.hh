@@ -16,23 +16,23 @@ class OpenSaveGui : private BaseGui
   bool pathSelected; ///< Has an entry been selected in the path combi box
   bool itemSelected; ///< Has an entry been selected in the contents list
   bool filterChanged; ///< Has an entry been selected in the contents list
-  int currentFilter;
+  int currentFilter; ///< The index of the currently selected filter
 
   /// GUI element to input the file name to save/open the maze as/from
 
-  irr::gui::IGUIEditBox * fileField;
-  irr::gui::IGUIComboBox* pathfield;
-  irr::gui::IGUIListBox * contentslist;
-  irr::gui::IGUIComboBox* filterfield;
+  irr::gui::IGUIEditBox * fileField; ///< The field for the user to enter a filename in
+  irr::gui::IGUIComboBox* pathfield; ///< The current path and options to select other paths
+  irr::gui::IGUIListBox * contentslist; ///< The contents of the current folder
+  irr::gui::IGUIComboBox* filterfield; ///< The filters available
 
-  irr::io::IFileSystem* fs;
-  irr::io::path path;
-  irr::io::IFileList* rawfiles;
-  irr::io::IFileList* filteredfiles;
+  irr::io::IFileSystem* fs; ///< The irrlicht filesystem object
+  irr::io::path path; ///< The current path
+  irr::io::IFileList* rawfiles; ///< The raw list of files in the current directory
+  irr::io::IFileList* filteredfiles; ///< The filtered list of files in the current directory
 
-  int drivecount;
-  irr::io::path* drives;
-  irr::core::stringw* drivenames;
+  int drivecount; ///< The number of drives found
+  irr::io::path* drives; ///< an array of the drives found
+  irr::core::stringw* drivenames; ///< an array of the names of the drives found
 
   /// An enum for button IDs
   enum
@@ -106,7 +106,7 @@ class OpenSaveGui : private BaseGui
 
     /// Process the selected file
     /**
-     * @param file the file to select.
+     * @param url the url to select.
      * @return true if the file is valid and has been processed successfully
      * @note if false is returned this function should show an error message first to explain the problem
      */
@@ -128,9 +128,8 @@ class OpenSaveGui : private BaseGui
     };
     /// Can the specified url be selected and if so what should happen
     /**
-     * @param file the file to select.
-     * @param type if the selection is file, folder or not yet created
-     * @return true if the url should be processed (options are equivelent to PROCESS and INVALID)
+     * @param url the url to select.
+     * @return true if the url should be processed (options are equivalent to PROCESS and INVALID)
      */
     virtual bool selectURL(const wchar_t* url){
       return INVALID;
@@ -157,7 +156,8 @@ class OpenSaveGui : private BaseGui
     /// Filter the files and folders to show in the dialog
     /**
      * @note only used if filtercount returns >0.
-     * @name the user will be presented an option show all files
+     * @note the user will be presented an option show all files
+     * @param i the index of the currently selected filter
      * @param file the file to filter
      * @param folder is the file a folder
      * @return true if the file should be shown
