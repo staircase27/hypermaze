@@ -2,7 +2,7 @@ Source: hypermaze
 Section: games
 Priority: optional
 Maintainer: staircase <staircase@darkfieldgames.com>
-Build-Depends: debhelper (>= 9.0.0), cmake, libirrlicht-dev (>= 1.8), libcurl-dev, libalut-dev (>= 1.1), libopenal-dev (>= 1.1)
+Build-Depends: debhelper (>= 9.0.0), cmake (>= 2.8.12), g++ | c++-compiler, libirrlicht-dev (>= 1.8), libcurl4-openssl-dev | libcurl4-dev, libalut-dev (>= 1.1), libopenal-dev (>= 1.1)
 Standards-Version: 3.9.5
 Homepage: http://darkfieldgames.com/games/hypermaze
 #Vcs-Git: git://git.debian.org/collab-maint/hypermaze.git
@@ -20,4 +20,9 @@ Package: hypermaze-data
 Architecture: all
 Depends: ${misc:Depends}
 Description: architecture independent data for hypermaze
- Textures, models, sounds and example levels for hypermaze
+ hypermaze is a 3D maze like puzzle where you have to get a "string" through a 
+ "maze". For more explanations run the puzzle or for information about
+ hypermazes in general see http://www.astrolog.org/labyrnth/hypermaz.htm. A
+ tutorial and a level generator are included.
+ . 
+ This package contains the textures, models, sounds and example levels

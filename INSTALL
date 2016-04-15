@@ -1,57 +1,119 @@
-Dependancies
+How to Install
+**************
+
+For debian/ubuntu like systems there are two ways of installing: the dpkg based
+method or the cmake based method. If you want to access the extra tools
+levelgen and scriptedit then it is required to use the cmake based build.
+
+For windows and other unix systems there is only one way to install which is
+the one described below in the section titled cmake based install
+
+Sadly for macs I haven't configured the build system due to lack of access to a
+mac to test it on. If you want to try and build it and work out how then let me know.
+
+
+Dependencies
 ************
 
-Before instalation can be started a few libraries must be installed.
+Before installation can be started a few libraries and tools must be installed.
 
-The only compulsary library is Irrlicht (http://irrlicht.sourceforge.net/)
+In a dpkg based installation you can check exactly which packages are needed by
+running `dpkg-checkbuilddeps` in the top folder of the downloaded source tree
+which lists the missing dependencies. If you downloaded the source from the
+source ppa repository these can be installed using the command
+`apt-get build-dep hypermaze`. Otherwise install them my your normal package
+installation method.
 
-There are various optional libraries that enable other features to be used which are:
- * For url and internet access to levels - libCURL (https://curl.haxx.se/libcurl/)
- * For sound ALUT and OpenAL (Hard to find. Often available in linux distros)
+For other systems the libraries will have to be installed manually. For all of
+them the development version including headers are needed.
 
-Note that for compiling the dev versions of packages will be needed as well as the actual library
+The only compulsory library is Irrlicht (http://irrlicht.sourceforge.net/)
 
-Installation Instructions
-*************************
+There are various optional libraries that enable other features to be used
+which are:
+ * For url and internet access to levels - libCURL
+     (https://curl.haxx.se/libcurl/)
+ * For sound ALUT and OpenAL (Hard to find for windows. Often available in
+     linux distros)
+
+We also require cmake and a valid c++ build system to build the program
+
+cmake can be downloaded and installed from http://www.cmake.org/
+or using your systems package repository system (where relevent). Note some
+systems have multiple frontends for cmake that provide easier ways to configure
+the build process.
+
+
+dpkg Based Installation Instructions
+************************************
+
+If everything is installed then building is as simple as running either
+`dpkg-buildpackage` or `debuilder` in the source tree which should place the
+resulting packages in the parent directory. These can then be installed using
+`dpkg -i` or your systems package installer.
+
+
+cmake Based Installation Instructions
+*************************************
 
 This program is configured for build and install using the cmake system.
 
-The first step to building and installing this program is to download and
-install cmake. It can be downloaded and installed from http://www.cmake.org/
-or using your systems package repository system (where relevent). Note some
-systems have multiple frontends for cmake.
-
-To configure the program, first make a directory to build the code in, and then
-in that folder run
+To configure the program, first make a directory to build the code in (ideally
+not the source folder but this can be done), and then in that folder run
         cmake -G <GENERATOR> <PATH_TO_SOURCE>
-where <GENERATOR> is the name of the build system to setup for and 
-<PATH TO SOURCE> is the path to the folder contaning this file. The list of
+where <GENERATOR> is the name of the build system to setup for and
+<PATH TO SOURCE> is the path to the folder containing this file. The list of
 generators available will vary from system to system. See `cmake --help` for
 the full list.
 
 If there are any problems or libraries not found then cmake will print an error
-message. Set the relevent variables (using -Dvar=value or a gui) and rerun till
-cmake has found all the relevent libraries. Some libraries are optional. A
-message will be printed if they aren't found and relevent features will be
-turned off.
+message. Note that only irrlicht is required so even if other libraries are
+missing it will setup a valid build system. A for all libraries including
+optional ones and  and features depending on the optional libraries will be
+turned off.To help cmake find any missing libraries set the relevant variables
+(using -Dvar=value or a gui) and rerun till cmake has found all the libraries.
 
-There are also settings for the install location (CMAKE_INSTALL_PREFIX=guessed 
+There are also settings for the install location (CMAKE_INSTALL_PREFIX=guessed
 by cmake) and build type (CMAKE_BUILD_TYPE="Debug", "Release", "RelWithDebInfo"
 or "MinSizeRel").
 
-If using a gui version then the instructions will be slightly differnet but the
+If using a gui version then the instructions will be slightly different but the
 basic idea is the same. For the interactive terminal version just replace cmake
 with ccmake in the above command. For the qt or windows gui version run the
 program then fill in build directory, path to source and generator when
 requested.
 
-If using a makefile based generator, use the commands
-        make && make install
-to make and then install the main program
+The next instructions depend on what type of generator was chosen at the start.
 
-To build packages that cab be installed later use the "package" target. The
+For an IDE based generator open the program and open the project which will
+have been generated in the build directory.
+
+For a makefile based generator, use the command
+        make
+to build the package and then
+        make install
+to install the program. The install step may need higher privileges but how
+to do this is system dependent.
+
+For other build systems see it's documentation. Generally all files you will
+need to use to build will be in the build directory.
+
+To build packages that can be installed later use the "package" target. The
 types of packages that will be built is configured using cmake by setting
 variables of the form CPACK_BINARY_* and CPACK_SOURCE_*
 
 The build system will also include targets to build the levelgen and scriptedit
 programs but these can't installed and aren't compiled by default.
+
+
+Running hypermaze
+*****************
+
+As hypermaze needs to find resource files it is not possible to run directly
+from the build tree without setting up a few environment variables. For most
+build systems there will be a "run" target that will do this required setup and
+run the hypermaze program from the build tree. For some IDEs this target is
+disabled but the built in run feature is configured to do the setup for you.
+
+Once installed the program can just be run without any extra environment
+variables needing to be set.

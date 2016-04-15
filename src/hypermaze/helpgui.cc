@@ -64,12 +64,15 @@ void HelpGui::createGUI(){
   text->setOverrideFont(0,getFontManager()->getFont(24,true));
   text->setAllTextAlignment(irr::gui::EGUIA_CENTER,irr::gui::EGUIA_CENTER);
   text->addText(L"\nBend, Stretch and Move the String through the maze to get it to the far"
-                L" side of the hyper maze.\n Either click and drag on the controls or use the"
-                L" keyboard controls set below.\n\n\nGame written by Staircase in association"
+                L" side of the hypermaze.\n To move the string either right click to select and"
+                L" left click and drag to move the string or use the keyboard controls set below."
+                L"\nIt is also possible hide parts of the maze by dragging on the blobs."
+                L"\n\n\nGame written by Staircase in association"
                 L" with Dark Field Games. http://www.darkfieldgames.com/\nThis game is released"
-                L" open source under the ***** licence. Feel free to edit and change as you like."
+                L" open source under the GPLv2 licence. Feel free to edit and change as you like."
                 L" If you make any improvements or new ideas please send them me them and I may"
-                L" include them in the next release (and thank you below)");
+                L" include them in the next release (and thank you below)\n\nThanks go to Ptsnoop,"
+                L"cosmosquark and David for testing and helping iron out the many bugs");
   text->drop();
 
   guienv->addButton(irr::core::rect<irr::s32>(center.X-75,center.Y+size.Height/2-32-32-10,

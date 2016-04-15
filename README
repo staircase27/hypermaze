@@ -1,3 +1,5 @@
 3D maze like puzzle where you have to get a "string" through a "maze".
-For more explanations run the puzzle or for information about hypermazes in general 
+For more explanations run the puzzle or for information about hypermazes in general
 see http://www.astrolog.org/labyrnth/hypermaz.htm
+
+See the INSTALL file for how to build and install
