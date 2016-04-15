@@ -76,9 +76,9 @@ if(UNIX)
    set(DATADIR "share/hypermaze")
    string(REGEX MATCH "^/usr(/|$)" INSTALL_IN_USR "${CMAKE_INSTALL_PREFIX}")
    if(INSTALL_IN_USR)
-     set(SYSTEMCONFIGDIR "/etc/hypermaze/")
+     set(SYSTEMCONFDIR "/etc/hypermaze/")
    else(INSTALL_IN_USR)
-     GET_FILENAME_COMPONENT(SYSTEMCONFIGDIR "${CMAKE_INSTALL_PREFIX}/etc/hypermaze" ABSOLUTE)
+     GET_FILENAME_COMPONENT(SYSTEMCONFDIR "${CMAKE_INSTALL_PREFIX}/etc/hypermaze" ABSOLUTE)
    endif(INSTALL_IN_USR)
    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:IOSTREAM>)
    set_property(TARGET hypermaze APPEND PROPERTY COMPILE_DEFINITIONS UNIX DATADIR="${CMAKE_INSTALL_PREFIX}/${DATADIR}" SYSTEMCONFDIR="${SYSTEMCONFDIR}")
@@ -384,7 +384,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "3D maze like puzzle")
 
 set(CPACK_STRIP_FILES "ON")
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CPackExtra.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/CPackExtra.cmake" @ONLY) 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CPackExtra.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/CPackExtra.cmake" @ONLY)
 
 set(CPACK_PROJECT_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/CPackExtra.cmake")
 
@@ -408,7 +408,7 @@ set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "3D maze like puzzle where you have to get 
 
 # NSIS windows installer options
 
-set(CPACK_NSIS_PACKAGE_NAME "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}") # should still show full version even though install version only contains 
+set(CPACK_NSIS_PACKAGE_NAME "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}") # should still show full version even though install version only contains
 
 set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_PACKAGE_NAME}")
 

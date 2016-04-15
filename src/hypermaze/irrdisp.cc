@@ -1,4 +1,9 @@
+/**
+ * @file irrdisp.cc
+ * @brief The implementation of irrdisp.hh
+ */
 #include "irrdisp.hh"
+#include "irrdispimp.hh"
 #include "controller.hh"
 #include "../core/script.hh"
 #include "guis.hh"
@@ -13,8 +18,8 @@ namespace irr{
   using namespace scene;
 }
 
-const double MazeDisplay::wall = 5;
-const double MazeDisplay::gap = 20;
+const double WALL_SIZE = 5;
+const double GAP_SIZE = 20;
 
 void MazeDisplay::init(Maze& m,NodeGen* ng,irr::vector3df center){
   for(set<Dirn>::iterator d=dirns.begin();d!=dirns.end();++d){
@@ -29,7 +34,7 @@ void MazeDisplay::init(Maze& m,NodeGen* ng,irr::vector3df center){
         2*m.size().dotProduct(to_vector(*d))-1,(vector<VisibleCounter*>*)NULL);
   }
 
-  irr::vector3df position=center-(wall+gap)*con(m.size()-Vector(1,1,1))/2;
+  irr::vector3df position=center-(WALL_SIZE+GAP_SIZE)*con(m.size()-Vector(1,1,1))/2;
 
   for(int x=0;x<m.size().X;++x)
     for(int y=0;y<m.size().Y;++y)
@@ -38,8 +43,8 @@ void MazeDisplay::init(Maze& m,NodeGen* ng,irr::vector3df center){
         irr::IMeshSceneNode* node = ng->makeUnitWall(true);
         node->grab();
 
-        node->setScale(irr::vector3df(wall,wall,wall));
-        node->setPosition(position+con(pos)*(wall+gap));
+        node->setScale(irr::vector3df(WALL_SIZE,WALL_SIZE,WALL_SIZE));
+        node->setPosition(position+con(pos)*(WALL_SIZE+GAP_SIZE));
 
         VisibleCounter* vc=new VisibleCounter(node);
         for(set<Dirn>::iterator dir=dirns.begin();dir!=dirns.end();++dir){
@@ -53,9 +58,9 @@ void MazeDisplay::init(Maze& m,NodeGen* ng,irr::vector3df center){
             irr::IMeshSceneNode* node = ng->makeUnitWall(false);
             node->grab();
 
-            node->setScale(wall*irr::vector3df(1,1,1)+(gap-wall)*remSgn(con(to_vector(*d))));
+            node->setScale(WALL_SIZE*irr::vector3df(1,1,1)+(GAP_SIZE-WALL_SIZE)*remSgn(con(to_vector(*d))));
 
-            node->setPosition(position+con(pos)*(wall+gap)+con(to_vector(*d))*(wall+gap)/2);
+            node->setPosition(position+con(pos)*(WALL_SIZE+GAP_SIZE)+con(to_vector(*d))*(WALL_SIZE+GAP_SIZE)/2);
 
             VisibleCounter* vc=new VisibleCounter(node);
             for(set<Dirn>::iterator dir=dirns.begin();dir!=dirns.end();++dir){
@@ -114,18 +119,18 @@ bool MazeDisplay::hideSide(Dirn side,bool out){
   return true;
 }
 void StringDisplay::update(){
-  irr::vector3df position=center-(MazeDisplay::wall+MazeDisplay::gap)*con(s->maze.size())/2;
+  irr::vector3df position=center-(WALL_SIZE+GAP_SIZE)*con(s->maze.size())/2;
   bool active=false;
   int i=0;
   list<irr::IMeshSceneNode*>::iterator nit=nodes.begin();
   StringPointer sit=s->begin();
 
-  startEnd->setPosition(position+con(s->getStart())*(MazeDisplay::wall+MazeDisplay::gap)
-      -con(to_vector(s->stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
-  startEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s->stringDir))));
-  endEnd->setPosition(position+con(s->getEnd())*(MazeDisplay::wall+MazeDisplay::gap)
-      +con(to_vector(s->stringDir))*(MazeDisplay::wall/2+MazeDisplay::gap/2));
-  endEnd->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(s->stringDir))));
+  startEnd->setPosition(position+con(s->getStart())*(WALL_SIZE+GAP_SIZE)
+      -con(to_vector(s->stringDir))*(WALL_SIZE/2+GAP_SIZE/2));
+  startEnd->setScale(WALL_SIZE*irr::vector3df(1,1,1)+(GAP_SIZE-WALL_SIZE)*remSgn(con(to_vector(s->stringDir))));
+  endEnd->setPosition(position+con(s->getEnd())*(WALL_SIZE+GAP_SIZE)
+      +con(to_vector(s->stringDir))*(WALL_SIZE/2+GAP_SIZE/2));
+  endEnd->setScale(WALL_SIZE*irr::vector3df(1,1,1)+(GAP_SIZE-WALL_SIZE)*remSgn(con(to_vector(s->stringDir))));
 
   while(sit!=s->end()){
 
@@ -133,8 +138,8 @@ void StringDisplay::update(){
       nit=nodes.insert(nit,ng->makeUnitString(true));
       (*nit)->setID(STRING_ID+i);
     }
-    (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1));
-    (*nit)->setPosition(position+con(sit->pos)*(MazeDisplay::wall+MazeDisplay::gap));
+    (*nit)->setScale(WALL_SIZE*irr::vector3df(1,1,1));
+    (*nit)->setPosition(position+con(sit->pos)*(WALL_SIZE+GAP_SIZE));
     if(i>=activeNodes)
       (*nit)->setVisible(true);
 
@@ -148,8 +153,8 @@ void StringDisplay::update(){
       nit=nodes.insert(nit,ng->makeUnitString(false));
       (*nit)->setID(STRING_ID+i);
     }
-    (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1)+(MazeDisplay::gap-MazeDisplay::wall)*remSgn(con(to_vector(sit->d))));
-    (*nit)->setPosition(position+con(sit->pos)*(MazeDisplay::wall+MazeDisplay::gap)+(MazeDisplay::gap+MazeDisplay::wall)*con(to_vector(sit->d))/2);
+    (*nit)->setScale(WALL_SIZE*irr::vector3df(1,1,1)+(GAP_SIZE-WALL_SIZE)*remSgn(con(to_vector(sit->d))));
+    (*nit)->setPosition(position+con(sit->pos)*(WALL_SIZE+GAP_SIZE)+(GAP_SIZE+WALL_SIZE)*con(to_vector(sit->d))/2);
     if(i>=activeNodes)
       (*nit)->setVisible(true);
 
@@ -165,8 +170,8 @@ void StringDisplay::update(){
     nit=nodes.insert(nit,ng->makeUnitString(true));
     (*nit)->setID(STRING_ID+i);
   }
-  (*nit)->setScale(MazeDisplay::wall*irr::vector3df(1,1,1));
-  (*nit)->setPosition(position+con(s->getEnd())*(MazeDisplay::wall+MazeDisplay::gap));
+  (*nit)->setScale(WALL_SIZE*irr::vector3df(1,1,1));
+  (*nit)->setPosition(position+con(s->getEnd())*(WALL_SIZE+GAP_SIZE));
   if(i>=activeNodes)
     (*nit)->setVisible(true);
 
@@ -222,11 +227,11 @@ pair<StringPointer,bool> StringDisplay::getStringPointer(irr::ISceneNode* node){
     return pair<StringPointer,bool>(sit,false);
 }
 
-PuzzleDisplay::PuzzleDisplay(NodeGen* ng,irr::IrrlichtDevice* device,FontManager* fm,SoundManager* sm):m(Vector(5,5,5)),sc(),s(new String(m)),sp(s),ng(ng),md(m,ng),sd(s,ng),won(false),device(device),fm(fm),sm(sm){
+PuzzleDisplay::PuzzleDisplay(NodeGen* ng,irr::IrrlichtDevice* device,FontManager* fm,SoundManager* sm):m(Vector(5,5,5)),sc(),s(new String(m)),sp(s),ng(ng),md(new MazeDisplay(m,ng)),sd(new StringDisplay(s,ng)),won(false),device(device),fm(fm),sm(sm){
   for(Dirn* d=allDirns;d!=allDirns+6;++d){
     irr::scene::IMeshSceneNode* node = ng->makeUnitHandle(to_vector(*d).dotProduct(to_vector(s->targetDir)));
-    node->setScale(irr::core::vector3df(1,1,1)*(md.wall+md.gap)/2);
-    node->setPosition(-con(to_vector(*d))*(abs(to_vector(*d).dotProduct(m.size()))/2+2)*(md.wall+md.gap));
+    node->setScale(irr::core::vector3df(1,1,1)*(WALL_SIZE+GAP_SIZE)/2);
+    node->setPosition(-con(to_vector(*d))*(abs(to_vector(*d).dotProduct(m.size()))/2+2)*(WALL_SIZE+GAP_SIZE));
     slicers[node]=*d;
   }
 };
@@ -241,75 +246,98 @@ SP<Dirn> PuzzleDisplay::getSlicerDirn(irr::ISceneNode* slicer){
 }
 
 pair<StringPointer,bool> PuzzleDisplay::getStringPointer(irr::ISceneNode* node){
-  return sd.getStringPointer(node);
+  return sd->getStringPointer(node);
 }
 
-void PuzzleDisplay::win(){
+void PuzzleDisplay::win(MultiInterfaceController* c){
   ScriptResponseWin r=sc.runWin(s);
   if(r.stringChanged)
-    sd.update();
+    sd->update();
   else if(r.stringSelectionChanged)
-    sd.updateActive();
+    sd->updateActive();
   if(r.stringChanged||r.stringSelectionChanged)
     sp.externalEditHappened();
-  MessageGui g;
-  for(int i=0;i<r.messageCount;++i)
+  if(r.messageCount>0){
+    MessageGui g;
+    c->showGUI(false);
+    for(int i=0;i<r.messageCount;++i)
       g.message(device,fm,r.messages[i]);
+    c->showGUI(true);
+  }
   if(r.block)
     return;
   won=true;
   if(sm)
     sm->playEffect(SoundManager::SE_WIN);
   if(device){
+    c->showGUI(false);
     WinGui wg;
-    wg.won(device,fm,*this,r.winMessage,r.nextLevel);
+    if(wg.won(device,fm,*this,r.winMessage,r.nextLevel))
+      mazeUpdated(c);
+    c->showGUI(true);
   }
 }
 
-void PuzzleDisplay::stringUpdated(){
+void PuzzleDisplay::stringUpdated(MultiInterfaceController* c){
   ScriptResponseMove r=sc.runMove(s);
-  sd.update();
+  sd->update();
   if(r.stringChanged||r.stringSelectionChanged)
     sp.externalEditHappened();
-  MessageGui g;
-  for(int i=0;i<r.messageCount;++i)
+  if(r.messageCount>0){
+    MessageGui g;
+    c->showGUI(false);
+    for(int i=0;i<r.messageCount;++i)
       g.message(device,fm,r.messages[i]);
+    c->showGUI(true);
+  }
   if((!won) && (s->hasWon()||r.forceWin))
-    win();
+    win(c);
 };
-void PuzzleDisplay::stringSelectionUpdated(){
+void PuzzleDisplay::stringSelectionUpdated(MultiInterfaceController* c){
   ScriptResponseSelect r=sc.runSelect(s);
   if(r.stringChanged)
-    sd.update();
+    sd->update();
   else
-    sd.updateActive();
+    sd->updateActive();
   if(r.stringChanged||r.stringSelectionChanged)
     sp.externalEditHappened();
-  MessageGui g;
-  for(int i=0;i<r.messageCount;++i)
+  if(r.messageCount>0){
+    MessageGui g;
+    c->showGUI(false);
+    for(int i=0;i<r.messageCount;++i)
       g.message(device,fm,r.messages[i]);
+    c->showGUI(true);
+  }
   if((!won) && r.forceWin)
-    win();
+    win(c);
 };
-void PuzzleDisplay::mazeUpdated(){
-    md.clear();
-    md.init(m,ng);
-    s=SP<String>(new String(m));
-    sp.SetString(s);
-    sd.setString(s);
-    for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
-      slicer->first->setPosition(-con(to_vector(slicer->second))*(abs(to_vector(slicer->second).dotProduct(m.size()))/2+2)*(md.wall+md.gap));
-    won=false;
-    ScriptResponseStart r=sc.runStart(s);
-    if(r.stringChanged)
-      sd.update();
-    else if(r.stringSelectionChanged)
-      sd.updateActive();
-  MessageGui g;
-  for(int i=0;i<r.messageCount;++i)
+void PuzzleDisplay::mazeUpdated(MultiInterfaceController* c){
+  md->clear();
+  md->init(m,ng);
+  s=SP<String>(new String(m));
+  sp.SetString(s);
+  sd->setString(s);
+  for(map<irr::ISceneNode*,Dirn>::iterator slicer=slicers.begin();slicer!=slicers.end();++slicer)
+    slicer->first->setPosition(-con(to_vector(slicer->second))*(abs(to_vector(slicer->second).dotProduct(m.size()))/2+2)*(WALL_SIZE+GAP_SIZE));
+  won=false;
+  ScriptResponseStart r=sc.runStart(s);
+  if(r.stringChanged)
+    sd->update();
+  else if(r.stringSelectionChanged)
+    sd->updateActive();
+  if(r.messageCount>0){
+    MessageGui g;
+    c->showGUI(false);
+    for(int i=0;i<r.messageCount;++i)
       g.message(device,fm,r.messages[i]);
+    c->showGUI(true);
+  }
 };
 bool PuzzleDisplay::hideSide(Dirn side,bool out){
-  return md.hideSide(side,out);
+  return md->hideSide(side,out);
 };
 
+PuzzleDisplay::~PuzzleDisplay(){
+  delete md;
+  delete sd;
+}

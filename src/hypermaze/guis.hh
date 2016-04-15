@@ -390,7 +390,7 @@ class WinGui: private BaseGui{
      * @param pd the puzzle display to store the loaded maze and script into
      * @param m a message to show on the win gui. Usually set by the current level's script
      * @param nextLevel the name and path for the next level. Usually set by the current level's script
-     * @return true
+     * @return true if a new maze was loaded or generated
      */
     bool won(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd,const Message& m, Pair<SPA<const char> > nextLevel);
 

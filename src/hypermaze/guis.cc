@@ -801,7 +801,7 @@ bool WinGui::won(irr::IrrlichtDevice* _device,FontManager* _fm,PuzzleDisplay& pd
   this->m=m;
   this->nextLevel=nextLevel;
   main(_device,_fm);
-  return true;
+  return loadClicked || generateClicked || nextClicked;
 }
 
 void WinGui::createGUI(){
@@ -851,13 +851,13 @@ bool WinGui::run(){
   }
   if(nextClicked){
     getTopElement()->setVisible(false);
-    nextClicked=false;
     irr::IReadFile* in=createAndOpen(getDevice()->getFileSystem(),&*nextLevel.a);
     if(!in){
       ErrorGui eg;
       eg.error(getDevice(),getFontManager(),L"Error Opening File","Can't open next level.");
       keyblock=getDevice()->getTimer()->getTime()+500;
       getTopElement()->setVisible(true);
+      nextClicked=false;
       return true;
     }
     IrrHypIStream is(in);
@@ -886,7 +886,6 @@ bool WinGui::run(){
     getTopElement()->setVisible(false);
     OpenGui og;
     if(og.open(getDevice(),getFontManager(),*pd)){
-      pd->mazeUpdated();
       return false;
     }
     getTopElement()->setVisible(true);
@@ -897,7 +896,6 @@ bool WinGui::run(){
     getTopElement()->setVisible(false);
     GenerateGui gg;
     if(gg.generate(getDevice(),getFontManager(),*pd)){
-      pd->mazeUpdated();
       return false;
     }
     getTopElement()->setVisible(true);

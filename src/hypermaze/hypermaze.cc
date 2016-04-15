@@ -228,12 +228,13 @@ int main(int argc,char* argv[]){
     }
   }
 
-  FontManager fm(device->getFileSystem(),device->getGUIEnvironment());
+  irr::gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
+  FontManager fm(device->getFileSystem(),guienv);
   {
-    device->getGUIEnvironment()->getSkin()->setFont(fm.getFont(16));
-    irr::SColor c=device->getGUIEnvironment()->getSkin()->getColor(irr::EGDC_3D_HIGH_LIGHT);
+    guienv->getSkin()->setFont(fm.getFont(16));
+    irr::SColor c=guienv->getSkin()->getColor(irr::EGDC_3D_HIGH_LIGHT);
     c.setAlpha(170);
-    device->getGUIEnvironment()->getSkin()->setColor(irr::EGDC_3D_HIGH_LIGHT,c);
+    guienv->getSkin()->setColor(irr::EGDC_3D_HIGH_LIGHT,c);
   }
 
   device->setWindowCaption(L"Hyper Maze");
@@ -273,7 +274,7 @@ int main(int argc,char* argv[]){
 
   PuzzleDisplay pd(ng,device,&fm,sm);
 
-  Controller* c=new MultiInterfaceController(pd,device,&fm,sm);
+  Controller* c=createController(pd,device,&fm,sm);
   device->setEventReceiver(c);
 
   while(device->run())
@@ -289,6 +290,8 @@ int main(int argc,char* argv[]){
     driver->beginScene(true, true, irr::SColor(255,100,101,140));
 
     smgr->drawAll();
+
+    guienv->drawAll();
 
     device->setWindowCaption((irr::stringw(L"Hyper Maze: ")+=pd.sp.getScore()).c_str());
 

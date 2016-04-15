@@ -1,3 +1,7 @@
+/**
+ * @file irrdisp.hh
+ * @brief The classes to display and manage the hypermaze
+ */
 #include "irrlicht.h"
 #include "../core/maze.hh"
 #include "../core/string.hh"
@@ -30,79 +34,13 @@ class NodeGen{
     virtual irr::scene::IMeshSceneNode* makeUnitHandle(int isForward)=0;
 };
 
-class VisibleCounter{
-  int visible;
-  public:
-  irr::scene::IMeshSceneNode* node;
-    VisibleCounter(irr::scene::IMeshSceneNode* node):node(node),visible(0){};
-    bool setVisible(bool isVisible){
-      if(isVisible)
-        visible++;
-      else
-        visible--;
-      if(visible<0&&node->isVisible()){
-        node->setVisible(false);
-        return true;
-      }else if(visible>=0&&!node->isVisible()){
-        node->setVisible(true);
-        return true;
-      }
-      return false;
-    }
-};
+class MazeDisplay; // defined in irrdispimp.hh
+class StringDisplay; // defined in irrdispimp.hh
+class MultiInterfaceController; // defined in controller.hh
 
+extern const double WALL_SIZE;
+extern const double GAP_SIZE;
 
-class MazeDisplay{
-  std::map<Dirn,std::pair<std::pair<int,int>,std::pair<Dirn,bool> > > limits;
-  std::map<Dirn,std::vector<std::vector<VisibleCounter*>*>*> nodes;
-  std::set<Dirn> dirns;
-  public:
-    static const double wall;
-    static const double gap;
-
-    void init(Maze& m,NodeGen* ng,irr::core::vector3df center=irr::core::vector3df(0,0,0));
-
-    void clear();
-
-    MazeDisplay(Maze& m,NodeGen* ng,irr::core::vector3df center=irr::core::vector3df(0,0,0)){
-      dirns.insert(UP);
-      dirns.insert(LEFT);
-      dirns.insert(FORWARD);
-      init(m,ng,center);
-    }
-
-    ~MazeDisplay(){clear();};
-
-    bool hideSide(Dirn side,bool out);
-};
-
-class StringDisplay{
-  SP<String> s;
-  std::list<irr::scene::IMeshSceneNode*> nodes;
-  irr::scene::IMeshSceneNode* startEnd;
-  irr::scene::IMeshSceneNode* endEnd;
-  int activeNodes;
-  NodeGen* ng;
-  irr::core::vector3df center;
-  static const int STRING_ID=1536;//(3<<9)
-  public:
-
-    void update();
-    void updateActive();
-
-    std::pair<StringPointer,bool> getStringPointer(irr::scene::ISceneNode* node);
-
-    StringDisplay(SP<String> s,NodeGen* ng,irr::core::vector3df center=irr::core::vector3df(0,0,0)):s(s),center(center),ng(ng),activeNodes(0),startEnd(ng->makeStringEnd()),endEnd(ng->makeStringEnd()){
-      endEnd->setRotation(irr::core::vector3df(0,180,0));
-      update();
-    };
-    void setString(SP<String> _s){
-      s=_s;
-      update();
-    }
-};
-
-class Controller;
 
 class PuzzleDisplay{
   public:
@@ -112,8 +50,8 @@ class PuzzleDisplay{
     StringPlay sp;
   private:
     NodeGen* ng;
-    MazeDisplay md;
-    StringDisplay sd;
+    MazeDisplay* md;
+    StringDisplay* sd;
     std::map<irr::scene::ISceneNode*,Dirn> slicers;
     bool won;
     irr::IrrlichtDevice *device;
@@ -126,15 +64,17 @@ class PuzzleDisplay{
 
     std::pair<StringPointer,bool> getStringPointer(irr::scene::ISceneNode* node);
 
-    void win();
+    void win(MultiInterfaceController* c);
 
-    void stringUpdated();
+    void stringUpdated(MultiInterfaceController* c);
 
-    void stringSelectionUpdated();
+    void stringSelectionUpdated(MultiInterfaceController* c);
 
-    void mazeUpdated();
+    void mazeUpdated(MultiInterfaceController* c);
 
     bool hideSide(Dirn side,bool out);
+
+    ~PuzzleDisplay();
 };
 
 #endif
