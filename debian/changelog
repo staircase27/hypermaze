@@ -1,3 +1,13 @@
+hypermaze (1.0.0~pre3) trusty; urgency=medium
+
+  * Added an on screen interface to access help,open,save,generate,undo and show the score
+  * Added licence to the helpgui
+  * Updated README.md
+  * Fixed build rules and improved install file 
+  * Fixed documentation
+
+ -- Simon Armstrong <staircase@darkfieldgames.com>  Fri, 15 Apr 2016 17:28:44 +0100
+
 hypermaze (1.0.0~pre2) wily; urgency=medium
 
   * Converted version numbers to git-buildpackage compatible (~ -> _)
@@ -11,7 +21,7 @@ hypermaze (1.0.0~pre1) wily; urgency=low
 
  -- Simon Armstrong <staircase@darkfieldgames.com>  Mon, 11 Apr 2016 09:31:08 +0100
 
-hypermaze (1.0.0~pre0) wiley; urgency=low
+hypermaze (1.0.0~pre0) wily; urgency=low
 
   * Initial Release.
 
