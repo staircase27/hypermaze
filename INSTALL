@@ -60,18 +60,19 @@ This program is configured for build and install using the cmake system.
 
 To configure the program, first make a directory to build the code in (ideally
 not the source folder but this can be done), and then in that folder run
-        cmake -G <GENERATOR> <PATH_TO_SOURCE>
-where <GENERATOR> is the name of the build system to setup for and
-<PATH TO SOURCE> is the path to the folder containing this file. The list of
-generators available will vary from system to system. See `cmake --help` for
-the full list.
+        cmake -G "<GENERATOR>" <PATH_TO_SOURCE>
+where <GENERATOR> is the name of the build system to setup for (e.g. 
+"Unix Makefiles" or "Visual Studio 14 2015") and <PATH TO SOURCE> is the path
+to the folder containing this file. The list of generators available will vary
+from system to system. See `cmake --help` for the full list of generator types.
 
 If there are any problems or libraries not found then cmake will print an error
 message. Note that only irrlicht is required so even if other libraries are
-missing it will setup a valid build system. A for all libraries including
-optional ones and  and features depending on the optional libraries will be
-turned off.To help cmake find any missing libraries set the relevant variables
-(using -Dvar=value or a gui) and rerun till cmake has found all the libraries.
+missing it will setup a valid build system. A message is still printed for
+optional libraries and if ignored features depending on the missing optional
+libraries will be turned off. To help cmake find any missing libraries set the
+relevant variables (using -Dvar=value or a gui) and rerun till cmake has found
+all the libraries.
 
 There are also settings for the install location (CMAKE_INSTALL_PREFIX=guessed
 by cmake) and build type (CMAKE_BUILD_TYPE="Debug", "Release", "RelWithDebInfo"

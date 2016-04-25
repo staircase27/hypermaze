@@ -414,6 +414,8 @@ set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_PACKAGE_NAME}")
 
 set(CPACK_NSIS_MENU_LINKS "hypermaze.exe" "Hypermaze")
 
+set(CPACK_NSIS_INSTALLED_ICON_NAME "hypermaze.exe,0")
+
 set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/icons/install.ico")
 
 set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/res/icons/uninstall.ico")
