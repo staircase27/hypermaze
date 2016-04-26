@@ -61,7 +61,7 @@ bool OpenSaveGui::OnEventImpl(const irr::SEvent &event){
     }else if(event.KeyInput.Key == irr::KEY_UP || event.KeyInput.Key == irr::KEY_DOWN){
       if(contentslist->OnEvent(event))
         return true;
-    }else if(event.KeyInput.PressedDown && event.KeyInput.Key == irr::KEY_KEY_H and event.KeyInput.Control){
+    }else if(event.KeyInput.PressedDown && event.KeyInput.Key == irr::KEY_KEY_H && event.KeyInput.Control){
       showhidden=!showhidden;
       filterChanged=true;
       std::cout<<"Toggling hidden"<<std::endl;

@@ -302,7 +302,8 @@ bool samePath(irr::io::path path1, irr::io::path path2)
 bool ishidden(irr::io::path folder, irr::io::path file){
   #ifdef WIN32
     irr::io::path path(folder);
-    folder+=IRRSLIT("/")+file;
+    path+=IRRSLIT("/");
+    path+=file;
     DWORD attrs=
     #ifdef __IRR_WCHAR_FILESYSTEM
       GetFileAttributesW(path.c_str());
