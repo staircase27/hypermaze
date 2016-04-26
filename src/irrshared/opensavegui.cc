@@ -54,20 +54,28 @@ bool OpenSaveGui::OnEventImpl(const irr::SEvent &event){
     if(event.GUIEvent.EventType == irr::gui::EGET_LISTBOX_SELECTED_AGAIN){
       itemSelected=true;
     }
-  }
-  if(event.EventType == irr::EET_KEY_INPUT_EVENT){
+  }else if(event.EventType == irr::EET_KEY_INPUT_EVENT){
     if(event.KeyInput.Key==irr::KEY_ESCAPE){
       cancelClicked=true;
       return true;
-    }else if(event.KeyInput.Key == irr::KEY_UP || event.KeyInput.Key == irr::KEY_DOWN)
+    }else if(event.KeyInput.Key == irr::KEY_UP || event.KeyInput.Key == irr::KEY_DOWN){
       if(contentslist->OnEvent(event))
         return true;
-  }
+    }else if(event.KeyInput.PressedDown && event.KeyInput.Key == irr::KEY_KEY_H and event.KeyInput.Control){
+      showhidden=!showhidden;
+      filterChanged=true;
+      std::cout<<"Toggling hidden"<<std::endl;
+      return true;
+    }
+  }else if(event.EventType == irr::EET_MOUSE_INPUT_EVENT && event.MouseInput.Event == irr::EMIE_MOUSE_WHEEL)
+    if(contentslist->OnEvent(event))
+      return true;
+    
   return false;
 };
 
 void OpenSaveGui::createGUI(){
-  okClicked=cancelClicked=pathSelected=itemSelected=filterChanged=false;
+  okClicked=cancelClicked=pathSelected=itemSelected=filterChanged=showhidden=false;
 
   irr::IVideoDriver* driver = getDevice()->getVideoDriver();
   irr::IGUIEnvironment *guienv = getDevice()->getGUIEnvironment();
@@ -133,10 +141,13 @@ void OpenSaveGui::populateWithFilteredContents() {
   contentslist->clear();
   filteredfiles = fs->createEmptyFileList(path, false, false);
   for (int i = 0; i < rawfiles->getFileCount(); ++i) {
-    irr::core::stringw wname(rawfiles->getFileName(i));
-    if (currentFilter==-1 || filterfiles(currentFilter,rawfiles->getFileName(i).c_str(), rawfiles->isDirectory(i))) {
+    if (rawfiles->getFileName(i) == ".") 
+      continue;
+    if (rawfiles->getFileName(i) == ".." || ((currentFilter==-1 || filterfiles(currentFilter,rawfiles->getFileName(i).c_str(), rawfiles->isDirectory(i)))&&
+        (showhidden || ! ishidden(path,rawfiles->getFileName(i))))) {
+      irr::core::stringw wname(rawfiles->getFileName(i));
       filteredfiles->addItem(rawfiles->getFullFileName(i), rawfiles->getFileOffset(i),
-        rawfiles->getFileSize(i), rawfiles->isDirectory(i), i);
+          rawfiles->getFileSize(i), rawfiles->isDirectory(i), i);
       contentslist->addItem(wname.c_str());
     }
   }

@@ -44,5 +44,13 @@ int getDriveList(irr::fschar_t*& drivespecs);
  * @note this handles if the paths are case sensitive or not
  */
 bool samePath(irr::io::path path1, irr::io::path path2);
+/// Check if a path is a hidden file
+/**
+ * @param folder the path to the containing folder
+ * @param file the filename
+ * @return true if the file is a hidden file
+ */
+bool ishidden(irr::io::path folder, irr::io::path file);
+ 
 
 #endif

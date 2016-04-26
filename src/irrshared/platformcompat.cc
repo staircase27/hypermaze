@@ -284,8 +284,8 @@ int getDriveList(irr::fschar_t*& drivespecs){
   }else{
     delete[] path;
     drivespecs=path=new irr::fschar_t[15];
-    memcpy(path,IRRSLIT("\0File System\0"),15*sizeof(irr::fschar_t));
-    strslen=13;
+    memcpy(path,IRRSLIT("/\0File System\0"),15*sizeof(irr::fschar_t));
+    strslen=14;
     strscount = 1;
   }
   return strscount;
@@ -299,3 +299,19 @@ bool samePath(irr::io::path path1, irr::io::path path2)
     return path1 == path2;
   #endif
 }
+bool ishidden(irr::io::path folder, irr::io::path file){
+  #ifdef WIN32
+    irr::io::path path(folder);
+    folder+=IRRSLIT("/")+file;
+    DWORD attrs=
+    #ifdef __IRR_WCHAR_FILESYSTEM
+      GetFileAttributesW(path.c_str());
+    #else
+      GetFileAttributesA(path.c_str());
+    #endif
+    return (attrs!=INVALID_FILE_ATTRIBUTES) && ((attrs&FILE_ATTRIBUTE_HIDDEN)!=0);
+  #else
+    return file[0]==IRRSLIT('.');
+  #endif
+}
+

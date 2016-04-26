@@ -17,6 +17,7 @@ class OpenSaveGui : private BaseGui
   bool itemSelected; ///< Has an entry been selected in the contents list
   bool filterChanged; ///< Has an entry been selected in the contents list
   int currentFilter; ///< The index of the currently selected filter
+  bool showhidden; ///< Should hidden files be shown
 
   /// GUI element to input the file name to save/open the maze as/from
 
