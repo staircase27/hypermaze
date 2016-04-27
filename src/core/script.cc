@@ -411,8 +411,14 @@ bool write(HypOStream& s,const Message& m){
   if(!write(s,m.count,0))
     return false;
   for(int i=0;i<m.count;++i){
-    if(!(write(s,m.paragraphs[i].a,false) && write(s,m.paragraphs[i].b,true)))
-      return false;
+    if(strlen(m.paragraphs[i].a)==0){
+      const char* c=":";
+      if(!(write(s,c,false) && write(s,m.paragraphs[i].b,true)))
+        return false;
+    }else{
+      if(!(write(s,m.paragraphs[i].a,false) && write(s,m.paragraphs[i].b,true)))
+        return false;
+    }
   }
   return true;
 }

@@ -12,20 +12,14 @@ IOResult CPPHypIStream::read(int& i, const int& base){
   std::istream::sentry s(is);
   if (!s)
     return IOResult(false,is.eof());
+  bool neg=false;
+  int c=is.peek();
+  if(c=='-')
+    neg=true;
+  else if(c=='+')
+    neg=false;
   if (base==0){
-    char c=is.peek();
-    if(c!='0'){
-      is>>dec;
-    }else{
-      is>>c;
-      c=is.peek();
-      if(c=='x'||c=='X'){
-        is>>c;
-        is>>hex;
-      }else{
-        is>>oct;
-      }
-    }
+    is.unsetf(ios_base::basefield);
   }else if (base==10){
     is>>dec;
   }else if(base==8){
@@ -33,6 +27,18 @@ IOResult CPPHypIStream::read(int& i, const int& base){
   }else if(base==16){
     is>>hex;
   }
+  if(is.fail()){
+    is.clear();
+    c=is.peek();
+    if(c=='*'){
+      is>>c;
+      if(neg)
+        i=INT_MIN;
+      else
+        i=INT_MAX;
+    }else
+      is.clear(is.failbit);
+  }   
   is>>i;
   return IOResult(is.good(),is.eof());
 }
@@ -58,6 +64,13 @@ IOResult CPPHypIStream::read(SPA<char const>& str,const bool& quote){
 
 bool CPPHypOStream::write(const int& i,const int& base){
   os<<nextSpace();
+  if(i==INT_MIN){
+    os<<"-*";
+    return os.good();
+  }else if(i==INT_MAX){
+    os<<"*";
+    return os.good();
+  }
   if(base==16){
     os<<hex;
   }else if(base==8){

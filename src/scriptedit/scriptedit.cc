@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cctype>
 
 using namespace std;
 
@@ -55,6 +56,13 @@ ostream& operator<<(ostream& s,const Range& r){
     s<<r.end;
   return s;
 }
+#define MAKETERM(D,N) \
+  if((b.dirnsCondition & to_mask(D))!=0){\
+    if(hasdirn)\
+      s<<", ";\
+    s<<N;\
+    hasdirn=true;\
+  }
 
 ostream& operator<<(ostream& s,const StringElementCondition& b){
   if((b.selectionCondition&2)==0)
@@ -64,7 +72,16 @@ ostream& operator<<(ostream& s,const StringElementCondition& b){
       s<<"not selected ";
   else
     s<<"any selection ";
-  s<<"dirns:"<<b.dirnsCondition<<" ";
+  s<<"dirns: ";
+  bool hasdirn=false;
+  MAKETERM(UP,"up")
+  MAKETERM(DOWN,"down")
+  MAKETERM(LEFT,"left")
+  MAKETERM(RIGHT,"right")
+  MAKETERM(FORWARD,"forward")
+  MAKETERM(BACK,"back")
+  if(!hasdirn)
+    s<<"none";
   s<<"located in (";
   if(b.xrange_count==0)
     s<<"any";
@@ -109,6 +126,7 @@ ostream& operator<<(ostream& s,const StringElementCondition& b){
   }
   return s<<")";
 }
+#undef MAKETERM
 
 ostream& operator<<(ostream& s,Pair<PatternTag,StringElementCondition>& p){
   s<<p.a.min<<"-"<<p.a.max<<" elements ";
@@ -198,6 +216,29 @@ ostream& operator<<(ostream& s,const ActionForceWin& e){
 ostream& operator<<(ostream& s,const ActionStringConditionSelect& e){
   return s<<"Set selection status for string matching "<<e.change<<" to "<<e.select;
 }
+
+ostream& operator<<(ostream& s,const StringMatcher& sm){
+  s<<"String Matcher for pattern [";
+  for(int i=0;i<sm.count;++i){
+    if(i!=0)
+      s<<", ";
+    s<<sm.pattern[i];
+  }
+  s<<"] processing element";
+  if(sm.group_count!=1)
+    s<<"s [";
+  else
+    s<<" ";
+  for(int i=0;i<sm.group_count;++i){
+    if(i!=0)
+      s<<", ";
+    s<<sm.groups[i].a<<"-"<<sm.groups[i].b;
+  }
+  if(sm.group_count!=1)
+    s<<"]";
+  return s;
+}
+
 
 ostream& operator<<(ostream& s,const ActionSetStringRoute& e){
   s<<"Set route for string matching pattern [";
@@ -383,6 +424,11 @@ bool edit(SPA<Range>& r,int& num){
   return changed;
 }
 
+#define MAKETERM(D,C) \
+              case C:\
+                e.dirnsCondition|=to_mask(D);\
+                break;
+
 bool edit(StringElementCondition& e){
   char c='p';
   bool changed=false;
@@ -402,14 +448,27 @@ bool edit(StringElementCondition& e){
         }
         changed=true;
         break;
-      case 'd':
-        cout<<"what dirns do you want?"<<endl<<": ";
-        cin>>e.dirnsCondition;
-        while(cin.fail()){
-          cout<<"invalid input: ";
-          cin.clear();
-          cin.ignore(100,'\n');
+      case 'm':
+        cout<<"what dirns do you want to match. Either enter the bitmask as an integer or a combination of the letters u (up), d (down), l (left), r (right), f (foward) and b (backwards)?"<<endl<<": ";
+        if(isdigit(cin.peek())){
           cin>>e.dirnsCondition;
+        }else{
+          std::string str;
+          cin>>str;
+          e.dirnsCondition=0;
+          for(const char* c=str.c_str();*c!='\0';++c){
+            switch(*c){
+              MAKETERM(UP,'u')
+              MAKETERM(DOWN,'d')
+              MAKETERM(LEFT,'l')
+              MAKETERM(RIGHT,'r')
+              MAKETERM(FORWARD,'f')
+              MAKETERM(BACK,'b')
+              default:
+                cout<<"Unknown direction letter ignored: '"<<*c<<"'"<<endl;
+                break;
+            }
+          }
         }
         changed=true;
         break;
@@ -424,13 +483,14 @@ bool edit(StringElementCondition& e){
         break;
       default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
-    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"s) Edit Selection status condition"<<endl<<"d) Edit the Dirn's mask"<<endl<<"x/y/z) Edit the range of locations in the x/y/z direction"<<endl<<"d) Done with this item"<<endl<<": ";
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"s) Edit Selection status condition"<<endl<<"m) Edit the Dirn's mask"<<endl<<"x/y/z) Edit the range of locations in the x/y/z direction"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
     if(cin.eof())
       break;
   }
   return changed;
 }
+#undef MAKETERM
 
 bool edit(PatternTag& r){
   cout<<"Enter the min and max repeates seperated by spaces: ";
@@ -1088,11 +1148,143 @@ bool edit(ActionStringConditionSelect& e){
   return changed;
 }
 
+bool edit(StringMatcher& sm){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<sm<<endl;
+        break;
+      case 'r':{
+        cout<<"currently there are "<<sm.count<<" elements in the pattern"<<endl<<"how many would you like there to be? ";
+        int newlen=-1;
+        c=' ';
+        cin>>newlen;
+        while(newlen<0||!cin.good()){
+          cout<<"must be positive integer"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>newlen;
+        }
+        while(c&&c!='y'&&c!='n'){
+          cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
+          cin>>c;
+        }
+        if(c=='n')
+          break;
+        if(newlen==sm.count)
+          break;
+        SPA<Pair<PatternTag,StringElementCondition> > newpattern(newlen);
+        for(int i=0;i<newlen&&i<sm.count;++i)
+          newpattern[i]=sm.pattern[i];
+        sm.count=newlen;
+        sm.pattern=newpattern;
+        changed=true;
+        break;
+      }
+      case 'e':{
+        if(sm.count<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which pattern element do you wish to edit? ";
+        int n;
+        cin>>n;
+        while(n>=sm.count||n<0){
+          cout<<"no such element: ";
+          cin>>n;
+        }
+        changed|=edit(sm.pattern[n].b);
+        break;
+      }
+      case 't':{
+        if(sm.count<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which pattern element's tag do you wish to edit? ";
+        int n;
+        cin>>n;
+        while(n>=sm.count||n<0){
+          cout<<"no such element: ";
+          cin>>n;
+        }
+        cout<<"editing tag for pattern element :"<<sm.pattern[n].b<<endl;
+        changed|=edit(sm.pattern[n].a);
+        break;
+      }
+      case 'g':{
+        cout<<"currently there are "<<sm.group_count<<" groups. "<<endl<<"how many would you like there to be? ";
+        int newlen=-1;
+        c=' ';
+        cin>>newlen;
+        while(newlen<0||!cin.good()){
+          cout<<"must be positive integer"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>newlen;
+        }
+        while(c&&c!='y'&&c!='n'){
+          cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
+          cin>>c;
+        }
+        if(c=='n')
+          break;
+        if(newlen==sm.group_count)
+          break;
+        SPA<Pair<int> > newgroups(newlen);
+        for(int i=0;i<newlen&&i<sm.group_count;++i)
+          newgroups[i]=sm.groups[i];
+        sm.group_count=newlen;
+        sm.groups=newgroups;
+        changed=true;
+        break;
+      }
+      case 'i':{
+        if(sm.group_count<=0){
+          cout<<"none to edit"<<endl;
+          break;
+        }
+        cout<<"which group do you wish to edit? ";
+        int n;
+        cin>>n;
+        while(n>=sm.group_count||n<0){
+          cout<<"no such element: ";
+          cin>>n;
+        }
+        cout<<"Enter the start and end indicies for the group seperated by a space: ";
+        cin>>sm.groups[n].a;
+        cin>>sm.groups[n].b;
+        if(sm.groups[n].a<0){
+          cout<<"Start too low. Fixed to 0."<<endl;
+          sm.groups[n].a=0;
+        }else if(sm.groups[n].a>=sm.count){
+          cout<<"Start too high. Fixed to "<<sm.count-1<<"."<<endl;
+          sm.groups[n].a=sm.count-1;
+        }
+        if(sm.groups[n].b<0){
+          cout<<"End too low. Fixed to 0."<<endl;
+          sm.groups[n].b=0;
+        }else if(sm.groups[n].b>=sm.count){
+          cout<<"End too high. Fixed to "<<sm.count-1<<"."<<endl;
+          sm.groups[n].b=sm.count-1;
+        }
+        changed=true;
+        break;
+      }
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
+    }
+    cout<<"Please select an action to use on this String Pattern Matcher:"<<endl<<"p) Print"<<endl<<"r) Resize pattern list"<<endl<<"e) Edit a pattern element"<<endl<<"t) Edit the tag for a pattern element"<<endl<<"g) Change the number of groups"<<endl<<"i) change the start and end incies for a group"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+    if(cin.eof())
+      break;
+  }
+  return changed;
+}
 
 bool edit(ActionSetStringRoute& a){
-  cout<<"Not Implemented Yet"<<endl;
-  return false;
-  ///TODO: IMPLEMENT
+
   char c='p';
   bool changed=false;
   while(c!='d'){
@@ -1100,9 +1292,82 @@ bool edit(ActionSetStringRoute& a){
       case 'p':
         cout<<a<<endl;
         break;
+      case 'm':
+        changed|=edit(a.ranges);
+        break;
+      case 'a':
+        a.all=!a.all;
+        if(a.all)
+          cout<<"Toggled all on"<<endl;
+        else
+          cout<<"Toggled all off"<<endl;
+        break;
+      case 'r':{
+        cout<<"currently there are "<<a.count<<" elements to the new route"<<endl<<"how many would you like there to be? ";
+        int newlen=-1;
+        c=' ';
+        cin>>newlen;
+        while(newlen<0||!cin.good()){
+          cout<<"must be positive integer"<<endl<<": ";
+          cin.clear();
+          cin.ignore(100,'\n');
+          cin>>newlen;
+        }
+        while(c&&c!='y'&&c!='n'){
+          cout<<"are you sure you want to change the length to "<<newlen<<"? y/n: ";
+          cin>>c;
+        }
+        if(c=='n')
+          break;
+        if(newlen==a.count)
+          break;
+        SPA<Dirn> newroute(newlen);
+        for(int i=0;i<newlen&&i<a.count;++i)
+          newroute[i]=a.route[i];
+        if(newlen>a.count)
+          for(int i=a.count;i<newlen;++i)
+            newroute[i]=RIGHT;
+        a.count=newlen;
+        a.route=newroute;
+        changed=true;
+        break;
+      }
+      case 'e':{
+        if(a.count<=0){
+          cout<<"empty route"<<endl;
+          break;
+        }
+        cout<<"which element do you wish to change? ";
+        int n;
+        cin>>n;
+        while(n>=a.count||n<0){
+          cout<<"no such element: ";
+          cin>>n;
+        }
+#define MAKETERM(D,C) \
+          case C:\
+            a.route[n]=D;\
+            break;
+        cout<<"What dirn should the element be? u (up), d (down), l (left), r (right), f (foward) and b (backwards)?"<<endl<<": ";
+        cin>>c;
+        switch(c){
+          MAKETERM(UP,'u')
+          MAKETERM(DOWN,'d')
+          MAKETERM(LEFT,'l')
+          MAKETERM(RIGHT,'r')
+          MAKETERM(FORWARD,'f')
+          MAKETERM(BACK,'b')
+          default:
+            cout<<"Unknown direction letter ignored: '"<<c<<"'"<<endl;
+            break;
+        }
+        break;
+      }
       default: cout<<"invalid input \""<<c<<"\""<<endl;
     }
-    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"r) Resize"<<endl<<"e) Edit an event"<<endl<<"d) Done with this item"<<endl<<": ";
+#undef MAKETERM
+
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"m) Edit the Pattern Matcher"<<endl<<"r) Resize new route"<<endl<<"e) Edit element of new route"<<endl<<"a) Toggle match all"<<endl<<"d) Done with this item"<<endl<<": ";
     cin>>c;
     if(cin.eof())
       break;
@@ -1265,8 +1530,35 @@ bool edit(Event& e){
         cout<<e<<endl;
         break;
       case 't':{
-        cout<<"please input new trigger: ";
-        cin>>e.trigger;
+        cout<<"Please input new trigger either as a integer or a combination of the letters t (start), w (win), m (move) and s (select): ";
+        if(isdigit(cin.peek())){
+          cin>>e.trigger;
+        }else{
+          std::string str;
+          cin>>str;
+          e.trigger=0;
+          for(const char* c=str.c_str();*c!='\0';++c){
+            switch(*c){
+              case 't':
+                e.trigger|=TRIGGER_START;
+                break;
+              case 'w':
+                e.trigger|=TRIGGER_WIN;
+                break;
+              case 'm':
+                e.trigger|=TRIGGER_MOVE;
+                break;
+              case 's':
+                e.trigger|=TRIGGER_SELECT;
+                break;
+              case ',':
+                break;
+              default:
+                cout<<"Unknown trigger letter ignored: '"<<*c<<"'"<<endl;
+                break;
+            }
+          }
+        }
         changed=true;
         break;
       }
@@ -1285,6 +1577,7 @@ bool edit(Event& e){
   }
   return changed;
 }
+
 
 bool edit(Script& s){
   char c='p';
@@ -1383,6 +1676,7 @@ void edit(){
         read(ihs,s);
         changed=false;
         cout<<"new script loaded: "<<s<<endl;
+        cout<<"File had maze: "<<m<<endl;
         break;
       }
       case 'n':
