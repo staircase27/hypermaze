@@ -22,6 +22,9 @@ IOResult CPPHypIStream::read(int& i, const int& base){
       if(c=='x'||c=='X'){
         is>>c;
         is>>hex;
+      }else if(isspace(c)){
+        i=0;
+        return IOResult(is.good(),is.eof());
       }else{
         is>>oct;
       }
