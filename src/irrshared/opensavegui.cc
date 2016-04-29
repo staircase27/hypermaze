@@ -16,6 +16,8 @@ namespace irr{
   using namespace gui;
 };
 
+
+
 bool OpenSaveGui::display(irr::IrrlichtDevice* _device,FontManager* _fm){
   fs=_device->getFileSystem();
   rawfiles=0;
@@ -24,6 +26,10 @@ bool OpenSaveGui::display(irr::IrrlichtDevice* _device,FontManager* _fm){
   path=fs->getWorkingDirectory();
   main(_device,_fm);
   fs->drop();
+  if(rawfiles)
+    rawfiles->drop();
+  if(filteredfiles)
+    filteredfiles->drop();
   fs=0;
   delete[] drives;
   delete[] drivenames;
@@ -102,12 +108,13 @@ void OpenSaveGui::createGUI(){
 
   contentslist = guienv->addListBox(irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+32+10,center.X+size.Width/2,center.Y+size.Height/2-32-10-32-10),getTopElement(),GUI_ID_CONTENTS_LIST,true);
 
+  currentFilter = -1;
+
   populateWithFolderContents();
 
   fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y+size.Height/2-32-10-32,center.X+size.Width/2,center.Y+size.Height/2-32-10),true,getTopElement());
 
   int filtercount = this->filtercount();
-  currentFilter = -1;
   if (filtercount > 0) {
     filterfield = guienv->addComboBox(irr::rect<irr::s32>(center.X - size.Width / 2, center.Y + size.Height / 2 - 32, center.X + size.Width / 2 - 220, center.Y + size.Height / 2), getTopElement(), GUI_ID_FILTER_COMBO);
     for (int i = 0; i < filtercount; ++i)

@@ -117,6 +117,7 @@ class MouseStringSelectorController: public Controller{
   irr::core::vector3df startPoint;
   irr::scene::ISceneNode* string;
   std::pair<StringPointer,bool> sp;
+  bool notifyselectionchanged;
   bool selected;
   int moved;
   MultiInterfaceController* base;
@@ -128,7 +129,7 @@ class MouseStringSelectorController: public Controller{
     virtual bool OnEvent(const irr::SEvent& event);
 
     MouseStringSelectorController(PuzzleDisplay& pd,irr::IrrlichtDevice *device,FontManager*,SoundManager* sm,MultiInterfaceController* base):
-        Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),sp(pd.s->end(),false),base(base){};
+        Controller(pd),collMan(device->getSceneManager()->getSceneCollisionManager()),string(0),sp(pd.s->end(),false),base(base),notifyselectionchanged(false){};
 };
 
 class HypermazeMultiInterfaceController:public MultiInterfaceController{

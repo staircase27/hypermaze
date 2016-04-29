@@ -769,6 +769,33 @@ IOResult read(HypIStream& s,ActionSetStringRoute& a);
  */
 bool write(HypOStream& s,const ActionSetStringRoute& a);
 
+///action to set the route that selected parts of the string follow
+class ActionTranslateStringTo:public ActionCommon, public PolymorphicHypIOImpl<ActionTranslateStringTo,10>{
+  public:
+    bool start; ///< Shift the start or the end to the specified position
+    Vector translateTo; ///<  The position to translate the requested end to
+
+    ///@copydoc ActionCommon::doCommon
+    ///this calls the StringMatcher to find a match then edits the retuned match.
+    ///if all is true this is repeated till the pattern fails to match. this can lead to infinite loops
+    virtual void doCommon(ScriptResponse& r,SP<String> s);
+};
+///Read an ActionTranslateStringTo from a stream
+/**
+ * @param s the stream to read from
+ * @param a ActionTranslateStringTo variable to read the data into
+ * @return an IOResult object that contains the status of the read
+ */
+IOResult read(HypIStream& s,ActionTranslateStringTo& a);
+///write an ActionTranslateStringTo to a stream
+/**
+ * @param s the stream to write to
+ * @param a the ActionTranslateStringTo to write
+ * @return true if i was written ok
+ */
+bool write(HypOStream& s,const ActionTranslateStringTo& a);
+
+
 ///Read an Event from a stream
 /**
  * @param s the stream to read from

@@ -70,16 +70,22 @@ void BufHypIStream::mergebufs(SPA<char>& addto,int& tolen,char const* const& add
 IOResult BufHypIStream::read(SPA<char const>& str,const bool& quote){
   char d;
   consumewhitespace();
+  // There is at least one char left after start as it was checked and found to not be whitespace
   if(quote){
     d=*(buf+start);
-    ++start;
+    if(++start>=end){
+      if(eof)
+        return IOResult(false,true);
+      else
+        readtobuf();
+    }
   }
-  SPA<char> sb  ;
+  SPA<char> sb;
   int sblen=0;
   int l=0;
   while(! (quote ? *(buf+start+l)==d : HypIStream::isspace(*(buf+start+l))) ){
     ++l;
-    if(start+l==end){
+    if(start+l>=end){
       if(eof)
         break;
       mergebufs(sb,sblen,buf,start,l);

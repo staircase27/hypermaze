@@ -483,19 +483,49 @@ class StringEdit{
      * with the new route.
      * @note StringPlay::externalEditHappened() should be called for any
      * StringPlays using the same String
+     * \par Example
+     * the code
+     * \code 
+     * StringEdit& se=...
+     * se.setStringSegment(se.getString().begin(),se.getString().end(),0,SPA<Dirn>(0))
+     * \endcode
+     * would set the string to a straight line right across the maze.
      * @param sp the start of the range to replace with the new route
      * @param ep the element after range to replace with the new route
      * @param count the number of elements in the new route
      * @param newRoute the Dirns that make up the new wroute
+     * 
      */
     void setStringSegment(StringPointer sp,StringPointer ep,int count,SPA<Dirn> newRoute);
+    
+    /// Translate the whole string around.
+    /**
+     * @note This function will ignore and part of the requested translation
+     * that is in the direction String.stringDir
+     * @note StringPlay::externalEditHappened() should be called for any
+     * StringPlays using the same String
+     * @param sp The string element to translate to a new position
+     * @param newpos the position to translate the elment sp to
+     */
+    void translateString(StringPointer sp,Vector newpos);
+    /// Translate the whole string around.
+    /**
+     * @note this is an override for translateString(StringPoint,Vector) to
+     * make it easier to translate based on the start of the string
+     * @note StringPlay::externalEditHappened() should be called for any
+     * StringPlays using the same String
+     * @param newpos the position to translate the start of the string to
+     */
+    inline void translateString(Vector newpos){
+      translateString(s->begin(),newpos);
+    }
 };
 
 #ifdef IOSTREAM
-/// write a representation of the String to a stream
+/// write a representation of the Vector to a stream
 /**
  * @param o the stream to write to
- * @param s the string to write
+ * @param v the Vector to write
  * @return the stream o
  */
 inline std::ostream& operator<<(std::ostream& o,SP<String> s){
@@ -505,11 +535,10 @@ inline std::ostream& operator<<(std::ostream& o,SP<String> s){
   return o<<s->endPos<<">";
 }
 
-/// write a representation of the StringPlay to a stream
+/// write a representation of the Vector to a stream
 /**
- * This basically writes the String that this contains out
  * @param o the stream to write to
- * @param s the string to write
+ * @param v the Vector to write
  * @return the stream o
  */
 inline std::ostream& operator<<(std::ostream& o,const StringPlay& s){

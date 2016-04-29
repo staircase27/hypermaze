@@ -13,6 +13,8 @@
 #ifndef VECTOR_HH_INC
 #define VECTOR_HH_INC
 
+#include "hypio.hh"
+
 #ifdef IRRLICHT
   #include "vector3d.h"
   /// A vector for locations in the maze
@@ -141,5 +143,15 @@ inline std::ostream& operator<<(std::ostream& o,Vector v){
   return o<<"<Vector: "<<v.X<<","<<v.Y<<","<<v.Z<<">";
 }
 #endif
+
+inline IOResult read(HypIStream& s,Vector& v){
+  IOResult r;
+  (r=read(s,v.X,10)).ok&&(r=read(s,v.Y,10)).ok&&(r=read(s,v.Z,10)).ok;
+  return r;
+}
+
+inline bool write(HypOStream& s,const Vector& v){
+  return write(s,v.X)&&write(s,v.Y)&&write(s,v.Z);
+}
 
 #endif

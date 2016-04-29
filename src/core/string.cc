@@ -480,3 +480,16 @@ void StringEdit::setStringSegment(StringPointer sp,StringPointer ep,int count,SP
   }
   s->endPos=pos;
 }
+
+void StringEdit::translateString(StringPointer sp,Vector newpos){
+  Vector delta=newpos;
+  if(sp==s->end())
+    delta-=s->endPos;
+  else
+    delta-=sp->pos;
+  // remove any component of delta in the direction of s->stringDir so we don't shift the ends in/out of the maze
+  delta-=delta.dotProduct(to_vector(s->stringDir))*to_vector(s->stringDir);
+  for(std::list<StringElement>::iterator it=s->route.begin();it!=s->route.end();++it)
+    it->pos+=delta;
+  s->endPos+=delta;
+}

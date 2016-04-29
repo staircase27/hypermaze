@@ -271,13 +271,13 @@ class Script{
     int now; ///< The time now
   public:
     ///Create a new empty script
-    Script():eventcount(0),events(),times(){};
+    Script():eventcount(0),events(),times(),now(0){};
     ///Create a script for some events
     /**
      * @param eventcount the number of events the new script will have
      * @param events the actual event for the new script
      */
-    Script(int eventcount,const SPA<Event>& events):eventcount(eventcount),events(events),times(eventcount){
+    Script(int eventcount,const SPA<Event>& events):eventcount(eventcount),events(events),times(eventcount),now(0){
       for(int i=0;i<eventcount;++i)
         times[i]=-1;
     };
@@ -287,6 +287,8 @@ class Script{
      * @return the time the specified event ran
      */
     inline int getTime(int event) const{
+      if(event<0 || event>=eventcount)
+        return *((int*)0);
       return times[event];
     }
 

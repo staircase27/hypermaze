@@ -393,12 +393,13 @@ namespace irr{
               return false;
             }
           }
+          break;
         case irr::EMIE_LMOUSE_LEFT_UP:
           if(string!=0){
             string=0;
             return true;
-          }else
-            return false;
+          }
+          break;
         case irr::EMIE_MOUSE_MOVED:
           if(string!=0){
             mousePos = irr::position2d<irr::s32> (event.MouseInput.X,event.MouseInput.Y);
@@ -425,7 +426,7 @@ namespace irr{
             if(moved>=0)
               if(sp.first!=pd.s->end())
                 pd.sp.setSelected(sp.first,!selected);
-            pd.stringSelectionUpdated(base);
+            notifyselectionchanged=true;
             ++moved;
             --weight;
           }else{
@@ -440,13 +441,17 @@ namespace irr{
             --sp.first;
             if(moved<=0)
               pd.sp.setSelected(sp.first,!selected);
-            pd.stringSelectionUpdated(base);
+            notifyselectionchanged=true;
             --moved;
             ++weight;
           }else{
             break;
           }
         }
+      }
+      if(notifyselectionchanged){
+        notifyselectionchanged=false;
+        pd.stringSelectionUpdated(base);
       }
     }
 
@@ -478,7 +483,7 @@ namespace irr{
               selected=!selected;
               for(StringPointer p=pd.s->begin();p!=pd.s->end();++p)
                 pd.sp.setSelected(p,selected);
-              pd.stringSelectionUpdated(base);
+              notifyselectionchanged=true;
               return true;
             }
             break;
@@ -508,11 +513,11 @@ namespace irr{
                 --sp.first;
                 pd.sp.setSelected(sp.first,!selected);
               }
-              pd.stringSelectionUpdated(base);
               string=node;
               moved=0;
               this->sp=sp;
               this->selected=selected;
+              notifyselectionchanged=true;
               return true;
             }
             break;

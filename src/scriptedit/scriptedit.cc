@@ -271,6 +271,15 @@ ostream& operator<<(ostream& s,const ActionSetStringRoute& e){
   return s;
 }
 
+ostream& operator<<(ostream& s,const ActionTranslateStringTo& a){
+  s<<"Translate string ";
+  if(a.start)
+    cout<<"start";
+  else
+    cout<<"end";
+  cout<<" to "<<a.translateTo;
+}
+
 #define MAKECASE(T) case T::id:\
                        s<<(T&)*e;\
                        break;
@@ -287,6 +296,7 @@ ostream& operator<<(ostream& s,SP<Action> e){
     MAKECASE(ActionForceWin)
     MAKECASE(ActionStringConditionSelect)
     MAKECASE(ActionSetStringRoute)
+    MAKECASE(ActionTranslateStringTo)
     default:
       s<<"unknown action";
   }
@@ -330,8 +340,8 @@ ostream& operator<<(ostream& s,const Script& e){
   s<<"Script: [";
   for(int i=0;i<e.geteventcount();++i){
     if(i!=0)
-      s<<", ";
-    s<<e.getevents()[i];
+      s<<","<<endl;
+    s<<i<<": "<<e.getevents()[i];
   }
   return s<<"]";
 }
@@ -1374,6 +1384,44 @@ bool edit(ActionSetStringRoute& a){
   }
   return changed;
 }
+
+bool edit(ActionTranslateStringTo& a){
+  char c='p';
+  bool changed=false;
+  while(c!='d'){
+    switch(c){
+      case 'p':
+        cout<<a<<endl;
+        break;
+      case 's':
+        a.start=!a.start;
+        if(a.start)
+          cout<<"Toggled to move start"<<endl;
+        else
+          cout<<"Toggled to move end"<<endl;
+        break;
+      case 'x':
+        cout<<"Enter the new x coordinate: "<<endl;
+        cin>>a.translateTo.X;
+        break;
+      case 'y':
+        cout<<"Enter the new x coordinate: "<<endl;
+        cin>>a.translateTo.Y;
+        break;
+      case 'z':
+        cout<<"Enter the new x coordinate: "<<endl;
+        cin>>a.translateTo.Z;
+        break;
+      default: cout<<"invalid input \""<<c<<"\""<<endl;
+    }
+    cout<<"Please select an action:"<<endl<<"p) Print"<<endl<<"s) Toggle translating start or end"<<endl<<"x/y/z) Edit x/y/z component of target position"<<endl<<"d) Done with this item"<<endl<<": ";
+    cin>>c;
+    if(cin.eof())
+      break;
+  }
+  return changed;
+}
+
 #define PRINTIDNAME(T) cout<<T::id<<") "<<#T<<endl;
 #define MAKEREPCASE(T) case T::id:\
                          p=SP<T>(new T());\
@@ -1467,6 +1515,7 @@ bool edit(SP<Action>& p){
         PRINTIDNAME(ActionForceWin)
         PRINTIDNAME(ActionStringConditionSelect)
         PRINTIDNAME(ActionSetStringRoute)
+        PRINTIDNAME(ActionTranslateStringTo)
         int i;
         bool done=false;
         while(!done){
@@ -1489,6 +1538,7 @@ bool edit(SP<Action>& p){
             MAKEREPCASE(ActionForceWin)
             MAKEREPCASE(ActionStringConditionSelect)
             MAKEREPCASE(ActionSetStringRoute)
+            MAKEREPCASE(ActionTranslateStringTo)
             default:
               done=false;
               cout<<"Unknown Action"<<endl;
@@ -1508,6 +1558,7 @@ bool edit(SP<Action>& p){
           MAKEEDITCASE(ActionForceWin)
           MAKEEDITCASE(ActionStringConditionSelect)
           MAKEEDITCASE(ActionSetStringRoute)
+          MAKEEDITCASE(ActionTranslateStringTo)
           default:
             cout<<"unknown action can't edit"<<endl;
         }

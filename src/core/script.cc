@@ -363,7 +363,10 @@ bool write(HypOStream& s,const ConditionNot& c){
 }
 
 bool ConditionAfter::is(int time,const Script& script,SP<const String> s){
-  return script.getTime(event)!=-1 && script.getTime(event)+delay<=time;
+  int eventtime=script.getTime(event);
+  return eventtime!=-1 &&
+   (eventtime+delay)
+   <=time;
 }
 IOResult read(HypIStream& s,ConditionAfter& c){
   IOResult r=read(s,c.event,0);
@@ -451,6 +454,8 @@ IOResult read(HypIStream& s,SP<Action>& a){
       return createAndRead<ActionStringConditionSelect>(s,a);
     case ActionSetStringRoute::id:
       return createAndRead<ActionSetStringRoute>(s,a);
+    case ActionTranslateStringTo::id:
+      return createAndRead<ActionTranslateStringTo>(s,a);
     default:
       a=Action::defaultvalue;
       return r;
@@ -472,7 +477,8 @@ void ActionMessage::doCommon(ScriptResponse& r,SP<String>){
     r.messages=SPA<Message>(1);
   }else{
     SPA<Message> tmp(r.messageCount+1);
-    memcopy(tmp,r.messages,r.messageCount);
+    for(int i=0;i<r.messageCount;++i)
+      tmp[i]=r.messages[i];
     r.messages=tmp;
   }
   r.messages[r.messageCount]=m;
@@ -559,6 +565,23 @@ bool write(HypOStream& s,const ActionSetStringRoute& a){
     if(!write(s,(int)a.route[i],0))
       return false;
   return write(s,a.all);
+}
+
+void ActionTranslateStringTo::doCommon(ScriptResponse& r,SP<String> s){
+  StringEdit se(s);
+  if(start)
+    se.translateString(s->begin(),translateTo);
+  else
+    se.translateString(s->end(),translateTo);
+}
+IOResult read(HypIStream& s,ActionTranslateStringTo& a){
+  IOResult r=read(s,a.start);
+  if(!r.ok)
+    return r;
+  return read(s,a.translateTo);
+}
+bool write(HypOStream& s,const ActionTranslateStringTo& a){
+  return write(s,a.start) && write(s,a.translateTo);
 }
 
 IOResult read(HypIStream& s,Event& e){
