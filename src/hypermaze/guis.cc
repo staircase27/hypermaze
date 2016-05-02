@@ -51,6 +51,8 @@ void addMessageToElement(GUIFormattedText* text,FontManager* fm,const Message& m
         }
         ++end;
       }
+      if(size==0)
+        size=16;
       bool bold=false;
       bool italic=false;
       if(*end!=0)
@@ -160,7 +162,7 @@ void MessageGui::createGUI(){
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
   irr::dimension2d<irr::s32> size=rect.getSize();
-  size.Width=min(400,size.Width-10);
+  size.Width=min(600,size.Width-10);
   size.Height=min(600,size.Height-10);
 
   makeElementFromMessage(guienv,getFontManager(),getTopElement(),irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,center.X+size.Width/2,center.Y+size.Height/2-10-32),m);
@@ -216,7 +218,7 @@ void ErrorGui::createGUI(){
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
   irr::dimension2d<irr::s32> size=rect.getSize();
-  size.Width=min(400,size.Width-10);
+  size.Width=min(600,size.Width-10);
   size.Height=min(600,size.Height-10);
 
   irr::video::ITexture* tex = getDevice()->getVideoDriver()->getTexture("irrlicht/error.png");
@@ -297,7 +299,7 @@ void ConfirmGui::createGUI(){
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
   irr::dimension2d<irr::s32> size=rect.getSize();
-  size.Width=min(400,size.Width-10);
+  size.Width=min(600,size.Width-10);
   size.Height=min(600,size.Height-10);
 
   irr::video::ITexture* tex = getDevice()->getVideoDriver()->getTexture("irrlicht/confirm.png");
@@ -405,7 +407,7 @@ void GenerateGui::createGUI(){
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
   irr::dimension2d<irr::s32> size=rect.getSize();
-  size.Width=min(400,size.Width-10);
+  size.Width=min(600,size.Width-10);
 
   xSize=guienv->addSpinBox(L"5",irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32-10-32,
       center.X+size.Width/2,center.Y-5-32-10),true,getTopElement());
@@ -481,7 +483,7 @@ void SaveGui::createGUI(){
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
   irr::dimension2d<irr::s32> size=rect.getSize();
-  size.Width=min(400,size.Width-10);
+  size.Width=min(600,size.Width-10);
 
   fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,center.X+size.Width/2,center.Y-5),true,getTopElement());
 
@@ -572,7 +574,7 @@ void OpenGui::createGUI(){
   irr::rect<irr::s32> rect=driver->getViewPort();
   irr::position2d<irr::s32> center=rect.getCenter();
   irr::dimension2d<irr::s32> size=rect.getSize();
-  size.Width=min(400,size.Width-10);
+  size.Width=min(600,size.Width-10);
 
   fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y-5-32,center.X+size.Width/2,center.Y-5),true,getTopElement());
 

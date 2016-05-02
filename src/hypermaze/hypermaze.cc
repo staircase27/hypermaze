@@ -235,6 +235,9 @@ int main(int argc,char* argv[]){
     irr::SColor c=guienv->getSkin()->getColor(irr::EGDC_3D_HIGH_LIGHT);
     c.setAlpha(170);
     guienv->getSkin()->setColor(irr::EGDC_3D_HIGH_LIGHT,c);
+    c=guienv->getSkin()->getColor(irr::EGDC_WINDOW);
+    c.setAlpha(170);
+    guienv->getSkin()->setColor(irr::EGDC_WINDOW,c);
   }
 
   device->setWindowCaption(L"Hyper Maze");
