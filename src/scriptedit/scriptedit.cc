@@ -82,7 +82,7 @@ ostream& operator<<(ostream& s,const StringElementCondition& b){
   MAKETERM(BACK,"back")
   if(!hasdirn)
     s<<"none";
-  s<<"located in (";
+  s<<" located in (";
   if(b.xrange_count==0)
     s<<"any";
   else{

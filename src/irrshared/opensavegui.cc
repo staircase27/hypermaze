@@ -76,7 +76,7 @@ bool OpenSaveGui::OnEventImpl(const irr::SEvent &event){
   }else if(event.EventType == irr::EET_MOUSE_INPUT_EVENT && event.MouseInput.Event == irr::EMIE_MOUSE_WHEEL)
     if(contentslist->OnEvent(event))
       return true;
-    
+
   return false;
 };
 
@@ -108,11 +108,9 @@ void OpenSaveGui::createGUI(){
 
   contentslist = guienv->addListBox(irr::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2+32+10,center.X+size.Width/2,center.Y+size.Height/2-32-10-32-10),getTopElement(),GUI_ID_CONTENTS_LIST,true);
 
-  currentFilter = -1;
-
-  populateWithFolderContents();
-
   fileField = guienv->addEditBox(0,irr::rect<irr::s32>(center.X-size.Width/2,center.Y+size.Height/2-32-10-32,center.X+size.Width/2,center.Y+size.Height/2-32-10),true,getTopElement());
+
+  currentFilter = -1;
 
   int filtercount = this->filtercount();
   if (filtercount > 0) {
@@ -122,6 +120,8 @@ void OpenSaveGui::createGUI(){
     filterfield->addItem(L"All (*.*)", 0);
     currentFilter = 0;
   }
+
+  populateWithFolderContents();
 
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-210,center.Y+size.Height/2-32,center.X+size.Width/2-100,center.Y+size.Height/2),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel");
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,getButtonName());
@@ -148,7 +148,7 @@ void OpenSaveGui::populateWithFilteredContents() {
   contentslist->clear();
   filteredfiles = fs->createEmptyFileList(path, false, false);
   for (int i = 0; i < rawfiles->getFileCount(); ++i) {
-    if (rawfiles->getFileName(i) == ".") 
+    if (rawfiles->getFileName(i) == ".")
       continue;
     if (rawfiles->getFileName(i) == ".." || ((currentFilter==-1 || filterfiles(currentFilter,rawfiles->getFileName(i).c_str(), rawfiles->isDirectory(i)))&&
         (showhidden || ! ishidden(path,rawfiles->getFileName(i))))) {
