@@ -58,32 +58,34 @@ void HelpGui::createGUI(){
   size.Width=min(600,size.Width-10);
   size.Height=min(600,size.Height-10);
 
-  GUIFormattedText* text=new GUIFormattedText(L"Hyper Maze Puzzle Game by Staircase",
+  GUIFormattedText* text=new GUIFormattedText(L"Hypermaze Puzzle Game by Staircase",
       guienv,getTopElement(),0,irr::core::rect<irr::s32>(center.X-size.Width/2,center.Y-size.Height/2,
           center.X+size.Width/2,center.Y+size.Height/2-10-32-10-32),true,true);
   text->setOverrideFont(0,getFontManager()->getFont(24,true));
   text->setAllTextAlignment(irr::gui::EGUIA_CENTER,irr::gui::EGUIA_CENTER);
-  text->addText(L"\nBend, Stretch and Move the String through the maze to get it to the far"
+  text->addText(L"Bend, stretch and move the string through the maze to get it to the far"
                 L" side of the hypermaze.\n To move the string either right click to select and"
                 L" left click and drag to move the string or use the keyboard controls set below."
-                L"\nIt is also possible hide parts of the maze by dragging on the blobs."
-                L"\n\n\nGame written by Staircase in association"
+                L"\nIt is also possible to hide parts of the maze by dragging on the spheres. For more "
+                L"help please follow the tutorials available below.");
+  text->addText(L"Game developed by Staircase (Simon Armstrong) in association"
                 L" with Dark Field Games. http://www.darkfieldgames.com/\nThis game is released"
                 L" open source under the GPLv2 licence. Feel free to edit and change as you like."
-                L" If you make any improvements or new ideas please send them me them and I may"
-                L" include them in the next release (and thank you below)\n\nThanks go to Ptsnoop,"
-                L"cosmosquark and David for testing and helping iron out the many bugs");
+                L" If you make any improvements or add new ideas, please send me them and I may"
+                L" include them in the next release (and thank you below).");
+  text->addText(L"Thanks go to PTSnoop, Cosmosquark and David for testing and helping iron out "
+                L"the bugs.");
   text->drop();
 
-  guienv->addButton(irr::core::rect<irr::s32>(center.X-75,center.Y+size.Height/2-32-32-10,
-          center.X+75,center.Y+size.Height/2-32-10),getTopElement(),GUI_ID_KEY_MAP_BUTTON,L"Edit Key Map (e)");
+  guienv->addButton(irr::core::rect<irr::s32>(center.X-100,center.Y+size.Height/2-32-32-10,
+          center.X+100,center.Y+size.Height/2-32-10),getTopElement(),GUI_ID_KEY_MAP_BUTTON,L"Keyboard Controls (e)");
   irr::gui::IGUIButton* ok=guienv->addButton(
       irr::core::rect<irr::s32>(center.X+size.Width/2-100,center.Y+size.Height/2-32,
           center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"OK");
 
   guienv->setFocus(ok);
 
-  getDevice()->setWindowCaption(L"Hyper Maze: Help");
+  getDevice()->setWindowCaption(L"Hypermaze: Help");
 }
 
 bool HelpGui::run(){

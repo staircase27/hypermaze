@@ -13,7 +13,6 @@ String::String(Maze m,Dirn stringDir,Dirn targetDir):maze(m),endPos(0,0,0),route
     route.push_back(StringElement(pos,stringDir,true));
     pos+=to_vector(stringDir);
   }
-  route.front().selected=false;
   endPos=pos;
 };
 

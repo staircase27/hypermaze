@@ -272,7 +272,7 @@ void KeyMapGui::createGUI(){
 
   guienv->setFocus(table);
 
-  getDevice()->setWindowCaption(L"Hyper Maze: Configure");
+  getDevice()->setWindowCaption(L"Hypermaze: Configure");
 
 }
 bool KeyMapGui::run(){

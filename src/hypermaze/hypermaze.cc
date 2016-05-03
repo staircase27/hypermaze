@@ -240,7 +240,7 @@ int main(int argc,char* argv[]){
     guienv->getSkin()->setColor(irr::EGDC_WINDOW,c);
   }
 
-  device->setWindowCaption(L"Hyper Maze");
+  device->setWindowCaption(L"Hypermaze");
   irr::IVideoDriver* driver = device->getVideoDriver();
   irr::ISceneManager* smgr = device->getSceneManager();
 
@@ -296,7 +296,7 @@ int main(int argc,char* argv[]){
 
     guienv->drawAll();
 
-    device->setWindowCaption((irr::stringw(L"Hyper Maze: ")+=pd.sp.getScore()).c_str());
+    device->setWindowCaption((irr::stringw(L"Hypermaze: ")+=pd.sp.getScore()).c_str());
 
     driver->endScene();
   }

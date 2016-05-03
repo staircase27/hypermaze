@@ -169,7 +169,7 @@ void MessageGui::createGUI(){
 
   guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"Ok"));
 
-  getDevice()->setWindowCaption(L"Hyper Maze: Message");
+  getDevice()->setWindowCaption(L"Hypermaze: Message");
 }
 bool MessageGui::run(){
   if(okClicked){
@@ -237,7 +237,7 @@ void ErrorGui::createGUI(){
 
   guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"Ok"));
 
-  getDevice()->setWindowCaption(L"Hyper Maze: Error");
+  getDevice()->setWindowCaption(L"Hypermaze: Error");
 }
 bool ErrorGui::run(){
   if(okClicked){
@@ -321,7 +321,7 @@ void ConfirmGui::createGUI(){
   guienv->setFocus(guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120-120-10,center.Y+size.Height/2-32,center.X+size.Width/2-120-10,center.Y+size.Height/2),getTopElement(),GUI_ID_OK_BUTTON,L"Ok"));
   guienv->addButton(irr::rect<irr::s32>(center.X+size.Width/2-120,center.Y+size.Height/2-32,center.X+size.Width/2,center.Y+size.Height/2),getTopElement(),GUI_ID_CANCEL_BUTTON,L"Cancel");
 
-  getDevice()->setWindowCaption(L"Hyper Maze: Confirm");
+  getDevice()->setWindowCaption(L"Hypermaze: Confirm");
   keyblock=getDevice()->getTimer()->getTime()+500;
 }
 bool ConfirmGui::run(){
@@ -432,7 +432,7 @@ void GenerateGui::createGUI(){
 
   guienv->setFocus(xSize->getEditBox());
 
-  getDevice()->setWindowCaption(L"Hyper Maze: Generate New Maze");
+  getDevice()->setWindowCaption(L"Hypermaze: Generate New Maze");
 
 }
 bool GenerateGui::run(){
@@ -492,7 +492,7 @@ void SaveGui::createGUI(){
 
   guienv->setFocus(fileField);
 
-  getDevice()->setWindowCaption(L"Hyper Maze: Save");
+  getDevice()->setWindowCaption(L"Hypermaze: Save");
 
 }
 bool SaveGui::run(){
@@ -583,7 +583,7 @@ void OpenGui::createGUI(){
 
   guienv->setFocus(fileField);
 
-  getDevice()->setWindowCaption(L"Hyper Maze: Open");
+  getDevice()->setWindowCaption(L"Hypermaze: Open");
 }
 bool OpenGui::run(){
   if(cancelClicked)
@@ -845,7 +845,7 @@ void WinGui::createGUI(){
 
   guienv->setFocus(def);
 
-  getDevice()->setWindowCaption(L"Hyper Maze: Congratulations");
+  getDevice()->setWindowCaption(L"Hypermaze: Congratulations");
 }
 bool WinGui::run(){
   if(okClicked){
