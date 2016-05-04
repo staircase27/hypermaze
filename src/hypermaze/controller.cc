@@ -96,7 +96,9 @@ namespace irr{
       if(isTriggered(KeyMap::A_CONF)&&actionTime[KeyMap::A_CONF]<now){
         base->showGUI(false);
         HelpGui kmg;
-        kmg.help(device,fm,map);
+        if(kmg.help(device,fm,map,pd)){
+          pd.mazeUpdated(base);
+        }
         base->showGUI(true);
         actionTime[KeyMap::A_CONF]=now+1*DELAY;
       }
@@ -144,7 +146,9 @@ namespace irr{
         helpclicked=false;
         base->showGUI(false);
         HelpGui kmg;
-        kmg.help(device,fm,base->getKeyMap());
+        if(kmg.help(device,fm,base->getKeyMap(),pd)){
+          pd.mazeUpdated(base);
+        }
         base->showGUI(true);
         helptime=now+1*DELAY;
       }

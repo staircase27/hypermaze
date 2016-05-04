@@ -38,7 +38,7 @@ void removeWall(Maze& m,Vector v,Dirn wall){
     return;
   cout<<"Updating "<<v<<" from "<<*p<<" to ";
   *p&=~to_mask(opposite(wall));
-  cout<<*p<<" by removing "<<to_mask(wall)<<endl;
+  cout<<*p<<" by removing "<<to_mask(opposite(wall))<<endl;
 }
 
 int main(){
