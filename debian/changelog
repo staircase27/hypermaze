@@ -1,3 +1,18 @@
+hypermaze (1.0.0~pre4) trusty; urgency=medium
+
+  * Added tutorials
+  * Added install/uninstall icons and added setting so windows picks up icon
+    for add/remove programs screen. fixed a few errors in INSTALL
+  * Hide hidden files unless ^H is pressed
+  * Improved and fixed bugs in scriptedit and levelgen used to generate
+    tutorials.
+  * Fixed memory corruption when displaying multiple messages at once in a
+    script
+  * Fixed background in guis and font size in messages
+  * Fixed bug so opensavegui loads with filter enabled
+
+ -- Simon Armstrong <staircase@darkfieldgames.com>  Wed, 04 May 2016 10:23:52 +0100
+
 hypermaze (1.0.0~pre3) trusty; urgency=medium
 
   * Added an on screen interface to access help,open,save,generate,undo and show the score
@@ -11,7 +26,6 @@ hypermaze (1.0.0~pre3) trusty; urgency=medium
 hypermaze (1.0.0~pre2) wily; urgency=medium
 
   * Converted version numbers to git-buildpackage compatible (~ -> _)
-  * UNRELEASED
 
  -- Simon Armstrong <staircase@darkfieldgames.com>  Mon, 11 Apr 2016 09:46:18 +0100
 
