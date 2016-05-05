@@ -79,7 +79,7 @@ void HelpGui::createGUI(){
   text->addText(L"Game developed by Staircase (Simon Armstrong) in association"
                 L" with Dark Field Games. http://www.darkfieldgames.com/\nThis game is released"
                 L" open source under the GPLv2 licence. Feel free to edit and change as you like."
-                L" If you make any improvements or add new ideas, please send me them and I may"
+                L" If you make any improvements or add new ideas, please send them to me and I may"
                 L" include them in the next release (and thank you below).");
   text->addText(L"Thanks go to PTSnoop, Cosmosquark and David for testing and helping iron out "
                 L"the bugs.");
